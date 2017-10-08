@@ -1,0 +1,77 @@
+﻿
+informatie over het vliegtuig:
+
+1) coordinaten: lengte-, breedte- en hoogtegraad
+
+2) heading: koers die de piloot aanhoudt (eenheidsvector?)
+
+3) track: richting waarin het vliegtuig vliegt (eenheidsvector?)
+
+4) absolute snelheid (grondsnelheid) en luchtsnelheid (snelheid ten opzichte van wind, beperkt voor de veiligheid)
+-> enkel grootte
+
+5) pitch angle: hoek die de het vliegtuig (symmetrievlak) maakt met de horizontale (grond)
+
+6) bank angle: an aircraft turns by banking the wings in the direction of the desired turn at a specific angle. 
+This angle is referred to as the bank angle. 
+
+
+
+krachten in spel:
+
+
+1) liftkracht
+
+De grootte van de liftkracht is gegeven door de formule:
+
+Fl = cl * 1/2 * ρ * v² * A
+
+In deze formule is A het vleugeloppervlak, v de snelheid van het vliegtuig ten opzichte van de lucht,
+ρ de dichtheid van de lucht en de dimensieloze constante cl heet de liftcoëfficiënt.
+
+2) wrijvingskracht
+Fw = cd * 1/2 * ρ * v² * A
+
+cd is de weerstandscoëfficiënt.
+
+3) kracht van de motor
+
+4) zwaartekracht
+
+goeie 
+
+website:
+
+http://www.explainthatstuff.com/howplaneswork.html
+
+https://www.grc.nasa.gov/www/k-12/WindTunnel/Activities/lift_formula.html
+
+https://sites.google.com/site/zdrytchx/how-to/angle-of-attack
+ "site is momenteel weggehaald van het internet"
+https://aviation.stackexchange.com/questions/2871/how-to-calculate-angular-velocity-and-radius-of-a-turn
+
+
+
+
+
+
+
+Dingen die we nog extra moeten weten over de krachten die in het spel zijn:
+1) Voor cd gebruiken we waarschijnlijk een gemiddelde constante waarde?
+2) Voor ρ gebruiken we ook een constante waarde, want we weten niet waar de grond is in de eerste opgave.
+3) Er is geen wind.
+3) De inclinatie die we uiteindelijk moeten berekenen staat in verband met cl.
+Dit is een rechtevenredig verband: zie figuur op https://www.grc.nasa.gov/www/k-12/WindTunnel/Activities/lift_formula.html
+
+4) We moeten geen rekening houden met drag, maar moeten gewoon werken met een maximale angle
+of attack waarbij het vliegtuig crasht.
+5) Op https://aviation.stackexchange.com/questions/2871/how-to-calculate-angular-velocity-and-radius-of-a-turn
+
+
+
+
+
+
+staan formules die gebruikt kunnen worden voor de berekeningen van het draaien?
+Het zijn wel geen SI eenheden, dus dat moet wel nog omgerekend worden, maar normaal vallen dan de kommagetallen waar vermenigvuldigd mee
+moeten worden weg in de nieuwe formules wat gemakkelijker is.
