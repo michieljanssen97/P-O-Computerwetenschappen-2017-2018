@@ -125,21 +125,21 @@
       <groupId>org.lwjgl</groupId>
       <artifactId>lwjgl-opengl</artifactId>
       <version>${lwjgl.version}</version>
-      <classifier>${lwjgl.natives}</classifier>
+      <classifier>natives-linux</classifier>
       <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.lwjgl</groupId>
       <artifactId>lwjgl-opengl</artifactId>
       <version>${lwjgl.version}</version>
-      <classifier>${lwjgl.natives}</classifier>
+      <classifier>natives-windows</classifier>
       <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.lwjgl</groupId>
       <artifactId>lwjgl-opengl</artifactId>
       <version>${lwjgl.version}</version>
-      <classifier>${lwjgl.natives}</classifier>
+      <classifier>natives-macos</classifier>
       <scope>runtime</scope>
     </dependency>
     <!-- LWJGL stb -->
