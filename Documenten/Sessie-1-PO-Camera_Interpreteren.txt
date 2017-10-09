@@ -1,0 +1,7 @@
+Bevindingen eerste sessie
+-	Kleuren herkennen in afbeelding:
+	•	Voor elke pixel RGB-waarden opvragen a.d.h.v. het commando image.getRGB(x,y)
+	•	RGB-waarden omzetten in HSV-waarden (HSB) a.d.h.v. het commando Color.RGBtoHSB(r, g, b, hsb)
+-	Op basis van de waarde van H de kubus herkennen
+-	Op basis van de waarde van V bepalen in welke richting (x, y, z) het vliegtuig moet vliegen
+-	Op basis van de hoek waaronder de kubus gezien wordt en de grootte van de kubus de afstand tot de kubus bepalen
