@@ -1,5 +1,5 @@
 language: java
 sudo: false
 script:
-  - cd drone-sim
+  - cd Code/P-O-CW
   - mvn -Dcheckstyle.errorOnBadStyle=true clean verify
