@@ -9,7 +9,9 @@ public class Vector3f {
 			this.x = x;
 			this.y = y;
 			this.z = z;
-		} else {throw new IllegalArgumentException("Position must be valid");}
+		} else {
+			throw new IllegalArgumentException("Position must be valid");
+			}
 		
 	}
 
@@ -54,11 +56,11 @@ public class Vector3f {
     }
     
     public Vector3f sum(Vector3f vector){
-        return new Vector3f(this.x+vector.x,this.y+vector.y,this.z-vector.z);
+        return new Vector3f(this.x+vector.x,this.y+vector.y,this.z+vector.z);
     }
         
     public float length(){
-        return (float)Math.sqrt((x*x) + (y*y)+(z*z));
+        return (float)Math.sqrt((Math.pow(this.x, 2)) + (Math.pow(this.y, 2))+(Math.pow(this.z, 2)));
     }
     
     public Vector3f unit(){
