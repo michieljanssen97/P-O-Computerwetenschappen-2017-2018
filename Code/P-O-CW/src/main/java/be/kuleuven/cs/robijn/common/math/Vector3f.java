@@ -9,9 +9,8 @@ public class Vector3f {
 			this.x = x;
 			this.y = y;
 			this.z = z;
-		} else {
-			throw new IllegalArgumentException("Position must be valid");
-		}
+		} else {throw new IllegalArgumentException("Position must be valid");}
+		
 	}
 
 	public Vector3f() {
@@ -21,8 +20,8 @@ public class Vector3f {
 	}
 	
 	public boolean isValidVector(float x, float y, float z){
-		return !(Float.isNaN(x) || Float.isNaN(y) || Float.isNaN(z) || Float.isInfinite(x)
-				||Float.isInfinite(y) || Float.isInfinite(z));
+		return !(Double.isNaN(x) || Double.isNaN(y) || Double.isNaN(z) || Double.isInfinite(x)
+				||Double.isInfinite(y) || Double.isInfinite(z));
 	}
 
 	public float getX() {
@@ -55,11 +54,11 @@ public class Vector3f {
     }
     
     public Vector3f sum(Vector3f vector){
-        return new Vector3f(this.x+vector.x,this.y+vector.y,this.z+vector.z);
+        return new Vector3f(this.x+vector.x,this.y+vector.y,this.z-vector.z);
     }
         
     public float length(){
-        return (float)Math.sqrt((Math.pow(this.x, 2)) + (Math.pow(this.y, 2))+(Math.pow(this.z, 2)));
+        return (float)Math.sqrt((x*x) + (y*y)+(z*z));
     }
     
     public Vector3f unit(){
@@ -70,8 +69,8 @@ public class Vector3f {
         return new Vector3f(this.x*factor,this.y*factor,this.z*factor);
     }
     
-    public float dot(Vector3f vector){
-        return (this.x*vector.x) + (this.y*vector.y) + (this.z*vector.z);
+    public Vector3f dot(Vector3f vector){
+        return new Vector3f(this.x*vector.x,this.y*vector.y,this.z*vector.z);
     }
     
     public Vector3f translate(float x, float y,float z){
