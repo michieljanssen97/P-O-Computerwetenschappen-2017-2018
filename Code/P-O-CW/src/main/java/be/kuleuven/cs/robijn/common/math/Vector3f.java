@@ -11,8 +11,7 @@ public class Vector3f {
 			this.z = z;
 		} else {
 			throw new IllegalArgumentException("Position must be valid");
-			}
-		
+		}
 	}
 
 	public Vector3f() {
@@ -22,8 +21,8 @@ public class Vector3f {
 	}
 	
 	public boolean isValidVector(float x, float y, float z){
-		return !(Double.isNaN(x) || Double.isNaN(y) || Double.isNaN(z) || Double.isInfinite(x)
-				||Double.isInfinite(y) || Double.isInfinite(z));
+		return !(Float.isNaN(x) || Float.isNaN(y) || Float.isNaN(z) || Float.isInfinite(x)
+				||Float.isInfinite(y) || Float.isInfinite(z));
 	}
 
 	public float getX() {
