@@ -71,8 +71,8 @@ public class Vector3f {
         return new Vector3f(this.x*factor,this.y*factor,this.z*factor);
     }
     
-    public Vector3f dot(Vector3f vector){
-        return new Vector3f(this.x*vector.x,this.y*vector.y,this.z*vector.z);
+    public float dot(Vector3f vector){
+        return (this.x*vector.x) + (this.y*vector.y) + (this.z*vector.z);
     }
     
     public Vector3f translate(float x, float y,float z){
