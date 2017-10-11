@@ -1,59 +1,63 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
-import Utils.Vector3f;
+import be.kuleuven.cs.robijn.common.math.Vector3f;
 
 public class Camera {
-	
-	private final Vector3f position;
-	private final Vector3f rotation;
-	
-	//Initialize the camers's position and rotation.
+
+	private Vector3f position;
+	private Vector3f rotation;
+
+	// Initialize the camers's position and rotation.
 	public Camera() {
-        position = new Vector3f(0, 0, 0);
-        rotation = new Vector3f(0, 0, 0);
-    }
-	
+		position = new Vector3f();
+		rotation = new Vector3f();
+	}
+
 	public Camera(Vector3f position, Vector3f rotation) {
-        this.position = position;
-        this.rotation = rotation;
-    }
-	
+		this.position = position;
+		this.rotation = rotation;
+	}
+
 	public Vector3f getPosition() {
-        return position;
-    }
-	//Set the camera to a given position.
-    public void setPosition(float x, float y, float z) {
-        position.x = x;
-        position.y = y;
-        position.z = z;
-    }
-    //Move the camera with a given amount.
-    public void movePosition(float offsetX, float offsetY, float offsetZ) {
-        if ( offsetZ != 0 ) {
-            position.x += (float)Math.sin(Math.toRadians(rotation.y)) * -1.0f * offsetZ;
-            position.z += (float)Math.cos(Math.toRadians(rotation.y)) * offsetZ;
-        }
-        if ( offsetX != 0) {
-            position.x += (float)Math.sin(Math.toRadians(rotation.y - 90)) * -1.0f * offsetX;
-            position.z += (float)Math.cos(Math.toRadians(rotation.y - 90)) * offsetX;
-        }
-        position.y += offsetY;
-    }
+		return position;
+	}
 
-    public Vector3f getRotation() {
-        return rotation;
-    }
+	public void setPosition(float x, float y, float z){
+		setPosition(new Vector3f(x,y,z));	
+	}
+	
+	// Set the camera to a given position.
+	public void setPosition(Vector3f vector) {
+		this.position = vector;
+	}
 
-    public void setRotation(float x, float y, float z) {
-        rotation.x = x;
-        rotation.y = y;
-        rotation.z = z;
-    }
-  //Rotate the camera with a given amount.
-    public void moveRotation(float offsetX, float offsetY, float offsetZ) {
-        rotation.x += offsetX;
-        rotation.y += offsetY;
-        rotation.z += offsetZ;
-    }
+//	// Move the camera with a given amount.
+//	public void movePosition(float offsetX, float offsetY, float offsetZ) {
+//		if (offsetZ != 0) {
+//			setPosition(position.translate((float) Math.sin(Math.toRadians(rotation.getY())) * -1.0f * offsetZ,
+//					0, (float) Math.cos(Math.toRadians(rotation.getY())) * offsetZ));
+//		}
+//		if (offsetX != 0) {
+//			setPosition(position.translate((float) Math.sin(Math.toRadians(rotation.getY() - 90)) * -1.0f * offsetX, 
+//					0, (float) Math.cos(Math.toRadians(rotation.getY() - 90)) * offsetX));
+//		}
+//		setPosition(position.translate(0, offsetY, 0));
+//	}
+
+	public Vector3f getRotation() {
+		return rotation;
+	}
+	public void setRotation(float x, float y, float z){
+		setRotation(new Vector3f(x,y,z));	
+	}
+	//Set the camera to a given rotation.
+	public void setRotation(Vector3f vector) {
+		this.rotation = vector;
+	}
+
+	// Rotate the camera with a given amount.
+	public void moveRotation(float offsetX, float offsetY, float offsetZ) {
+		setRotation(position.translate(offsetX, offsetY, offsetZ));
+	}
 
 }
