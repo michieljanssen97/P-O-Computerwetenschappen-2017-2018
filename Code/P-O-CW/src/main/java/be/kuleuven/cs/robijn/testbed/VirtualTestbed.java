@@ -1,5 +1,6 @@
-package be.kuleuven.cs.robijn;
+package be.kuleuven.cs.robijn.testbed;
 
+import be.kuleuven.cs.robijn.common.Drone;
 import be.kuleuven.cs.robijn.common.math.Vector3f;
 
 public class VirtualTestbed {
@@ -77,16 +78,17 @@ public class VirtualTestbed {
 	 */
 	private Drone drone = null;
 	
-	/**
-	 * 
-	 * @param vector3f
-	 * @return
-	 */
-	public Vector3f transformationToWorldCoordinates(Vector3f vector3f) {
-		Matrix roltransformation = [[cos(rol), -sin(rol), 0], [sin(rol), cos(rol), 0], [0, 0, 1]];
-		Matrix pitchtransformation = [[1, 0, 0], [0, cos(pitch), -sin(pitch)], [0, sin(pitch), cos(pitch)]];
-		Matrix headingtransformation = [[cos(heading), 0, sin(heading)], [0, 1, 0], [-sin(heading), 0, cos(heading)]];
-		return headingtransformation*pitchtransformation*roltransformation*vector3f
+	public Vector3f transformationToWorldCoordinates(Vector3f vector3f) 
+			throws IllegalStateException {
+		if (! this.hasDrone())
+			throw new IllegalStateException("this virtual testbad has no drone");
+		Matrix roltransformation = new Matrix({{(float)Math.cos(this.getDrone().getRoll()), -(float)Math.sin(this.getDrone().getRoll()), 0},
+			{(float)Math.sin(this.getDrone().getRoll()), (float)Math.cos(this.getDrone().getRoll()), 0}, {0, 0, 1}});
+		Matrix pitchtransformation = new Matrix({{1, 0, 0},
+			{0, (float)Math.cos(this.getDrone().getPitch()), -(float)Math.sin(this.getDrone().getPitch())}, {0, sin(pitch), cos(pitch)}});
+		Matrix headingtransformation = new Matrix({{(float)Math.cos(this.getDrone().getHeading()), 0, (float)Math.sin(this.getDrone().getHeading())},
+			{0, 1, 0}, {-(float)Math.sin(this.getDrone().getHeading()), 0, (float)Math.cos(this.getDrone().getHeading())}});
+		return headingtransformation*pitchtransformation*roltransformation*vector3f;
 	}
 }
 

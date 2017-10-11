@@ -1,6 +1,7 @@
-package be.kuleuven.cs.robijn;
+package be.kuleuven.cs.robijn.common;
 
 import be.kuleuven.cs.robijn.common.math.Vector3f;
+import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
 
 public class Drone {
 	
