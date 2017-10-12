@@ -149,6 +149,63 @@ public class Matrix {
         return new Matrix(newValues);
     }
 
+    /**
+     * Returns the row-reduced echelon form of this matrix.
+     * This function uses the Gauss-Jordan method.
+     * @return the rref of this matrix
+     */
+    public Matrix getRREF(){
+        //Create new array for rref values
+        float[][] newValues = new float[getRowCount()][getColumnCount()];
+        for (int row = 0; row < getRowCount(); row++){
+            newValues[row] = Arrays.copyOf(values[row], values[row].length);
+        }
+
+        //Iterate over columns
+        for(int col = 0; col < getColumnCount(); col++){
+            //Find first non-zero row
+            int row = -1;
+            for(int curRow = col; curRow < getRowCount(); curRow++){
+                if(Math.abs(newValues[curRow][col]) > 1E-6){
+                    //First non-zero row found
+                    row = curRow;
+                    break;
+                }
+            }
+
+            if(row != -1){
+                //Rescale the values on this row so that the leading element is 1
+                double scale = 1d/newValues[row][col];
+                for(int curCol = col; curCol < getColumnCount(); curCol++){
+                    newValues[row][curCol] = (float)(newValues[row][curCol] * scale);
+                }
+
+                //For every other row that follows the first non-empty one
+                //subtract a multiple of the first non-empty one so that the leading element becomes 0
+                for(int curRow = row+1; curRow < getRowCount(); curRow++){
+                    scale = newValues[curRow][col];
+                    for(int curCol = col; curCol < getColumnCount(); curCol++){
+                        newValues[curRow][curCol] = (float)(newValues[curRow][curCol] - (newValues[row][curCol] * scale));
+                    }
+                }
+            }
+        }
+        return new Matrix(newValues);
+    }
+
+    public float getDeterminant(){
+        if(getRowCount() != getColumnCount()){
+            throw new RuntimeException("The determinant is only defined on square matrices.");
+        }
+
+        Matrix rref = getRREF();
+        float determinant = 1f;
+        for(int i = 0; i < getRowCount(); i++){
+            determinant *= rref.getValue(i, i);
+        }
+        return determinant;
+    }
+
     public String toString(){
         String str = "[";
         for(float[] row : values){
