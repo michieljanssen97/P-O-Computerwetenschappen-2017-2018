@@ -285,7 +285,23 @@ public class MatrixTest {
 
         Matrix calculatedProduct = matrix1.multiply(scalar);
 
-        assertMatricesEqual(matrix1, result);
+        assertMatricesEqual(result, calculatedProduct);
+    }
+
+    @Test
+    public void testMatrixRREF(){
+        Matrix matrix1 = new Matrix(new float[][]{
+                {1, 2, 3}, {4, 5, 6}, {8, 8, 9}
+        });
+
+        Matrix rref = new Matrix(new float[][]{
+                {1, 2, 3}, {0, 1, 2}, {0, 0, 1}
+        });
+
+        //Matrix rrefCalculated = Matrix.createIdentityMatrix(3);
+        Matrix calculatedRREF = matrix1.getRREF();
+
+        assertMatricesEqual(rref, calculatedRREF);
     }
 
     private void assertMatricesEqual(Matrix mat1, Matrix mat2){
