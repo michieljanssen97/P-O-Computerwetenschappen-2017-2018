@@ -91,13 +91,28 @@ public class VirtualTestbed {
 			throws IllegalStateException {
 		if (! this.hasDrone())
 			throw new IllegalStateException("this virtual testbad has no drone");
-		Matrix roltransformation = new Matrix({{(float)Math.cos(this.getDrone().getRoll()), -(float)Math.sin(this.getDrone().getRoll()), 0},
+		Matrix rollTransformation = new Matrix({{(float)Math.cos(this.getDrone().getRoll()), -(float)Math.sin(this.getDrone().getRoll()), 0},
 			{(float)Math.sin(this.getDrone().getRoll()), (float)Math.cos(this.getDrone().getRoll()), 0}, {0, 0, 1}});
-		Matrix pitchtransformation = new Matrix({{1, 0, 0},
-			{0, (float)Math.cos(this.getDrone().getPitch()), -(float)Math.sin(this.getDrone().getPitch())}, {0, sin(pitch), cos(pitch)}});
-		Matrix headingtransformation = new Matrix({{(float)Math.cos(this.getDrone().getHeading()), 0, (float)Math.sin(this.getDrone().getHeading())},
+		Matrix pitchTransformation = new Matrix({{1, 0, 0},
+			{0, (float)Math.cos(this.getDrone().getPitch()), -(float)Math.sin(this.getDrone().getPitch())},
+			{0, (float)Math.sin(this.getDrone().getPitch()), (float)Math.cos(this.getDrone().getPitch())}});
+		Matrix headingTransformation = new Matrix({{(float)Math.cos(this.getDrone().getHeading()), 0, (float)Math.sin(this.getDrone().getHeading())},
 			{0, 1, 0}, {-(float)Math.sin(this.getDrone().getHeading()), 0, (float)Math.cos(this.getDrone().getHeading())}});
 		return headingtransformation*pitchtransformation*roltransformation*vector3f;
+	}
+	
+	public Vector3f transformationToDroneCoordinates(Vector3f vector3f) 
+			throws IllegalStateException {
+		if (! this.hasDrone())
+			throw new IllegalStateException("this virtual testbad has no drone");
+		Matrix rollTransformation = new Matrix({{(float)Math.cos(this.getDrone().getRoll()), (float)Math.sin(this.getDrone().getRoll()), 0},
+			{-(float)Math.sin(this.getDrone().getRoll()), (float)Math.cos(this.getDrone().getRoll()), 0}, {0, 0, 1}});
+		Matrix pitchTransformation = new Matrix({{1, 0, 0},
+			{0, (float)Math.cos(this.getDrone().getPitch()), (float)Math.sin(this.getDrone().getPitch())},
+			{0, -(float)Math.sin(this.getDrone().getPitch()), (float)Math.cos(this.getDrone().getPitch())}});
+		Matrix headingTransformation = new Matrix({{(float)Math.cos(this.getDrone().getHeading()), 0, -(float)Math.sin(this.getDrone().getHeading())},
+			{0, 1, 0}, {(float)Math.sin(this.getDrone().getHeading()), 0, (float)Math.cos(this.getDrone().getHeading())}});
+		return roll*vector3f;
 	}
 }
 
