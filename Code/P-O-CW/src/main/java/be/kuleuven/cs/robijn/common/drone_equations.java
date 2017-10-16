@@ -1,6 +1,6 @@
-package be.kuleuven.cs.robijn.common.math;
+package be.kuleuven.cs.robijn.common;
 
-public class drone {
+public class drone_equations {
 	private final double GRAVITY_CONSTANT = 9.81; // gravitional constant g
 	private final int NB_AXES = 3; // x-, y- and z-axis
 	
@@ -24,7 +24,7 @@ public class drone {
 	/*
 	 * Create a drone
 	 */
-	public drone createDrone(float wingX, float tailSize, float engineMass, float wingMass, float tailMass, float maxThrust, float maxAOA, 
+	public drone_equations createDrone(float wingX, float tailSize, float engineMass, float wingMass, float tailMass, float maxThrust, float maxAOA, 
 			float wingLiftSlope, float horStabLiftSlope, float verStabLiftSlope,float horizontalAngleOfAttack, float verticalAngleOfView,
 			int nbColumns, int nbRows) {
 		
