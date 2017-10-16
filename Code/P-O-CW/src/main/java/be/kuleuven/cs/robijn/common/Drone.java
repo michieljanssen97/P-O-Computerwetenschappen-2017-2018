@@ -5,8 +5,85 @@ import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
 
 public class Drone {
 	
+	/*
+	 * Create a drone
+	 */
+	public Drone(float wingX, float tailSize, float engineMass, float wingMass, float tailMass, float maxThrust, float maxAOA,
+			float wingLiftSlope, float horStabLiftSlope, float verStabLiftSlope, Vector3f position, Vector3f velocity, float heading,
+			float pitch, float roll, float headingAngularVelocity, float pitchAngularVelocity, float rollAngularVelocity,
+			VirtualTestbed virtualTestbed) 
+					throws IllegalArgumentException {
+		if (! isValidWingX(wingX))
+			throw new IllegalArgumentException();
+		this.wingX = wingX;
+		if (! isValidTailSize(tailSize))
+			throw new IllegalArgumentException();
+		this.tailSize = tailSize;
+		if (! isValidEngineMass(engineMass))
+			throw new IllegalArgumentException();
+		this.engineMass = engineMass;
+		if (! isValidWingMass(wingMass))
+			throw new IllegalArgumentException();
+		this.wingMass = wingMass;
+		if (! isValidTailMass(tailMass))
+			throw new IllegalArgumentException();
+		this.tailMass = tailMass;
+		if (! isValidMaxThrust(maxThrust))
+			throw new IllegalArgumentException();
+		this.maxThrust = maxThrust;
+		if (! isValidMaxAOA(maxAOA))
+			throw new IllegalArgumentException();
+		this.maxAOA = maxAOA;
+		if (! isValidWingLiftSlope(wingLiftSlope))
+			throw new IllegalArgumentException();
+		this.wingLiftSlope = wingLiftSlope;
+		if (! isValidHorStabLiftSlope(horStabLiftSlope))
+			throw new IllegalArgumentException();
+		this.horStabLiftSlope = horStabLiftSlope;
+		if (! isValidVerStabLiftSlope(verStabLiftSlope))
+			throw new IllegalArgumentException();
+		this.verStabLiftSlope = verStabLiftSlope;
+		if (! isValidPosition(position))
+			throw new IllegalArgumentException();
+		this.position = position;
+		if (! isValidVelocity(velocity))
+			throw new IllegalArgumentException();
+		this.velocity = velocity;
+		if (! isValidHeading(heading))
+			throw new IllegalArgumentException();
+		this.heading = heading;
+		if (! isValidPitch(pitch))
+			throw new IllegalArgumentException();
+		this.pitch = pitch;
+		if (! isValidRoll(roll))
+			throw new IllegalArgumentException();
+		this.roll = roll;
+		if (! isValidHeadingAngularVelocity(headingAngularVelocity))
+			throw new IllegalArgumentException();
+		this.headingAngularVelocity = headingAngularVelocity;
+		if (! isValidPitchAngularVelocity(pitchAngularVelocity))
+			throw new IllegalArgumentException();
+		this.pitchAngularVelocity = pitchAngularVelocity;
+		if (! isValidRollAngularVelocity(rollAngularVelocity))
+			throw new IllegalArgumentException();
+		this.rollAngularVelocity = rollAngularVelocity;
+		if (virtualTestbed != null)
+			addVirtualTestbed(virtualTestbed);
+	}
+	
+	public Drone(float wingX, float tailSize, float engineMass, float wingMass, float tailMass, float maxThrust, float maxAOA,
+			float wingLiftSlope, float horStabLiftSlope, float verStabLiftSlope, Vector3f position, Vector3f velocity, float heading,
+			float pitch, float roll, float headingAngularVelocity, float pitchAngularVelocity, float rollAngularVelocity)
+					throws IllegalArgumentException {
+		this(wingX, tailSize, engineMass, wingMass, tailMass, maxThrust, maxAOA, wingLiftSlope, horStabLiftSlope, verStabLiftSlope,
+				position, velocity, heading, pitch, roll, headingAngularVelocity, pitchAngularVelocity, rollAngularVelocity, null);
+	}
+	
 	/**
-	 * Return the heading of this drone.
+	 * Return the heading (yaw) of this drone.
+	 * The heading is equal to atan2(H . (-1, 0, 0), H . (0, 0, -1)), 
+	 * where H is the drone's heading vector (which we define as the drone's forward vector ((0, 0, -1) in drone coordinates) 
+	 * projected onto the world XZ plane.
 	 */
 	public float getHeading() {
 		return this.heading;
@@ -46,12 +123,17 @@ public class Drone {
 	}
 	
 	/**
-	 * Variable registering the heading of this drone.
+	 * Variable registering the heading (yaw) of this drone.
+	 * The heading is equal to atan2(H . (-1, 0, 0), H . (0, 0, -1)), 
+	 * where H is the drone's heading vector (which we define as the drone's forward vector ((0, 0, -1) in drone coordinates) 
+	 * projected onto the world XZ plane.
 	 */
 	private float heading;
 	
 	/**
 	 * Return the pitch of this drone.
+	 * The pitch is equal to atan2(F . (0, 1, 0), F . H), 
+	 * where F is the drone's forward vector and H is the drone's heading vector.
 	 */
 	public float getPitch() {
 		return this.pitch;
@@ -92,11 +174,15 @@ public class Drone {
 	
 	/**
 	 * Variable registering the pitch of this drone.
+	 * The pitch is equal to atan2(F . (0, 1, 0), F . H), 
+	 * where F is the drone's forward vector and H is the drone's heading vector.
 	 */
 	private float pitch;
 	
 	/**
-	 * Return the roll of this drone.
+	 * Return the roll (bank) of this drone.
+	 * The roll is is equal to atan2(R . (0, 1, 0), R . R0), 
+	 * where R is the drone's right direction ((1, 0, 0) in drone coordinates) and R0 = H x (0, 1, 0).
 	 */
 	public float getRoll() {
 		return this.roll;
@@ -136,7 +222,9 @@ public class Drone {
 	}
 	
 	/**
-	 * Variable registering the roll of this drone.
+	 * Variable registering the roll (bank) of this drone.
+	 * The roll is is equal to atan2(R . (0, 1, 0), R . R0), 
+	 * where R is the drone's right direction ((1, 0, 0) in drone coordinates) and R0 = H x (0, 1, 0).
 	 */
 	private float roll;
 	
@@ -181,7 +269,7 @@ public class Drone {
 	/**
 	 * Variable registering the position of the center of mass of this drone.
 	 */
-	private Vector3f position = new Vector3f(0, 0, 0);
+	private Vector3f position;
 	
 	/**
 	 * Return the velocity of the center of mass of this drone.
@@ -267,7 +355,7 @@ public class Drone {
 	/**
 	 * Variable registering the angular velocity of the heading of this drone.
 	 */
-	private float headingAngularVelocity = 0;
+	private float headingAngularVelocity;
 	
 	/**
 	 * Return the angular velocity of the pitch of this drone.
@@ -310,7 +398,7 @@ public class Drone {
 	/**
 	 * Variable registering the angular velocity of the pitch of this drone.
 	 */
-	private float pitchAngularVelocity = 0;
+	private float pitchAngularVelocity;
 	
 	/**
 	 * Return the angular velocity of the roll of this drone.
@@ -320,7 +408,7 @@ public class Drone {
 	}
 	
 	/**
-	 * Check whether the given angular velocity of the roll is a valid angular velocity of the roll for
+	 * Check whether the given angular velocity of the roll  is a valid angular velocity of the roll for
 	 * any drone.
 	 *  
 	 * @param  rollAngularVelocity
@@ -353,7 +441,231 @@ public class Drone {
 	/**
 	 * Variable registering the angular velocity of the roll of this drone.
 	 */
-	private float rollAngularVelocity = 0;
+	private float rollAngularVelocity;
+	
+	public float getGravity() {
+		return this.gravity;
+	}
+	
+	private final float gravity = (float)9.81;
+	
+	private final float engineMass;
+	
+	public static boolean isValidEngineMass(float engineMass) {
+		return ((engineMass > 0) & (engineMass <= Float.MAX_VALUE));
+	}
+	
+	private final float tailSize;
+	
+	public static boolean isValidTailSize(float tailSize) {
+		return ((tailSize > 0) & (tailSize <= Float.MAX_VALUE));
+	}
+	
+	private final float wingX;
+	
+	public static boolean isValidWingX(float wingX) {
+		return ((wingX > 0) & (wingX <= Float.MAX_VALUE));
+	}
+	
+	private final float wingMass;
+	
+	public static boolean isValidWingMass(float wingMass) {
+		return ((wingMass > 0) & (wingMass <= Float.MAX_VALUE));
+	}
+	
+	private final float maxThrust;
+	
+	public static boolean isValidMaxThrust(float maxThrust) {
+		return ((maxThrust >= 0) & (maxThrust <= Float.MAX_VALUE));
+	}
+	
+	private final float maxAOA;
+	
+	public static boolean isValidMaxAOA(float maxAOA) {
+		return ((maxAOA >= 0) & (maxAOA < 2*Math.PI));
+	}
+	
+	private final float wingLiftSlope;
+	
+	public static boolean isValidWingLiftSlope(float wingLiftSlope) {
+		return ((wingLiftSlope > 0) & (wingLiftSlope <= Float.MAX_VALUE));
+	}
+	
+	private final float horStabLiftSlope;
+	
+	public static boolean isValidHorStabLiftSlope(float horStabLiftSlope) {
+		return ((horStabLiftSlope > 0) & (horStabLiftSlope <= Float.MAX_VALUE));
+	}
+	
+	private final float verStabLiftSlope;
+	
+	public static boolean isValidVerStabLiftSlope(float verStabLiftSlope) {
+		return ((verStabLiftSlope > 0) & (verStabLiftSlope <= Float.MAX_VALUE));
+	}
+	
+	private final float tailMass;
+	
+	public static boolean isValidTailMass(float tailMass) {
+		return ((tailMass > 0) & (tailMass <= Float.MAX_VALUE));
+	}
+	
+	/*
+	 * getters for the drone's attributes
+	 */
+	public float getWingX() {
+		return this.wingX;
+	}
+	
+	public float getTailSize() {
+		return this.tailSize;
+	}
+	
+	public float getEngineMass() {
+		return this.engineMass;
+	}
+	
+	public float getWingMass() {
+		return this.wingMass;
+	}
+	
+	public float getTailMass() {
+		return this.tailMass;
+	}
+	
+	public float getMaxThrust() {
+		return this.maxThrust;
+	}
+	
+	public float getMaxAOA() {
+		return this.maxAOA;
+	}
+	
+	public float getWingLiftSlope() {
+		return this.wingLiftSlope;
+	}
+	
+	public float getHorStabLiftSlope() {
+		return this.horStabLiftSlope;
+	}
+	
+	public float getVerStabLiftSlope() {
+		return this.verStabLiftSlope;
+	}
+	
+	/*
+	 * Return the gravitational force for the given mass
+	 */
+	public float getGravitationalForce(float mass) {
+		return (this.getEngineMass() + this.getTailMass() + (2*this.getWingMass())) * this.getGravity();
+	}
+	
+	/*
+	 * Calculate the lift force
+	 */
+	public float getLiftForce(float[] normal, float AOA, float liftslope, float projectedVelocity) {
+		float scalar = (float) (AOA * liftslope * Math.pow(projectedVelocity,2));
+		
+		float[] liftForce = {0,0,0};
+		if (normal.length == NB_AXES) {
+			for(int i=0; i<NB_AXES; i++) {
+				liftForce[i] = normal[i] * scalar;//TODO solve problem
+			}
+		}
+		return liftForce;
+	}
+	
+	/*
+	 * Calculate the Projected Velocity of the drone
+	 * @param 	droneVelocity
+	 * 			The velocity of the drone
+	 * 
+	 * @param	windVelocity
+	 * 			The Velocity of the wind
+	 * 
+	 * @Return	Returns the accumulated velocity of the drone and the wind, projected onto the correct axis.
+	 */
+	public float[] getProjectedVelocity(float[] droneVelocity, float[] windVelocity) {
+		float[] accumulatedVelocity = new float[3];
+		for(int i=0; i < NB_AXES; i++) {
+			accumulatedVelocity[0] = droneVelocity[0] - windVelocity[0];
+		}
+		//TODO project correctly
+		return
+	}
+	
+	
+	/*
+	 * Attack vectors of the Wings and stabilizers
+	 */
+	public float[] getAttackVectorLeftWing() {
+		float[] attackVectorLW = {0, (float) Math.sin(getLeftWingInclination()), (float) -Math.cos(getLeftWingInclination())};
+		return attackVectorLW;
+	}
+
+	public float[] getAttackVectorRightWing() {
+		float[] attackVectorRW = {0, (float) Math.sin(getRightWingInclination()), (float) -Math.cos(getRightWingInclination())};
+		return attackVectorRW;
+	}
+	
+	public float[] getAttackVectorHorizontalStab() {
+		float[] attackVectorHS = {0, (float) Math.sin(getHorStabInclination()), (float) -Math.cos(getHorStabInclination())};
+		return attackVectorHS;
+	}
+	
+	public float[] getAttackVectorVerticalStab() {
+		float[] attackVectorVS = {(float) -Math.sin(getVerStabInclination()), 0, (float) -Math.cos(getVerStabInclination())};
+		return attackVectorVS;
+	}
+		
+	/*
+	 * Normals of the Wings and Stabilizers
+	 */
+	public float[] getNormalLeftWing() {
+		return crossProduct(this.getAxisvectorLeftWing(), this.getAttackVectorLeftWing());
+	}
+	
+	public float[] getNormaRightWing() {
+		return crossProduct(this.getAxisVectorRightWing(), this.getAttackVectorRightWing());
+	}
+	
+	public float[] getNoralHorizontalStab() {
+		return crossProduct(this.getAxisVectorHorizontalStab(), this.getAttackVectorHorizontalStab());
+	}
+	
+	public float[] getNormalVerticalStab() {
+		return crossProduct(this.getAxisVectorVerticalStab(), this.getAttackVectorVerticalStab());
+	}
+
+	
+	/*
+	 * Axis vectors of the Wings and Stabilizers
+	 */
+	public float[] getAxisvectorLeftWing() {
+		float[] axisVectorLW = {1,0,0};
+		return axisVectorLW;
+	}
+	
+	public float[] getAxisVectorRightWing() {
+		float[] axisVectorRW = {1,0,0};
+		return axisVectorRW;
+	}
+	
+	public float[] getAxisVectorHorizontalStab() {
+		float[] axisVectorHS = {1,0,0};
+		return axisVectorHS;
+	}
+	
+	public float[] getAxisVectorVerticalStab() {
+		float[] axisVectorVS = {0,1,0};
+		return axisVectorVS;
+	}
+	
+	/*
+	 * Caclculate the Angle Of Attack
+	 */
+	public float getAngleOfAttack(float[] normal, float[] projSpeed, float[] attackVector) {
+		return (float) -Math.atan2(dotProduct(normal, projSpeed), dotProduct(attackVector, projSpeed));
+	}
 	
 	/**
 	 * Return the virtual testbed of this drone.

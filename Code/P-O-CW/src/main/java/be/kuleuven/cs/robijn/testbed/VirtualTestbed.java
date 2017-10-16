@@ -5,6 +5,15 @@ import be.kuleuven.cs.robijn.common.math.Vector3f;
 
 public class VirtualTestbed {
 	
+	public VirtualTestbed(Drone drone) {
+		if (drone != null)
+			addDrone(drone);
+	}
+	
+	public VirtualTestbed() {
+		this(null);
+	}
+	
 	/**
 	 * Return the drone of this virtual testbed.
 	 * A null reference is returned if this virtual testbed has no drone.
