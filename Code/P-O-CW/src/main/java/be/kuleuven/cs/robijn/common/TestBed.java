@@ -3,6 +3,9 @@ package be.kuleuven.cs.robijn.common;
 import p_en_o_cw_2017.AutopilotInputs;
 import p_en_o_cw_2017.AutopilotOutputs;
 
+/**
+ * Provides a simulation environment for the drone to fly in.
+ */
 public interface TestBed {
     /**
      * Runs the physics and graphics simulation to provide simulation data for the autopilot.

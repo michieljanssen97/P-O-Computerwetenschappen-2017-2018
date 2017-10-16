@@ -2,6 +2,9 @@ package be.kuleuven.cs.robijn.common;
 
 import p_en_o_cw_2017.*;
 
+/**
+ * Calculates the drone parameters to fly it around the simulation.
+ */
 public interface AutoPilot {
     /**
      * Provides the latest simulation data to the autopilot, and returns the adjustments made by the autopilot.
