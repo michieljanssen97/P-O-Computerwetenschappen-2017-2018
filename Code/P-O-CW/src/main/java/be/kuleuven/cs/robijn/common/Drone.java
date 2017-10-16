@@ -1,11 +1,10 @@
 package be.kuleuven.cs.robijn.common;
 
 import be.kuleuven.cs.robijn.common.math.Vector3f;
+import be.kuleuven.cs.robijn.testbed.Matrix;
 import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
 
 public class Drone {
-	
-	private final int NB_AXES = 3; // x-, y- and z-axis
 	
 	/*
 	 * Create a drone
@@ -570,22 +569,112 @@ public class Drone {
 		return this.verStabLiftSlope;
 	}
 	
+	public Vector3f transformationToWorldCoordinates(Vector3f vector3f) {
+		return this.headingTransformation(this.inversePitchTransformation(this.inverseRollTransformation(vector3f)));
+	}
+	
+	public Vector3f transformationToDroneCoordinates(Vector3f vector3f) {
+		return this.rollTransformation(this.pitchTransformation(this.headingTransformation(vector3f)));
+	}
+	
+	public Vector3f rollTransformation(Vector3f vector3f) 
+			throws IllegalStateException {
+		if (! this.hasVirtualTestbed())
+			throw new IllegalStateException("this drone has no virtual testbed");
+		Matrix rollTransformation = new Matrix({{(float)Math.cos(this.getDrone().getRoll()), (float)Math.sin(this.getDrone().getRoll()), 0},
+			{-(float)Math.sin(this.getDrone().getRoll()), (float)Math.cos(this.getDrone().getRoll()), 0}, {0, 0, 1}});
+		return rollTransformation*vector3f;	
+	}
+	
+	public Vector3f pitchTransformation(Vector3f vector3f) 
+			throws IllegalStateException {
+		if (! this.hasVirtualTestbed())
+			throw new IllegalStateException("this drone has no virtual testbed");
+		Matrix pitchTransformation = new Matrix({{1, 0, 0},
+			{0, (float)Math.cos(this.getDrone().getPitch()), (float)Math.sin(this.getDrone().getPitch())},
+			{0, -(float)Math.sin(this.getDrone().getPitch()), (float)Math.cos(this.getDrone().getPitch())}});
+		return pitchTransformation*vector3f;	
+	}
+	
+	public Vector3f headingTransformation(Vector3f vector3f) 
+			throws IllegalStateException {
+		if (! this.hasVirtualTestbed())
+			throw new IllegalStateException("this drone has no virtual testbed");
+		Matrix headingTransformation = new Matrix({{(float)Math.cos(this.getDrone().getHeading()), 0, -(float)Math.sin(this.getDrone().getHeading())},
+			{0, 1, 0}, {(float)Math.sin(this.getDrone().getHeading()), 0, (float)Math.cos(this.getDrone().getHeading())}});
+		return headingTransformation*vector3f;	
+	}
+	
+	public Vector3f inverseRollTransformation(Vector3f vector3f) 
+			throws IllegalStateException {
+		if (! this.hasVirtualTestbed())
+			throw new IllegalStateException("this drone has no virtual testbed");
+		Matrix inverseRollTransformation = new Matrix({{(float)Math.cos(this.getDrone().getRoll()), -(float)Math.sin(this.getDrone().getRoll()), 0},
+			{(float)Math.sin(this.getDrone().getRoll()), (float)Math.cos(this.getDrone().getRoll()), 0}, {0, 0, 1}});
+		return inverseRollTransformation*vector3f;	
+	}
+	
+	public Vector3f inversePitchTransformation(Vector3f vector3f) 
+			throws IllegalStateException {
+		if (! this.hasVirtualTestbed())
+			throw new IllegalStateException("this drone has no virtual testbed");
+		Matrix inversePitchTransformation = new Matrix({{1, 0, 0},
+			{0, (float)Math.cos(this.getDrone().getPitch()), -(float)Math.sin(this.getDrone().getPitch())},
+			{0, (float)Math.sin(this.getDrone().getPitch()), (float)Math.cos(this.getDrone().getPitch())}});
+		return inversePitchTransformation*vector3f;	
+	}
+	
+	public Vector3f inverseHeadingTransformation(Vector3f vector3f) 
+			throws IllegalStateException {
+		if (! this.hasVirtualTestbed())
+			throw new IllegalStateException("this drone has no virtual testbed");
+		Matrix inverseHeadingTransformation = new Matrix({{(float)Math.cos(this.getDrone().getHeading()), 0, (float)Math.sin(this.getDrone().getHeading())},
+			{0, 1, 0}, {-(float)Math.sin(this.getDrone().getHeading()), 0, (float)Math.cos(this.getDrone().getHeading())}});
+		return inverseHeadingTransformation*vector3f;	
+	}
+	
 	/*
 	 * Return the gravitational force for the given mass
 	 */
-	public float getGravitationalForce() {
-		return (this.getEngineMass() + this.getTailMass() + (2*this.getWingMass())) * this.getGravity();
+	public Vector3f getGravitationalForceWing() {
+		return new Vector3f(0, (this.getWingMass() * this.getGravity()), 0);
+	}
+	
+	public Vector3f getGravitationalForceTail() {
+		return new Vector3f(0, (this.getTailMass() * this.getGravity()), 0);
+	}
+	
+	public Vector3f getGravitationalForceEngine() {
+		return new Vector3f(0, (this.getEngineMass() * this.getGravity()), 0);
 	}
 	
 	/*
 	 * Calculate the lift force
 	 */
-	public Vector3f getLiftForce(Vector3f normal, float AOA, float liftslope, float projectedVelocityScalar) {
-		float scalar = (float) (AOA * liftslope * Math.pow(projectedVelocityScalar,2));
+	public Vector3f getLiftForce(Vector3f normal, float AOA, float liftslope, Vector3f projectedVelocity) {
+		float scalar = (float) (AOA * liftslope * Math.pow(projectedVelocity.length(),2));
 		
 		Vector3f liftForce = new Vector3f(normal.getX() * scalar, normal.getY() * scalar, normal.getZ() * scalar);
 		
 		return liftForce;
+	}
+	
+	public Vector3f getHeadingAngularVelocityVector() {
+		if (! this.hasVirtualTestbed())
+			throw new IllegalStateException("this drone has no virtual testbed");
+		return new Vector3f(0, this.getHeadingAngularVelocity(), 0);
+	}
+	
+	public Vector3f getPitchAngularVelocityVector() throws IllegalStateException {
+		if (! this.hasVirtualTestbed())
+			throw new IllegalStateException("this drone has no virtual testbed");
+		return this.inverseHeadingTransformation(new Vector3f(this.getPitchAngularVelocity(), 0, 0));
+	}
+	
+	public Vector3f getRollAngularVelocityVector() {
+		if (! this.hasVirtualTestbed())
+			throw new IllegalStateException("this drone has no virtual testbed");
+		return this.inverseHeadingTransformation(this.inversePitchTransformation(new Vector3f(0, 0, this.getRollAngularVelocity())));
 	}
 	
 	/*
@@ -598,97 +687,113 @@ public class Drone {
 	 * 
 	 * @Return	Returns the accumulated velocity of the drone and the wind, projected onto the correct axis.
 	 */
-	public Vector3f getProjectedVelocityVector(Vector3f droneVelocityVector, Vector3f windVelocityVector) {
-		Vector3f accumulatedVelocity = new Vector3f(droneVelocityVector.getX() - windVelocityVector.getX(),
-													droneVelocityVector.getY() - windVelocityVector.getY(),
-													droneVelocityVector.getZ() - windVelocityVector.getZ());
-		//TODO project correctly
-		return accumulatedVelocity;
+	public Vector3f getProjectedVelocityLeftWing() {
+		Vector3f distance = this.transformationToWorldCoordinates(new Vector3f(-this.getWingX(), 0, 0));
+		Vector3f velocityWorldCoordinates = this.getVelocity().sum(this.getHeadingAngularVelocityVector().crossProduct(distance))
+				.sum(this.getPitchAngularVelocityVector().crossProduct(distance))
+				.sum(this.getRollAngularVelocityVector().crossProduct(distance));
+		Vector3f velocityDroneCoordinates = this.transformationToDroneCoordinates(velocityWorldCoordinates);
+		velocityDroneCoordinates.setX(0);
+		return this.transformationToWorldCoordinates(velocityDroneCoordinates);
 	}
 	
-	/*
-	 * Calculate the Projected Velocity of the drone as a Scalar.
-	 */
-	public float getProjectedVelocityScalar(Vector3f projectedVelocityVector) {
-		return projectedVelocityVector.length();
+	public Vector3f getProjectedVelocityRightWing() {
+		Vector3f distance = this.transformationToWorldCoordinates(new Vector3f(this.getWingX(), 0, 0));
+		Vector3f velocityWorldCoordinates = this.getVelocity().sum(this.getHeadingAngularVelocityVector().crossProduct(distance))
+				.sum(this.getPitchAngularVelocityVector().crossProduct(distance))
+				.sum(this.getRollAngularVelocityVector().crossProduct(distance));
+		Vector3f velocityDroneCoordinates = this.transformationToDroneCoordinates(velocityWorldCoordinates);
+		velocityDroneCoordinates.setX(0);
+		return this.transformationToWorldCoordinates(velocityDroneCoordinates);
 	}
 	
+	public Vector3f getProjectedVelocityHorStab() {
+		Vector3f distance = this.transformationToWorldCoordinates(new Vector3f(0, 0, this.getTailSize()));
+		Vector3f velocityWorldCoordinates = this.getVelocity().sum(this.getHeadingAngularVelocityVector().crossProduct(distance))
+				.sum(this.getPitchAngularVelocityVector().crossProduct(distance))
+				.sum(this.getRollAngularVelocityVector().crossProduct(distance));
+		Vector3f velocityDroneCoordinates = this.transformationToDroneCoordinates(velocityWorldCoordinates);
+		velocityDroneCoordinates.setX(0);
+		return this.transformationToWorldCoordinates(velocityDroneCoordinates);
+	}
+	
+	public Vector3f getProjectedVelocityVerStab() {
+		Vector3f distance = this.transformationToWorldCoordinates(new Vector3f(0, 0, this.getTailSize()));
+		Vector3f velocityWorldCoordinates = this.getVelocity().sum(this.getHeadingAngularVelocityVector().crossProduct(distance))
+				.sum(this.getPitchAngularVelocityVector().crossProduct(distance))
+				.sum(this.getRollAngularVelocityVector().crossProduct(distance));
+		Vector3f velocityDroneCoordinates = this.transformationToDroneCoordinates(velocityWorldCoordinates);
+		velocityDroneCoordinates.setY(0);
+		return this.transformationToWorldCoordinates(velocityDroneCoordinates);
+	}
 	
 	/*
 	 * Attack vectors of the Wings and stabilizers
 	 */
 	public Vector3f getAttackVectorLeftWing(float leftWingInclination) {
 		Vector3f attackVectorLW = new Vector3f(0, (float) Math.sin(leftWingInclination), (float) -Math.cos(leftWingInclination));
-		return attackVectorLW;
+		return this.transformationToWorldCoordinates(attackVectorLW);
 	}
 
 	public Vector3f getAttackVectorRightWing(float rightWingInclination) {
 		Vector3f attackVectorRW = new Vector3f(0, (float) Math.sin(rightWingInclination), (float) -Math.cos(rightWingInclination));
-		return attackVectorRW;
+		return this.transformationToWorldCoordinates(attackVectorRW);
 	}
 	
 	public Vector3f getAttackVectorHorizontalStab(float horStabInclination) {
 		Vector3f attackVectorHS = new Vector3f(0, (float) Math.sin(horStabInclination), (float) -Math.cos(horStabInclination));
-		return attackVectorHS;
+		return this.transformationToWorldCoordinates(attackVectorHS);
 	}
 	
 	public Vector3f getAttackVectorVerticalStab(float verStabInclination) {
 		Vector3f attackVectorVS = new Vector3f((float) -Math.sin(verStabInclination), 0, (float) -Math.cos(verStabInclination));
-		return attackVectorVS;
+		return this.transformationToWorldCoordinates(attackVectorVS);
 	}
 		
 	/*
 	 * Normals of the Wings and Stabilizers
 	 */
-	public Vector3f getNormalLeftWing() {
-		return (this.getAxisvectorLeftWing()).crossProduct(this.getAttackVectorLeftWing());
+	public Vector3f getNormalLeftWing(float leftWingInclination) {
+		return (this.getAxisVectorHor()).crossProduct(this.getAttackVectorLeftWing(leftWingInclination));
 	}
 	
-	public Vector3f getNormaRightWing() {
-		return this.getAxisVectorRightWing().crossProduct(this.getAttackVectorRightWing());
+	public Vector3f getNormalRightWing(float rightWingInclination) {
+		return this.getAxisVectorHor().crossProduct(this.getAttackVectorRightWing(rightWingInclination));
 	}
 	
-	public Vector3f getNoralHorizontalStab() {
-		return this.getAxisVectorHorizontalStab().crossProduct(this.getAttackVectorHorizontalStab());
+	public Vector3f getNormalHorStab(float horStabInclination) {
+		return this.getAxisVectorHor().crossProduct(this.getAttackVectorHorizontalStab(horStabInclination));
 	}
 	
-	public Vector3f getNormalVerticalStab() {
-		return this.getAxisVectorVerticalStab().crossProduct(this.getAttackVectorVerticalStab());
+	public Vector3f getNormalVerStab(float verStabInclination) {
+		return this.getAxisVectorVer().crossProduct(this.getAttackVectorVerticalStab(verStabInclination));
 	}
-
 	
 	/*
 	 * Axis vectors of the Wings and Stabilizers
 	 */
-	public Vector3f getAxisvectorLeftWing() {
-		Vector3f axisVectorLW = new Vector3f(1,0,0);
-		return axisVectorLW;
+	public Vector3f getAxisVectorHor() {
+		Vector3f axisVectorH = new Vector3f(1,0,0);
+		return this.transformationToDroneCoordinates(axisVectorH);
 	}
 	
-	public Vector3f getAxisVectorRightWing() {
-		Vector3f axisVectorRW = new Vector3f(1,0,0);
-		return axisVectorRW;
-	}
-	
-	public Vector3f getAxisVectorHorizontalStab() {
-		Vector3f axisVectorHS = new Vector3f(1,0,0);
-		return axisVectorHS;
-	}
-	
-	public Vector3f getAxisVectorVerticalStab() {
-		Vector3f axisVectorVS = new Vector3f(0,1,0);
-		return axisVectorVS;
+	public Vector3f getAxisVectorVer() {
+		Vector3f axisVectorV = new Vector3f(0,1,0);
+		return this.transformationToWorldCoordinates(axisVectorV);
 	}
 	
 	/*
 	 * Calculate the Angle Of Attack
 	 */
-	public float getAngleOfAttack(Vector3f normal, Vector3f projSpeedVector, Vector3f attackVector) {
+	public float getAngleOfAttack(Vector3f normal, Vector3f projSpeedVector, Vector3f attackVector)
+			throws IllegalArgumentException {
 		float aoa = (float) -Math.atan2(normal.dot(projSpeedVector), attackVector.dot(projSpeedVector));
 		if (aoa > this.maxAOA)
-			throw new IndexOutOfBoundsException();
+			throw new IllegalArgumentException();
 		return aoa;
 	}
+	
+	public 
 	
 	/**
 	 * Return the virtual testbed of this drone.
