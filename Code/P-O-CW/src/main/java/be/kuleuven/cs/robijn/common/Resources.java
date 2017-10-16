@@ -1,5 +1,7 @@
 package be.kuleuven.cs.robijn.common;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.stream.Collectors;
 
@@ -13,6 +15,20 @@ public class Resources {
     public static String loadTextResource(String resourceName){
         try(BufferedReader in = new BufferedReader(new InputStreamReader(Resources.class.getResourceAsStream(resourceName)))){
             return in.lines().collect(Collectors.joining("\n"));
+        }catch (IOException ex){
+            throw new UncheckedIOException("Failed to load the resource under path '" + resourceName + "'.", ex);
+        }
+    }
+
+    /**
+     * Loads the image at path 'resourceName' from the application resources.
+     * The path should start with a '/' and is relative to the 'resources' folder in the project.
+     * @param resourceName the path of the resource being loaded
+     * @return the contents of the resource, as an image.
+     */
+    public static BufferedImage loadImageResource(String resourceName){
+        try(InputStream stream = Resources.class.getResourceAsStream(resourceName)){
+            return ImageIO.read(stream);
         }catch (IOException ex){
             throw new UncheckedIOException("Failed to load the resource under path '" + resourceName + "'.", ex);
         }

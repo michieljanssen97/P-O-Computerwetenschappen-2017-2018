@@ -17,7 +17,7 @@ public class App
 {
     public static void main( String[] args )
     {
-
+        testRenderer();
     }
 
     private static void testRenderer(){
@@ -38,5 +38,8 @@ public class App
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        buffer.close();
+        renderer.close();
     }
 }

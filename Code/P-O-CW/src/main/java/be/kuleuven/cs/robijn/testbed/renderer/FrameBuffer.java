@@ -12,7 +12,7 @@ import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_COMPLETE;
 import static org.lwjgl.opengl.GL32.*;
 
-public class FrameBuffer implements Closeable {
+public class FrameBuffer implements AutoCloseable {
     public static FrameBuffer create(int width, int height){
         int fbo = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -87,7 +87,7 @@ public class FrameBuffer implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         //Cleanup LWJGL resources
         glDeleteRenderbuffers(frameBufferId);
         glDeleteFramebuffers(renderBufferId);
