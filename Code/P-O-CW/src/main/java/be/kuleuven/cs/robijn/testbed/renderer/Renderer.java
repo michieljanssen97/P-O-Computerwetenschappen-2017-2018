@@ -1,24 +1,26 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.Resources;
+import be.kuleuven.cs.robijn.common.math.Vector3f;
 import be.kuleuven.cs.robijn.common.scene.World;
+import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
-
-import java.io.Closeable;
-import java.io.IOException;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL15.GL_ELEMENT_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-public class Renderer implements Closeable {
+public class Renderer implements AutoCloseable {
     public static Renderer create(){
         //Initialize LWJGL
 
@@ -51,43 +53,98 @@ public class Renderer implements Closeable {
     }
 
     private long windowHandle;
-    Model triangle;
+
+    private Model model;
+
     private Renderer(long windowHandle){
         this.windowHandle = windowHandle;
 
         //Temporary code
-        triangle = Model.loadModel();
-        Shader vertexShader = Shader.loadVertexShader(Resources.loadTextResource("/shaders/vertex.glsl"));
-        Shader fragmentShader = Shader.loadFragmentShader(Resources.loadTextResource("/shaders/fragment.glsl"));
-        ShaderProgram program = ShaderProgram.createProgram(vertexShader, fragmentShader);
-        triangle.setShaderProgram(program);
+        Mesh mesh = OBJLoader.loadFromResources("/models/cube/cube.obj");
+        Shader vertexShader = Shader.compileVertexShader(Resources.loadTextResource("/shaders/vertex.glsl"));
+        Shader fragmentShader = Shader.compileFragmentShader(Resources.loadTextResource("/shaders/fragment.glsl"));
+        ShaderProgram program = ShaderProgram.link(vertexShader, fragmentShader);
+        model = new Model(mesh, null, program);
     }
+
+    //Temp testing data
+    float fovX = (float)Math.PI/2f;
+    float fovY = (float)Math.PI/2f;
 
     public void renderWorld(World world, Camera camera, FrameBuffer buffer){
         //Use own framebuffer instead of default framebuffer
         glBindFramebuffer(GL_FRAMEBUFFER, buffer.getId());
         //Set the size and position of the image we want to render in the buffer
         glViewport(0, 0, buffer.getWidth(), buffer.getHeight());
-        //We don't use depth for now, so disable
-        glDisable(GL_DEPTH_TEST);
-        glDepthMask(false);
         //Replace previous frame with a blank screen
         glClearColor(0, 0f, 0f, 1f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        //Enable shader program
-        //TODO: here we want to iterate over the objects in the world,
-        //load their geometry, shader and color and draw them.
-        //For now, we just draw a triangle
-        glUseProgram(triangle.getShaderProgram().getProgramId());
+        //Setup per-camera matrices
+        //TODO: mirror image through transformation matrix?
+        Matrix4f viewMatrix = createViewMatrix(camera);
+        Matrix4f projectionMatrix = createProjectionMatrix(fovX, fovY, 1f, 1000f);
 
-        //Draw triangle
-        glBindVertexArray(triangle.getVertexArrayId());
-        glDrawArrays(GL_TRIANGLES, 0, triangle.getVertexCount());
+        //Setup per-object matrices
+        Vector3f objPos = new Vector3f(0, 0, -6);
+        Vector3f objRotation = new Vector3f(0, 0, 0);
+        Vector3f objScale = new Vector3f(1, 1, 1);
+
+        Matrix4f modelMatrix = createModelMatrix(objPos, objRotation, objScale);
+
+        Matrix4f mvp = new Matrix4f(projectionMatrix).mul(viewMatrix).mul(modelMatrix);
+
+        model.getShader().setUniformMatrix("mvp", false, mvp); //TODO: is this the best way to do this?
+
+        //Draw object
+        //TODO: bind buffers (or can we just bind the VAO?), (set attributes?)
+        glDrawElements(GL_TRIANGLES, indicesCount, GL_FLOAT, 0);
+    }
+
+    /**
+     * Returns a linear transformation matrix for transforming vertices from object space to world space.
+     * @return a non-null matrix
+     */
+    private Matrix4f createModelMatrix(Vector3f position, Vector3f rotation, Vector3f scale){
+        Matrix4f matrix = new Matrix4f();
+        matrix.identity();
+        matrix.translate(position.getX(), position.getY(), position.getZ());
+        matrix.rotate(rotation.getX(), 1, 0 , 0);
+        matrix.rotate(rotation.getY(), 0, 1 , 0);
+        matrix.rotate(rotation.getZ(), 0, 0 , 1);
+        matrix.scale(scale.getX(), scale.getY(), scale.getZ());
+        return matrix;
+    }
+
+    /**
+     * Returns a linear transformation matrix for transforming vertices from world space to camera space.
+     * @return a non-null matrix
+     */
+    private Matrix4f createViewMatrix(Camera camera){
+        Matrix4f viewMatrix = new Matrix4f();
+        viewMatrix.identity();
+        viewMatrix.rotate(camera.getRotation().getX(), 1, 0 , 0);
+        viewMatrix.rotate(camera.getRotation().getY(), 0, 1 , 0);
+        viewMatrix.rotate(camera.getRotation().getZ(), 0, 0 , 1);
+        viewMatrix.translate(-camera.getPosition().getX(), -camera.getPosition().getY(), -camera.getPosition().getZ());
+        return viewMatrix;
+    }
+
+    /**
+     * Returns a linear transformation matrix for transforming vertices from camera space to screen space.
+     * @return a non-null matrix
+     */
+    private Matrix4f createProjectionMatrix(float xFOV, float yFOV, float zNear, float zFar){
+        Matrix4f projectionMatrix = new Matrix4f();
+        projectionMatrix.identity();
+        projectionMatrix.perspective(yFOV, xFOV/yFOV, zNear, zFar);
+        return projectionMatrix;
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
+        //TODO: destroy model resources?
+
         //Destroy LWJGL resources
         glfwDestroyWindow(windowHandle);
         glfwTerminate();

@@ -44,6 +44,42 @@ public class Matrix {
         this.values = values;
     }
 
+    /**
+     * Returns a copy of the values in this matrix.
+     * @return the contents of this matrix as a multidimensional array.
+     * The first index is for the rows, the second for the columns.
+     */
+    public float[][] getValues(){
+        float[][] copy = new float[this.getRowCount()][this.getColumnCount()];
+        for(int row = 0; row < getRowCount(); row++){
+            System.arraycopy(values[row], 0, copy[row], 0, getColumnCount());
+        }
+        return copy;
+    }
+
+    /**
+     * Returns a copy of the values in this matrix.
+     * @return the contents of this matrix as a row-linearized array.
+     */
+    public float[] getValuesRowLinearized(){
+        float[] copy = new float[this.getRowCount()*this.getColumnCount()];
+        for(int row = 0; row < getRowCount(); row++){
+            System.arraycopy(values[row], 0, copy, row*getColumnCount(), getColumnCount());
+        }
+        return copy;
+    }
+
+    /**
+     * Returns the array that stores the values in this matrix.
+     * DO NOT USE THIS FUNCTION TO MODIFY THE CONTENTS OF THE MATRIX.
+     * This may lead to unintended side-effects.
+     * @return the contents of this matrix as a multidimensional array.
+     * The first index is for the rows, the second for the columns.
+     */
+    public float[][] getBackingArray(){
+        return values;
+    }
+
     public int getRowCount(){
         return values.length;
     }
