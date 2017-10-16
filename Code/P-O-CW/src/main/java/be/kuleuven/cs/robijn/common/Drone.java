@@ -1,7 +1,7 @@
 package be.kuleuven.cs.robijn.common;
 
+import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.math.Vector3f;
-import be.kuleuven.cs.robijn.testbed.Matrix;
 import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
 
 public class Drone {
@@ -510,21 +510,12 @@ public class Drone {
 		return ((tailMass > 0) & (tailMass <= Float.MAX_VALUE));
 	}
 	
-	private Vector3f enginePos = null;
-	
-	public Vector3f getEnginePosition() {
-		return this.enginePos;
-	}
-	
 	/*
 	 * Setter for the position of the engine in drone coordinates
 	 */
-	public void setEnginePosition() {
-		this.enginePos.setX(0);
-		this.enginePos.setY(0);
-		this.enginePos.setZ((-this.getTailMass() * this.getTailSize()) / this.getEngineMass());
+	public float getEngineDistance() {
+		return ((-this.getTailMass() * this.getTailSize()) / this.getEngineMass());
 	}
-	
 	
 	/*
 	 * getters for the drone's attributes
@@ -651,12 +642,32 @@ public class Drone {
 	/*
 	 * Calculate the lift force
 	 */
-	public Vector3f getLiftForce(Vector3f normal, float AOA, float liftslope, Vector3f projectedVelocity) {
-		float scalar = (float) (AOA * liftslope * Math.pow(projectedVelocity.length(),2));
+	public Vector3f getLiftForceLeftWing(float leftWingInclination) {
+		float liftForce = (float) (this.getAngleOfAttackLeftWing(leftWingInclination) 
+				* this.getWingLiftSlope() * Math.pow(this.getProjectedVelocityLeftWing().length(),2));
 		
-		Vector3f liftForce = new Vector3f(normal.getX() * scalar, normal.getY() * scalar, normal.getZ() * scalar);
+		return this.getNormalHor(leftWingInclination).scale(liftForce);
+	}
+	
+	public Vector3f getLiftForceRightWing(float rightWingInclination) {
+		float liftForce = (float) (this.getAngleOfAttackRightWing(rightWingInclination) 
+				* this.getWingLiftSlope() * Math.pow(this.getProjectedVelocityRightWing().length(),2));
 		
-		return liftForce;
+		return this.getNormalHor(rightWingInclination).scale(liftForce);
+	}
+	
+	public Vector3f getLiftForceHorStab(float horStabInclination) {
+		float liftForce = (float) (this.getAngleOfAttackHorStab(horStabInclination) 
+				* this.getHorStabLiftSlope() * Math.pow(this.getProjectedVelocityHorStab().length(),2));
+		
+		return this.getNormalHor(horStabInclination).scale(liftForce);
+	}
+	
+	public Vector3f getLiftForceVerStab(float verStabInclination) {
+		float liftForce = (float) (this.getAngleOfAttackVerStab(verStabInclination) 
+				* this.getVerStabLiftSlope() * Math.pow(this.getProjectedVelocityVerStab().length(),2));
+		
+		return this.getNormalVer(verStabInclination).scale(liftForce);
 	}
 	
 	public Vector3f getHeadingAngularVelocityVector() {
@@ -730,43 +741,25 @@ public class Drone {
 	/*
 	 * Attack vectors of the Wings and stabilizers
 	 */
-	public Vector3f getAttackVectorLeftWing(float leftWingInclination) {
-		Vector3f attackVectorLW = new Vector3f(0, (float) Math.sin(leftWingInclination), (float) -Math.cos(leftWingInclination));
-		return this.transformationToWorldCoordinates(attackVectorLW);
-	}
-
-	public Vector3f getAttackVectorRightWing(float rightWingInclination) {
-		Vector3f attackVectorRW = new Vector3f(0, (float) Math.sin(rightWingInclination), (float) -Math.cos(rightWingInclination));
-		return this.transformationToWorldCoordinates(attackVectorRW);
+	public Vector3f getAttackVectorHor(float horInclination) {
+		Vector3f attackVectorH = new Vector3f(0, (float) Math.sin(horInclination), (float) -Math.cos(horInclination));
+		return this.transformationToWorldCoordinates(attackVectorH);
 	}
 	
-	public Vector3f getAttackVectorHorizontalStab(float horStabInclination) {
-		Vector3f attackVectorHS = new Vector3f(0, (float) Math.sin(horStabInclination), (float) -Math.cos(horStabInclination));
-		return this.transformationToWorldCoordinates(attackVectorHS);
-	}
-	
-	public Vector3f getAttackVectorVerticalStab(float verStabInclination) {
-		Vector3f attackVectorVS = new Vector3f((float) -Math.sin(verStabInclination), 0, (float) -Math.cos(verStabInclination));
-		return this.transformationToWorldCoordinates(attackVectorVS);
+	public Vector3f getAttackVectorVer(float verInclination) {
+		Vector3f attackVectorV = new Vector3f((float) -Math.sin(verInclination), 0, (float) -Math.cos(verInclination));
+		return this.transformationToWorldCoordinates(attackVectorV);
 	}
 		
 	/*
 	 * Normals of the Wings and Stabilizers
 	 */
-	public Vector3f getNormalLeftWing(float leftWingInclination) {
-		return (this.getAxisVectorHor()).crossProduct(this.getAttackVectorLeftWing(leftWingInclination));
+	public Vector3f getNormalHor(float horInclination) {
+		return this.getAxisVectorHor().crossProduct(this.getAttackVectorHor(horInclination));
 	}
 	
-	public Vector3f getNormalRightWing(float rightWingInclination) {
-		return this.getAxisVectorHor().crossProduct(this.getAttackVectorRightWing(rightWingInclination));
-	}
-	
-	public Vector3f getNormalHorStab(float horStabInclination) {
-		return this.getAxisVectorHor().crossProduct(this.getAttackVectorHorizontalStab(horStabInclination));
-	}
-	
-	public Vector3f getNormalVerStab(float verStabInclination) {
-		return this.getAxisVectorVer().crossProduct(this.getAttackVectorVerticalStab(verStabInclination));
+	public Vector3f getNormalVer(float verInclination) {
+		return this.getAxisVectorVer().crossProduct(this.getAttackVectorVer(verInclination));
 	}
 	
 	/*
@@ -785,15 +778,76 @@ public class Drone {
 	/*
 	 * Calculate the Angle Of Attack
 	 */
-	public float getAngleOfAttack(Vector3f normal, Vector3f projSpeedVector, Vector3f attackVector)
+	public float getAngleOfAttackLeftWing(float leftWingInclination)
 			throws IllegalArgumentException {
-		float aoa = (float) -Math.atan2(normal.dot(projSpeedVector), attackVector.dot(projSpeedVector));
-		if (aoa > this.maxAOA)
+		float AOA = (float) -Math.atan2(this.getNormalHor(leftWingInclination).dot(this.getProjectedVelocityLeftWing())
+				, this.getAttackVectorHor(leftWingInclination).dot(this.getProjectedVelocityLeftWing()));
+		if (AOA > this.maxAOA)
 			throw new IllegalArgumentException();
-		return aoa;
+		return AOA;
 	}
 	
-	public 
+	public float getAngleOfAttackRightWing(float rightWingInclination)
+			throws IllegalArgumentException {
+		float AOA = (float) -Math.atan2(this.getNormalHor(rightWingInclination).dot(this.getProjectedVelocityRightWing())
+				, this.getAttackVectorHor(rightWingInclination).dot(this.getProjectedVelocityRightWing()));
+		if (AOA > this.maxAOA)
+			throw new IllegalArgumentException();
+		return AOA;
+	}
+	
+	public float getAngleOfAttackHorStab(float horStabInclination)
+			throws IllegalArgumentException {
+		float AOA = (float) -Math.atan2(this.getNormalHor(horStabInclination).dot(this.getProjectedVelocityHorStab())
+				, this.getAttackVectorHor(horStabInclination).dot(this.getProjectedVelocityHorStab()));
+		if (AOA > this.maxAOA)
+			throw new IllegalArgumentException();
+		return AOA;
+	}
+	
+	public float getAngleOfAttackVerStab(float verStabInclination)
+			throws IllegalArgumentException {
+		float AOA = (float) -Math.atan2(this.getNormalVer(verStabInclination).dot(this.getProjectedVelocityVerStab())
+				, this.getAttackVectorVer(verStabInclination).dot(this.getProjectedVelocityVerStab()));
+		if (AOA > this.maxAOA)
+			throw new IllegalArgumentException();
+		return AOA;
+	}
+	
+	/**
+	 * krachtenevenwicht
+	 * @param thrust
+	 * @param leftWingInclination
+	 * @param rightWingInclination
+	 * @param horStabInclination
+	 * @param verStabInclination
+	 * @return
+	 */
+	public Vector3f getAcceleration(float thrust, float leftWingInclination, float rightWingInclination, float horStabInclination,
+			float verStabInclination) {
+		return this.getGravitationalForceEngine().sum(this.getGravitationalForceTail()).sum(this.getGravitationalForceWing().scale(2)) 
+				.sum(this.getLiftForceLeftWing(leftWingInclination)).sum(this.getLiftForceRightWing(rightWingInclination))
+				.sum(this.getLiftForceHorStab(horStabInclination)).sum(this.getLiftForceVerStab(verStabInclination))
+				.sum(this.transformationToWorldCoordinates(new Vector3f(0, 0, -thrust)))
+				.scale(1/(this.getEngineMass()+(2*this.getWingMass())+this.getTailMass()));
+	}
+	
+	public float[] getAngularAccelerations(float leftWingInclination, float rightWingInclination, float horStabInclination,
+			float verStabInclination) {
+		float inertiaMatrixXX = (float) (this.getTailMass()*Math.pow(this.getTailSize(),2) 
+				+ this.getEngineMass()*Math.pow(this.getEngineDistance(), 2));
+		float inertiaMatrixZZ = (float) (2*(this.getWingMass()*Math.pow(this.getWingX(),2)));
+		float inertiaMatrixYY = inertiaMatrixXX + inertiaMatrixZZ;
+		RealMatrix coefficients = 
+				new Array2DRowRealMatrix(new double[][] {{inertiaMatrixXX*Math.cos(this.getPitch())*Math.sin(this.getRoll()),
+					inertiaMatrixXX*Math.cos(this.getRoll()), 0},
+					{inertiaMatrixYY*Math.cos(this.getPitch())*Math.cos(this.getRoll()), -inertiaMatrixYY*Math.sin(this.getRoll()), 0}, 
+					{-inertiaMatrixZZ*Math.sin(this.getPitch()), 0, inertiaMatrixZZ}}, false);
+		DecompositionSolver solver = new LUDecomposition(coefficients).getSolver();
+		return null;
+	}
+	
+	
 	
 	/**
 	 * Return the virtual testbed of this drone.
