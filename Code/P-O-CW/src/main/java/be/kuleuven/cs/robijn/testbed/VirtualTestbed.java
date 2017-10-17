@@ -1,6 +1,7 @@
 package be.kuleuven.cs.robijn.testbed;
 
-import be.kuleuven.cs.robijn.common.Drone;
+import org.apache.commons.math3.linear.*;
+import be.kuleuven.cs.robijn.common.*;
 
 public class VirtualTestbed {
 	
@@ -85,4 +86,40 @@ public class VirtualTestbed {
 	 * Variable referencing the drone of this virtual testbed.
 	 */
 	private Drone drone = null;
+	
+	public void moveDrone(float dt, float thrust, float leftWingInclination, float rightWingInclination,
+			float horStabInclination, float verStabInclination) throws IllegalArgumentException, IllegalStateException {
+		if (dt < 0)
+			throw new IllegalArgumentException();
+		if (! this.hasDrone())
+			throw new IllegalStateException("this virtual testbed has no drone");
+		
+		RealVector position = this.getDrone().getPosition();
+		RealVector velocity = this.getDrone().getVelocity();
+		RealVector acceleration = this.getDrone().getAcceleration(thrust,
+				leftWingInclination, rightWingInclination, horStabInclination, verStabInclination);
+		
+		this.getDrone().setPosition(position.add(velocity.mapMultiply(dt)).add(acceleration.mapMultiply(Math.pow(dt, 2)/2)));
+		this.getDrone().setVelocity(velocity.add(acceleration.mapMultiply(dt)));
+		
+		float[] angularAccelerations = this.getDrone().getAngularAccelerations(leftWingInclination,
+				rightWingInclination, horStabInclination, verStabInclination);
+		float heading = this.getDrone().getHeading();
+		float headingAngularVelocity = this.getDrone().getHeadingAngularVelocity();
+		float headingAngularAcceleration = angularAccelerations[0];
+		float pitch = this.getDrone().getPitch();
+		float pitchAngularVelocity = this.getDrone().getPitchAngularVelocity();
+		float pitchAngularAcceleration = angularAccelerations[1];
+		float roll = this.getDrone().getRoll();
+		float rollAngularVelocity = this.getDrone().getRollAngularVelocity();
+		float rollAngularAcceleration = angularAccelerations[2];
+		
+		this.getDrone().setHeading((float)(heading + headingAngularVelocity*dt + headingAngularAcceleration*(Math.pow(dt, 2)/2)));
+		this.getDrone().setPitch((float)(pitch + pitchAngularVelocity*dt + pitchAngularAcceleration*(Math.pow(dt, 2)/2)));
+		this.getDrone().setRoll((float)(roll + rollAngularVelocity*dt + rollAngularAcceleration*(Math.pow(dt, 2)/2)));
+		
+		this.getDrone().setHeadingAngularVelocity(headingAngularVelocity + headingAngularAcceleration*dt);
+		this.getDrone().setPitchAngularVelocity(pitchAngularVelocity + pitchAngularAcceleration*dt);
+		this.getDrone().setRollAngularVelocity(rollAngularVelocity + rollAngularAcceleration*dt);
+	}
 }
