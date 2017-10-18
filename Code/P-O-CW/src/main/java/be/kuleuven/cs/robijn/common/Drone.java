@@ -6,6 +6,13 @@ import be.kuleuven.cs.robijn.testbed.*;
 
 public class Drone implements Vector3d {
 	
+	
+    //  -----------------   //
+    //                      //
+    //   INITIALISE DRONE   //
+    //                      //
+    //  -----------------   //
+	
 	/*
 	 * Create a drone
 	 */
@@ -77,6 +84,137 @@ public class Drone implements Vector3d {
 				velocity, null);
 	}
 	
+	
+    //     -----------------     //
+    //                           //
+    //  GETTERS DRONE ATTRIBUTES //
+    //                           //
+    //     -----------------     //
+	
+	private final float gravity = (float) 9.81;
+	
+	private final float engineMass;
+	
+	private final float tailSize;
+	
+	private final float wingX;
+	
+	private final float wingMass;
+	
+	private final float maxThrust;
+	
+	private final float maxAOA;
+	
+	private final float wingLiftSlope;
+	
+	private final float horStabLiftSlope;
+	
+	private final float verStabLiftSlope;
+	
+	private final float tailMass;
+	
+	
+	public float getGravity() {
+		return this.gravity;
+	}
+
+	public float getEngineMass() {
+		return this.engineMass;
+	}
+	
+	public static boolean isValidEngineMass(float engineMass) {
+		return ((engineMass > 0) & (engineMass <= Float.MAX_VALUE));
+	}
+	
+	public float getTailSize() {
+		return this.tailSize;
+	}
+	
+	public static boolean isValidTailSize(float tailSize) {
+		return ((tailSize > 0) & (tailSize <= Float.MAX_VALUE));
+	}
+	
+	public float getWingX() {
+		return this.wingX;
+	}
+	
+	public static boolean isValidWingX(float wingX) {
+		return ((wingX > 0) & (wingX <= Float.MAX_VALUE));
+	}
+	
+	public float getWingMass() {
+		return this.wingMass;
+	}
+	
+	public static boolean isValidWingMass(float wingMass) {
+		return ((wingMass > 0) & (wingMass <= Float.MAX_VALUE));
+	}
+	
+	public float getMaxThrust() {
+		return this.maxThrust;
+	}
+	
+	public static boolean isValidMaxThrust(float maxThrust) {
+		return ((maxThrust >= 0) & (maxThrust <= Float.MAX_VALUE));
+	}
+	
+	public float getMaxAOA() {
+		return this.maxAOA;
+	}
+	
+	public static boolean isValidMaxAOA(float maxAOA) {
+		return ((maxAOA >= 0) & (maxAOA < 2*Math.PI));
+	}
+	
+	public float getWingLiftSlope() {
+		return this.wingLiftSlope;
+	}
+	
+	public static boolean isValidWingLiftSlope(float wingLiftSlope) {
+		return ((wingLiftSlope > 0) & (wingLiftSlope <= Float.MAX_VALUE));
+	}
+	
+	public float getHorStabLiftSlope() {
+		return this.horStabLiftSlope;
+	}
+	
+	public static boolean isValidHorStabLiftSlope(float horStabLiftSlope) {
+		return ((horStabLiftSlope > 0) & (horStabLiftSlope <= Float.MAX_VALUE));
+	}
+	
+	public float getVerStabLiftSlope() {
+		return this.verStabLiftSlope;
+	}
+	
+	public static boolean isValidVerStabLiftSlope(float verStabLiftSlope) {
+		return ((verStabLiftSlope > 0) & (verStabLiftSlope <= Float.MAX_VALUE));
+	}
+	
+	public float getTailMass() {
+		return this.tailMass;
+	}
+	
+	public static boolean isValidTailMass(float tailMass) {
+		return ((tailMass > 0) & (tailMass <= Float.MAX_VALUE));
+	}
+
+	public float getEngineDistance() {
+		return ((this.getTailMass() * this.getTailSize()) / this.getEngineMass());
+	}
+	
+    //  -----------------   //
+    //                      //
+    //       HEADING        //
+    //                      //
+    //  -----------------   //
+	/**
+	 * Variable registering the heading (yaw) of this drone.
+	 * The heading is equal to atan2(H . (-1, 0, 0), H . (0, 0, -1)), 
+	 * where H is the drone's heading vector (which we define as the drone's forward vector ((0, 0, -1) in drone coordinates) 
+	 * projected onto the world XZ plane.
+	 */
+	private float heading = 0;
+	
 	/**
 	 * Return the heading (yaw) of this drone.
 	 * The heading is equal to atan2(H . (-1, 0, 0), H . (0, 0, -1)), 
@@ -119,14 +257,19 @@ public class Drone implements Vector3d {
 			throw new IllegalArgumentException();
 		this.heading = heading;
 	}
+
 	
+    //  -----------------   //
+    //                      //
+    //         PITCH        //
+    //                      //
+    //  -----------------   //
 	/**
-	 * Variable registering the heading (yaw) of this drone.
-	 * The heading is equal to atan2(H . (-1, 0, 0), H . (0, 0, -1)), 
-	 * where H is the drone's heading vector (which we define as the drone's forward vector ((0, 0, -1) in drone coordinates) 
-	 * projected onto the world XZ plane.
+	 * Variable registering the pitch of this drone.
+	 * The pitch is equal to atan2(F . (0, 1, 0), F . H), 
+	 * where F is the drone's forward vector and H is the drone's heading vector.
 	 */
-	private float heading = 0;
+	private float pitch = 0;
 	
 	/**
 	 * Return the pitch of this drone.
@@ -170,12 +313,19 @@ public class Drone implements Vector3d {
 		this.pitch = pitch;
 	}
 	
+	
+	
+    //  -----------------   //
+    //                      //
+    //         ROLL         //
+    //                      //
+    //  -----------------   //
 	/**
-	 * Variable registering the pitch of this drone.
-	 * The pitch is equal to atan2(F . (0, 1, 0), F . H), 
-	 * where F is the drone's forward vector and H is the drone's heading vector.
+	 * Variable registering the roll (bank) of this drone.
+	 * The roll is is equal to atan2(R . (0, 1, 0), R . R0), 
+	 * where R is the drone's right direction ((1, 0, 0) in drone coordinates) and R0 = H x (0, 1, 0).
 	 */
-	private float pitch = 0;
+	private float roll = 0;
 	
 	/**
 	 * Return the roll (bank) of this drone.
@@ -219,12 +369,16 @@ public class Drone implements Vector3d {
 		this.roll = roll;
 	}
 	
+	
+    //  -----------------   //
+    //                      //
+    //    POSITION DRONE    //
+    //                      //
+    //  -----------------   //
 	/**
-	 * Variable registering the roll (bank) of this drone.
-	 * The roll is is equal to atan2(R . (0, 1, 0), R . R0), 
-	 * where R is the drone's right direction ((1, 0, 0) in drone coordinates) and R0 = H x (0, 1, 0).
+	 * Variable registering the position of the center of mass of this drone.
 	 */
-	private float roll = 0;
+	private RealVector position = new ArrayRealVector(new double[] { 0, 0, 0 }, false);
 	
 	/**
 	 * Return the position of the center of mass of this drone.
@@ -264,10 +418,33 @@ public class Drone implements Vector3d {
 		this.position = position;
 	}
 	
+	
+    //  -----------------   //
+    //                      //
+    //    VELOCITY DRONE    //
+    //                      //
+    //  -----------------   //
+	
 	/**
-	 * Variable registering the position of the center of mass of this drone.
+	 * Variable registering the velocity of the center of mass of this drone.
 	 */
-	private RealVector position = new ArrayRealVector(new double[] { 0, 0, 0 }, false);
+	private RealVector velocity;
+	
+	/**
+	 * Variable registering the angular velocity of the heading of this drone.
+	 */
+	private float headingAngularVelocity = 0;
+	
+	/**
+	 * Variable registering the angular velocity of the pitch of this drone.
+	 */
+	private float pitchAngularVelocity = 0;
+	
+	/**
+	 * Variable registering the angular velocity of the roll of this drone.
+	 */
+	private float rollAngularVelocity = 0;
+	
 	
 	/**
 	 * Return the velocity of the center of mass of this drone.
@@ -307,10 +484,6 @@ public class Drone implements Vector3d {
 		this.velocity = velocity;
 	}
 	
-	/**
-	 * Variable registering the velocity of the center of mass of this drone.
-	 */
-	private RealVector velocity;
 	
 	/**
 	 * Return the angular velocity of the heading of this drone.
@@ -350,10 +523,7 @@ public class Drone implements Vector3d {
 		this.headingAngularVelocity = headingAngularVelocity;
 	}
 	
-	/**
-	 * Variable registering the angular velocity of the heading of this drone.
-	 */
-	private float headingAngularVelocity = 0;
+
 	
 	/**
 	 * Return the angular velocity of the pitch of this drone.
@@ -392,11 +562,7 @@ public class Drone implements Vector3d {
 			throw new IllegalArgumentException();
 		this.pitchAngularVelocity = pitchAngularVelocity;
 	}
-	
-	/**
-	 * Variable registering the angular velocity of the pitch of this drone.
-	 */
-	private float pitchAngularVelocity = 0;
+
 	
 	/**
 	 * Return the angular velocity of the roll of this drone.
@@ -435,117 +601,19 @@ public class Drone implements Vector3d {
 			throw new IllegalArgumentException();
 		this.rollAngularVelocity = rollAngularVelocity;
 	}
+
 	
+
+	
+    //  -----------------   //
+    //                      //
+    //    VIRTUAL TESTBED   //
+    //                      //
+    //  -----------------   //
 	/**
-	 * Variable registering the angular velocity of the roll of this drone.
+	 * Variable referencing the virtual testbed of this drone.
 	 */
-	private float rollAngularVelocity = 0;
-	
-	public float getGravity() {
-		return this.gravity;
-	}
-	
-	private final float gravity = (float) 9.81;
-	
-	public float getEngineMass() {
-		return this.engineMass;
-	}
-	
-	public static boolean isValidEngineMass(float engineMass) {
-		return ((engineMass > 0) & (engineMass <= Float.MAX_VALUE));
-	}
-	
-	private final float engineMass;
-	
-	public float getTailSize() {
-		return this.tailSize;
-	}
-	
-	public static boolean isValidTailSize(float tailSize) {
-		return ((tailSize > 0) & (tailSize <= Float.MAX_VALUE));
-	}
-	
-	private final float tailSize;
-	
-	public float getWingX() {
-		return this.wingX;
-	}
-	
-	public static boolean isValidWingX(float wingX) {
-		return ((wingX > 0) & (wingX <= Float.MAX_VALUE));
-	}
-	
-	private final float wingX;
-	
-	public float getWingMass() {
-		return this.wingMass;
-	}
-	
-	public static boolean isValidWingMass(float wingMass) {
-		return ((wingMass > 0) & (wingMass <= Float.MAX_VALUE));
-	}
-	
-	private final float wingMass;
-	
-	public float getMaxThrust() {
-		return this.maxThrust;
-	}
-	
-	public static boolean isValidMaxThrust(float maxThrust) {
-		return ((maxThrust >= 0) & (maxThrust <= Float.MAX_VALUE));
-	}
-	
-	private final float maxThrust;
-	
-	public float getMaxAOA() {
-		return this.maxAOA;
-	}
-	
-	public static boolean isValidMaxAOA(float maxAOA) {
-		return ((maxAOA >= 0) & (maxAOA < 2*Math.PI));
-	}
-	
-	private final float maxAOA;
-	
-	public float getWingLiftSlope() {
-		return this.wingLiftSlope;
-	}
-	
-	public static boolean isValidWingLiftSlope(float wingLiftSlope) {
-		return ((wingLiftSlope > 0) & (wingLiftSlope <= Float.MAX_VALUE));
-	}
-	
-	private final float wingLiftSlope;
-	
-	public float getHorStabLiftSlope() {
-		return this.horStabLiftSlope;
-	}
-	
-	public static boolean isValidHorStabLiftSlope(float horStabLiftSlope) {
-		return ((horStabLiftSlope > 0) & (horStabLiftSlope <= Float.MAX_VALUE));
-	}
-	
-	private final float horStabLiftSlope;
-	
-	public float getVerStabLiftSlope() {
-		return this.verStabLiftSlope;
-	}
-	
-	public static boolean isValidVerStabLiftSlope(float verStabLiftSlope) {
-		return ((verStabLiftSlope > 0) & (verStabLiftSlope <= Float.MAX_VALUE));
-	}
-	
-	private final float verStabLiftSlope;
-	
-	public float getTailMass() {
-		return this.tailMass;
-	}
-	
-	public static boolean isValidTailMass(float tailMass) {
-		return ((tailMass > 0) & (tailMass <= Float.MAX_VALUE));
-	}
-	
-	private final float tailMass;
+	private VirtualTestbed virtualTestbed = null;
 	
 	/**
 	 * Return the virtual testbed of this drone.
@@ -635,16 +703,13 @@ public class Drone implements Vector3d {
 	protected void setVirtualTestbed(VirtualTestbed virtualTestbed) {
 		this.virtualTestbed = virtualTestbed;
 	}
+
 	
-	/**
-	 * Variable referencing the virtual testbed of this drone.
-	 */
-	private VirtualTestbed virtualTestbed = null;
-	
-	public float getEngineDistance() {
-		return ((this.getTailMass() * this.getTailSize()) / this.getEngineMass());
-	}
-	
+    //     -----------------      //
+    //                            //
+    //  TRANSFORMATION MATRICES   //				WORLD TO DRONE COORDINATES
+    //                            //
+    //     -----------------      //
 	public RealVector rollTransformation(RealVector realVector) 
 			throws IllegalStateException {
 		if (! this.hasVirtualTestbed())
@@ -676,6 +741,12 @@ public class Drone implements Vector3d {
 	public RealVector transformationToDroneCoordinates(RealVector realVector) {
 		return this.rollTransformation(this.pitchTransformation(this.headingTransformation(realVector)));
 	}
+	
+    //     -----------------      //
+    //                            //
+    //  TRANSFORMATION MATRICES   //				DRONE TO WORLD COORDINATES
+    //                            //
+    //     -----------------      //
 	
 	public RealVector inverseRollTransformation(RealVector realVector) 
 			throws IllegalStateException {
@@ -709,6 +780,13 @@ public class Drone implements Vector3d {
 		return this.inverseHeadingTransformation(this.inversePitchTransformation(this.inverseRollTransformation(realVector)));
 	}
 	
+	
+    //     -----------------      //
+    //                            //
+    //  ANGULAR VELOCITY VECTOR   //
+    //                            //
+    //     -----------------      //
+	
 	public RealVector getHeadingAngularVelocityVector() {
 		if (! this.hasVirtualTestbed())
 			throw new IllegalStateException("this drone has no virtual testbed");
@@ -727,6 +805,13 @@ public class Drone implements Vector3d {
 		return this.inverseHeadingTransformation(this.inversePitchTransformation(
 				new ArrayRealVector(new double[] {0, 0, this.getRollAngularVelocity()}, false)));
 	}
+	
+	
+    //        -----------------         //
+    //                                  //
+    //   POSITION IN WORLD COORDINATES  //
+    //                                  //
+    //        -----------------         //
 	
 	public RealVector getLeftWingPosition() {
 		return this.getPosition().add(this.transformationToWorldCoordinates(
@@ -747,6 +832,13 @@ public class Drone implements Vector3d {
 		return this.getPosition().add(this.transformationToWorldCoordinates(
 				new ArrayRealVector(new double[] {0, 0, -this.getEngineDistance()}, false)));
 	}
+	
+	
+    //        -----------------        //
+    //                                 //
+    //             FORCES              //
+    //                                 //
+    //        -----------------        //
 	
 	/*
 	 * Return the gravitational force for the given mass
