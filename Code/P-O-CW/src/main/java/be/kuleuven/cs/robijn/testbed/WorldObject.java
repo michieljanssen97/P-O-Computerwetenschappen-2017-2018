@@ -1,16 +1,15 @@
 package be.kuleuven.cs.robijn.testbed;
 
-import be.kuleuven.cs.robijn.common.Drone;
-import be.kuleuven.cs.robijn.common.math.Vector3f;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.math3.linear.RealVector;
+
 public class WorldObject {
     private ArrayList<WorldObject> children = new ArrayList<>();
-    private Vector3f position;
-    private Vector3f rotation;
+    private RealVector position;
+    private RealVector rotation;
 
     /**
      * Returns an immutable list of the children of this object.
@@ -67,7 +66,7 @@ public class WorldObject {
      * Returns the position of this object, relative to its parent.
      * @return a non-null vector
      */
-    public Vector3f getPosition() {
+    public RealVector getPosition() {
         return position;
     }
 
@@ -75,7 +74,7 @@ public class WorldObject {
      * Sets the position of this object relative to its parent.
      * @param vector the new position vector of this object. Must not be null.
      */
-    public void setPosition(Vector3f vector) {
+    public void setPosition(RealVector vector) {
         if(vector == null){
             throw new IllegalArgumentException("vector cannot be null");
         }
@@ -87,7 +86,7 @@ public class WorldObject {
      * Returns the rotation of this object, relative to its parent.
      * @return a non-null vector
      */
-    public Vector3f getRotation() {
+    public RealVector getRotation() {
         return rotation;
     }
 
@@ -95,7 +94,7 @@ public class WorldObject {
      * Sets the rotation of this object relative to its parent.
      * @param vector the new rotational vector of this object. Must not be null.
      */
-    public void setRotation(Vector3f vector) {
+    public void setRotation(RealVector vector) {
         if(vector == null){
             throw new IllegalArgumentException("vector cannot be null");
         }

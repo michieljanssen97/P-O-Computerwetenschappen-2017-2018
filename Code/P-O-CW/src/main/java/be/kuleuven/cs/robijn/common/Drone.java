@@ -4,7 +4,7 @@ import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.math.Vector3d;
 import be.kuleuven.cs.robijn.testbed.*;
 
-public class Drone implements Vector3d {
+public class Drone extends WorldObject implements Vector3d {
 	
 	
     //  -----------------   //
@@ -163,7 +163,7 @@ public class Drone implements Vector3d {
 	}
 	
 	public static boolean isValidMaxAOA(float maxAOA) {
-		return ((maxAOA >= 0) & (maxAOA < 2*Math.PI));
+		return ((maxAOA > -(Math.PI/2)) & (maxAOA < (Math.PI/2)));
 	}
 	
 	public float getWingLiftSlope() {

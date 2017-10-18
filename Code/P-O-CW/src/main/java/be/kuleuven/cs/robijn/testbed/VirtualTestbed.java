@@ -3,15 +3,14 @@ package be.kuleuven.cs.robijn.testbed;
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.*;
 
-public class VirtualTestbed {
+public class VirtualTestbed extends WorldObject {
 	
-	public VirtualTestbed(Drone drone) {
-		if (drone != null)
-			addDrone(drone);
-	}
-	
+	/**
+	 * eerst een virtual testbed aanmaken en daarna de drone daaraan toevoegen!
+	 * (Altijd drone.addVirtualTestbed(...) gebruiken in plaats van virtualTestbed.addDrone(...))
+	 * @param drone
+	 */
 	public VirtualTestbed() {
-		this(null);
 	}
 	
 	/**
