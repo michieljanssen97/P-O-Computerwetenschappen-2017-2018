@@ -11,6 +11,8 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.GL_ELEMENT_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
@@ -76,9 +78,11 @@ public class Renderer implements AutoCloseable {
         glBindFramebuffer(GL_FRAMEBUFFER, buffer.getId());
         //Set the size and position of the image we want to render in the buffer
         glViewport(0, 0, buffer.getWidth(), buffer.getHeight());
+        //Enable depth testing so we only see the faces oriented towards the camera.
+        glEnable(GL_DEPTH_TEST);
         //Replace previous frame with a blank screen
         glClearColor(0, 0f, 0f, 1f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
         //Setup per-camera matrices
         //TODO: mirror image through transformation matrix?
@@ -97,8 +101,14 @@ public class Renderer implements AutoCloseable {
         model.getShader().setUniformMatrix("mvp", false, mvp); //TODO: is this the best way to do this?
 
         //Draw object
-        //TODO: bind buffers (or can we just bind the VAO?), (set attributes?)
-        glDrawElements(GL_TRIANGLES, indicesCount, GL_FLOAT, 0);
+        glBindVertexArray(model.getMesh().getVertexArrayObjectId());
+        glActiveTexture(GL_TEXTURE0);
+        if(model.getTexture() != null){
+            glBindTexture(GL_TEXTURE_2D, model.getTexture().getTextureId());
+        }else{
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
+        glDrawElements(GL_TRIANGLES, model.getMesh().getVertexCount(), GL_UNSIGNED_INT, 0);
     }
 
     /**
