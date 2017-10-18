@@ -6,6 +6,7 @@ import org.apache.commons.math3.linear.*;
 import org.junit.Test;
 
 import be.kuleuven.cs.robijn.common.Drone;
+import be.kuleuven.cs.robijn.common.math.Vector3f;
 import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
 
 public class DroneTest {
@@ -16,14 +17,15 @@ public class DroneTest {
 	float wingMass = 40;
 	float tailMass = 30;
 	float maxThrust = 60000;
-	float maxAOA = ((float) (Math.PI));
+	float maxAOA = ((float) (Math.PI/3));
 	float wingLiftSlope = 15;
 	float horStabLiftSlope = 10;
 	float verStabLiftSlope = 10;
 	RealVector velocity = new ArrayRealVector(new double[] {20,20,20},false);
+	VirtualTestbed vtestbed = new VirtualTestbed();
 	
 	Drone drone = new Drone(wingX, tailSize, engineMass, wingMass, tailMass, maxThrust, maxAOA, wingLiftSlope
-			, horStabLiftSlope, verStabLiftSlope, velocity);
+			, horStabLiftSlope, verStabLiftSlope, velocity, vtestbed);
 	
 	/**
 	 * Test the getters of the drone's attributes
@@ -125,29 +127,27 @@ public class DroneTest {
 		assertTrue(position.equals(drone.transformationToWorldCoordinates(drone.transformationToDroneCoordinates(position))));
 	}
 	
-	public static void main(String args[]) {
-		float wingX = 4;
-		float tailSize = 6;
-		float engineMass = 20;
-		float wingMass = 40;
-		float tailMass = 30;
-		float maxThrust = 60000;
-		float maxAOA = ((float) (Math.PI/3));
-		float wingLiftSlope = 15;
-		float horStabLiftSlope = 10;
-		float verStabLiftSlope = 10;
-		VirtualTestbed vtestbed = new VirtualTestbed();
+    public boolean RealVectorEquals(RealVector v1, RealVector v2){ 
+        if(v1.getDimension() == 0 || v2.getDimension()== 0){
+            return false;
+        }
+        double epsilon = 0.000000001;
+        return Math.abs(v1.getEntry(0)-v2.getEntry(0))<epsilon && Math.abs(v1.getEntry(1)-v2.getEntry(1))<epsilon && Math.abs(v1.getEntry(2)-v2.getEntry(2))<epsilon;
+    }
+	
+    /*
+     * test the transformation matrices
+     */	
+    @Test
+    public void testTransformationMatrices() {
+		drone.setRoll((float) Math.PI/3);
+		drone.setHeading((float) Math.PI/4);
+		drone.setPitch((float) Math.PI/5);
+
 		
-		RealVector velocity = new ArrayRealVector(new double[] {20,20,20},false);
-		Drone drone2 = new Drone(wingX, tailSize, engineMass, wingMass, tailMass, maxThrust, maxAOA, wingLiftSlope
-				, horStabLiftSlope, verStabLiftSlope, velocity, vtestbed);
-		
-		drone2.setHeading((float) Math.PI/6);
-		drone2.setPitch((float) Math.PI/6);
-		drone2.setRoll((float) Math.PI/6);
-		RealVector position = new ArrayRealVector(new double[] {1,1,1});
-		System.out.print(position.equals(drone2.transformationToWorldCoordinates(drone2.transformationToDroneCoordinates(position)))+ "\n");
-		System.out.print(position+ "\n");
-		System.out.print(drone2.transformationToWorldCoordinates(drone2.transformationToDroneCoordinates(position)));
+		RealVector position = new ArrayRealVector(new double[] {0,2,3});
+		//System.out.print(drone2.transformationToDroneCoordinates(position)+"\n"); -> klopte met andere groep
+		//System.out.print(drone2.transformationToWorldCoordinates(position));
+		assertTrue(RealVectorEquals(position,drone.transformationToWorldCoordinates(drone.transformationToDroneCoordinates(position))));
 	}
 }
