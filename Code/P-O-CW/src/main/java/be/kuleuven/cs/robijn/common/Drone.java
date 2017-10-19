@@ -3,6 +3,7 @@ package be.kuleuven.cs.robijn.common;
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
 import be.kuleuven.cs.robijn.testbed.*;
+import p_en_o_cw_2017.*;
 
 public class Drone extends WorldObject {
 	
@@ -16,39 +17,38 @@ public class Drone extends WorldObject {
 	/*
 	 * Create a drone
 	 */
-	public Drone(float wingX, float tailSize, float engineMass, float wingMass, float tailMass, float maxThrust, float maxAOA,
-			float wingLiftSlope, float horStabLiftSlope, float verStabLiftSlope, RealVector velocity, VirtualTestbed virtualTestbed) 
+	public Drone(AutopilotConfig config, RealVector velocity) 
 					throws IllegalArgumentException {
-		if (! isValidWingX(wingX))
+		if (! isValidWingX(config.getWingX()))
 			throw new IllegalArgumentException();
-		this.wingX = wingX;
-		if (! isValidTailSize(tailSize))
+		this.wingX = config.getWingX();
+		if (! isValidTailSize(config.getTailSize()))
 			throw new IllegalArgumentException();
-		this.tailSize = tailSize;
-		if (! isValidEngineMass(engineMass))
+		this.tailSize = config.getTailSize();
+		if (! isValidEngineMass(config.getEngineMass()))
 			throw new IllegalArgumentException();
-		this.engineMass = engineMass;
-		if (! isValidWingMass(wingMass))
+		this.engineMass = config.getEngineMass();
+		if (! isValidWingMass(config.getWingMass()))
 			throw new IllegalArgumentException();
-		this.wingMass = wingMass;
-		if (! isValidTailMass(tailMass))
+		this.wingMass = config.getWingMass();
+		if (! isValidTailMass(config.getTailMass()))
 			throw new IllegalArgumentException();
-		this.tailMass = tailMass;
-		if (! isValidMaxThrust(maxThrust))
+		this.tailMass = config.getTailMass();
+		if (! isValidMaxThrust(config.getMaxThrust()))
 			throw new IllegalArgumentException();
-		this.maxThrust = maxThrust;
-		if (! isValidMaxAOA(maxAOA))
+		this.maxThrust = config.getMaxThrust();
+		if (! isValidMaxAOA(config.getMaxAOA()))
 			throw new IllegalArgumentException();
-		this.maxAOA = maxAOA;
-		if (! isValidWingLiftSlope(wingLiftSlope))
+		this.maxAOA = config.getMaxAOA();
+		if (! isValidWingLiftSlope(config.getWingLiftSlope()))
 			throw new IllegalArgumentException();
-		this.wingLiftSlope = wingLiftSlope;
-		if (! isValidHorStabLiftSlope(horStabLiftSlope))
+		this.wingLiftSlope = config.getWingLiftSlope();
+		if (! isValidHorStabLiftSlope(config.getHorStabLiftSlope()))
 			throw new IllegalArgumentException();
-		this.horStabLiftSlope = horStabLiftSlope;
-		if (! isValidVerStabLiftSlope(verStabLiftSlope))
+		this.horStabLiftSlope = config.getHorStabLiftSlope();
+		if (! isValidVerStabLiftSlope(config.getVerStabLiftSlope()))
 			throw new IllegalArgumentException();
-		this.verStabLiftSlope = verStabLiftSlope;
+		this.verStabLiftSlope = config.getVerStabLiftSlope();
 		//if (! isValidPosition(position))
 		//	throw new IllegalArgumentException();
 		//this.position = position;
