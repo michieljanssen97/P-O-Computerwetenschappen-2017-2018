@@ -23,7 +23,8 @@ public class WorldObject {
      * If no such object is found, null is returned.
      * @param clazz the class of the child to return. Must not be null.
      */
-    public <T extends WorldObject> T getFirstChildOfType(Class<T> clazz){
+    @SuppressWarnings("unchecked")
+	public <T extends WorldObject> T getFirstChildOfType(Class<T> clazz){
         if(clazz == null){
             throw new IllegalArgumentException("clazz cannot be null");
         }
@@ -64,10 +65,10 @@ public class WorldObject {
 
     /**
      * Returns the position of this object, relative to its parent.
-     * @return a non-null vector
+     * @return a non-null vector that is immutable.
      */
     public RealVector getPosition() {
-        return position;
+    	return RealVector.unmodifiableRealVector(position);
     }
 
     /**
@@ -87,7 +88,7 @@ public class WorldObject {
      * @return a non-null vector
      */
     public RealVector getRotation() {
-        return rotation;
+        return RealVector.unmodifiableRealVector(rotation);
     }
 
     /**

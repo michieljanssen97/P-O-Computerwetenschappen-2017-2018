@@ -2,7 +2,10 @@ package be.kuleuven.cs.robijn.common.math;
 
 import org.apache.commons.math3.linear.*;
 
-public interface Vector3d {
+public class VectorMath {
+	
+	private VectorMath() {
+	}
 	
 	public static RealVector crossProduct(RealVector realVector1, RealVector realVector2)
 			throws IllegalArgumentException {

@@ -1,10 +1,10 @@
 package be.kuleuven.cs.robijn.common;
 
 import org.apache.commons.math3.linear.*;
-import be.kuleuven.cs.robijn.common.math.Vector3d;
+import be.kuleuven.cs.robijn.common.math.VectorMath;
 import be.kuleuven.cs.robijn.testbed.*;
 
-public class Drone extends WorldObject implements Vector3d {
+public class Drone extends WorldObject {
 	
 	
     //  -----------------   //
@@ -73,17 +73,7 @@ public class Drone extends WorldObject implements Vector3d {
 		//if (! isValidRollAngularVelocity(rollAngularVelocity))
 		//	throw new IllegalArgumentException();
 		//this.rollAngularVelocity = rollAngularVelocity;
-		if (virtualTestbed != null)
-			addVirtualTestbed(virtualTestbed);
 	}
-	
-	public Drone(float wingX, float tailSize, float engineMass, float wingMass, float tailMass, float maxThrust, float maxAOA,
-			float wingLiftSlope, float horStabLiftSlope, float verStabLiftSlope, RealVector velocity)
-					throws IllegalArgumentException {
-		this(wingX, tailSize, engineMass, wingMass, tailMass, maxThrust, maxAOA, wingLiftSlope, horStabLiftSlope, verStabLiftSlope,
-				velocity, null);
-	}
-	
 	
     //     -----------------     //
     //                           //
@@ -375,48 +365,48 @@ public class Drone extends WorldObject implements Vector3d {
     //    POSITION DRONE    //
     //                      //
     //  -----------------   //
-	/**
-	 * Variable registering the position of the center of mass of this drone.
-	 */
-	private RealVector position = new ArrayRealVector(new double[] { 0, 0, 0 }, false);
+//	/**
+//	 * Variable registering the position of the center of mass of this drone.
+//	 */
+//	private RealVector position = new ArrayRealVector(new double[] { 0, 0, 0 }, false);
 	
-	/**
-	 * Return the position of the center of mass of this drone.
-	 */
-	public RealVector getPosition() {
-		return this.position;
-	}
-	
-	/**
-	 * Check whether the given position is a valid position for
-	 * any drone.
-	 *  
-	 * @param  position
-	 *         The position to check.
-	 * @return True if and only if the given position is effective.
-	 *       | result == (position != null)
-	*/
-	public static boolean isValidPosition(RealVector position) {
-		return (position != null);
-	}
-	
-	/**
-	 * Set the position of this drone to the given position.
-	 * 
-	 * @param  position
-	 *         The new position for this drone.
-	 * @post   The position of this new drone is equal to the given position.
-	 *       | new.getPosition() == position
-	 * @throws IllegalArgumentException
-	 *         The given position is not a valid position for any drone.
-	 *       | ! isValidPosition(position)
-	 */
-	public void setPosition(RealVector position) 
-			throws IllegalArgumentException {
-		if (! isValidPosition(position))
-			throw new IllegalArgumentException();
-		this.position = position;
-	}
+//	/**
+//	 * Return the position of the center of mass of this drone.
+//	 */
+//	public RealVector getPosition() {
+//		return this.position;
+//	}
+//	
+//	/**
+//	 * Check whether the given position is a valid position for
+//	 * any drone.
+//	 *  
+//	 * @param  position
+//	 *         The position to check.
+//	 * @return True if and only if the given position is effective.
+//	 *       | result == (position != null)
+//	*/
+//	public static boolean isValidPosition(RealVector position) {
+//		return (position != null);
+//	}
+//	
+//	/**
+//	 * Set the position of this drone to the given position.
+//	 * 
+//	 * @param  position
+//	 *         The new position for this drone.
+//	 * @post   The position of this new drone is equal to the given position.
+//	 *       | new.getPosition() == position
+//	 * @throws IllegalArgumentException
+//	 *         The given position is not a valid position for any drone.
+//	 *       | ! isValidPosition(position)
+//	 */
+//	public void setPosition(RealVector position) 
+//			throws IllegalArgumentException {
+//		if (! isValidPosition(position))
+//			throw new IllegalArgumentException();
+//		this.position = position;
+//	}
 	
 	
     //  -----------------   //
@@ -610,86 +600,86 @@ public class Drone extends WorldObject implements Vector3d {
     //    VIRTUAL TESTBED   //
     //                      //
     //  -----------------   //
-	/**
-	 * Variable referencing the virtual testbed of this drone.
-	 */
-	private VirtualTestbed virtualTestbed = null;
+//	/**
+//	 * Variable referencing the virtual testbed of this drone.
+//	 */
+//	private VirtualTestbed virtualTestbed = null;
+//	
+//	/**
+//	 * Return the virtual testbed of this drone.
+//	 * A null reference is returned if this drone has no virtual testbed.
+//	 */
+//	public VirtualTestbed getVirtualTestbed() {
+//		return this.virtualTestbed;
+//	}
+//	
+//	/**
+//	 * Check whether this drone has a proper virtual testbed.
+//	 * 
+//	 * @return True if and only if the virtual testbed of this drone, if it is effective, in turn has this drone as
+//	 *         its drone.
+//	 *       | result == 
+//	 *       |   ((this.getVirtualTestbed() == null) || (this.getVirtualTestbed().getDrone() == this))
+//	 */
+//	public boolean hasProperVirtualTestbed() {
+//		return ((this.getVirtualTestbed() == null) || (this.getVirtualTestbed().getDrone() == this));
+//	}
+//	
+//	/**
+//	 * Check whether this drone has a virtual testbed.
+//	 * 
+//	 * @return True if this drone has an effective virtual testbed, false otherwise.
+//	 *       | result == (this.getVirtualTestbed() != null)
+//	 */
+//	public boolean hasVirtualTestbed() {
+//		return this.getVirtualTestbed() != null;
+//	}
 	
-	/**
-	 * Return the virtual testbed of this drone.
-	 * A null reference is returned if this drone has no virtual testbed.
-	 */
-	public VirtualTestbed getVirtualTestbed() {
-		return this.virtualTestbed;
-	}
-	
-	/**
-	 * Check whether this drone has a proper virtual testbed.
-	 * 
-	 * @return True if and only if the virtual testbed of this drone, if it is effective, in turn has this drone as
-	 *         its drone.
-	 *       | result == 
-	 *       |   ((this.getVirtualTestbed() == null) || (this.getVirtualTestbed().getDrone() == this))
-	 */
-	public boolean hasProperVirtualTestbed() {
-		return ((this.getVirtualTestbed() == null) || (this.getVirtualTestbed().getDrone() == this));
-	}
-	
-	/**
-	 * Check whether this drone has a virtual testbed.
-	 * 
-	 * @return True if this drone has an effective virtual testbed, false otherwise.
-	 *       | result == (this.getVirtualTestbed() != null)
-	 */
-	public boolean hasVirtualTestbed() {
-		return this.getVirtualTestbed() != null;
-	}
-	
-	/**
-	 * Add this drone to the given virtual testbed.
-	 * 
-	 * @param  virtualTestbed
-	 *         The new virtual testbed for this drone.
-	 * @post   The given virtual testbed is set as the virtual testbed of this drone.
-	 *       | new.getVirtualTestbed() == virtualTestbed
-	 * @post   This drone is set as the drone of the given virtual testbed.
-	 *       | (new virtualTestbed).getDrone() == this
-	 * @throws NullPointerException
-	 *         The given virtual testbed is not effective.
-	 *       | virtualTestbed == null
-	 * @throws IllegalStateException
-	 *         This drone has already a virtual testbed.
-	 *       | this.hasVirtualTestbed()
-	 */
-	public void addVirtualTestbed(VirtualTestbed virtualTestbed) 
-			throws NullPointerException, IllegalStateException {
-		if (virtualTestbed == null)
-			throw new NullPointerException();
-		if (this.hasVirtualTestbed())
-			throw new IllegalStateException("Each drone is located in at most one vitual testbed");
-		setVirtualTestbed(virtualTestbed);
-		virtualTestbed.addDrone(this);
-	}
-	
-	/**
-	 * Remove this drone from its virtual testbed, if any.
-	 * 
-	 * @post This drone has no longer a virtual testbed.
-	 *     | ! new.hasVirtualTestbed()
-	 * @post The former virtual testbed of this drone, if any, has no longer this drone
-	 *       as its drone.
-	 *     | if (this.hasVirtualTestbed())
-	 *     |   then (new (this.getVirtualTestbed())).getDrone != this
-	 */
-	public void removeVirtualTestbed() {
-		try {
-			VirtualTestbed virtualTestbed = this.getVirtualTestbed();
-			this.setVirtualTestbed(null);
-			virtualTestbed.removeDrone(this);
-		} catch (NullPointerException exc) {
-			assert (! this.hasVirtualTestbed());
-		}
-	}
+//	/**
+//	 * Add this drone to the given virtual testbed.
+//	 * 
+//	 * @param  virtualTestbed
+//	 *         The new virtual testbed for this drone.
+//	 * @post   The given virtual testbed is set as the virtual testbed of this drone.
+//	 *       | new.getVirtualTestbed() == virtualTestbed
+//	 * @post   This drone is set as the drone of the given virtual testbed.
+//	 *       | (new virtualTestbed).getDrone() == this
+//	 * @throws NullPointerException
+//	 *         The given virtual testbed is not effective.
+//	 *       | virtualTestbed == null
+//	 * @throws IllegalStateException
+//	 *         This drone has already a virtual testbed.
+//	 *       | this.hasVirtualTestbed()
+//	 */
+//	public void addVirtualTestbed(VirtualTestbed virtualTestbed) 
+//			throws NullPointerException, IllegalStateException {
+//		if (virtualTestbed == null)
+//			throw new NullPointerException();
+//		if (this.hasVirtualTestbed())
+//			throw new IllegalStateException("Each drone is located in at most one vitual testbed");
+//		setVirtualTestbed(virtualTestbed);
+//		virtualTestbed.addDrone(this);
+//	}
+//	
+//	/**
+//	 * Remove this drone from its virtual testbed, if any.
+//	 * 
+//	 * @post This drone has no longer a virtual testbed.
+//	 *     | ! new.hasVirtualTestbed()
+//	 * @post The former virtual testbed of this drone, if any, has no longer this drone
+//	 *       as its drone.
+//	 *     | if (this.hasVirtualTestbed())
+//	 *     |   then (new (this.getVirtualTestbed())).getDrone != this
+//	 */
+//	public void removeVirtualTestbed() {
+//		try {
+//			VirtualTestbed virtualTestbed = this.getVirtualTestbed();
+//			this.setVirtualTestbed(null);
+//			virtualTestbed.removeDrone(this);
+//		} catch (NullPointerException exc) {
+//			assert (! this.hasVirtualTestbed());
+//		}
+//	}
 	
 	/**
 	 * Add the given virtual testbed as the virtual testbed of this drone.
@@ -700,9 +690,9 @@ public class Drone extends WorldObject implements Vector3d {
 	 *      | new.getVirtualTestbed() == virtualTestbed
 	 *        
 	 */
-	protected void setVirtualTestbed(VirtualTestbed virtualTestbed) {
-		this.virtualTestbed = virtualTestbed;
-	}
+//	protected void setVirtualTestbed(VirtualTestbed virtualTestbed) {
+//		this.virtualTestbed = virtualTestbed;
+//	}
 
 	
     //     -----------------      //
@@ -712,8 +702,8 @@ public class Drone extends WorldObject implements Vector3d {
     //     -----------------      //
 	public RealVector rollTransformation(RealVector realVector) 
 			throws IllegalStateException {
-		if (! this.hasVirtualTestbed())
-			throw new IllegalStateException("this drone has no virtual testbed");
+//		if (! this.hasVirtualTestbed())
+//			throw new IllegalStateException("this drone has no virtual testbed");
 		RealMatrix rollTransformation = new Array2DRowRealMatrix(new double[][] {{Math.cos(this.getRoll()), Math.sin(this.getRoll()), 0},
 			{-Math.sin(this.getRoll()), Math.cos(this.getRoll()), 0}, {0, 0, 1}}, false);
 		return rollTransformation.operate(realVector);	
@@ -721,8 +711,8 @@ public class Drone extends WorldObject implements Vector3d {
 	
 	public RealVector pitchTransformation(RealVector realVector) 
 			throws IllegalStateException {
-		if (! this.hasVirtualTestbed())
-			throw new IllegalStateException("this drone has no virtual testbed");
+//		if (! this.hasVirtualTestbed())
+//			throw new IllegalStateException("this drone has no virtual testbed");
 		RealMatrix pitchTransformation = new Array2DRowRealMatrix(new double[][] {{1, 0, 0},
 			{0, Math.cos(this.getPitch()), Math.sin(this.getPitch())},
 			{0, -Math.sin(this.getPitch()), Math.cos(this.getPitch())}}, false);
@@ -731,8 +721,8 @@ public class Drone extends WorldObject implements Vector3d {
 	
 	public RealVector headingTransformation(RealVector realVector) 
 			throws IllegalStateException {
-		if (! this.hasVirtualTestbed())
-			throw new IllegalStateException("this drone has no virtual testbed");
+//		if (! this.hasVirtualTestbed())
+//			throw new IllegalStateException("this drone has no virtual testbed");
 		RealMatrix headingTransformation = new Array2DRowRealMatrix(new double[][] {{Math.cos(this.getHeading()), 0, -Math.sin(this.getHeading())},
 			{0, 1, 0}, {Math.sin(this.getHeading()), 0, Math.cos(this.getHeading())}}, false);
 		return headingTransformation.operate(realVector);	
@@ -750,8 +740,8 @@ public class Drone extends WorldObject implements Vector3d {
 	
 	public RealVector inverseRollTransformation(RealVector realVector) 
 			throws IllegalStateException {
-		if (! this.hasVirtualTestbed())
-			throw new IllegalStateException("this drone has no virtual testbed");
+//		if (! this.hasVirtualTestbed())
+//			throw new IllegalStateException("this drone has no virtual testbed");
 		RealMatrix inverseRollTransformation = new Array2DRowRealMatrix(new double[][] {{Math.cos(this.getRoll()), -Math.sin(this.getRoll()), 0},
 			{Math.sin(this.getRoll()), Math.cos(this.getRoll()), 0}, {0, 0, 1}}, false);
 		return inverseRollTransformation.operate(realVector);	
@@ -759,8 +749,8 @@ public class Drone extends WorldObject implements Vector3d {
 	
 	public RealVector inversePitchTransformation(RealVector realVector) 
 			throws IllegalStateException {
-		if (! this.hasVirtualTestbed())
-			throw new IllegalStateException("this drone has no virtual testbed");
+//		if (! this.hasVirtualTestbed())
+//			throw new IllegalStateException("this drone has no virtual testbed");
 		RealMatrix inversePitchTransformation = new Array2DRowRealMatrix(new double[][] {{1, 0, 0},
 			{0, Math.cos(this.getPitch()), -Math.sin(this.getPitch())},
 			{0, Math.sin(this.getPitch()), Math.cos(this.getPitch())}}, false);
@@ -769,8 +759,8 @@ public class Drone extends WorldObject implements Vector3d {
 	
 	public RealVector inverseHeadingTransformation(RealVector realVector) 
 			throws IllegalStateException {
-		if (! this.hasVirtualTestbed())
-			throw new IllegalStateException("this drone has no virtual testbed");
+//		if (! this.hasVirtualTestbed())
+//			throw new IllegalStateException("this drone has no virtual testbed");
 		RealMatrix inverseHeadingTransformation = new Array2DRowRealMatrix(new double[][] {{Math.cos(this.getHeading()), 0,
 			Math.sin(this.getHeading())}, {0, 1, 0}, {-Math.sin(this.getHeading()), 0, Math.cos(this.getHeading())}}, false);
 		return inverseHeadingTransformation.operate(realVector);	
@@ -788,20 +778,20 @@ public class Drone extends WorldObject implements Vector3d {
     //     -----------------      //
 	
 	public RealVector getHeadingAngularVelocityVector() {
-		if (! this.hasVirtualTestbed())
-			throw new IllegalStateException("this drone has no virtual testbed");
+//		if (! this.hasVirtualTestbed())
+//			throw new IllegalStateException("this drone has no virtual testbed");
 		return new ArrayRealVector(new double[] {0, this.getHeadingAngularVelocity(), 0}, false);
 	}
 	
 	public RealVector getPitchAngularVelocityVector() throws IllegalStateException {
-		if (! this.hasVirtualTestbed())
-			throw new IllegalStateException("this drone has no virtual testbed");
+//		if (! this.hasVirtualTestbed())
+//			throw new IllegalStateException("this drone has no virtual testbed");
 		return this.inverseHeadingTransformation(new ArrayRealVector(new double[] {this.getPitchAngularVelocity(), 0, 0}, false));
 	}
 	
 	public RealVector getRollAngularVelocityVector() {
-		if (! this.hasVirtualTestbed())
-			throw new IllegalStateException("this drone has no virtual testbed");
+//		if (! this.hasVirtualTestbed())
+//			throw new IllegalStateException("this drone has no virtual testbed");
 		return this.inverseHeadingTransformation(this.inversePitchTransformation(
 				new ArrayRealVector(new double[] {0, 0, this.getRollAngularVelocity()}, false)));
 	}
@@ -885,11 +875,11 @@ public class Drone extends WorldObject implements Vector3d {
 	 * Normals of the Wings and Stabilizers
 	 */
 	public RealVector getNormalHor(float horInclination) {
-		return Vector3d.crossProduct(this.getAxisVectorHor(), this.getAttackVectorHor(horInclination));
+		return VectorMath.crossProduct(this.getAxisVectorHor(), this.getAttackVectorHor(horInclination));
 	}
 	
 	public RealVector getNormalVer(float verInclination) {
-		return Vector3d.crossProduct(this.getAxisVectorVer(), this.getAttackVectorVer(verInclination));
+		return VectorMath.crossProduct(this.getAxisVectorVer(), this.getAttackVectorVer(verInclination));
 	}
 	
 	/*
@@ -897,9 +887,9 @@ public class Drone extends WorldObject implements Vector3d {
 	 */
 	public RealVector getLiftForceLeftWing(float leftWingInclination) throws IllegalArgumentException {
 		RealVector distance = this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {-this.getWingX(), 0, 0}, false));
-		RealVector velocityWorldCoordinates = this.getVelocity().add(Vector3d.crossProduct(this.getHeadingAngularVelocityVector(), distance))
-				.add(Vector3d.crossProduct(this.getPitchAngularVelocityVector(), distance))
-				.add(Vector3d.crossProduct(this.getRollAngularVelocityVector(), distance));
+		RealVector velocityWorldCoordinates = this.getVelocity().add(VectorMath.crossProduct(this.getHeadingAngularVelocityVector(), distance))
+				.add(VectorMath.crossProduct(this.getPitchAngularVelocityVector(), distance))
+				.add(VectorMath.crossProduct(this.getRollAngularVelocityVector(), distance));
 		RealVector velocityDroneCoordinates = this.transformationToDroneCoordinates(velocityWorldCoordinates);
 		velocityDroneCoordinates.setEntry(0, 0);
 		RealVector projectedVelocity = this.transformationToWorldCoordinates(velocityDroneCoordinates);
@@ -915,9 +905,9 @@ public class Drone extends WorldObject implements Vector3d {
 	
 	public RealVector getLiftForceRightWing(float rightWingInclination) throws IllegalArgumentException {
 		RealVector distance = this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {this.getWingX(), 0, 0}, false));
-		RealVector velocityWorldCoordinates = this.getVelocity().add(Vector3d.crossProduct(this.getHeadingAngularVelocityVector(), distance))
-				.add(Vector3d.crossProduct(this.getPitchAngularVelocityVector(), distance))
-				.add(Vector3d.crossProduct(this.getRollAngularVelocityVector(), distance));
+		RealVector velocityWorldCoordinates = this.getVelocity().add(VectorMath.crossProduct(this.getHeadingAngularVelocityVector(), distance))
+				.add(VectorMath.crossProduct(this.getPitchAngularVelocityVector(), distance))
+				.add(VectorMath.crossProduct(this.getRollAngularVelocityVector(), distance));
 		RealVector velocityDroneCoordinates = this.transformationToDroneCoordinates(velocityWorldCoordinates);
 		velocityDroneCoordinates.setEntry(0, 0);
 		RealVector projectedVelocity = this.transformationToWorldCoordinates(velocityDroneCoordinates);
@@ -933,9 +923,9 @@ public class Drone extends WorldObject implements Vector3d {
 	
 	public RealVector getLiftForceHorStab(float horStabInclination) throws IllegalArgumentException {
 		RealVector distance = this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, this.getTailSize()}, false));
-		RealVector velocityWorldCoordinates = this.getVelocity().add(Vector3d.crossProduct(this.getHeadingAngularVelocityVector(), distance))
-				.add(Vector3d.crossProduct(this.getPitchAngularVelocityVector(), distance))
-				.add(Vector3d.crossProduct(this.getRollAngularVelocityVector(), distance));
+		RealVector velocityWorldCoordinates = this.getVelocity().add(VectorMath.crossProduct(this.getHeadingAngularVelocityVector(), distance))
+				.add(VectorMath.crossProduct(this.getPitchAngularVelocityVector(), distance))
+				.add(VectorMath.crossProduct(this.getRollAngularVelocityVector(), distance));
 		RealVector velocityDroneCoordinates = this.transformationToDroneCoordinates(velocityWorldCoordinates);
 		velocityDroneCoordinates.setEntry(0, 0);
 		RealVector projectedVelocity = this.transformationToWorldCoordinates(velocityDroneCoordinates);
@@ -951,9 +941,9 @@ public class Drone extends WorldObject implements Vector3d {
 	
 	public RealVector getLiftForceVerStab(float verStabInclination) throws IllegalArgumentException {
 		RealVector distance = this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, this.getTailSize()}, false));
-		RealVector velocityWorldCoordinates = this.getVelocity().add(Vector3d.crossProduct(this.getHeadingAngularVelocityVector(), distance))
-				.add(Vector3d.crossProduct(this.getPitchAngularVelocityVector(), distance))
-				.add(Vector3d.crossProduct(this.getRollAngularVelocityVector(), distance));
+		RealVector velocityWorldCoordinates = this.getVelocity().add(VectorMath.crossProduct(this.getHeadingAngularVelocityVector(), distance))
+				.add(VectorMath.crossProduct(this.getPitchAngularVelocityVector(), distance))
+				.add(VectorMath.crossProduct(this.getRollAngularVelocityVector(), distance));
 		RealVector velocityDroneCoordinates = this.transformationToDroneCoordinates(velocityWorldCoordinates);
 		velocityDroneCoordinates.setEntry(1, 0);
 		RealVector projectedVelocity = this.transformationToWorldCoordinates(velocityDroneCoordinates);
@@ -1010,24 +1000,39 @@ public class Drone extends WorldObject implements Vector3d {
 		RealVector angularMomentumDroneCoordinates = inertiaMatrix.operate(totalAngularVelocityDroneCoordinates);
 		
 		RealMatrix coefficients = 
-				new Array2DRowRealMatrix(new double[][] {{inertiaMatrixXX*Math.cos(this.getPitch())*Math.sin(this.getRoll()),
-					inertiaMatrixXX*Math.cos(this.getRoll()), 0},
-					{inertiaMatrixYY*Math.cos(this.getPitch())*Math.cos(this.getRoll()), -inertiaMatrixYY*Math.sin(this.getRoll()), 0}, 
-					{-inertiaMatrixZZ*Math.sin(this.getPitch()), 0, inertiaMatrixZZ}}, false);
+				new Array2DRowRealMatrix(new double[][] {
+					{inertiaMatrixXX * Math.cos(this.getPitch()) * Math.sin(this.getRoll()), inertiaMatrixXX * Math.cos(this.getRoll()), 0},
+					{inertiaMatrixYY * Math.cos(this.getPitch()) * Math.cos(this.getRoll()), -inertiaMatrixYY * Math.sin(this.getRoll()), 0}, 
+					{-inertiaMatrixZZ * Math.sin(this.getPitch()), 0, inertiaMatrixZZ}
+				}, false);
 		DecompositionSolver solver = new LUDecomposition(coefficients).getSolver();
 		
-		RealVector constants = Vector3d.crossProduct(new ArrayRealVector(new double[] {-this.getWingX(), 0, 0}, false), 
-				this.transformationToDroneCoordinates(this.getGravitationalForceWing().add(this.getLiftForceLeftWing(leftWingInclination))))
-				.add(Vector3d.crossProduct(new ArrayRealVector(new double[] {this.getWingX(), 0, 0}, false), 
-				this.transformationToDroneCoordinates(this.getGravitationalForceWing().add(this.getLiftForceRightWing(rightWingInclination)))))
-				.add(Vector3d.crossProduct(new ArrayRealVector(new double[] {0, 0, this.getTailSize()}, false), 
-				this.transformationToDroneCoordinates(this.getGravitationalForceTail().add(this.getLiftForceHorStab(horStabInclination))
-						.add(this.getLiftForceVerStab(verStabInclination)))))
-				.subtract(Vector3d.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates))
-				.subtract(inertiaMatrix.operate(this.transformationToDroneCoordinates(
-						Vector3d.crossProduct(this.getHeadingAngularVelocityVector(), this.getPitchAngularVelocityVector())
-						.add(Vector3d.crossProduct(this.getHeadingAngularVelocityVector().add(this.getPitchAngularVelocityVector()),
-								this.getRollAngularVelocityVector())))));
+		RealVector constants = 
+				VectorMath.crossProduct(
+					new ArrayRealVector(new double[] {-this.getWingX(), 0, 0}, false), 
+					this.transformationToDroneCoordinates(this.getGravitationalForceWing().add(this.getLiftForceLeftWing(leftWingInclination)))
+				)
+				.add(VectorMath.crossProduct(
+					new ArrayRealVector(new double[] {this.getWingX(), 0, 0}, false), 
+					this.transformationToDroneCoordinates(this.getGravitationalForceWing().add(this.getLiftForceRightWing(rightWingInclination)))
+				))
+				.add(VectorMath.crossProduct(
+					new ArrayRealVector(new double[] {0, 0, this.getTailSize()}, false), 
+					this.transformationToDroneCoordinates(
+						this.getGravitationalForceTail().add(this.getLiftForceHorStab(horStabInclination))
+						.add(this.getLiftForceVerStab(verStabInclination))
+					)
+				))
+				.subtract(VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates))
+				.subtract(inertiaMatrix.operate(
+					this.transformationToDroneCoordinates(
+						VectorMath.crossProduct(this.getHeadingAngularVelocityVector(), this.getPitchAngularVelocityVector())
+						.add(VectorMath.crossProduct(
+							this.getHeadingAngularVelocityVector().add(this.getPitchAngularVelocityVector()),
+							this.getRollAngularVelocityVector()
+						))
+					)
+				));
 		RealVector solution = solver.solve(constants);
 		
 		return new float[] {(float)solution.getEntry(0), (float)solution.getEntry(1), (float)solution.getEntry(2)};
