@@ -6,7 +6,9 @@ import org.joml.Vector3f;
 import org.joml.Vector3i;
 
 import java.io.*;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,7 +30,13 @@ public class OBJLoader {
     private ArrayList<Vector3f> vertices = new ArrayList<Vector3f>();
     private ArrayList<Vector2f> textureCoordinates = new ArrayList<Vector2f>();
     private ArrayList<Vector3f> normals = new ArrayList<Vector3f>();
-    private ArrayList<Vector3i> indices = new ArrayList<Vector3i>();
+
+    //TODO: ArrayList<Integer> can produce a large memory overhead if the model has many faces
+    //https://stackoverflow.com/questions/9037468/what-is-the-storage-cost-for-a-boxed-primitive-in-java
+    //Solution: dynamically growing arrays/buffers? multiple passes over the file, reading the faces in a second pass?
+    private ArrayList<Integer> vertexIndices = new ArrayList<Integer>();
+    private ArrayList<Integer> textureIndices = new ArrayList<Integer>();
+    private ArrayList<Integer> normalIndices = new ArrayList<Integer>();
 
     private OBJLoader(){ }
 
@@ -74,94 +82,65 @@ public class OBJLoader {
     }
 
     private void loadFace(String[] args){
-        //3 index values of the vertices that make up the new face
-        Vector3i faceVertexIndices = new Vector3i();
-
-        //3 texture index values that make up the new face
-        Vector3i faceTextureIndices = new Vector3i();
-        boolean faceTextureIndicesSpecified = false;
-
-        //3 normal index values that make up the new face
-        Vector3i faceNormalIndices = new Vector3i();
-        boolean faceNormalIndicesSpecified = false;
-
         for (int i = 0; i < args.length; i++){
             String[] coordParts = args[i].split("/");
 
             int vertexIndex = Integer.parseInt(coordParts[0]);
 
-            int textureIndex = -1;
+            int textureIndex = 0;
             if(coordParts.length >= 2 && !coordParts[1].equals("")){
-                faceTextureIndicesSpecified = true;
                 textureIndex = Integer.parseInt(coordParts[1]);
             }
 
-            int normalIndex = -1;
+            int normalIndex = 0;
             if(coordParts.length == 3){
-                faceNormalIndicesSpecified = true;
                 normalIndex = Integer.parseInt(coordParts[2]);
             }
 
-            faceVertexIndices.setComponent(i, vertexIndex);
-            faceTextureIndices.setComponent(i, textureIndex);
-            faceNormalIndices.setComponent(i, normalIndex);
-        }
-
-
-        indices.add(faceVertexIndices);
-        if(faceTextureIndicesSpecified){
-            if(faceVertexIndices.x != faceTextureIndices.x ||
-                    faceVertexIndices.y != faceTextureIndices.y ||
-                    faceVertexIndices.z != faceTextureIndices.z ){
-                //Can fix by implementing https://stackoverflow.com/a/23356738/915418
-                throw new RuntimeException("Models with seperate normal or texture indices are currently unsupported");
-            }
-        }
-        if(faceNormalIndicesSpecified){
-            if(faceVertexIndices.x != faceNormalIndices.x ||
-                    faceVertexIndices.y != faceNormalIndices.y ||
-                    faceVertexIndices.z != faceNormalIndices.z ){
-                //Can fix by implementing https://stackoverflow.com/a/23356738/915418
-                throw new RuntimeException("Models with seperate normal or texture indices are currently unsupported");
-            }
+            vertexIndices.add(vertexIndex);
+            textureIndices.add(textureIndex);
+            normalIndices.add(normalIndex);
         }
     }
 
     private Mesh buildModel(){
+        //This method uses the cheap and easy way to fix the 'multiple indices to one index' problem.
+        //Easy to implement and relatively cheap, but breaks if a vertex is associated with multiple texture/normal coordinates
+
         float[] vertexArray = linearizeVector3fList(vertices);
-        float[] textureCoordinatesArray = linearizeVector2fList(textureCoordinates);
-        float[] normalsArray = linearizeVector3fList(normals);
+        float[] textureArray = new float[vertices.size()*2];
+        float[] normalArray = new float[vertices.size()*3];
 
-        int[] faceIndexArray = linearizeVector3iList(indices);
+        int[] indexArray = new int[vertexIndices.size()];
+        for(int i = 0; i < vertexIndices.size(); i++){
+            indexArray[i] = vertexIndices.get(i)-1;
+        }
 
-        return Mesh.loadMesh(vertexArray, textureCoordinatesArray, normalsArray, faceIndexArray);
+        //Loop over indices
+        for(int i = 0; i < vertexIndices.size(); i++) {
+            int vertexIndex = vertexIndices.get(i)-1;
+            int textureIndex = textureIndices.get(i)-1;
+            int normalIndex = normalIndices.get(i)-1;
+
+            if(textureIndex != -1) {
+                textureArray[(vertexIndex * 2)] = textureCoordinates.get(textureIndex).x;
+                textureArray[(vertexIndex * 2) + 1] = textureCoordinates.get(textureIndex).y;
+            }
+
+            if(normalIndex != -1) {
+                normalArray[(vertexIndex * 3)] = normals.get(normalIndex).x;
+                normalArray[(vertexIndex * 3) + 1] = normals.get(normalIndex).y;
+                normalArray[(vertexIndex * 3) + 2] = normals.get(normalIndex).z;
+            }
+        }
+
+        return Mesh.loadMesh(vertexArray, textureArray, normalArray, indexArray);
     }
 
     private float[] linearizeVector3fList(List<Vector3f> vectors){
         float[] arr = new float[vectors.size()*3];
         for(int i = 0; i < vectors.size(); i++){
             Vector3f vector = vectors.get(i);
-            arr[(i*3)] = vector.x;
-            arr[(i*3)+1] = vector.y;
-            arr[(i*3)+2] = vector.z;
-        }
-        return arr;
-    }
-
-    private float[] linearizeVector2fList(List<Vector2f> vectors){
-        float[] arr = new float[vectors.size()*2];
-        for(int i = 0; i < vectors.size(); i++){
-            Vector2f vector = vectors.get(i);
-            arr[(i*2)] = vector.x;
-            arr[(i*2)+1] = vector.y;
-        }
-        return arr;
-    }
-
-    private int[] linearizeVector3iList(List<Vector3i> vectors){
-        int[] arr = new int[vectors.size()*3];
-        for(int i = 0; i < vectors.size(); i++){
-            Vector3i vector = vectors.get(i);
             arr[(i*3)] = vector.x;
             arr[(i*3)+1] = vector.y;
             arr[(i*3)+2] = vector.z;

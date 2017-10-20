@@ -32,11 +32,6 @@ public class ShaderProgram {
             throw new RuntimeException("Shader program failed to link:\n" + glGetProgramInfoLog(program));
         }
 
-        int posAttr = glGetAttribLocation(program, "vertexPos_modelspace");
-
-        glVertexAttribPointer(posAttr, 3, GL_FLOAT, false,0, 0);
-        glEnableVertexAttribArray(posAttr);
-
         return new ShaderProgram(program);
     }
 

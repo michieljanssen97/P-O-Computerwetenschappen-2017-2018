@@ -1,18 +1,22 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
+import be.kuleuven.cs.robijn.common.Camera;
 import be.kuleuven.cs.robijn.common.math.Vector3f;
 
-public class Camera {
+public class OpenGLCamera implements Camera {
 	private Vector3f position;
 	private Vector3f rotation;
 
+	private float fovHorizontal = (float)Math.PI/2f;
+	private float fovVertical = (float)Math.PI/2f;
+
 	// Initialize the camers's position and rotation.
-	public Camera() {
+	public OpenGLCamera() {
 		position = new Vector3f();
 		rotation = new Vector3f();
 	}
 
-	public Camera(Vector3f position, Vector3f rotation) {
+	public OpenGLCamera(Vector3f position, Vector3f rotation) {
 		this.position = position;
 		this.rotation = rotation;
 	}
@@ -46,5 +50,25 @@ public class Camera {
 	// Rotate the camera with a given amount.
 	public void moveRotation(float offsetX, float offsetY, float offsetZ) {
 		setRotation(position.translate(offsetX, offsetY, offsetZ));
+	}
+
+	@Override
+	public float getHorizontalFOV() {
+		return fovHorizontal;
+	}
+
+	@Override
+	public void setHorizontalFOV(float fov) {
+		this.fovHorizontal = fov;
+	}
+
+	@Override
+	public float getVerticalFOV() {
+		return fovVertical;
+	}
+
+	@Override
+	public void setVerticalFOV(float fov) {
+		this.fovVertical = fov;
 	}
 }

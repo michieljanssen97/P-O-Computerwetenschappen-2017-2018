@@ -1,7 +1,9 @@
 package be.kuleuven.cs.robijn;
 
-import be.kuleuven.cs.robijn.testbed.renderer.FrameBuffer;
-import be.kuleuven.cs.robijn.testbed.renderer.Renderer;
+import be.kuleuven.cs.robijn.common.*;
+import be.kuleuven.cs.robijn.common.math.Vector3f;
+import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
+import org.apache.commons.math3.linear.ArrayRealVector;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -17,21 +19,34 @@ public class App
 {
     public static void main( String[] args )
     {
-        testRenderer();
+        try {
+            testRenderer();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    private static void testRenderer(){
+    private static void testRenderer() throws Exception {
         System.out.println( "P&0 CW" );
-        Renderer renderer = Renderer.create();
-        int width = 400;
-        int height = 400;
-        FrameBuffer buffer = FrameBuffer.create(width, height);
-        renderer.renderWorld(null, null, buffer);
+        Renderer renderer = OpenGLRenderer.create();
+
+        int width = 4000;
+        int height = 4000;
+        FrameBuffer buffer = renderer.createFrameBuffer(width, height);
+
+        Camera camera = renderer.createCamera();
+        WorldObject world = new WorldObject();
+        Box box = new Box();
+        box.setRotation(new ArrayRealVector(new double[]{0, 0, (float)Math.PI/2f}, false));
+        box.setPosition(new ArrayRealVector(new double[]{0, 0, -6}, false));
+        world.addChild(box);
+
+        renderer.render(world, buffer, camera);
 
         BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
         byte[] imgBackingByteArray = ((DataBufferByte) img.getRaster().getDataBuffer()).getData();
 
-        buffer.read(imgBackingByteArray);
+        buffer.readPixels(imgBackingByteArray);
 
         try {
             ImageIO.write(img, "png", new File("test.png")); //Writes test.png to folder where java is running

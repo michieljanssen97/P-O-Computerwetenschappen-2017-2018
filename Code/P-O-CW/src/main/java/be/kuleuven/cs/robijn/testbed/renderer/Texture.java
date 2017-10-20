@@ -12,7 +12,7 @@ import static org.lwjgl.opengl.GL11.*;
 public class Texture implements AutoCloseable {
     private final int textureId;
 
-    public Texture load(BufferedImage img){
+    public static Texture load(BufferedImage img){
         //Copy pixel values to array of integers
         int[] pixels = new int[img.getWidth() * img.getHeight()];
         img.getRGB(0, 0, img.getWidth(), img.getHeight(), pixels, 0, img.getWidth());

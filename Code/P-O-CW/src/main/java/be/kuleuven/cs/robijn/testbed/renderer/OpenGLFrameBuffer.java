@@ -1,9 +1,8 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
+import be.kuleuven.cs.robijn.common.FrameBuffer;
 import org.lwjgl.BufferUtils;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -12,8 +11,8 @@ import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_COMPLETE;
 import static org.lwjgl.opengl.GL32.*;
 
-public class FrameBuffer implements AutoCloseable {
-    public static FrameBuffer create(int width, int height){
+public class OpenGLFrameBuffer implements FrameBuffer {
+    public static OpenGLFrameBuffer create(int width, int height){
         int fbo = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
@@ -29,7 +28,7 @@ public class FrameBuffer implements AutoCloseable {
         int bytesPerPixel = 3; //Because RGB
         ByteBuffer buf = BufferUtils.createByteBuffer(bytesPerPixel*width*height);
 
-        return new FrameBuffer(fbo, renderBuffer, width, height, bytesPerPixel, buf);
+        return new OpenGLFrameBuffer(fbo, renderBuffer, width, height, bytesPerPixel, buf);
     }
 
     private int frameBufferId;
@@ -39,7 +38,7 @@ public class FrameBuffer implements AutoCloseable {
     private int bytesPerPixel;
     private ByteBuffer buf;
 
-    private FrameBuffer(int frameBufferId, int renderBufferId, int width, int height, int bytesPerPixel, ByteBuffer buffer){
+    private OpenGLFrameBuffer(int frameBufferId, int renderBufferId, int width, int height, int bytesPerPixel, ByteBuffer buffer){
         this.frameBufferId = frameBufferId;
         this.renderBufferId = renderBufferId;
         this.width = width;
@@ -48,8 +47,21 @@ public class FrameBuffer implements AutoCloseable {
         this.buf = buffer;
     }
 
-    public void read(byte[] targetBuffer){
-        if(targetBuffer.length < width * height * bytesPerPixel){
+    public int getId(){
+        return frameBufferId;
+    }
+
+    public int getWidth(){
+        return width;
+    }
+
+    public int getHeight(){
+        return height;
+    }
+
+    @Override
+    public void readPixels(byte[] data) {
+        if(data.length < width * height * bytesPerPixel){
             throw new IllegalArgumentException("target buffer is too small");
         }
 
@@ -71,19 +83,7 @@ public class FrameBuffer implements AutoCloseable {
 
         //Move cursor in buffer back to the begin and copy the contents to the java image
         buf.position(0);
-        buf.get(targetBuffer);
-    }
-
-    public int getId(){
-        return frameBufferId;
-    }
-
-    public int getWidth(){
-        return width;
-    }
-
-    public int getHeight(){
-        return height;
+        buf.get(data);
     }
 
     @Override

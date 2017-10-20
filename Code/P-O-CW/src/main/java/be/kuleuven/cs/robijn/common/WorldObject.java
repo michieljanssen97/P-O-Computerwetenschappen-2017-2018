@@ -1,15 +1,16 @@
-package be.kuleuven.cs.robijn.testbed;
+package be.kuleuven.cs.robijn.common;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 
 public class WorldObject {
     private ArrayList<WorldObject> children = new ArrayList<>();
-    private RealVector position;
-    private RealVector rotation;
+    private RealVector position = new ArrayRealVector(new double[]{0, 0, 0}, false);
+    private RealVector rotation = new ArrayRealVector(new double[]{0, 0, 0}, false);
 
     /**
      * Returns an immutable list of the children of this object.

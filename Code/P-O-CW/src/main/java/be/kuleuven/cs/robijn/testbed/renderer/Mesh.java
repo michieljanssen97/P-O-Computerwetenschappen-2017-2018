@@ -1,7 +1,10 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
+import org.lwjgl.BufferUtils;
+
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL15.*;
@@ -28,7 +31,7 @@ public class Mesh implements AutoCloseable {
 
         //If any of the other arguments is null, make them an empty array instead (easier to work with)
         textureCoordinates = textureCoordinates == null ? new float[0] : textureCoordinates;
-        normals = normals == null ? new float[0] : textureCoordinates;
+        normals = normals == null ? new float[0] : normals;
 
         //Verify the dimensions of the arrays
         if(textureCoordinates.length % 2 != 0){
@@ -55,7 +58,7 @@ public class Mesh implements AutoCloseable {
         if(textureCoordinates.length != 0){
             textureCoordinatesBuffer = glGenBuffers();
             glBindBuffer(GL_ARRAY_BUFFER, textureCoordinatesBuffer);
-            glBufferData(textureCoordinatesBuffer, textureCoordinates, GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, textureCoordinates, GL_STATIC_DRAW);
             glVertexAttribPointer(1,2, GL_FLOAT,false, 0, 0);
             glEnableVertexAttribArray(1);
         }
@@ -73,7 +76,7 @@ public class Mesh implements AutoCloseable {
         //Create indices buffer
         int indicesBufferId = glGenBuffers();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesBufferId);
-        glBufferData(indicesBufferId, faceIndices, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, faceIndices, GL_STATIC_DRAW);
 
         //According to section "5.1.2 Automatic Unbinding of Deleted Objects" and 5.1.3 in the OpenGL spec,
         //you can 'delete' buffers, textures, renderbuffers, ... without actually removing them from GPU memory.
@@ -96,23 +99,23 @@ public class Mesh implements AutoCloseable {
             glDeleteBuffers(indicesBufferId);
         }
 
-        return new Mesh(vertexArrayId, vertexPositions.length/3);
+        return new Mesh(vertexArrayId, faceIndices.length);
     }
 
     private int vertexArrayObjectId;
-    private int vertexCount;
+    private int indexCount;
 
-    private Mesh(int vertexArrayObjectId, int vertexCount){
+    private Mesh(int vertexArrayObjectId, int indexCount){
         this.vertexArrayObjectId = vertexArrayObjectId;
-        this.vertexCount = vertexCount;
+        this.indexCount = indexCount;
     }
 
     public int getVertexArrayObjectId(){
         return vertexArrayObjectId;
     }
 
-    public int getVertexCount(){
-        return vertexCount;
+    public int getIndexCount(){
+        return indexCount;
     }
 
     @Override
