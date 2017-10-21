@@ -6,6 +6,7 @@ import org.lwjgl.BufferUtils;
 import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL12.GL_BGR;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_COMPLETE;
@@ -20,6 +21,11 @@ public class OpenGLFrameBuffer implements FrameBuffer {
         glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB8, width, height);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderBuffer);
+
+        int depthRenderBuffer = glGenRenderbuffers();
+        glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
             throw new RuntimeException("Frame buffer incomplete!");
@@ -79,7 +85,7 @@ public class OpenGLFrameBuffer implements FrameBuffer {
         //Make sure we write to the begin of the buffer
         buf.position(0);
         //Read frame from GPU to RAM
-        glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buf);
+        glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, buf);
 
         //Move cursor in buffer back to the begin and copy the contents to the java image
         buf.position(0);

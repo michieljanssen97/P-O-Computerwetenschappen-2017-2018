@@ -1,17 +1,11 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
-import be.kuleuven.cs.robijn.common.Camera;
-import be.kuleuven.cs.robijn.common.FrameBuffer;
-import be.kuleuven.cs.robijn.common.Renderer;
-import be.kuleuven.cs.robijn.common.Resources;
-import be.kuleuven.cs.robijn.common.WorldObject;
+import be.kuleuven.cs.robijn.common.*;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
-
-import java.io.Closeable;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
@@ -54,24 +48,39 @@ public class OpenGLRenderer implements Renderer {
 
         glfwMakeContextCurrent(windowHandle);
         GL.createCapabilities();
-        return new OpenGLRenderer(windowHandle);
+        OpenGLRenderer renderer = new OpenGLRenderer(windowHandle);
+        renderer.initializeModels();
+        return renderer;
     }
 
     private long windowHandle;
 
-    //Temp testing code
-    private Model model;
+    private Model droneModel = null;
+    private Model boxModel = null;
 
     private OpenGLRenderer(long windowHandle){
         this.windowHandle = windowHandle;
+    }
 
-        //Temp testing code
-        Mesh mesh = OBJLoader.loadFromResources("/models/drone/FRE.obj");
-        Shader vertexShader = Shader.compileVertexShader(Resources.loadTextResource("/shaders/vertex.glsl"));
-        Shader fragmentShader = Shader.compileFragmentShader(Resources.loadTextResource("/shaders/fragment.glsl"));
-        ShaderProgram program = ShaderProgram.link(vertexShader, fragmentShader);
-        Texture texture = Texture.load(Resources.loadImageResource("/models/drone/CIRRUSTS.JPG"));
-        model = new Model(mesh, texture, program);
+    private void initializeModels(){
+        //Load shader for textured models
+        Shader vertexShader = Shader.compileVertexShader(Resources.loadTextResource("/shaders/textured/vertex.glsl"));
+        Shader fragmentShader = Shader.compileFragmentShader(Resources.loadTextResource("/shaders/textured/fragment.glsl"));
+        ShaderProgram texturedProgram = ShaderProgram.link(vertexShader, fragmentShader);
+
+        //Load drone
+        Mesh droneMesh = OBJLoader.loadFromResources("/models/drone/drone.obj");
+        Texture texture = Texture.load(Resources.loadImageResource("/models/drone/texture.jpg"));
+        droneModel = new Model(droneMesh, texture, texturedProgram);
+
+        //Load shader for box model
+        vertexShader = Shader.compileVertexShader(Resources.loadTextResource("/shaders/box/vertex.glsl"));
+        fragmentShader = Shader.compileFragmentShader(Resources.loadTextResource("/shaders/box/fragment.glsl"));
+        ShaderProgram boxProgram = ShaderProgram.link(vertexShader, fragmentShader);
+
+        //Load cube
+        Mesh mesh = OBJLoader.loadFromResources("/models/cube/cube.obj");
+        boxModel = new Model(mesh, null, boxProgram);
     }
 
     @Override
@@ -89,15 +98,16 @@ public class OpenGLRenderer implements Renderer {
         glViewport(0, 0, buffer.getWidth(), buffer.getHeight());
         //Enable depth testing so we only see the faces oriented towards the camera.
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
         //Replace previous frame with a blank screen
         glClearColor(0.2f, 0.2f, 0.2f, 1f);
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
         //Setup per-camera matrices
-        //TODO: mirror image through transformation matrix?
         OpenGLCamera openglCamera = (OpenGLCamera)camera;
         Matrix4f viewMatrix = createViewMatrix(openglCamera);
-        Matrix4f projectionMatrix = createProjectionMatrix(openglCamera.getHorizontalFOV(), openglCamera.getVerticalFOV(), 1f, 10000f);
+        Matrix4f projectionMatrix = createProjectionMatrix(openglCamera.getHorizontalFOV(), openglCamera.getVerticalFOV(), 0.1f, 1000f);
         Matrix4f viewProjectionMatrix = new Matrix4f(projectionMatrix).mul(viewMatrix);
 
         //Render objects
@@ -111,6 +121,13 @@ public class OpenGLRenderer implements Renderer {
         for (WorldObject child : obj.getChildren()){
             renderChildren(child, viewProjectionMatrix);
         }
+
+        Model model = null;
+        if(obj instanceof Box){
+            model = boxModel;
+        }/*else if(obj instanceof Drone){
+            model = droneModel;
+        }*/
 
         //Setup per-object matrices
         Matrix4f modelMatrix = createModelMatrix(obj.getPosition(), obj.getRotation(), new ArrayRealVector(new double[]{1, 1, 1}, false));
@@ -162,6 +179,15 @@ public class OpenGLRenderer implements Renderer {
     private Matrix4f createViewMatrix(OpenGLCamera camera){
         Matrix4f viewMatrix = new Matrix4f();
         viewMatrix.identity();
+        //Reading the pixels from an OpenGL framebuffer results in an array of bytes that is backwards.
+        //For example:
+        //000111222      888777666
+        //333444555  =>  555444333
+        //666777888      222111000
+        //This means that RGB pixels become BGR pixels and that the image is flipped vertically and horizontally (rotate 180°)
+        //The colorspace issue is fixed in OpenGLFrameBuffer, and the flipped image is fixed here by rendering the world
+        //with the camera rotated 180° so that upon reading, the correct result is produced.
+        viewMatrix.rotate((float)Math.PI, 0, 0 , 1);
         viewMatrix.rotate(camera.getRotation().getX(), 1, 0 , 0);
         viewMatrix.rotate(camera.getRotation().getY(), 0, 1 , 0);
         viewMatrix.rotate(camera.getRotation().getZ(), 0, 0 , 1);
