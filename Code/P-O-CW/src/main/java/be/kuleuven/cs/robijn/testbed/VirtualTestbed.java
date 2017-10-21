@@ -39,7 +39,7 @@ public class VirtualTestbed extends WorldObject {
 		drone.setVelocity(velocity.add(acceleration.mapMultiply(dt)));
 		
 		float[] angularAccelerations = drone.getAngularAccelerations(inputs.getLeftWingInclination(),
-				inputs.getRightWingInclination(), inputs.getRightWingInclination(), inputs.getVerStabInclination());
+				inputs.getRightWingInclination(), inputs.getRightWingInclination(), inputs.getVerStabInclination(), inputs.getThrust());
 		float heading = drone.getHeading();
 		float headingAngularVelocity = drone.getHeadingAngularVelocity();
 		float headingAngularAcceleration = angularAccelerations[0];
