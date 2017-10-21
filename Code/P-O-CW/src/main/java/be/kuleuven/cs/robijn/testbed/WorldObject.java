@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.apache.commons.math3.linear.RealVector;
 
-public class WorldObject {
+public class WorldObject { //TODO implements AutoPilotConfig????
     private ArrayList<WorldObject> children = new ArrayList<>();
     private RealVector position;
     private RealVector rotation;
@@ -64,7 +64,7 @@ public class WorldObject {
     }
 
     /**
-     * Returns the position of this object, relative to its parent.
+     * Returns the position of this object, relative to its parent, in World Coordinates
      * @return a non-null vector that is immutable.
      */
     public RealVector getPosition() {
@@ -72,7 +72,7 @@ public class WorldObject {
     }
 
     /**
-     * Sets the position of this object relative to its parent.
+     * Sets the position of this object relative to its parent, in World Coordinates
      * @param vector the new position vector of this object. Must not be null.
      */
     public void setPosition(RealVector vector) {
