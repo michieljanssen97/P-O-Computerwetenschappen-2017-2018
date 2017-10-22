@@ -17,6 +17,8 @@ import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL32.GL_FIRST_VERTEX_CONVENTION;
+import static org.lwjgl.opengl.GL32.glProvokingVertex;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class OpenGLRenderer implements Renderer {
@@ -48,6 +50,9 @@ public class OpenGLRenderer implements Renderer {
 
         glfwMakeContextCurrent(windowHandle);
         GL.createCapabilities();
+
+        glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
+
         OpenGLRenderer renderer = new OpenGLRenderer(windowHandle);
         renderer.initializeModels();
         return renderer;
@@ -131,8 +136,8 @@ public class OpenGLRenderer implements Renderer {
 
         //Setup per-object matrices
         Matrix4f modelMatrix = createModelMatrix(obj.getPosition(), obj.getRotation(), new ArrayRealVector(new double[]{1, 1, 1}, false));
-        Matrix4f mvp = new Matrix4f(viewProjectionMatrix).mul(modelMatrix);
-        model.getShader().setUniformMatrix("mvp", false, mvp); //TODO: is this the best way to do this?
+        model.getShader().setUniformMatrix("viewProjectionTransformation", false, viewProjectionMatrix);
+        model.getShader().setUniformMatrix("modelTransformation", false, modelMatrix);
 
         //Bind object model mesh, texture, shader, ...
         glBindVertexArray(model.getMesh().getVertexArrayObjectId());
