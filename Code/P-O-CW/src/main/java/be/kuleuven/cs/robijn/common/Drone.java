@@ -2,7 +2,6 @@ package be.kuleuven.cs.robijn.common;
 
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
-import be.kuleuven.cs.robijn.testbed.*;
 import p_en_o_cw_2017.*;
 
 public class Drone extends WorldObject {
