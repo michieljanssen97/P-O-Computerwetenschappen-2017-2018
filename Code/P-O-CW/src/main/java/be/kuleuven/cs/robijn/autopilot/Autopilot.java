@@ -5,7 +5,6 @@ import org.apache.commons.math3.analysis.solvers.*;
 import org.apache.commons.math3.exception.*;
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.*;
-import be.kuleuven.cs.robijn.testbed.*;
 import p_en_o_cw_2017.*;
 
 public class Autopilot extends WorldObject implements AutoPilot {
@@ -19,10 +18,10 @@ public class Autopilot extends WorldObject implements AutoPilot {
 	public AutopilotOutputs update(AutopilotInputs input) {
 		Drone drone = this.getFirstChildOfType(Drone.class);
 		float horStabInclinationTemp = 0;
-		float verStabInclination = 0;
-		float leftWingInclination = 0;
-		float rightWingInclination = 0;
-		float thrust = 0;
+		float verStabInclinationTemp = 0;
+		float leftWingInclinationTemp = 0;
+		float rightWingInclinationTemp = 0;
+		float thrustTemp = drone.getMaxThrust();
 		float imageYRotation = 0;
 		float imageXRotation = 0;
 		float minDegrees = 1;
@@ -30,9 +29,9 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		if (bestInclination > drone.getMaxAOA())
 			bestInclination = drone.getMaxAOA();
 		if (imageYRotation > minDegrees)
-			verStabInclination =  bestInclination;
+			verStabInclinationTemp =  bestInclination;
 		else if (imageYRotation < -minDegrees)
-			verStabInclination = -bestInclination;
+			verStabInclinationTemp = -bestInclination;
 		if (imageXRotation > minDegrees)
 			horStabInclinationTemp = bestInclination;
 		else if (imageXRotation < -minDegrees)
@@ -65,14 +64,18 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
 		try {
 			double solution = solver.solve(100, function, 0.0, Math.PI/2);
-			rightWingInclination = (float) solution;
-			leftWingInclination = (float) solution;
+			rightWingInclinationTemp = (float) solution;
+			leftWingInclinationTemp = (float) solution;
 		} catch (TooManyEvaluationsException exc) {
-			leftWingInclination = bestInclination;
-			rightWingInclination = bestInclination;
+			leftWingInclinationTemp = bestInclination;
+			rightWingInclinationTemp = bestInclination;
 		}
-		if (drone.getVelocity().getNorm() > )
-			thrust = 0;
+		if (drone.getVelocity().getNorm() > (1000.0/3.6))
+			thrustTemp = 0;
+		final float thrust = thrustTemp;
+		final float leftWingInclination = leftWingInclinationTemp;
+		final float rightWingInclination = rightWingInclinationTemp;
+		final float verStabInclination = verStabInclinationTemp;
 		return new AutopilotOutputs() {
 			public float getThrust() {
 				return thrust;
