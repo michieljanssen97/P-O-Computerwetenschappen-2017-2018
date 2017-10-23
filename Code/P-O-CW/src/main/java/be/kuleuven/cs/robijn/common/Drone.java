@@ -57,30 +57,9 @@ public class Drone extends WorldObject {
 		if (! isValidVerStabLiftSlope(config.getVerStabLiftSlope()))
 			throw new IllegalArgumentException();
 		this.verStabLiftSlope = config.getVerStabLiftSlope();
-		//if (! isValidPosition(position))
-		//	throw new IllegalArgumentException();
-		//this.position = position;
 		if (! isValidVelocity(velocity))
 			throw new IllegalArgumentException();
 		this.velocity = velocity;
-		//if (! isValidHeading(heading))
-		//	throw new IllegalArgumentException();
-		//this.heading = heading;
-		//if (! isValidPitch(pitch))
-		//	throw new IllegalArgumentException();
-		//this.pitch = pitch;
-		//if (! isValidRoll(roll))
-		//	throw new IllegalArgumentException();
-		//this.roll = roll;
-		//if (! isValidHeadingAngularVelocity(headingAngularVelocity))
-		//	throw new IllegalArgumentException();
-		//this.headingAngularVelocity = headingAngularVelocity;
-		//if (! isValidPitchAngularVelocity(pitchAngularVelocity))
-		//	throw new IllegalArgumentException();
-		//this.pitchAngularVelocity = pitchAngularVelocity;
-		//if (! isValidRollAngularVelocity(rollAngularVelocity))
-		//	throw new IllegalArgumentException();
-		//this.rollAngularVelocity = rollAngularVelocity;
 	}
 	
     //     -----------------     //
@@ -367,56 +346,6 @@ public class Drone extends WorldObject {
 		this.roll = roll;
 	}
 	
-	
-    //  -----------------   //
-    //                      //
-    //    POSITION DRONE    //
-    //                      //
-    //  -----------------   //
-//	/**
-//	 * Variable registering the position of the center of mass of this drone.
-//	 */
-//	private RealVector position = new ArrayRealVector(new double[] { 0, 0, 0 }, false);
-	
-//	/**
-//	 * Return the position of the center of mass of this drone.
-//	 */
-//	public RealVector getPosition() {
-//		return this.position;
-//	}
-//	
-//	/**
-//	 * Check whether the given position is a valid position for
-//	 * any drone.
-//	 *  
-//	 * @param  position
-//	 *         The position to check.
-//	 * @return True if and only if the given position is effective.
-//	 *       | result == (position != null)
-//	*/
-//	public static boolean isValidPosition(RealVector position) {
-//		return (position != null);
-//	}
-//	
-//	/**
-//	 * Set the position of this drone to the given position.
-//	 * 
-//	 * @param  position
-//	 *         The new position for this drone.
-//	 * @post   The position of this new drone is equal to the given position.
-//	 *       | new.getWorldPosition() == position
-//	 * @throws IllegalArgumentException
-//	 *         The given position is not a valid position for any drone.
-//	 *       | ! isValidPosition(position)
-//	 */
-//	public void setPosition(RealVector position) 
-//			throws IllegalArgumentException {
-//		if (! isValidPosition(position))
-//			throw new IllegalArgumentException();
-//		this.position = position;
-//	}
-	
-	
     //  -----------------   //
     //                      //
     //    VELOCITY DRONE    //
@@ -600,109 +529,6 @@ public class Drone extends WorldObject {
 		this.rollAngularVelocity = rollAngularVelocity;
 	}
 
-	
-
-	
-    //  -----------------   //
-    //                      //
-    //    VIRTUAL TESTBED   //
-    //                      //
-    //  -----------------   //
-//	/**
-//	 * Variable referencing the virtual testbed of this drone.
-//	 */
-//	private VirtualTestbed virtualTestbed = null;
-//	
-//	/**
-//	 * Return the virtual testbed of this drone.
-//	 * A null reference is returned if this drone has no virtual testbed.
-//	 */
-//	public VirtualTestbed getVirtualTestbed() {
-//		return this.virtualTestbed;
-//	}
-//	
-//	/**
-//	 * Check whether this drone has a proper virtual testbed.
-//	 * 
-//	 * @return True if and only if the virtual testbed of this drone, if it is effective, in turn has this drone as
-//	 *         its drone.
-//	 *       | result == 
-//	 *       |   ((this.getVirtualTestbed() == null) || (this.getVirtualTestbed().getDrone() == this))
-//	 */
-//	public boolean hasProperVirtualTestbed() {
-//		return ((this.getVirtualTestbed() == null) || (this.getVirtualTestbed().getDrone() == this));
-//	}
-//	
-//	/**
-//	 * Check whether this drone has a virtual testbed.
-//	 * 
-//	 * @return True if this drone has an effective virtual testbed, false otherwise.
-//	 *       | result == (this.getVirtualTestbed() != null)
-//	 */
-//	public boolean hasVirtualTestbed() {
-//		return this.getVirtualTestbed() != null;
-//	}
-//	
-//	/**
-//	 * Add this drone to the given virtual testbed.
-//	 * 
-//	 * @param  virtualTestbed
-//	 *         The new virtual testbed for this drone.
-//	 * @post   The given virtual testbed is set as the virtual testbed of this drone.
-//	 *       | new.getVirtualTestbed() == virtualTestbed
-//	 * @post   This drone is set as the drone of the given virtual testbed.
-//	 *       | (new virtualTestbed).getDrone() == this
-//	 * @throws NullPointerException
-//	 *         The given virtual testbed is not effective.
-//	 *       | virtualTestbed == null
-//	 * @throws IllegalStateException
-//	 *         This drone has already a virtual testbed.
-//	 *       | this.hasVirtualTestbed()
-//	 */
-//	public void addVirtualTestbed(VirtualTestbed virtualTestbed) 
-//			throws NullPointerException, IllegalStateException {
-//		if (virtualTestbed == null)
-//			throw new NullPointerException();
-//		if (this.hasVirtualTestbed())
-//			throw new IllegalStateException("Each drone is located in at most one vitual testbed");
-//		setVirtualTestbed(virtualTestbed);
-//		virtualTestbed.addDrone(this);
-//	}
-//	
-//	/**
-//	 * Remove this drone from its virtual testbed, if any.
-//	 * 
-//	 * @post This drone has no longer a virtual testbed.
-//	 *     | ! new.hasVirtualTestbed()
-//	 * @post The former virtual testbed of this drone, if any, has no longer this drone
-//	 *       as its drone.
-//	 *     | if (this.hasVirtualTestbed())
-//	 *     |   then (new (this.getVirtualTestbed())).getDrone != this
-//	 */
-//	public void removeVirtualTestbed() {
-//		try {
-//			VirtualTestbed virtualTestbed = this.getVirtualTestbed();
-//			this.setVirtualTestbed(null);
-//			virtualTestbed.removeDrone(this);
-//		} catch (NullPointerException exc) {
-//			assert (! this.hasVirtualTestbed());
-//		}
-//	}
-//	
-//	/**
-//	 * Add the given virtual testbed as the virtual testbed of this drone.
-//	 * 
-//	 * @param virtualTestbed
-//	 *        The virtual testbed to be added as the virtual testbed of this drone.
-//	 * @post  The virtual testbed of this drone is the same as the given virtual testbed.
-//	 *      | new.getVirtualTestbed() == virtualTestbed
-//	 *        
-//	 */
-//	protected void setVirtualTestbed(VirtualTestbed virtualTestbed) {
-//		this.virtualTestbed = virtualTestbed;
-//	}
-
-	
     //     -----------------      //
     //                            //
     //  TRANSFORMATION MATRICES   //				WORLD TO DRONE COORDINATES
@@ -1215,15 +1041,10 @@ public class Drone extends WorldObject {
 							   new ArrayRealVector(new double[] {0, 0, this.getTailSize()}, false), //distance
 							   this.transformationToDroneCoordinates(this.getGravitationalForceTail().add(this.getLiftForceHorStab(horStabInclination)).add(this.getLiftForceVerStab(verStabInclination))) //forces
 							   );
-//		RealVector momentOnEngine = VectorMath.crossProduct(
-//									new ArrayRealVector(new double[] {0, 0, -this.getEngineDistance()}, false), //distance
-//									this.transformationToDroneCoordinates(new ArrayRealVector(new double[] {0, 0, -thrust}, false)) //force
-//									);
 		
 		RealVector constants =  momentOnLeftWing
 								.add(momentOnRightWing)
 								.add(momentOnTail)
-								//.add(momentOnEngine)
 								.subtract(VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates))
 								.subtract(inertiaMatrix.operate(
 									this.transformationToDroneCoordinates(
