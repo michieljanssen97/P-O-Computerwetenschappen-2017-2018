@@ -3,6 +3,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import math.Vector3f;
+
 
 import javax.imageio.ImageIO;
 

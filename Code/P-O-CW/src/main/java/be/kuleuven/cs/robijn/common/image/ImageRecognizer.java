@@ -1,5 +1,7 @@
 package image;
 
+import math.Vector3f;
+
 public class ImageRecognizer {
 	
 	public ImageRecognizer(){
