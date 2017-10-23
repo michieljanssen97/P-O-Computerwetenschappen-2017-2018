@@ -404,7 +404,7 @@ public class Drone extends WorldObject {
 //	 * @param  position
 //	 *         The new position for this drone.
 //	 * @post   The position of this new drone is equal to the given position.
-//	 *       | new.getPosition() == position
+//	 *       | new.getWorldPosition() == position
 //	 * @throws IllegalArgumentException
 //	 *         The given position is not a valid position for any drone.
 //	 *       | ! isValidPosition(position)
@@ -888,7 +888,7 @@ public class Drone extends WorldObject {
 	 * Return to position of the Left Wing of the drone in World Coordinates
 	 */
 	public RealVector getLeftWingPosition() {
-		return this.getPosition().add(this.transformationToWorldCoordinates(
+		return this.getWorldPosition().add(this.transformationToWorldCoordinates(
 				new ArrayRealVector(new double[] {-this.getWingX(), 0, 0}, false)));
 	}
 	
@@ -896,7 +896,7 @@ public class Drone extends WorldObject {
 	 * Return to position of the Right Wing of the drone in World Coordinates
 	 */
 	public RealVector getRightWingPosition() {
-		return this.getPosition().add(this.transformationToWorldCoordinates(
+		return this.getWorldPosition().add(this.transformationToWorldCoordinates(
 				new ArrayRealVector(new double[] {this.getWingX(), 0, 0}, false)));
 	}
 	
@@ -904,7 +904,7 @@ public class Drone extends WorldObject {
 	 * Return to position of the tail (Horizontal and Vertical Stabilizer) of the drone in World Coordinates
 	 */
 	public RealVector getTailPosition() {
-		return this.getPosition().add(this.transformationToWorldCoordinates(
+		return this.getWorldPosition().add(this.transformationToWorldCoordinates(
 				new ArrayRealVector(new double[] {0, 0, this.getTailSize()}, false)));
 	}
 	
@@ -912,7 +912,7 @@ public class Drone extends WorldObject {
 	 * Return to position of the Engine of the drone in World Coordinates
 	 */
 	public RealVector getEnginePosition() {
-		return this.getPosition().add(this.transformationToWorldCoordinates(
+		return this.getWorldPosition().add(this.transformationToWorldCoordinates(
 				new ArrayRealVector(new double[] {0, 0, -this.getEngineDistance()}, false)));
 	}
 	

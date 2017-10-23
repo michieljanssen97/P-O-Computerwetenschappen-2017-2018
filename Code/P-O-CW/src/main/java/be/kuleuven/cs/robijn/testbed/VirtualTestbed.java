@@ -30,12 +30,12 @@ public class VirtualTestbed extends WorldObject {
 		Drone drone = this.getFirstChildOfType(Drone.class);
 		if (drone == null)
 			throw new IllegalStateException("this virtual testbed has no drone");
-		RealVector position = drone.getPosition();
+		RealVector position = drone.getWorldPosition();
 		RealVector velocity = drone.getVelocity();
 		RealVector acceleration = drone.getAcceleration(inputs.getThrust(),
 				inputs.getLeftWingInclination(), inputs.getRightWingInclination(), inputs.getRightWingInclination(), inputs.getVerStabInclination());
 		
-		drone.setPosition(position.add(velocity.mapMultiply(dt)).add(acceleration.mapMultiply(Math.pow(dt, 2)/2)));
+		drone.setRelativePosition(position.add(velocity.mapMultiply(dt)).add(acceleration.mapMultiply(Math.pow(dt, 2)/2)));
 		drone.setVelocity(velocity.add(acceleration.mapMultiply(dt)));
 		
 		float[] angularAccelerations = drone.getAngularAccelerations(inputs.getLeftWingInclination(),
