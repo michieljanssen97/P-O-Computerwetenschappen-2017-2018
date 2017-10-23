@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.apache.commons.math3.linear.RealVector;
 
-public class WorldObject { //TODO implements AutoPilotConfig????
+public class WorldObject {
     private ArrayList<WorldObject> children = new ArrayList<>();
     private RealVector position;
     private RealVector rotation;
