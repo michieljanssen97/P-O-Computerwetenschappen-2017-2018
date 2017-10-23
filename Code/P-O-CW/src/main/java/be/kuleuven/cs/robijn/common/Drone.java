@@ -887,7 +887,7 @@ public class Drone extends WorldObject {
 	/**
 	 * Return to position of the Left Wing of the drone in World Coordinates
 	 */
-	public RealVector getLeftWingPosition() { //TODO is getPosition in world coordinates????
+	public RealVector getLeftWingPosition() {
 		return this.getPosition().add(this.transformationToWorldCoordinates(
 				new ArrayRealVector(new double[] {-this.getWingX(), 0, 0}, false)));
 	}
@@ -1215,15 +1215,15 @@ public class Drone extends WorldObject {
 							   new ArrayRealVector(new double[] {0, 0, this.getTailSize()}, false), //distance
 							   this.transformationToDroneCoordinates(this.getGravitationalForceTail().add(this.getLiftForceHorStab(horStabInclination)).add(this.getLiftForceVerStab(verStabInclination))) //forces
 							   );
-		RealVector momentOnEngine = VectorMath.crossProduct(
-									new ArrayRealVector(new double[] {0, 0, -this.getEngineDistance()}, false), //distance //TODO ik heb dit toegevoegd omdat het nodig was denk ik
-									this.transformationToDroneCoordinates(new ArrayRealVector(new double[] {0, 0, -thrust}, false)) //force
-									);
+//		RealVector momentOnEngine = VectorMath.crossProduct(
+//									new ArrayRealVector(new double[] {0, 0, -this.getEngineDistance()}, false), //distance
+//									this.transformationToDroneCoordinates(new ArrayRealVector(new double[] {0, 0, -thrust}, false)) //force
+//									);
 		
 		RealVector constants =  momentOnLeftWing
 								.add(momentOnRightWing)
 								.add(momentOnTail)
-								.add(momentOnEngine)
+								//.add(momentOnEngine)
 								.subtract(VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates))
 								.subtract(inertiaMatrix.operate(
 									this.transformationToDroneCoordinates(
