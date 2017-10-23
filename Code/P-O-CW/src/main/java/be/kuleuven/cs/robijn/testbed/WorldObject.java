@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import be.kuleuven.cs.robijn.common.math.Vector3f;
 import org.apache.commons.math3.linear.RealVector;
 
 public class WorldObject {
