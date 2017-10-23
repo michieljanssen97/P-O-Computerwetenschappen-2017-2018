@@ -6,7 +6,8 @@ import java.util.List;
 
 import org.apache.commons.math3.linear.RealVector;
 
-public class WorldObject { //TODO implements AutoPilotConfig????
+public class WorldObject {
+    private WorldObject parent;
     private ArrayList<WorldObject> children = new ArrayList<>();
     private RealVector position;
     private RealVector rotation;
@@ -46,8 +47,12 @@ public class WorldObject { //TODO implements AutoPilotConfig????
         if(obj == null){
             throw new IllegalArgumentException("obj cannot be null");
         }
+        if(obj.parent != null){
+            throw new IllegalArgumentException("obj already has a parent");
+        }
 
         children.add(obj);
+        obj.parent = this;
     }
 
     /**
@@ -60,22 +65,47 @@ public class WorldObject { //TODO implements AutoPilotConfig????
             throw new IllegalArgumentException("obj cannot be null");
         }
 
-        return children.remove(obj);
+        if(children.remove(obj)){
+            obj.parent = null;
+            return true;
+        }
+        return false;
     }
 
     /**
-     * Returns the position of this object, relative to its parent, in World Coordinates
+     * Returns the WorldObject of which this object is the child.
+     * Returns null if this has no parent.
+     */
+    public WorldObject getParent() {
+        return parent;
+    }
+
+    /**
+     * Returns the position of this object in world coordinates.
      * @return a non-null vector that is immutable.
      */
-    public RealVector getPosition() {
-    	return RealVector.unmodifiableRealVector(position);
+    public RealVector getWorldPosition() {
+        if(parent == null){
+            return getRelativePosition();
+        }
+
+        RealVector worldPosition = parent.getWorldPosition().add(this.getRelativePosition());
+        return RealVector.unmodifiableRealVector(worldPosition);
     }
 
     /**
-     * Sets the position of this object relative to its parent, in World Coordinates
+     * Returns the position of this object, relative to its parent.
+     * @return a non-null vector that is immutable.
+     */
+    public RealVector getRelativePosition() {
+        return RealVector.unmodifiableRealVector(position);
+    }
+
+    /**
+     * Sets the position of this object relative to its parent.
      * @param vector the new position vector of this object. Must not be null.
      */
-    public void setPosition(RealVector vector) {
+    public void setRelativePosition(RealVector vector) {
         if(vector == null){
             throw new IllegalArgumentException("vector cannot be null");
         }

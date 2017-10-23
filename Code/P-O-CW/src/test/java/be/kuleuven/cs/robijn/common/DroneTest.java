@@ -120,13 +120,13 @@ public class DroneTest extends TestCase {
 	
 	public void testPosition() {
 		RealVector pos = new ArrayRealVector(new double[] {4,7,5},false); //Valid value
-		drone.setPosition(pos);
-		assertTrue(pos.equals(drone.getPosition()));
+		drone.setRelativePosition(pos);
+		assertTrue(pos.equals(drone.getWorldPosition()));
 		
 		RealVector pos2 = null; //Invalid value
 		boolean thrown = false;
 		try {
-			drone.setPosition(pos2);
+			drone.setRelativePosition(pos2);
 		}
 		catch(IllegalArgumentException e) {
 			thrown=true;
