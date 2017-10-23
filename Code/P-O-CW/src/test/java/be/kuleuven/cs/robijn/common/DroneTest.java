@@ -1,14 +1,13 @@
 package be.kuleuven.cs.robijn.common;
 
-import static org.junit.Assert.*;
 
 import org.apache.commons.math3.linear.*;
-import org.junit.Test;
 
 import be.kuleuven.cs.robijn.common.Drone;
+import junit.framework.TestCase;
 import p_en_o_cw_2017.AutopilotConfig;
 
-public class DroneTest {
+public class DroneTest extends TestCase {
 	
 	float wingX = 4;
 	float tailSize = 6;
@@ -52,7 +51,6 @@ public class DroneTest {
 	/**
 	 * Test the getters of the drone's attributes
 	 */
-	@Test
 	public void testDroneConfiguration() {
 		assertEquals(wingX, drone.getWingX(), 0.00001);
 		assertEquals(tailSize, drone.getTailSize(), 0.00001);
@@ -68,7 +66,7 @@ public class DroneTest {
 	}
 	
 	
-	@Test
+	
 	public void testHeading() {
 		float heading = (float) Math.PI; //Valid value
 		drone.setHeading(heading);
@@ -83,7 +81,7 @@ public class DroneTest {
 		}
 	}
 	
-	@Test
+	
 	public void testPitch() {
 		float pitch = (float) Math.PI; //Valid value
 		drone.setPitch(pitch);
@@ -98,7 +96,7 @@ public class DroneTest {
 		}
 	}
 	
-	@Test
+	
 	public void testRoll() {
 		float roll = (float) Math.PI; //Valid value
 		drone.setRoll(roll);
@@ -113,7 +111,7 @@ public class DroneTest {
 		}
 	}
 	
-	@Test
+	
 	public void testPosition() {
 		RealVector pos = new ArrayRealVector(new double[] {4,7,5},false); //Valid value
 		drone.setPosition(pos);
@@ -128,7 +126,7 @@ public class DroneTest {
 		}
 	}
 	
-	@Test
+	
 	public void testVelocity() {
 		RealVector velocity =  new ArrayRealVector(new double[] {5,8,6}, false); //Valid value
 		drone.setVelocity(velocity);
@@ -143,7 +141,7 @@ public class DroneTest {
 		}
 	}
 	
-	@Test
+	
 	public void testRollTransformation() {
 		RealVector position = new ArrayRealVector(new double[] {-2.6337,-0.47158,-1.2795});
 		assertTrue(position.equals(drone.transformationToWorldCoordinates(drone.transformationToDroneCoordinates(position))));
@@ -160,7 +158,7 @@ public class DroneTest {
     /*
      * test the transformation matrices
      */	
-    @Test
+    
     public void testTransformationMatrices() {
 		drone.setRoll((float) Math.PI/3);
 		drone.setHeading((float) Math.PI/4);
