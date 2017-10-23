@@ -25,6 +25,37 @@ public class VirtualTestbed extends WorldObject {
 	 *         drone == null
 	 */
 	public void moveDrone(float dt, AutopilotOutputs inputs) throws IllegalArgumentException, IllegalStateException {
-		throw new RuntimeException("Not implemented.");
+		if (dt < 0)
+			throw new IllegalArgumentException();
+		Drone drone = this.getFirstChildOfType(Drone.class);
+		if (drone == null)
+			throw new IllegalStateException("this virtual testbed has no drone");
+		RealVector position = drone.getWorldPosition();
+		RealVector velocity = drone.getVelocity();
+		RealVector acceleration = drone.getAcceleration(inputs.getThrust(),
+				inputs.getLeftWingInclination(), inputs.getRightWingInclination(), inputs.getRightWingInclination(), inputs.getVerStabInclination());
+		
+		drone.setRelativePosition(position.add(velocity.mapMultiply(dt)).add(acceleration.mapMultiply(Math.pow(dt, 2)/2)));
+		drone.setVelocity(velocity.add(acceleration.mapMultiply(dt)));
+		
+		float[] angularAccelerations = drone.getAngularAccelerations(inputs.getLeftWingInclination(),
+				inputs.getRightWingInclination(), inputs.getRightWingInclination(), inputs.getVerStabInclination(), inputs.getThrust());
+		float heading = drone.getHeading();
+		float headingAngularVelocity = drone.getHeadingAngularVelocity();
+		float headingAngularAcceleration = angularAccelerations[0];
+		float pitch = drone.getPitch();
+		float pitchAngularVelocity = drone.getPitchAngularVelocity();
+		float pitchAngularAcceleration = angularAccelerations[1];
+		float roll = drone.getRoll();
+		float rollAngularVelocity = drone.getRollAngularVelocity();
+		float rollAngularAcceleration = angularAccelerations[2];
+		
+		drone.setHeading((float)(heading + headingAngularVelocity*dt + headingAngularAcceleration*(Math.pow(dt, 2)/2)));
+		drone.setPitch((float)(pitch + pitchAngularVelocity*dt + pitchAngularAcceleration*(Math.pow(dt, 2)/2)));
+		drone.setRoll((float)(roll + rollAngularVelocity*dt + rollAngularAcceleration*(Math.pow(dt, 2)/2)));
+		
+		drone.setHeadingAngularVelocity(headingAngularVelocity + headingAngularAcceleration*dt);
+		drone.setPitchAngularVelocity(pitchAngularVelocity + pitchAngularAcceleration*dt);
+		drone.setRollAngularVelocity(rollAngularVelocity + rollAngularAcceleration*dt);
 	}
 }
