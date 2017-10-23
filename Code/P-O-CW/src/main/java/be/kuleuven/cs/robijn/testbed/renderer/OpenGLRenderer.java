@@ -135,7 +135,7 @@ public class OpenGLRenderer implements Renderer {
         }*/
 
         //Setup per-object matrices
-        Matrix4f modelMatrix = createModelMatrix(obj.getPosition(), obj.getRotation(), new ArrayRealVector(new double[]{1, 1, 1}, false));
+        Matrix4f modelMatrix = createModelMatrix(obj.getWorldPosition(), obj.getRotation(), new ArrayRealVector(new double[]{1, 1, 1}, false));
         model.getShader().setUniformMatrix("viewProjectionTransformation", false, viewProjectionMatrix);
         model.getShader().setUniformMatrix("modelTransformation", false, modelMatrix);
 

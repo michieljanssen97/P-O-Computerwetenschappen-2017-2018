@@ -38,7 +38,7 @@ public class App
         WorldObject world = new WorldObject();
         Box box = new Box();
         box.setRotation(new ArrayRealVector(new double[]{0, 0, (float)Math.PI/2f}, false));
-        box.setPosition(new ArrayRealVector(new double[]{0, 0, -6}, false));
+        box.setRelativePosition(new ArrayRealVector(new double[]{0, 0, -6}, false));
         world.addChild(box);
 
         renderer.render(world, buffer, camera);
