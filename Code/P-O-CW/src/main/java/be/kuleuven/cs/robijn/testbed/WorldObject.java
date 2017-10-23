@@ -94,7 +94,7 @@ public class WorldObject {
     }
 
     /**
-     * Returns the position of this object, relative to its parent, in World Coordinates
+     * Returns the position of this object, relative to its parent.
      * @return a non-null vector that is immutable.
      */
     public RealVector getRelativePosition() {
@@ -102,7 +102,7 @@ public class WorldObject {
     }
 
     /**
-     * Sets the position of this object relative to its parent, in World Coordinates
+     * Sets the position of this object relative to its parent.
      * @param vector the new position vector of this object. Must not be null.
      */
     public void setRelativePosition(RealVector vector) {
