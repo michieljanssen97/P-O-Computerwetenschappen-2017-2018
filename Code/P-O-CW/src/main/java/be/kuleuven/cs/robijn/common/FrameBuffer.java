@@ -3,7 +3,7 @@ package be.kuleuven.cs.robijn.common;
 /**
  * Represents a buffer that contains the pixels produced by the renderer
  */
-public interface FrameBuffer {
+public interface FrameBuffer extends AutoCloseable {
     /**
      * Returns the width of the image stored in the framebuffer, in pixels
      */
