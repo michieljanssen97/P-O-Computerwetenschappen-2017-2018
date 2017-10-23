@@ -73,12 +73,14 @@ public class DroneTest extends TestCase {
 		assertEquals(heading, drone.getHeading(), 0.00001);
 		
 		float heading2 = (float) (3*Math.PI); //Invalid value
+		boolean thrown = false;
 		try{
 			drone.setHeading(heading2);
 		}
 		catch (IllegalArgumentException e) {
-			//Is ok
+			thrown=true;
 		}
+		assertTrue(thrown);
 	}
 	
 	
@@ -88,12 +90,14 @@ public class DroneTest extends TestCase {
 		assertEquals(pitch, drone.getPitch(), 0.00001);
 		
 		float pitch2 = (float) (3*Math.PI); //Invalid value
+		boolean thrown = false;
 		try{
 			drone.setPitch(pitch2);
 		}
 		catch (IllegalArgumentException e) {
-			//Is ok
+			thrown=true;
 		}
+		assertTrue(thrown);
 	}
 	
 	
@@ -103,12 +107,14 @@ public class DroneTest extends TestCase {
 		assertEquals(roll, drone.getRoll(), 0.00001);
 		
 		float roll2 = (float) (3*Math.PI); //Invalid value
+		boolean thrown = false;
 		try{
 			drone.setRoll(roll2);
 		}
 		catch (IllegalArgumentException e) {
-			//Is ok
+			thrown=true;
 		}
+		assertTrue(thrown);
 	}
 	
 	
@@ -118,12 +124,14 @@ public class DroneTest extends TestCase {
 		assertTrue(pos.equals(drone.getPosition()));
 		
 		RealVector pos2 = null; //Invalid value
+		boolean thrown = false;
 		try {
 			drone.setPosition(pos2);
 		}
 		catch(IllegalArgumentException e) {
-			//Is ok
+			thrown=true;
 		}
+		assertTrue(thrown);
 	}
 	
 	
@@ -133,14 +141,15 @@ public class DroneTest extends TestCase {
 		assertTrue(velocity.equals(drone.getVelocity()));
 		
 		RealVector velocity2 = null; //Invalid value
+		boolean thrown = false;
 		try {
 			drone.setVelocity(velocity2);
 		}
 		catch(IllegalArgumentException e) {
-			//Is ok
+			thrown=true;
 		}
+		assertTrue(thrown);
 	}
-	
 	
 	public void testRollTransformation() {
 		RealVector position = new ArrayRealVector(new double[] {-2.6337,-0.47158,-1.2795});
