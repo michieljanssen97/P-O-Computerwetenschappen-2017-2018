@@ -6,8 +6,7 @@ import org.apache.commons.math3.linear.*;
 import org.junit.Test;
 
 import be.kuleuven.cs.robijn.common.Drone;
-import be.kuleuven.cs.robijn.common.math.Vector3f;
-import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
+import p_en_o_cw_2017.AutopilotConfig;
 
 public class DroneTest {
 	
@@ -22,10 +21,33 @@ public class DroneTest {
 	float horStabLiftSlope = 10;
 	float verStabLiftSlope = 10;
 	RealVector velocity = new ArrayRealVector(new double[] {20,20,20},false);
-	VirtualTestbed vtestbed = new VirtualTestbed();
+	float horAngleOfView = (float) (Math.PI/3);
+	float verAngleOfView = (float) (Math.PI/3);
+	int nbColumns = 120;
+	int nbRows = 120;
 	
-	Drone drone = new Drone(wingX, tailSize, engineMass, wingMass, tailMass, maxThrust, maxAOA, wingLiftSlope
-			, horStabLiftSlope, verStabLiftSlope, velocity, vtestbed);
+	
+	public AutopilotConfig createAutopilotConfig() {
+	    return new AutopilotConfig() {
+	        public float getGravity() { return (float) 9.81; }
+	        public float getWingX() { return wingX; }
+	        public float getTailSize() { return tailSize; }
+	        public float getEngineMass() { return engineMass; }
+	        public float getWingMass() { return wingMass; }
+	        public float getTailMass() { return tailMass; }
+	        public float getMaxThrust() { return maxThrust; }
+	        public float getMaxAOA() { return maxAOA; }
+	        public float getWingLiftSlope() { return wingLiftSlope; }
+	        public float getHorStabLiftSlope() { return horStabLiftSlope; }
+	        public float getVerStabLiftSlope() { return verStabLiftSlope; }
+	        public float getHorizontalAngleOfView() { return horAngleOfView; }
+	        public float getVerticalAngleOfView() { return verAngleOfView; }
+	        public int getNbColumns() { return nbColumns; }
+	        public int getNbRows() { return nbRows; }
+	    };
+	}
+	
+	Drone drone = new Drone(createAutopilotConfig(), velocity);
 	
 	/**
 	 * Test the getters of the drone's attributes
