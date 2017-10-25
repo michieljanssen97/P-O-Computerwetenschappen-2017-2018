@@ -1,4 +1,4 @@
-package image;
+package be.kuleuven.cs.robijn.common.image;
 
 /**
  * A class that represents the pixels of an image.
