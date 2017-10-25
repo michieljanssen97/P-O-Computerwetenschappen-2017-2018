@@ -5,7 +5,14 @@ import be.kuleuven.cs.robijn.common.math.*;
 import junit.framework.*;
 import p_en_o_cw_2017.*;
 
+/**
+ * A class with tests for the class Drone.
+ * 
+ * @author Pieter Vandensande en Roy De Prins
+ */
 public class DroneTest extends TestCase {
+	
+	private static final double EPSILON = 0.0001;
 	
 	private static float wingX = 4;
 	private static float tailSize = 6;
@@ -41,7 +48,7 @@ public class DroneTest extends TestCase {
     };
 	private static Drone drone = new Drone(config, velocity);
 	
-	public final void extendedConstructor_LegalCase() throws Exception {
+	public final void testExtendedConstructor_LegalCase() throws Exception {
 		float wingX = 4;
 		float tailSize = 6;
 		float engineMass = 20;
@@ -89,10 +96,10 @@ public class DroneTest extends TestCase {
 		assertTrue(VectorMath.fuzzyEquals(velocity, drone1.getVelocity()));
 	}
 	
-	public void testHeading() {
+	public final void testSetHeading_LegalCase_IllegalCase() {
 		float heading = (float) Math.PI; //Valid value
 		drone.setHeading(heading);
-		assertEquals(heading, drone.getHeading(), 0.00001);
+		assertEquals(heading, drone.getHeading(), EPSILON);
 		
 		float heading2 = (float) (3*Math.PI); //Invalid value
 		boolean thrown = false;
@@ -106,10 +113,10 @@ public class DroneTest extends TestCase {
 	}
 	
 	
-	public void testPitch() {
+	public final void testSetPitch_LegalCase_IllegalCase() {
 		float pitch = (float) Math.PI; //Valid value
 		drone.setPitch(pitch);
-		assertEquals(pitch, drone.getPitch(), 0.00001);
+		assertEquals(pitch, drone.getPitch(), EPSILON);
 		
 		float pitch2 = (float) (3*Math.PI); //Invalid value
 		boolean thrown = false;
@@ -123,7 +130,7 @@ public class DroneTest extends TestCase {
 	}
 	
 	
-	public void testRoll() {
+	public final void testSetRoll_LegalCase_IllegalCase() {
 		float roll = (float) Math.PI; //Valid value
 		drone.setRoll(roll);
 		assertEquals(roll, drone.getRoll(), 0.00001);
@@ -139,11 +146,10 @@ public class DroneTest extends TestCase {
 		assertTrue(thrown);
 	}
 	
-	
-	public void testPosition() {
+	public final void testSetPosition_LegalCase_IllegalCase() {
 		RealVector pos = new ArrayRealVector(new double[] {4,7,5},false); //Valid value
 		drone.setRelativePosition(pos);
-		assertTrue(pos.equals(drone.getWorldPosition()));
+		assertTrue(VectorMath.fuzzyEquals(pos, drone.getWorldPosition()));
 		
 		RealVector pos2 = null; //Invalid value
 		boolean thrown = false;
@@ -156,11 +162,10 @@ public class DroneTest extends TestCase {
 		assertTrue(thrown);
 	}
 	
-	
-	public void testVelocity() {
+	public final void testSetVelocity_LegalCase_IllegalCase() {
 		RealVector velocity =  new ArrayRealVector(new double[] {5,8,6}, false); //Valid value
 		drone.setVelocity(velocity);
-		assertTrue(velocity.equals(drone.getVelocity()));
+		assertTrue(VectorMath.fuzzyEquals(velocity, drone.getVelocity()));
 		
 		RealVector velocity2 = null; //Invalid value
 		boolean thrown = false;
@@ -173,21 +178,21 @@ public class DroneTest extends TestCase {
 		assertTrue(thrown);
 	}
 	
-	public void testRollTransformation() {
-		RealVector position = new ArrayRealVector(new double[] {-2.6337,-0.47158,-1.2795});
-		assertTrue(position.equals(drone.transformationToWorldCoordinates(drone.transformationToDroneCoordinates(position))));
+	public final void testTransformationToWorldCoordinates_SingleCase() {
+		drone.setRoll(0);
+		drone.setHeading(0);
+		drone.setPitch(0);
+		RealVector positionDroneCoordinates = new ArrayRealVector(new double[] {-2.6337,-0.47158,-1.2795}, false);
+		assertTrue(VectorMath.fuzzyEquals(new ArrayRealVector(new double[] {-2.6337,-0.47158,-1.2795}, false),
+				drone.transformationToWorldCoordinates(positionDroneCoordinates)));
 	}
 	
-    /*
-     * test the transformation matrices
-     */
-    public void testTransformationMatrices() {
+    public final void testTransformationToDroneCoordinates_SingleCase() {
 		drone.setRoll((float) Math.PI/3);
 		drone.setHeading((float) Math.PI/4);
 		drone.setPitch((float) Math.PI/5);
-
-		
-		RealVector position = new ArrayRealVector(new double[] {0,2,3});
-		assertTrue(VectorMath.fuzzyEquals(position,drone.transformationToWorldCoordinates(drone.transformationToDroneCoordinates(position))));
+		RealVector positionWorldCoordinates = new ArrayRealVector(new double[] {0,2,3}, false);
+		assertTrue(VectorMath.fuzzyEquals(new ArrayRealVector(new double[] {1.4204288832, 3.269574698, 0.5406136163}, false),
+				drone.transformationToDroneCoordinates(positionWorldCoordinates)));
 	}
 }
