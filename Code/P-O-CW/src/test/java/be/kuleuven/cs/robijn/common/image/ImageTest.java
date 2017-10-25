@@ -29,7 +29,7 @@ public class ImageTest {
 	@Test
 	public void testRedCenterPixel5x5() throws Exception {
 		ImageRecognizer rec = new ImageRecognizer();
-		byte[] image1 = Files.readAllBytes(new File("test/java/be/kuleuven/cs/robijn/common/image/5x5-Red-255-0-0-Center-3-3.png"));
+		byte[] image1 = Files.readAllBytes(new File("test/java/be/kuleuven/cs/robijn/common/image/5x5-Red-255-0-0-Center-3-3.png").toPath());
 		Image im = rec.createImage(image1, 5, 5, 120, 120);
 		int[] redCo = rec.getRedCubeAveragePixel(im);
 		int[] expected = {3,3};
@@ -39,7 +39,7 @@ public class ImageTest {
 	@Test
 	public void testRedCenterPixel10x10() throws Exception {
 		ImageRecognizer rec = new ImageRecognizer();
-		byte[] image1 = Files.readAllBytes(new File("C:\\Users\\rafhe\\Desktop\\Test Images\\10x10-Red-255-0-0-Center-3-2.png").toPath());
+		byte[] image1 = Files.readAllBytes(new File("test/java/be/kuleuven/cs/robijn/common/image/10x10-Red-255-0-0-Center-3-2.png").toPath());
 		Image im = rec.createImage(image1, 10, 10, 120, 120);
 		int[] redCo = rec.getRedCubeAveragePixel(im);
 		int[] expected = {3,2};
