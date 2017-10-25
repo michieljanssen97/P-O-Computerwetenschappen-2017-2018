@@ -1,4 +1,5 @@
-package image;
+package be.kuleuven.cs.robijn.common.image;
+
 import static org.junit.Assert.*;
 
 import java.awt.Color;
