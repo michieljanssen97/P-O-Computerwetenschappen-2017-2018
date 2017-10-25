@@ -2,11 +2,28 @@ package be.kuleuven.cs.robijn.common.math;
 
 import org.apache.commons.math3.linear.*;
 
+/**
+ * A class with methods (that are not in the class RealVector)
+ * to do calculations with 3-dimensional RealVectors.
+ * 
+ * @author Pieter Vandensande
+ */
 public class VectorMath {
 	
 	private VectorMath() {
 	}
 	
+	/**
+	 * Method to calculate the cross product between two 3-dimensional vectors.
+	 * @param  realVector1
+	 *         The first vector to calculate the cross product with.
+	 * @param  realVector2
+	 *         The second vector to calculate the cross product with.
+	 * @return The cross product of realVector1 and realVector2.
+	 * @throws IllegalArgumentException
+	 *         At least one of the given vectors isn't 3-dimensional.
+	 *       | ((realVector1.getDimension() != 3) || (realVector2.getDimension() != 3))
+	 */
 	public static RealVector crossProduct(RealVector realVector1, RealVector realVector2)
 			throws IllegalArgumentException {
 		if ((realVector1.getDimension() != 3) || (realVector2.getDimension() != 3))

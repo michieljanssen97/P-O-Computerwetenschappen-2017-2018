@@ -5,6 +5,11 @@ import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
 import p_en_o_cw_2017.*;
 
+/**
+ * A class of virtual testbeds.
+ * 
+ * @author Pieter Vandensande en Roy De Prins.
+ */
 public class VirtualTestbed extends WorldObject implements TestBed {
 	
 	public VirtualTestbed(AutopilotConfig config) {
@@ -63,7 +68,9 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		drone.setRollAngularVelocity(rollAngularVelocity + rollAngularAcceleration*dt);
 	}
 	
-	public void setElapsedTime(long elapsedTime) {
+	public void setElapsedTime(long elapsedTime) throws IllegalArgumentException {
+		if (! isValidElapsedTime(elapsedTime))
+			throw new IllegalArgumentException();
 		this.elapsedTime = elapsedTime;
 	}
 	
@@ -82,10 +89,24 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	public long getLastUpdate() {
 		return lastUpdate;
 	}
-
+	
+	public static boolean isValidElapsedTime(long elapsedTime) {
+		return ((elapsedTime >= 0) & (elapsedTime <= Long.MAX_VALUE));
+	}
+	
+	public static boolean isValidBeginSimulation(long beginSimulation) {
+		return ((beginSimulation >= 0) & (beginSimulation <= Long.MAX_VALUE));
+	}
+	
+	public static boolean isValidLastUpdate(long LastUpdate) {
+		return ((LastUpdate >= 0) & (LastUpdate <= Long.MAX_VALUE));
+	}
+	
 	private long lastUpdate = System.currentTimeMillis();
 	
-	public void setLastUpdate(long lastUpdate) {
+	public void setLastUpdate(long lastUpdate) throws IllegalArgumentException {
+		if (! isValidLastUpdate(lastUpdate))
+			throw new IllegalArgumentException();
 		this.lastUpdate = lastUpdate;
 	}
 	
