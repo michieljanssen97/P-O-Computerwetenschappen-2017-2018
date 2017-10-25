@@ -31,14 +31,15 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		if (bestInclination > drone.getMaxAOA())
 			bestInclination = drone.getMaxAOA();
 		if (imageYRotation > minDegrees)
-			verStabInclinationTemp =  bestInclination;
+			verStabInclinationTemp =  -bestInclination;
 		else if (imageYRotation < -minDegrees)
-			verStabInclinationTemp = -bestInclination;
+			verStabInclinationTemp = bestInclination;
 		if (imageXRotation > minDegrees)
-			horStabInclinationTemp = bestInclination;
-		else if (imageXRotation < -minDegrees)
 			horStabInclinationTemp = -bestInclination;
+		else if (imageXRotation < -minDegrees)
+			horStabInclinationTemp = bestInclination;
 		final float horStabInclination = horStabInclinationTemp;
+		final float verStabInclination = verStabInclinationTemp;
 		
 		RealVector distance1 = drone.transformationToWorldCoordinates(new ArrayRealVector(new double[] {drone.getWingX(), 0, 0}, false));
 		RealVector velocityWorldCoordinates1 = drone.calculateVelocityWorldCo(drone.getVelocity(), drone.getHeadingAngularVelocityVector(), 
@@ -56,9 +57,12 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		velocityDroneCoordinates1.setEntry(0, 0);
 		double projectedVelocityRightWing = drone.transformationToWorldCoordinates(velocityDroneCoordinates2).getNorm();
 		
-		UnivariateFunction function = (x)->{return Math.cos(x)*x - ((drone.getGravitationalForceEngine().getNorm()
-				+ drone.getGravitationalForceTail().getNorm() + (2*drone.getGravitationalForceWing().getNorm())
-				+ drone.getLiftForceHorStab(horStabInclination).getEntry(1))/(drone.getWingLiftSlope()*(Math.pow(projectedVelocityLeftWing, 2)
+		UnivariateFunction function = (x)->{return Math.cos(x)*x - ((drone.transformationToDroneCoordinates(drone.getGravitationalForceEngine()).getEntry(1)
+				+ drone.transformationToDroneCoordinates(drone.getGravitationalForceTail()).getEntry(1) 
+				+ (2*drone.transformationToDroneCoordinates(drone.getGravitationalForceWing()).getEntry(1))
+				+ drone.transformationToDroneCoordinates(drone.getLiftForceHorStab(horStabInclination)).getEntry(1)
+				+ drone.transformationToDroneCoordinates(drone.getLiftForceVerStab(verStabInclination)).getEntry(1))
+				/(drone.getWingLiftSlope()*(Math.pow(projectedVelocityLeftWing, 2)
 						+Math.pow(projectedVelocityRightWing, 2))));};
 		double relativeAccuracy = 1.0e-12;
 		double absoluteAccuracy = 1.0e-8;
@@ -77,7 +81,6 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		final float thrust = thrustTemp;
 		final float leftWingInclination = leftWingInclinationTemp;
 		final float rightWingInclination = rightWingInclinationTemp;
-		final float verStabInclination = verStabInclinationTemp;
 		return new AutopilotOutputs() {
 			public float getThrust() {
 				return thrust;
