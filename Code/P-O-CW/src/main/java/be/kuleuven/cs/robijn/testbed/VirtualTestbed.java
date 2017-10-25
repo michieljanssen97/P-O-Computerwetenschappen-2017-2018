@@ -2,9 +2,10 @@ package be.kuleuven.cs.robijn.testbed;
 
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.*;
+import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
 import p_en_o_cw_2017.*;
 
-public class VirtualTestbed extends WorldObject {
+public class VirtualTestbed extends WorldObject implements TestBed {
 	
 	public VirtualTestbed() {
 	}
@@ -58,5 +59,19 @@ public class VirtualTestbed extends WorldObject {
 		drone.setHeadingAngularVelocity(headingAngularVelocity + headingAngularAcceleration*dt);
 		drone.setPitchAngularVelocity(pitchAngularVelocity + pitchAngularAcceleration*dt);
 		drone.setRollAngularVelocity(rollAngularVelocity + rollAngularAcceleration*dt);
+	}
+
+	@Override
+	public AutopilotInputs update(AutopilotOutputs output) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	private OpenGLRenderer renderer;
+	
+	public Renderer getRenderer() {
+		if (renderer == null)
+			renderer = OpenGLRenderer.create();
+		return renderer;
 	}
 }

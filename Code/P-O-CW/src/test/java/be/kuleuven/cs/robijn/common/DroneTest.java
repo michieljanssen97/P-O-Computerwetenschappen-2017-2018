@@ -1,33 +1,63 @@
 package be.kuleuven.cs.robijn.common;
 
-
 import org.apache.commons.math3.linear.*;
-
-import be.kuleuven.cs.robijn.common.Drone;
-import junit.framework.TestCase;
-import p_en_o_cw_2017.AutopilotConfig;
+import be.kuleuven.cs.robijn.common.math.*;
+import junit.framework.*;
+import p_en_o_cw_2017.*;
 
 public class DroneTest extends TestCase {
 	
-	float wingX = 4;
-	float tailSize = 6;
-	float engineMass = 20;
-	float wingMass = 40;
-	float tailMass = 30;
-	float maxThrust = 60000;
-	float maxAOA = ((float) (Math.PI/3));
-	float wingLiftSlope = 15;
-	float horStabLiftSlope = 10;
-	float verStabLiftSlope = 10;
-	RealVector velocity = new ArrayRealVector(new double[] {20,20,20},false);
-	float horAngleOfView = (float) (Math.PI/3);
-	float verAngleOfView = (float) (Math.PI/3);
-	int nbColumns = 120;
-	int nbRows = 120;
+	private static float wingX = 4;
+	private static float tailSize = 6;
+	private static float engineMass = 20;
+	private static float wingMass = 40;
+	private static float tailMass = 30;
+	private static float maxThrust = 60000;
+	private static float maxAOA = ((float) (Math.PI/3));
+	private static float wingLiftSlope = 15;
+	private static float horStabLiftSlope = 10;
+	private static float verStabLiftSlope = 10;
+	private static RealVector velocity = new ArrayRealVector(new double[] {20,20,20},false);
+	private static float horAngleOfView = (float) (Math.PI/3);
+	private static float verAngleOfView = (float) (Math.PI/3);
+	private static int nbColumns = 120;
+	private static int nbRows = 120;
+	private static AutopilotConfig config = new AutopilotConfig() {
+        public float getGravity() { return (float) 9.81; }
+        public float getWingX() { return wingX; }
+        public float getTailSize() { return tailSize; }
+        public float getEngineMass() { return engineMass; }
+        public float getWingMass() { return wingMass; }
+        public float getTailMass() { return tailMass; }
+        public float getMaxThrust() { return maxThrust; }
+        public float getMaxAOA() { return maxAOA; }
+        public float getWingLiftSlope() { return wingLiftSlope; }
+        public float getHorStabLiftSlope() { return horStabLiftSlope; }
+        public float getVerStabLiftSlope() { return verStabLiftSlope; }
+        public float getHorizontalAngleOfView() { return horAngleOfView; }
+        public float getVerticalAngleOfView() { return verAngleOfView; }
+        public int getNbColumns() { return nbColumns; }
+        public int getNbRows() { return nbRows; }
+    };
+	private static Drone drone = new Drone(config, velocity);
 	
-	
-	public AutopilotConfig createAutopilotConfig() {
-	    return new AutopilotConfig() {
+	public final void extendedConstructor_LegalCase() throws Exception {
+		float wingX = 4;
+		float tailSize = 6;
+		float engineMass = 20;
+		float wingMass = 40;
+		float tailMass = 30;
+		float maxThrust = 60000;
+		float maxAOA = ((float) (Math.PI/3));
+		float wingLiftSlope = 15;
+		float horStabLiftSlope = 10;
+		float verStabLiftSlope = 10;
+		RealVector velocity = new ArrayRealVector(new double[] {20,20,20},false);
+		float horAngleOfView = (float) (Math.PI/3);
+		float verAngleOfView = (float) (Math.PI/3);
+		int nbColumns = 120;
+		int nbRows = 120;
+		AutopilotConfig config = new AutopilotConfig() {
 	        public float getGravity() { return (float) 9.81; }
 	        public float getWingX() { return wingX; }
 	        public float getTailSize() { return tailSize; }
@@ -44,28 +74,20 @@ public class DroneTest extends TestCase {
 	        public int getNbColumns() { return nbColumns; }
 	        public int getNbRows() { return nbRows; }
 	    };
+		Drone drone1 = new Drone(config, velocity);
+		assertNotNull(drone1);
+		assertEquals(wingX, drone1.getWingX(), 0.00001);
+		assertEquals(tailSize, drone1.getTailSize(), 0.00001);
+		assertEquals(engineMass, drone1.getEngineMass(), 0.00001);
+		assertEquals(wingMass, drone1.getWingMass(), 0.00001);
+		assertEquals(tailMass, drone1.getTailMass(), 0.00001);
+		assertEquals(maxThrust, drone1.getMaxThrust(), 0.00001);
+		assertEquals(maxAOA, drone1.getMaxAOA(), 0.00001);
+		assertEquals(wingLiftSlope, drone1.getWingLiftSlope(), 0.00001);
+		assertEquals(horStabLiftSlope, drone1.getHorStabLiftSlope(), 0.00001);
+		assertEquals(verStabLiftSlope, drone1.getVerStabLiftSlope(), 0.00001);
+		assertTrue(VectorMath.fuzzyEquals(velocity, drone1.getVelocity()));
 	}
-	
-	Drone drone = new Drone(createAutopilotConfig(), velocity);
-	
-	/**
-	 * Test the getters of the drone's attributes
-	 */
-	public void testDroneConfiguration() {
-		assertEquals(wingX, drone.getWingX(), 0.00001);
-		assertEquals(tailSize, drone.getTailSize(), 0.00001);
-		assertEquals(engineMass, drone.getEngineMass(), 0.00001);
-		assertEquals(wingMass, drone.getWingMass(), 0.00001);
-		assertEquals(tailMass, drone.getTailMass(), 0.00001);
-		assertEquals(maxThrust, drone.getMaxThrust(), 0.00001);
-		assertEquals(maxAOA, drone.getMaxAOA(), 0.00001);
-		assertEquals(wingLiftSlope, drone.getWingLiftSlope(), 0.00001);
-		assertEquals(horStabLiftSlope, drone.getHorStabLiftSlope(), 0.00001);
-		assertEquals(verStabLiftSlope, drone.getVerStabLiftSlope(), 0.00001);
-		assertTrue(velocity.equals(drone.getVelocity()));
-	}
-	
-	
 	
 	public void testHeading() {
 		float heading = (float) Math.PI; //Valid value
@@ -156,18 +178,9 @@ public class DroneTest extends TestCase {
 		assertTrue(position.equals(drone.transformationToWorldCoordinates(drone.transformationToDroneCoordinates(position))));
 	}
 	
-    public boolean RealVectorEquals(RealVector v1, RealVector v2){ 
-        if(v1.getDimension() == 0 || v2.getDimension()== 0){
-            return false;
-        }
-        double epsilon = 0.000000001;
-        return Math.abs(v1.getEntry(0)-v2.getEntry(0))<epsilon && Math.abs(v1.getEntry(1)-v2.getEntry(1))<epsilon && Math.abs(v1.getEntry(2)-v2.getEntry(2))<epsilon;
-    }
-	
     /*
      * test the transformation matrices
-     */	
-    
+     */
     public void testTransformationMatrices() {
 		drone.setRoll((float) Math.PI/3);
 		drone.setHeading((float) Math.PI/4);
@@ -175,8 +188,6 @@ public class DroneTest extends TestCase {
 
 		
 		RealVector position = new ArrayRealVector(new double[] {0,2,3});
-		//System.out.print(drone2.transformationToDroneCoordinates(position)+"\n"); -> klopte met andere groep
-		//System.out.print(drone2.transformationToWorldCoordinates(position));
-		assertTrue(RealVectorEquals(position,drone.transformationToWorldCoordinates(drone.transformationToDroneCoordinates(position))));
+		assertTrue(VectorMath.fuzzyEquals(position,drone.transformationToWorldCoordinates(drone.transformationToDroneCoordinates(position))));
 	}
 }
