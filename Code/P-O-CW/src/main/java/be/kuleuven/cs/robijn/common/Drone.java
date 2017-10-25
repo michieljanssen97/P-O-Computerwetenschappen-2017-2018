@@ -17,12 +17,12 @@ public class Drone extends WorldObject {
  * Create a new Drone
  * 
  * @param config
- * 			The attributes of the Drone
+ * 			The attributes of this drone
  * 			For example WingX, TailSize, EngineMass, ...
  * @param velocity
  * 			The starting velocity of the drone
  * @throws IllegalArgumentException
- * 			The given arguments in config and velocity or not valid arguments for the drone.
+ * 			One of the given parameters is not a valid parameter for this drone.
  */
 	public Drone(AutopilotConfig config, RealVector velocity) 
 					throws IllegalArgumentException {
@@ -63,10 +63,9 @@ public class Drone extends WorldObject {
 	
     //     -----------------     //
     //                           //
-    //  GETTERS DRONE ATTRIBUTES //
+    //     DRONE ATTRIBUTES      //
     //                           //
     //     -----------------     //
-	
 	private final float gravity = (float) 9.81;
 	
 	private final float engineMass;
@@ -185,17 +184,15 @@ public class Drone extends WorldObject {
     //  -----------------   //
 	/**
 	 * Variable registering the heading (yaw) of this drone.
-	 * The heading is equal to atan2(H . (-1, 0, 0), H . (0, 0, -1)), 
-	 * where H is the drone's heading vector (which we define as the drone's forward vector ((0, 0, -1) in drone coordinates) 
-	 * projected onto the world XZ plane.
+	 * The heading is equal to atan2(H . (-1, 0, 0), H . (0, 0, -1)), where H is the drone's heading vector
+	 * (which we define as H0/||H0|| where H0 is the drone's forward vector ((0, 0, -1) in drone coordinates) projected onto the world XZ plane.
 	 */
 	private float heading = 0;
 	
 	/**
 	 * Return the heading (yaw) of this drone.
-	 * The heading is equal to atan2(H . (-1, 0, 0), H . (0, 0, -1)), 
-	 * where H is the drone's heading vector (which we define as the drone's forward vector ((0, 0, -1) in drone coordinates) 
-	 * projected onto the world XZ plane.
+	 * The heading is equal to atan2(H . (-1, 0, 0), H . (0, 0, -1)), where H is the drone's heading vector
+	 * (which we define as H0/||H0|| where H0 is the drone's forward vector ((0, 0, -1) in drone coordinates) projected onto the world XZ plane.
 	 */
 	public float getHeading() {
 		return this.heading;
@@ -242,14 +239,14 @@ public class Drone extends WorldObject {
     //  -----------------   //
 	/**
 	 * Variable registering the pitch of this drone.
-	 * The pitch is equal to atan2(F . (0, 1, 0), F . H), 
+	 * The pitch is equal to atan2(F . (0, 1, 0), F . H),
 	 * where F is the drone's forward vector and H is the drone's heading vector.
 	 */
 	private float pitch = 0;
 	
 	/**
 	 * Return the pitch of this drone.
-	 * The pitch is equal to atan2(F . (0, 1, 0), F . H), 
+	 * The pitch is equal to atan2(F . (0, 1, 0), F . H),
 	 * where F is the drone's forward vector and H is the drone's heading vector.
 	 */
 	public float getPitch() {
@@ -257,7 +254,7 @@ public class Drone extends WorldObject {
 	}
 	
 	/**
-	 * Check whether the given pitch is a valid heading for
+	 * Check whether the given pitch is a valid pitch for
 	 * any drone.
 	 *  
 	 * @param  pitch
@@ -298,15 +295,15 @@ public class Drone extends WorldObject {
     //  -----------------   //
 	/**
 	 * Variable registering the roll (bank) of this drone.
-	 * The roll is is equal to atan2(R . (0, 1, 0), R . R0), 
-	 * where R is the drone's right direction ((1, 0, 0) in drone coordinates) and R0 = H x (0, 1, 0).
+	 * atan2(R . U0, R . R0), where R is the drone's right direction ((1, 0, 0) in drone coordinates),
+	 * R0 = H x (0, 1, 0), and U0 = R0 x F.
 	 */
 	private float roll = 0;
 	
 	/**
 	 * Return the roll (bank) of this drone.
-	 * The roll is is equal to atan2(R . (0, 1, 0), R . R0), 
-	 * where R is the drone's right direction ((1, 0, 0) in drone coordinates) and R0 = H x (0, 1, 0).
+	 * atan2(R . U0, R . R0), where R is the drone's right direction ((1, 0, 0) in drone coordinates),
+	 * R0 = H x (0, 1, 0), and U0 = R0 x F.
 	 */
 	public float getRoll() {
 		return this.roll;
@@ -347,10 +344,9 @@ public class Drone extends WorldObject {
 	
     //  -----------------   //
     //                      //
-    //    VELOCITY DRONE    //
+    //   VELOCITIES DRONE   //
     //                      //
     //  -----------------   //
-	
 	/**
 	 * Variable registering the velocity of the center of mass of this drone.
 	 */
@@ -534,14 +530,12 @@ public class Drone extends WorldObject {
     //                            //
     //     -----------------      //
 	/**
-	 * Transform the given Roll vector from World coordinates to Drone coordinates
+	 * Transform the given vector from Heading-Pitch coordinates to Drone coordinates
 	 * @param realVector
-	 * 			The Roll vector to transform from World to Drone coordinates
-	 * @return The given Roll Vector in Drone coordinates
+	 * 			The vector to transform from Heading-Pitch to Drone coordinates
+	 * @return The given vector in Drone coordinates
 	 */
 	public RealVector rollTransformation(RealVector realVector){
-//		if (! this.hasVirtualTestbed())
-//			throw new IllegalStateException("this drone has no virtual testbed");
 		float rollAngle = this.getRoll();
 		RealMatrix rollTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for roll
 			{Math.cos(rollAngle),      Math.sin(rollAngle),    0},
@@ -552,14 +546,12 @@ public class Drone extends WorldObject {
 	}
 	
 	/**
-	 * Transform the given Pitch vector from World coordinates to Drone coordinates
+	 * Transform the given vector from Heading coordinates to Heading-Pitch coordinates
 	 * @param realVector
-	 * 			The Pitch vector to transform from World to Drone coordinates
-	 * @return The given Pitch Vector in Drone coordinates
+	 * 			The vector to transform from World to Drone coordinates
+	 * @return The given vector in Heading-Pitch coordinates
 	 */
 	public RealVector pitchTransformation(RealVector realVector){
-//		if (! this.hasVirtualTestbed())
-//			throw new IllegalStateException("this drone has no virtual testbed");
 		float pitchAngle = this.getPitch();
 		RealMatrix pitchTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for pitch
 			{1,       0,                          0},
@@ -570,14 +562,12 @@ public class Drone extends WorldObject {
 	}
 	
 	/**
-	 * Transform the given Heading vector from World coordinates to Drone coordinates
+	 * Transform the given vector from World coordinates to Heading coordinates
 	 * @param realVector
-	 * 			The Heading vector to transform from World to Drone coordinates
-	 * @return The given Heading Vector in Drone coordinates
+	 * 			The vector to transform from World to Heading coordinates
+	 * @return The given vector in Heading coordinates
 	 */
 	public RealVector headingTransformation(RealVector realVector){
-//		if (! this.hasVirtualTestbed())
-//			throw new IllegalStateException("this drone has no virtual testbed");
 		float headingAngle = this.getHeading();
 		RealMatrix headingTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for heading
 			{Math.cos(headingAngle),       0,          -Math.sin(headingAngle)},
@@ -602,18 +592,15 @@ public class Drone extends WorldObject {
     //  TRANSFORMATION MATRICES   //				DRONE TO WORLD COORDINATES
     //                            //
     //     -----------------      //
-	
 	/**
-	 * Transform the given Roll vector from Drone coordinates to World coordinates
+	 * Transform the given vector from Drone coordinates to Heading-Pitch coordinates
 	 * @param realVector
-	 * 			The Roll vector to transform from Drone to World coordinates
-	 * @return The given Roll Vector in World coordinates
+	 * 			The vector to transform from Drone to Heading-Pitch coordinates
+	 * @return The given vector in Heading-Pitch coordinates
 	 */
 	public RealVector inverseRollTransformation(RealVector realVector){
-//		if (! this.hasVirtualTestbed())
-//			throw new IllegalStateException("this drone has no virtual testbed");
 		float rollAngle = this.getRoll();
-		RealMatrix inverseRollTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for roll
+		RealMatrix inverseRollTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for inverse roll
 			{Math.cos(rollAngle),      -Math.sin(rollAngle),       0},
 			{Math.sin(rollAngle),       Math.cos(rollAngle),       0}, 
 			{0,                         0,                         1}
@@ -622,16 +609,14 @@ public class Drone extends WorldObject {
 	}
 	
 	/**
-	 * Transform the given Pitch vector from Drone coordinates to World coordinates
+	 * Transform the given vector from Heading-Pitch coordinates to Heading coordinates
 	 * @param realVector
-	 * 			The Pitch vector to transform from Drone to World coordinates
-	 * @return The given Pitch Vector in World coordinates
+	 * 			The vector to transform from Heading-Pitch to Heading coordinates
+	 * @return The given vector in Heading coordinates
 	 */
 	public RealVector inversePitchTransformation(RealVector realVector){
-//		if (! this.hasVirtualTestbed())
-//			throw new IllegalStateException("this drone has no virtual testbed");
 		float PitchAngle = this.getPitch();
-		RealMatrix inversePitchTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for pitch
+		RealMatrix inversePitchTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for inverse pitch
 			{1,       0,                        0},
 			{0,       Math.cos(PitchAngle),    -Math.sin(PitchAngle)},
 			{0,       Math.sin(PitchAngle),     Math.cos(PitchAngle)}
@@ -640,16 +625,14 @@ public class Drone extends WorldObject {
 	}
 	
 	/**
-	 * Transform the given Heading vector from Drone coordinates to World coordinates
+	 * Transform the given vector from Heading coordinates to World coordinates
 	 * @param realVector
-	 * 			The Heading vector to transform from Drone to World coordinates
-	 * @return The given Heading Vector in World coordinates
+	 * 			The vector to transform from Heading to World coordinates
+	 * @return The given vector in World coordinates
 	 */
 	public RealVector inverseHeadingTransformation(RealVector realVector){
-//		if (! this.hasVirtualTestbed())
-//			throw new IllegalStateException("this drone has no virtual testbed");
 		float headingAngle = this.getHeading();
-		RealMatrix inverseHeadingTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for heading
+		RealMatrix inverseHeadingTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for inverse heading
 			{Math.cos(headingAngle),     0,       Math.sin(headingAngle)}, 
 			{0,                          1,       0}, 
 			{-Math.sin(headingAngle),    0,       Math.cos(headingAngle)}
@@ -670,34 +653,27 @@ public class Drone extends WorldObject {
 	
     //     -----------------      //
     //                            //
-    //  ANGULAR VELOCITY VECTOR   //
+    //  ANGULAR VELOCITY VECTORS  //
     //                            //
     //     -----------------      //
-	
 	/**
-	 * Return the Heading Angular velocity of this drone as a vector.
+	 * Return the Heading Angular velocity of this drone as a vector in World Coordinates.
 	 */
 	public RealVector getHeadingAngularVelocityVector() {
-//		if (! this.hasVirtualTestbed())
-//			throw new IllegalStateException("this drone has no virtual testbed");
 		return new ArrayRealVector(new double[] {0, this.getHeadingAngularVelocity(), 0}, false);
 	}
 	
 	/**
-	 * Return the Pitch Angular velocity of this drone as a vector.
+	 * Return the Pitch Angular velocity of this drone as a vector in World Coordinates.
 	 */
 	public RealVector getPitchAngularVelocityVector() throws IllegalStateException {
-//		if (! this.hasVirtualTestbed())
-//			throw new IllegalStateException("this drone has no virtual testbed");
 		return this.inverseHeadingTransformation(new ArrayRealVector(new double[] {this.getPitchAngularVelocity(), 0, 0}, false));
 	}
 	
 	/**
-	 * Return the Roll Angular velocity of this drone as a vector.
+	 * Return the Roll Angular velocity of this drone as a vector in World Coordinates.
 	 */
 	public RealVector getRollAngularVelocityVector() {
-//		if (! this.hasVirtualTestbed())
-//			throw new IllegalStateException("this drone has no virtual testbed");
 		return this.inverseHeadingTransformation(this.inversePitchTransformation(
 				new ArrayRealVector(new double[] {0, 0, this.getRollAngularVelocity()}, false)));
 	}
@@ -705,12 +681,11 @@ public class Drone extends WorldObject {
 	
     //        -----------------         //
     //                                  //
-    //   POSITION IN WORLD COORDINATES  //
+    //   POSITIONS IN WORLD COORDINATES //
     //                                  //
     //        -----------------         //
-	
 	/**
-	 * Return to position of the Left Wing of the drone in World Coordinates
+	 * Return to position of the Left Wing of this drone in World Coordinates.
 	 */
 	public RealVector getLeftWingPosition() {
 		return this.getWorldPosition().add(this.transformationToWorldCoordinates(
@@ -718,7 +693,7 @@ public class Drone extends WorldObject {
 	}
 	
 	/**
-	 * Return to position of the Right Wing of the drone in World Coordinates
+	 * Return to position of the Right Wing of this drone in World Coordinates.
 	 */
 	public RealVector getRightWingPosition() {
 		return this.getWorldPosition().add(this.transformationToWorldCoordinates(
@@ -726,7 +701,7 @@ public class Drone extends WorldObject {
 	}
 	
 	/**
-	 * Return to position of the tail (Horizontal and Vertical Stabilizer) of the drone in World Coordinates
+	 * Return to position of the tail (Horizontal and Vertical Stabilizer) of this drone in World Coordinates.
 	 */
 	public RealVector getTailPosition() {
 		return this.getWorldPosition().add(this.transformationToWorldCoordinates(
@@ -734,7 +709,7 @@ public class Drone extends WorldObject {
 	}
 	
 	/**
-	 * Return to position of the Engine of the drone in World Coordinates
+	 * Return to position of the Engine of the drone in World Coordinates.
 	 */
 	public RealVector getEnginePosition() {
 		return this.getWorldPosition().add(this.transformationToWorldCoordinates(
@@ -747,32 +722,31 @@ public class Drone extends WorldObject {
     //             FORCES              //
     //                                 //
     //        -----------------        //
-	
 	/**
-	 * Return the gravitational force on the Wing in Drone Coordinates
+	 * Return the gravitational force on the Wing in World Coordinates.
 	 */
 	public RealVector getGravitationalForceWing() {
 		return new ArrayRealVector(new double[] {0, -(this.getWingMass() * this.getGravity()), 0 }, false);
 	}
 	
 	/**
-	 * Return the gravitational force on the Tail in Drone Coordinates
+	 * Return the gravitational force on the Tail in World Coordinates.
 	 */
 	public RealVector getGravitationalForceTail() {
 		return new ArrayRealVector(new double[] {0, -(this.getTailMass() * this.getGravity()), 0 }, false);
 	}
 	
 	/**
-	 * Return the gravitational force on the Engine in Drone Coordinates
+	 * Return the gravitational force on the Engine in World Coordinates.
 	 */
 	public RealVector getGravitationalForceEngine() {
 		return new ArrayRealVector(new double[] {0, -(this.getEngineMass() * this.getGravity()), 0 }, false);
 	}
 	
 	/**
-	 * Return the Attack Vector for the horizontal Components (Wings and Horizontal Stabilizer) in World Coordinates
+	 * Return the Attack Vector for the horizontal Components (Wings and Horizontal Stabilizer) in World Coordinates.
 	 * @param horInclination
-	 * 			The Horizontal Inclination of the Wing or Horizontal Stabilizer in Drone Coordinates
+	 * 			The Horizontal Inclination of the Wing or Horizontal Stabilizer.
 	 */
 	public RealVector getAttackVectorHor(float horInclination) {
 		RealVector attackVectorH = new ArrayRealVector(new double[] {0, Math.sin(horInclination), -Math.cos(horInclination)}, false);
@@ -780,9 +754,9 @@ public class Drone extends WorldObject {
 	}
 	
 	/**
-	 * return the Attack Vector for the Vertical Components (Vertical Stabilizer) in World Coordinates
+	 * return the Attack Vector for the Vertical Components (Vertical Stabilizer) in World Coordinates.
 	 * @param verInclination
-	 * 			The Vertical Inclination of the Vertical Stabilizer in Drone Coordinates
+	 * 			The Vertical Inclination of the Vertical Stabilizer.
 	 */
 	public RealVector getAttackVectorVer(float verInclination) {
 		RealVector attackVectorV = new ArrayRealVector(new double[] {-Math.sin(verInclination), 0, -Math.cos(verInclination)}, false);
@@ -790,7 +764,7 @@ public class Drone extends WorldObject {
 	}
 	
 	/**
-	 * Return the Axis Vector of the Horizontal Components (Wings and Horizontal Stabilizer) in World Coordinates
+	 * Return the Axis Vector of the Horizontal Components (Wings and Horizontal Stabilizer) in World Coordinates.
 	 */
 	public RealVector getAxisVectorHor() {
 		RealVector axisVectorH = new ArrayRealVector(new double[] {1,0,0}, false);
@@ -798,7 +772,7 @@ public class Drone extends WorldObject {
 	}
 	
 	/**
-	 * Return the Axis Vector of the Vertical Components (vertical Stabilizer) in World Coordinates
+	 * Return the Axis Vector of the Vertical Components (vertical Stabilizer) in World Coordinates.
 	 */
 	public RealVector getAxisVectorVer() {
 		RealVector axisVectorV = new ArrayRealVector(new double[] {0,1,0}, false);
@@ -806,36 +780,37 @@ public class Drone extends WorldObject {
 	}
 	
 	/**
-	 * Return the Normal of the Horizontal Components (Wings and Horizontal Stabilizer) as a Vector in World Coordinates
+	 * Return the Normal of the Horizontal Components (Wings and Horizontal Stabilizer) as a Vector in World Coordinates.
 	 * @param horInclination
-	 * 			The Horizontal Inclination of the Wing or Horizontal Stabilizer in Drone Coordinates
+	 * 			The Horizontal Inclination of the Wing or Horizontal Stabilizer in Drone Coordinates.
 	 */
 	public RealVector getNormalHor(float horInclination) {
-		return VectorMath.crossProduct(this.getAxisVectorHor(), this.getAttackVectorHor(horInclination)); //Cross product of 2 vectors in World Coordinates results in a vector in World Coordinates
+		return VectorMath.crossProduct(this.getAxisVectorHor(), this.getAttackVectorHor(horInclination)); 
+		//Cross product of 2 vectors in World Coordinates results in a vector in World Coordinates
 	}
 	
 	/**
-	 * Return the Normal of the Vertical Components (vertical Stabilizer) as a vector in World Coordinates
+	 * Return the Normal of the Vertical Components (vertical Stabilizer) as a vector in World Coordinates.
 	 * @param verInclination
-	 * 			The Vertical Inclination of the Vertical Stabilizer in Drone Coordinates
+	 * 			The Vertical Inclination of the Vertical Stabilizer in Drone Coordinates.
 	 */
 	public RealVector getNormalVer(float verInclination) {
 		return VectorMath.crossProduct(this.getAxisVectorVer(), this.getAttackVectorVer(verInclination));
 	}
 	
 	/**
-	 * Calculate the Velocity of the point with 'distance' to the drone's center of mass in World Coordinates
+	 * Calculate the Velocity of the point with a certain distance to the drone's center of mass in World Coordinates.
 	 * @param velocity
-	 * 			The velocity of the drone's center of mass
+	 * 			The velocity of the drone's center of mass.
 	 * @param headingVelocity
-	 * 			The heading angular Velocity of the drone's center of mass
+	 * 			The heading angular velocity.
 	 * @param pitchVelocity
-	 * 			The pitch angular velocity of the dron's center of mass
+	 * 			The pitch angular velocity.
 	 * @param rollVelocity
-	 * 			The roll angular velocity of the drone's center of mass
+	 * 			The roll angular velocity.
 	 * @param distance
-	 * 			The distance between this point and the drone's center of mass
-	 * @return The velocity of this point of the drone in World Coordinates
+	 * 			The distance between the point and the drone's center of mass.
+	 * @return The velocity of the point in World Coordinates.
 	 */
 	public RealVector calculateVelocityWorldCo(RealVector velocity, RealVector headingVelocity, RealVector pitchVelocity, RealVector rollVelocity, RealVector distance) {
 		return (velocity
@@ -845,17 +820,16 @@ public class Drone extends WorldObject {
 	}
 	
 	/**
-	 * Calculate the Angle Of Attack
+	 * Calculate the Angle Of Attack of a certain airfoil.
 	 * @param normal
-	 * 			The normal of the given point
+	 * 			The normal of the airfoil.
 	 * @param projectedVelocity
-	 * 			The projected velocity of the given point
+	 * 			The projected velocity of the airfoil.
 	 * @param attackVector
-	 * 			The attack vector of the given point
-	 * @return	The Angle Of Attack of the given point
+	 * 			The attack vector of the airfoil.
+	 * @return	The Angle Of Attack of the airfoil.
 	 * @throws IllegalArgumentException
-	 * 			throws IllegalArgumentException if the calculated Angle Of Attack is invalid
-	 * 			| AOA > maxAOA		
+	 * 			The calculated Angle Of Attack is not a valid Angle Of Attack
 	 */
 	public float calculateAOA(RealVector normal, RealVector projectedVelocity, RealVector attackVector) throws IllegalArgumentException {
 		float AOA = (float) -Math.atan2(normal.dotProduct(projectedVelocity), attackVector.dotProduct(projectedVelocity));
@@ -866,10 +840,10 @@ public class Drone extends WorldObject {
 	}
 	
 	/**
-	 *  Calculate the Lift Force on the Left Wing
+	 * Calculate the Lift Force on the Left Wing.
 	 * @param leftWingInclination
-	 * 			The current Inclination on the left wing in Drone Coordinates
-	 * @return The Lift Force on the Left Wing of the drone
+	 * 			The current Inclination of the left wing.
+	 * @return The Lift Force on the Left Wing of this drone.
 	 */
 	public RealVector getLiftForceLeftWing(float leftWingInclination){
 		RealVector distance = this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {-this.getWingX(), 0, 0}, false)); //distance between left wing and center of mass in World Coordinates
@@ -887,10 +861,10 @@ public class Drone extends WorldObject {
 	}
 	
 	/**
-	 * Calculate the Lift Force on the Right Wing
+	 * Calculate the Lift Force on the Right Wing.
 	 * @param rightWingInclination
-	 * 			The current Inclination on the Right wing
-	 * @return The Lift Force on the Right Wing of the drone
+	 * 			The current Inclination of the Right wing.
+	 * @return The Lift Force on the Right Wing of this drone.
 	 */
 	public RealVector getLiftForceRightWing(float rightWingInclination){
 		RealVector distance = this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {this.getWingX(), 0, 0}, false));
@@ -908,10 +882,10 @@ public class Drone extends WorldObject {
 	}
 	
 	/**
-	 * Calculate the Lift Force on the Horizontal Stabilizer
+	 * Calculate the Lift Force on the Horizontal Stabilizer.
 	 * @param horStabInclination
-	 * 			The current Inclination on the Horizontal Stabilizer
-	 * @return The Lift Force on the Horizontal Stabilizer of the drone
+	 * 			The current Inclination of the Horizontal Stabilizer.
+	 * @return The Lift Force on the Horizontal Stabilizer of this drone.
 	 */
 	public RealVector getLiftForceHorStab(float horStabInclination){
 		RealVector distance = this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, this.getTailSize()}, false));
@@ -928,10 +902,10 @@ public class Drone extends WorldObject {
 	}
 	
 	/**
-	 * Calculate the Lift Force on the Vertical Stabilizer
+	 * Calculate the Lift Force on the Vertical Stabilizer.
 	 * @param verStabInclination
-	 * 			The current Inclination on the Vertical Stabilizer
-	 * @return The Lift Force on the Vertical Stabilizer of the drone
+	 * 			The current Inclination of the Vertical Stabilizer.
+	 * @return The Lift Force on the Vertical Stabilizer of the drone.
 	 */
 	public RealVector getLiftForceVerStab(float verStabInclination){
 		RealVector distance = this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, this.getTailSize()}, false));
@@ -948,24 +922,26 @@ public class Drone extends WorldObject {
 	}
 	
 	/**
-	 * Calculate the drone's acceleration, through the equilibrium of forces
-	 * (Sum F)/(Sum m) = a
+	 * Calculate the drone's acceleration, with the second law of Newton:
+	 * "The total force on this drone is equal to 
+	 * the mass of this drone multiplied with the acceleration of this drone's center of mass."
 	 * @param thrust
-	 * 			The current Thrust of the Engine
+	 * 			The current Thrust of the Engine.
 	 * @param leftWingInclination
-	 * 			The current inclination of the Left Wing
+	 * 			The current inclination of the Left Wing.
 	 * @param rightWingInclination
-	 * 			The current inclination of the Right Wing
+	 * 			The current inclination of the Right Wing.
 	 * @param horStabInclination
-	 * 			The current inclination of the Horizontal Stabilizer
+	 * 			The current inclination of the Horizontal Stabilizer.
 	 * @param verStabInclination
-	 * 			The current inclination of the Vertical Stabilizer
-	 * @return The acceleration of the drone's center of mass
+	 * 			The current inclination of the Vertical Stabilizer.
+	 * @return The acceleration of this drone's center of mass.
 	 * @throws IllegalArgumentException
-	 * 			throws IllegalArgumentException if the given thrust is invalid
-	 * 			| thrust > maxThrust
+	 * 			The given thrust is not a valid thrust for any drone.
+	 * 		  | thrust > this.maxThrust()
 	 */
-	public RealVector getAcceleration(float thrust, float leftWingInclination, float rightWingInclination, float horStabInclination, float verStabInclination) throws IllegalArgumentException {
+	public RealVector getAcceleration(float thrust, float leftWingInclination, float rightWingInclination, float horStabInclination, float verStabInclination)
+			throws IllegalArgumentException {
 		if (thrust > this.getMaxThrust())
 			throw new IllegalArgumentException();
 		
@@ -984,19 +960,19 @@ public class Drone extends WorldObject {
 	}
 	
 	/**
-	 * Calculate the angular acceleration of the drone's center of mass, through the equilibrium of moment
+	 * Calculate the angular accelerations around this drone's center of mass, with the momentum equation.
 	 * @param leftWingInclination
-	 * 			The current inclination of the Left Wing
+	 * 			The current inclination of the Left Wing.
 	 * @param rightWingInclination
-	 * 			The current inclination of the Right Wing
+	 * 			The current inclination of the Right Wing.
 	 * @param horStabInclination
-	 * 			The current inclination of the Horizontal Stabilizer
+	 * 			The current inclination of the Horizontal Stabilizer.
 	 * @param verStabInclination
-	 * 			The current inclination of the Vertical Stabilizer
-	 * @return  The angular acceleration of the drone's center of mass
-	 * 			The first element is the heading angular acceleration
-	 * 			The second element is the pitch angular acceleration
-	 * 			The third element is the roll angular acceleration
+	 * 			The current inclination of the Vertical Stabilizer.
+	 * @return  The angular accelerations around this drone's center of mass.
+	 * 			The first element is the heading angular acceleration.
+	 * 			The second element is the pitch angular acceleration.
+	 * 			The third element is the roll angular acceleration.
 	 */
 	public float[] getAngularAccelerations(float leftWingInclination, float rightWingInclination, float horStabInclination, float verStabInclination, float thrust) {
 		float inertiaMatrixXX = (float) (this.getTailMass()*Math.pow(this.getTailSize(),2) + this.getEngineMass()*Math.pow(this.getEngineDistance(), 2));
@@ -1057,6 +1033,5 @@ public class Drone extends WorldObject {
 		RealVector solution = solver.solve(constants);
 		
 		return new float[] {(float)solution.getEntry(0), (float)solution.getEntry(1), (float)solution.getEntry(2)};
-	}
-	
+	}	
 }
