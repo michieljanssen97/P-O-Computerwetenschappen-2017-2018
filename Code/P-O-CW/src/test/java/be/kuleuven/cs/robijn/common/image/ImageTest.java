@@ -1,13 +1,13 @@
 package be.kuleuven.cs.robijn.common.image;
 
-import static org.junit.Assert.*;
-
 import java.awt.Color;
 import java.io.File;
 import java.nio.file.Files;
 
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.*;
+
 
 public class ImageTest {
 
