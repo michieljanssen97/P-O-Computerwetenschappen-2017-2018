@@ -4,6 +4,11 @@ import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
 import p_en_o_cw_2017.*;
 
+/**
+ * A class of drones.
+ * 
+ * @author Pieter Vandensande en Roy De Prins
+ */
 public class Drone extends WorldObject {
 	
 	
