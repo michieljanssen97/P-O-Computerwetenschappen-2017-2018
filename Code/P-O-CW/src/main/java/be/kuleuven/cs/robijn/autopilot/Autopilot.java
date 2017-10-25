@@ -9,7 +9,9 @@ import p_en_o_cw_2017.*;
 
 public class Autopilot extends WorldObject implements AutoPilot {
 	
-	public Autopilot() {
+	public Autopilot(AutopilotConfig config) {
+		Drone drone = new Drone(config, new ArrayRealVector(new double[] {0, 0, -1000.0/3.6}, false));
+		this.addChild(drone);
 	}
 	
 	/**

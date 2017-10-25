@@ -7,7 +7,9 @@ import p_en_o_cw_2017.*;
 
 public class VirtualTestbed extends WorldObject implements TestBed {
 	
-	public VirtualTestbed() {
+	public VirtualTestbed(AutopilotConfig config) {
+		Drone drone = new Drone(config, new ArrayRealVector(new double[] {0, 0, -1000.0/3.6}, false));
+		this.addChild(drone);
 	}
 	
 	/**
@@ -26,7 +28,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	 *         This virtual testbed has no drone.
 	 *         drone == null
 	 */
-	public void moveDrone(float dt, AutopilotOutputs inputs) throws IllegalArgumentException, IllegalStateException {
+	public void moveDrone(float dt, AutopilotOutputs output) throws IllegalArgumentException, IllegalStateException {
 		if (dt < 0)
 			throw new IllegalArgumentException();
 		Drone drone = this.getFirstChildOfType(Drone.class);
@@ -34,14 +36,14 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 			throw new IllegalStateException("this virtual testbed has no drone");
 		RealVector position = drone.getWorldPosition();
 		RealVector velocity = drone.getVelocity();
-		RealVector acceleration = drone.getAcceleration(inputs.getThrust(),
-				inputs.getLeftWingInclination(), inputs.getRightWingInclination(), inputs.getRightWingInclination(), inputs.getVerStabInclination());
+		RealVector acceleration = drone.getAcceleration(output.getThrust(),
+				output.getLeftWingInclination(), output.getRightWingInclination(), output.getRightWingInclination(), output.getVerStabInclination());
 		
 		drone.setRelativePosition(position.add(velocity.mapMultiply(dt)).add(acceleration.mapMultiply(Math.pow(dt, 2)/2)));
 		drone.setVelocity(velocity.add(acceleration.mapMultiply(dt)));
 		
-		float[] angularAccelerations = drone.getAngularAccelerations(inputs.getLeftWingInclination(),
-				inputs.getRightWingInclination(), inputs.getRightWingInclination(), inputs.getVerStabInclination(), inputs.getThrust());
+		float[] angularAccelerations = drone.getAngularAccelerations(output.getLeftWingInclination(),
+				output.getRightWingInclination(), output.getRightWingInclination(), output.getVerStabInclination(), output.getThrust());
 		float heading = drone.getHeading();
 		float headingAngularVelocity = drone.getHeadingAngularVelocity();
 		float headingAngularAcceleration = angularAccelerations[0];
@@ -60,11 +62,38 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		drone.setPitchAngularVelocity(pitchAngularVelocity + pitchAngularAcceleration*dt);
 		drone.setRollAngularVelocity(rollAngularVelocity + rollAngularAcceleration*dt);
 	}
+	
+	public void setElapsedTime(long elapsedTime) {
+		this.elapsedTime = elapsedTime;
+	}
+	
+	private long elapsedTime = 0;
+	
+	public long getElapsedTime() {
+		return elapsedTime;
+	}
 
-	@Override
-	public AutopilotInputs update(AutopilotOutputs output) {
-		// TODO Auto-generated method stub
-		return null;
+	public long getBeginSimulation() {
+		return beginSimulation;
+	}
+
+	private final long beginSimulation = System.currentTimeMillis();
+	
+	public long getLastUpdate() {
+		return lastUpdate;
+	}
+
+	private long lastUpdate = System.currentTimeMillis();
+	
+	public void setLastUpdate(long lastUpdate) {
+		this.lastUpdate = lastUpdate;
+	}
+	
+	public void update(AutopilotOutputs output) {
+		long now = System.currentTimeMillis();
+		this.setElapsedTime(now - this.getBeginSimulation());
+		this.moveDrone((float)(now- this.getLastUpdate())/1000f, output);
+		this.setLastUpdate(now);
 	}
 	
 	private OpenGLRenderer renderer;
@@ -73,5 +102,19 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		if (renderer == null)
 			renderer = OpenGLRenderer.create();
 		return renderer;
+	}
+
+	public AutopilotInputs getInputs() {
+		Drone drone = this.getFirstChildOfType(Drone.class);
+		return new AutopilotInputs() {
+            public byte[] getImage() { return null; }
+            public float getX() { return (float) drone.getWorldPosition().getEntry(0); }
+            public float getY() { return (float) drone.getWorldPosition().getEntry(1); }
+            public float getZ() { return (float) drone.getWorldPosition().getEntry(2); }
+            public float getHeading() { return drone.getHeading(); }
+            public float getPitch() { return drone.getPitch(); }
+            public float getRoll() { return drone.getRoll(); }
+            public float getElapsedTime() { return this.getElapsedTime(); }
+        };
 	}
 }
