@@ -11,10 +11,6 @@ import static org.junit.Assert.*;
 
 public class ImageTest {
 
-	@Before
-	public void setUp() throws Exception {
-	}
-
 	@Test
 	public void testRGBtoHSV() {
 		float[] hsv = new float[3];
@@ -33,7 +29,7 @@ public class ImageTest {
 	@Test
 	public void testRedCenterPixel5x5() throws Exception {
 		ImageRecognizer rec = new ImageRecognizer();
-		byte[] image1 = Files.readAllBytes(new File("C:\\Users\\rafhe\\Desktop\\Test Images\\5x5-Red-255-0-0-Center-3-3.png").toPath());
+		byte[] image1 = Files.readAllBytes(new File("test/java/be/kuleuven/cs/robijn/common/image/5x5-Red-255-0-0-Center-3-3.png"));
 		Image im = rec.createImage(image1, 5, 5, 120, 120);
 		int[] redCo = rec.getRedCubeAveragePixel(im);
 		int[] expected = {3,3};
