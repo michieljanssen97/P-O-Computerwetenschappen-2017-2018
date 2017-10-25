@@ -32,7 +32,7 @@ public class ImageTest {
 	@Test
 	public void testRedCenterPixel5x5() throws Exception {
 		ImageRecognizer rec = new ImageRecognizer();
-		byte[] image1 = Files.readAllBytes(new File("C:\\Users\\Gebruiker\\Desktop\\Test Images\\5x5-Red-255-0-0-Center-3-3.png").toPath());
+		byte[] image1 = Files.readAllBytes(new File("C:\\Users\\rafhe\\Desktop\\Test Images\\5x5-Red-255-0-0-Center-3-3.png").toPath());
 		Image im = rec.createImage(image1, 5, 5, 120, 120);
 		int[] redCo = rec.getRedCubeAveragePixel(im);
 		int[] expected = {3,3};
@@ -42,7 +42,7 @@ public class ImageTest {
 	@Test
 	public void testRedCenterPixel10x10() throws Exception {
 		ImageRecognizer rec = new ImageRecognizer();
-		byte[] image1 = Files.readAllBytes(new File("C:\\Users\\Gebruiker\\Desktop\\Test Images\\10x10-Red-255-0-0-Center-3-2.png").toPath());
+		byte[] image1 = Files.readAllBytes(new File("C:\\Users\\rafhe\\Desktop\\Test Images\\10x10-Red-255-0-0-Center-3-2.png").toPath());
 		Image im = rec.createImage(image1, 10, 10, 120, 120);
 		int[] redCo = rec.getRedCubeAveragePixel(im);
 		int[] expected = {3,2};
@@ -52,7 +52,7 @@ public class ImageTest {
 	@Test
 	public void testCenterPixel5x5() throws Exception {
 		ImageRecognizer rec = new ImageRecognizer();
-		byte[] image1 = Files.readAllBytes(new File("C:\\Users\\Gebruiker\\Desktop\\Test Images\\5x5-Red-255-0-0-Center-3-3.png").toPath());
+		byte[] image1 = Files.readAllBytes(new File("C:\\Users\\rafhe\\Desktop\\Test Images\\5x5-Red-255-0-0-Center-3-3.png").toPath());
 		Image im = rec.createImage(image1, 5, 5, 120, 120);
 		int[] center = im.getCenterPixel();
 		int[] expected = {2,2};
@@ -293,9 +293,13 @@ public class ImageTest {
 	
 	@Test
 	public void test3DDistanceToCube3Corner() throws Exception {
-		byte[] image1 = Files.readAllBytes(new File("C:\\Users\\Gebruiker\\Desktop\\Test Images\\cube3sidecorner.png").toPath());
+		byte[] image1 = Files.readAllBytes(new File("C:\\Users\\rafhe\\Desktop\\Test Images\\cube3sidecorner.png").toPath());
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.get3DDistanceToCube()));
+		System.out.println(Float.toString(im.getTotalDistance()));
+		System.out.println(Float.toString(im.getXYZDistance().getX()));
+		System.out.println(Float.toString(im.getXYZDistance().getY()));
+		System.out.println(Float.toString(im.getXYZDistance().getZ()));
+		System.out.println(Integer.toString(im.getAmountSidesVisible()));
 		assertTrue(true);
 	}
 	
