@@ -1,4 +1,6 @@
-package image;
+package be.kuleuven.cs.robijn.common.image;
+
+import be.kuleuven.cs.robijn.common.math.Vector3f;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;

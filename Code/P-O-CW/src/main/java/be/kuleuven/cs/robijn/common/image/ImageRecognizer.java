@@ -1,6 +1,6 @@
-package image;
+package be.kuleuven.cs.robijn.common.image;
 
-//import math.Vector3f;
+import be.kuleuven.cs.robijn.common.math.Vector3f;
 
 /**
  * A class that can create and work with images.
