@@ -76,6 +76,14 @@ public class Autopilot extends WorldObject implements AutoPilot {
 			leftWingInclinationTemp = bestInclination;
 			rightWingInclinationTemp = bestInclination;
 		}
+		if ((drone.getRoll()*(360/(2*Math.PI))) > minDegrees) {
+			leftWingInclinationTemp += (1/360)*2*Math.PI;
+			rightWingInclinationTemp -= (1/360)*2*Math.PI;
+		}
+		if ((drone.getRoll()*(360/(2*Math.PI))) < -minDegrees) {
+			leftWingInclinationTemp -= (1/360)*2*Math.PI;
+			rightWingInclinationTemp += (1/360)*2*Math.PI;
+		}
 		if (drone.getVelocity().getNorm() > (1000.0/3.6))
 			thrustTemp = 0;
 		final float thrust = thrustTemp;
