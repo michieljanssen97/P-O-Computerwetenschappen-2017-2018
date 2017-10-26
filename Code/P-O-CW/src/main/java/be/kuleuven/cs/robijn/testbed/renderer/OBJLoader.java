@@ -3,14 +3,9 @@ package be.kuleuven.cs.robijn.testbed.renderer;
 import be.kuleuven.cs.robijn.common.Resources;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-import org.joml.Vector3i;
-
 import java.io.*;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class OBJLoader {
     public static Mesh loadFromResources(String resourceName){

@@ -1,7 +1,6 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.Camera;
-import be.kuleuven.cs.robijn.common.math.Vector3f;
 
 public class OpenGLCamera extends Camera {
 	private float fovHorizontal = (float)Math.PI/2f;

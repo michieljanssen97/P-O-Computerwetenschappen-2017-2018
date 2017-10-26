@@ -2,9 +2,7 @@ package be.kuleuven.cs.robijn.testbed.renderer;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL12;
-
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
 import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
