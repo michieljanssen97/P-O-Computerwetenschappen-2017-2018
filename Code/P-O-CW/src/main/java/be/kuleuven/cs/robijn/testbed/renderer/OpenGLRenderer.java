@@ -195,10 +195,14 @@ public class OpenGLRenderer implements Renderer {
         //The colorspace issue is fixed in OpenGLFrameBuffer, and the flipped image is fixed here by rendering the world
         //with the camera rotated 180° so that upon reading, the correct result is produced.
         viewMatrix.rotate((float)Math.PI, 0, 0 , 1);
-        viewMatrix.rotate(camera.getRotation().getX(), 1, 0 , 0);
-        viewMatrix.rotate(camera.getRotation().getY(), 0, 1 , 0);
-        viewMatrix.rotate(camera.getRotation().getZ(), 0, 0 , 1);
-        viewMatrix.translate(-camera.getPosition().getX(), -camera.getPosition().getY(), -camera.getPosition().getZ());
+        viewMatrix.rotate((float)camera.getRotation().getEntry(0), 1, 0 , 0);
+        viewMatrix.rotate((float)camera.getRotation().getEntry(1), 0, 1 , 0);
+        viewMatrix.rotate((float)camera.getRotation().getEntry(2), 0, 0 , 1);
+        viewMatrix.translate(
+                (float) -camera.getWorldPosition().getEntry(0),
+                (float) -camera.getWorldPosition().getEntry(1),
+                (float) -camera.getWorldPosition().getEntry(2)
+        );
         return viewMatrix;
     }
 
