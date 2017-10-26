@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<fx:root type="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <AnchorPane fx:id="contentHost" AnchorPane.leftAnchor="0" AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0">
+
+      </AnchorPane>
+      <Button fx:id="splitHorizontallyButton" mnemonicParsing="false" text="⍆" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+         <padding>
+            <Insets bottom="2.0" left="8.0" right="8.0" top="2.0" />
+         </padding>
+      </Button>
+      <Button fx:id="splitVerticallyButton" mnemonicParsing="false" text="⍖" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+         <padding>
+            <Insets bottom="2.0" left="8.0" right="8.0" top="2.0" />
+         </padding>
+      </Button>
+   </children>
+</fx:root>
