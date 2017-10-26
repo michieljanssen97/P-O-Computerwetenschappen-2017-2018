@@ -14,6 +14,10 @@ import static org.lwjgl.opengl.GL32.*;
 
 public class OpenGLFrameBuffer implements FrameBuffer {
     public static OpenGLFrameBuffer create(int width, int height){
+        if(width <= 0 || height <= 0){
+            throw new IllegalArgumentException("Invalid framebuffer width or height");
+        }
+
         int fbo = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
@@ -27,8 +31,9 @@ public class OpenGLFrameBuffer implements FrameBuffer {
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
 
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            throw new RuntimeException("Frame buffer incomplete!");
+        int framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE) {
+            throw new RuntimeException("Frame buffer incomplete! (errorcode = "+framebufferStatus+")");
         }
 
         int bytesPerPixel = 3; //Because RGB
@@ -45,6 +50,10 @@ public class OpenGLFrameBuffer implements FrameBuffer {
     private ByteBuffer buf;
 
     private OpenGLFrameBuffer(int frameBufferId, int renderBufferId, int width, int height, int bytesPerPixel, ByteBuffer buffer){
+        if(buffer.capacity() < width*height*bytesPerPixel){
+            throw new IllegalArgumentException("buffer is too small");
+        }
+
         this.frameBufferId = frameBufferId;
         this.renderBufferId = renderBufferId;
         this.width = width;
@@ -67,7 +76,7 @@ public class OpenGLFrameBuffer implements FrameBuffer {
 
     @Override
     public void readPixels(byte[] data) {
-        if(data.length < width * height * bytesPerPixel){
+        if(data.length < width*height*bytesPerPixel){
             throw new IllegalArgumentException("target buffer is too small");
         }
 
@@ -84,6 +93,7 @@ public class OpenGLFrameBuffer implements FrameBuffer {
 
         //Make sure we write to the begin of the buffer
         buf.position(0);
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
         //Read frame from GPU to RAM
         glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, buf);
 
