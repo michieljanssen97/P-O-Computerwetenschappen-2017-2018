@@ -22,4 +22,9 @@ public interface TestBed {
      * @return the renderer used by the testbed.
      */
     Renderer getRenderer();
+
+	/**
+	 * Returns the internal representation of the world used for rendering and physics updates
+	 */
+	WorldObject getWorldRepresentation();
 }
