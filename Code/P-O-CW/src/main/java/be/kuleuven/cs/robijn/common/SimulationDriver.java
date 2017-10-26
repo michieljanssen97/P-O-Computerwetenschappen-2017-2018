@@ -15,7 +15,7 @@ public class SimulationDriver {
     private WorldObject world;
     private TestBed testBed;
     private AutoPilot autoPilot;
-    private boolean simulationPaused = true;
+    private boolean simulationPaused;
     private AutopilotInputs latestAutopilotInputs;
     private AutopilotOutputs latestAutopilotOutputs;
 
