@@ -130,9 +130,11 @@ public class OpenGLRenderer implements Renderer {
         Model model = null;
         if(obj instanceof Box){
             model = boxModel;
-        }/*else if(obj instanceof Drone){
+        }else if(obj instanceof Drone){
             model = droneModel;
-        }*/
+        }else{
+            return;
+        }
 
         //Setup per-object matrices
         Matrix4f modelMatrix = createModelMatrix(obj.getWorldPosition(), obj.getRotation(), new ArrayRealVector(new double[]{1, 1, 1}, false));
