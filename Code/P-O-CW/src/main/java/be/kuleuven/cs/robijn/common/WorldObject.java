@@ -3,6 +3,8 @@ package be.kuleuven.cs.robijn.common;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
@@ -12,6 +14,7 @@ public class WorldObject {
     private ArrayList<WorldObject> children = new ArrayList<>();
     private RealVector position = new ArrayRealVector(new double[]{0, 0, 0}, false);
     private RealVector rotation = new ArrayRealVector(new double[]{0, 0, 0}, false);
+    private String name = "";
 
     /**
      * Returns an immutable list of the children of this object.
@@ -38,6 +41,37 @@ public class WorldObject {
         }
 
         return null;
+    }
+
+    /**
+     * Searches the direct children of this object and returns the first child with a matching name and type.
+     * If no such object is found, null is returned.
+     * @param name the name of the object to be returned.
+     * @param clazz the class of the child to return. Must not be null.
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends WorldObject> T getChildByName(String name, Class<T> clazz){
+        if(clazz == null){
+            throw new IllegalArgumentException("clazz cannot be null");
+        }
+
+        for(WorldObject child : children){
+            if(child.getClass().isAssignableFrom(clazz) && Objects.equals(name, child.getName())){
+                return (T)child;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns a stream with this object, this objects children, their children and so on.
+     */
+    public Stream<WorldObject> getDescendantsStream(){
+        return Stream.concat(
+                Stream.of(this),
+                getChildren().stream().flatMap(WorldObject::getDescendantsStream)
+        );
     }
 
     /**
@@ -132,6 +166,21 @@ public class WorldObject {
         }
 
         this.rotation = vector;
+    }
+
+    /**
+     * Returns the name of this object. If no name was set using setName(), this method return "".
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Sets the name of this object.
+     * @param name the new name of this object.
+     */
+    public void setName(String name) {
+        this.name = name;
     }
 }
 

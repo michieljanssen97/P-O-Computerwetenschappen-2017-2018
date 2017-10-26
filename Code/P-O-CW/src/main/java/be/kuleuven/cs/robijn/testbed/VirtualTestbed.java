@@ -125,6 +125,11 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		return renderer;
 	}
 
+	@Override
+	public WorldObject getWorldRepresentation() {
+		return this;
+	}
+
 	public AutopilotInputs getInputs() {
 		Drone drone = this.getFirstChildOfType(Drone.class);
 		return new AutopilotInputs() {
