@@ -9,6 +9,7 @@ import javax.imageio.ImageIO;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 
 /**
  * A class that represents images.
@@ -51,14 +52,21 @@ public class Image {
 	 * @param verticalAngleOfView	The vertical angle of view.
 	 * @throws IOException	One of the parameters is invalid or the image cannot be read.
 	 */
-	public Image(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView) throws Exception{
+	public Image(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView) {
 		if ( (!isValidImage(image, nbRows, nbColumns)) || (!isValidAngle(horizontalAngleOfView)) || (!isValidAngle(verticalAngleOfView)) )
-			throw new Exception("The given byte array is invalid or does not have the right dimensions.");
+			throw new IllegalArgumentException("The given byte array is invalid or does not have the right dimensions.");
 		this.nbRows = nbRows;
 		this.nbColumns = nbColumns;
 		this.horizontalAngleOfView = horizontalAngleOfView;
 		this.verticalAngleOfView = verticalAngleOfView;
-		this.image = ImageIO.read(new ByteArrayInputStream(image));
+		for(int i = 0; i < nbColumns * nbRows; i++){
+			byte b = image[(i*3)+0];
+			image[(i*3)+0] = image[(i*3)+2];
+			image[(i*3)+2] = b;
+		}
+		this.image = new BufferedImage(nbColumns, nbRows, BufferedImage.TYPE_3BYTE_BGR);
+		byte[] imageBackingBuffer = ((DataBufferByte) this.image.getRaster().getDataBuffer()).getData();
+		System.arraycopy(image, 0, imageBackingBuffer, 0, image.length);
 	}
 	
 	/**
@@ -69,7 +77,7 @@ public class Image {
 	 * @return	True if the number of rows and columns and the length of the image are strictly positive
 	 */
 	private boolean isValidImage(byte[] image, int nbRows, int nbColumns){
-		return (nbRows > 0) && (nbColumns > 0) && (image.length > 0);
+		return (nbRows > 0) && (nbColumns > 0) && (image.length == ((nbRows*nbColumns)*3));
 	}
 	
 	/**
@@ -123,9 +131,9 @@ public class Image {
 	 * @return	An array with 3 floats indicating the hue, saturation and value of the given pixel
 	 * @throws Exception	The given coordinates are invalid
 	 */
-	public float[] getPixelHSV(int x, int y) throws Exception{
+	public float[] getPixelHSV(int x, int y) {
 		if ((!isValidXCoordinate(x)) || (!isValidYCoordinate(y))) 
-			throw new Exception();
+			throw new IllegalArgumentException();
 		int rgb = getImage().getRGB(x, y);
 		Color col = new Color(rgb);
 		float[] hsv = new float[3];
@@ -157,8 +165,8 @@ public class Image {
 	 * @return	Whether or not the given color is part of the red spectrum.
 	 * @throws Exception	The given HSV is invalid.
 	 */
-	public static boolean isRedHSV(float[] hsv) throws Exception{
-		if (!isValidHSV(hsv)) {throw new Exception();}
+	public static boolean isRedHSV(float[] hsv) {
+		if (!isValidHSV(hsv)) {throw new IllegalArgumentException();}
 		float hue = hsv[0];
 		float saturation = hsv[1];
 		return (((hue >= (1.0 - (5.0/360.0))) || (hue <= (10.0/360.0))) && (saturation >= 0.25));
@@ -180,7 +188,7 @@ public class Image {
 	 * Returns a list of all red pixels in the image.
 	 * @throws Exception	The coordinates of the scanned pixels are invalid
 	 */
-	private ArrayList<Pixel> getRedPixels() throws Exception{
+	private ArrayList<Pixel> getRedPixels() {
 		ArrayList<Pixel> redPixels = new ArrayList<Pixel>();
 		for (int y = 0; y < getnbRows(); y++){
 			for (int x = 0; x < getnbColumns(); x++){
@@ -205,7 +213,7 @@ public class Image {
 	 * Calculates the average coordinates of the red pixels of the image.
 	 * @throws Exception	Something goes wrong while calculating the red pixels
 	 */
-	public int[] getAverageRedPixel() throws Exception{
+	public int[] getAverageRedPixel() {
 		ArrayList<Pixel> redPixels = getRedPixels();
 		int totalX = 0;
 		int totalY = 0;
@@ -252,7 +260,7 @@ public class Image {
 	 * Returns the rotation necessary to fly towards the red cube in the image.
 	 * @throws Exception	Something goes wrong while calculating the average coordinates of the red pixels
 	 */
-	public float[] getRotationToRedCube() throws Exception{
+	public float[] getRotationToRedCube() {
 		int[] averageRed = getAverageRedPixel();
 		int[] pixelsToRedCube = getPixelsFromCenter(averageRed[0], averageRed[1]);
 		return getNecessaryRotation(getHorizontalAngle(), getVerticalAngle(), pixelsToRedCube[0], pixelsToRedCube[1]);

@@ -22,7 +22,7 @@ public class ImageRecognizer {
 	 * @return	An instance of the Image class containing the given values
 	 * @throws Exception	One of the parameters is invalid or the image can't be read
 	 */
-	public Image createImage(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView) throws Exception{
+	public Image createImage(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView) {
 		return new Image(image, nbRows, nbColumns, horizontalAngleOfView, verticalAngleOfView);
 	}
 	
