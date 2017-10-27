@@ -1,14 +1,36 @@
 package be.kuleuven.cs.robijn.common.image;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 
 import org.junit.Test;
+
+import javax.imageio.ImageIO;
+
 import static org.junit.Assert.*;
 
 
 public class ImageTest {
+	private byte[] loadImageRGBBytes(String resourceName) throws IOException {
+		BufferedImage image = ImageIO.read(getClass().getClassLoader().getResource(resourceName));
+		byte[] rgbBytes = new byte[image.getWidth() * image.getHeight()];
+		for(int y = 0; y < image.getHeight(); y++){
+			for(int x = 0; x < image.getWidth(); x++){
+				int argb = image.getRGB(x, y);
+				byte r = (byte)((argb >> 16) & 0xFF);
+				byte g = (byte)((argb >>  8) & 0xFF);
+				byte b = (byte)((argb >>  0) & 0xFF);
+				int offset = ((y*image.getWidth()) + x) * 3;
+				rgbBytes[offset] = r;
+				rgbBytes[offset+1] = g;
+				rgbBytes[offset+2] = b;
+			}
+		}
+		return rgbBytes;
+	}
 
 	@Test
 	public void testRGBtoHSV() {
