@@ -1,5 +1,6 @@
 package be.kuleuven.cs.robijn.common;
 
+import org.apache.commons.math3.geometry.euclidean.threed.*;
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
 import p_en_o_cw_2017.*;
@@ -592,6 +593,28 @@ public class Drone extends WorldObject {
 		return this.rollTransformation(this.pitchTransformation(this.headingTransformation(realVector)));
 	}
 	
+	public RealMatrix getRotationMatrix() {
+		float rollAngle = this.getRoll();
+		float pitchAngle = this.getPitch();
+		float headingAngle = this.getHeading();
+		RealMatrix rollTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for roll
+			{Math.cos(rollAngle),      Math.sin(rollAngle),    0},
+			{-Math.sin(rollAngle),     Math.cos(rollAngle),    0}, 
+			{0,                        0,                      1}
+			}, false);
+		RealMatrix pitchTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for pitch
+			{1,       0,                          0},
+			{0,       Math.cos(pitchAngle),       Math.sin(pitchAngle)},
+			{0,      -Math.sin(pitchAngle),       Math.cos(pitchAngle)}
+			}, false);
+		RealMatrix headingTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for heading
+			{Math.cos(headingAngle),       0,          -Math.sin(headingAngle)},
+			{0,                            1,           0}, 
+			{Math.sin(headingAngle),       0,           Math.cos(headingAngle)}
+			}, false);
+		return rollTransformation.multiply(pitchTransformation.multiply(headingTransformation));	
+	}
+	
     //     -----------------      //
     //                            //
     //  TRANSFORMATION MATRICES   //				DRONE TO WORLD COORDINATES
@@ -962,6 +985,13 @@ public class Drone extends WorldObject {
 		float totalMass = this.getEngineMass() + (2*this.getWingMass()) + this.getTailMass();
 		
 		return totalForce.mapMultiply(1/totalMass);
+	}
+	
+	@Override
+	public RealVector getRotation() {
+		Rotation rotation = new Rotation(this.getRotationMatrix().getData(), 0.0001);
+		double[] angles = rotation.getAngles(RotationOrder.XYZ);
+		return new ArrayRealVector(angles, false);
 	}
 	
 	/**

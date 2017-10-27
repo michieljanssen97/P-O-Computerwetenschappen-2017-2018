@@ -138,6 +138,8 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 
 	public AutopilotInputs getInputs() {
 		Drone drone = this.getFirstChildOfType(Drone.class);
+		if (latestCameraImage == null)
+			renderCameraView();
 		return new AutopilotInputs() {
             public byte[] getImage() { return latestCameraImage; }
             public float getX() { return (float) drone.getWorldPosition().getEntry(0); }
@@ -167,7 +169,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 
 		Renderer renderer = getRenderer();
 		if(frameBuffer == null){
-			renderer.createFrameBuffer(config.getNbColumns(), config.getNbRows());
+			frameBuffer = renderer.createFrameBuffer(config.getNbColumns(), config.getNbRows());
 		}
 		if(droneCamera == null){
 			droneCamera = createDroneCamera();
