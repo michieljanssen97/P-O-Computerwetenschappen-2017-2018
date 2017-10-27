@@ -117,20 +117,20 @@ public class OpenGLRenderer implements Renderer {
 
         //Render objects
         for (WorldObject child : worldRoot.getChildren()){
-            renderChildren(child, viewProjectionMatrix);
+            renderChildren(child, viewProjectionMatrix, !openglCamera.areDronesHidden());
         }
     }
 
-    private void renderChildren(WorldObject obj, Matrix4f viewProjectionMatrix){
+    private void renderChildren(WorldObject obj, Matrix4f viewProjectionMatrix, boolean renderDrones){
         //Recursively render children
         for (WorldObject child : obj.getChildren()){
-            renderChildren(child, viewProjectionMatrix);
+            renderChildren(child, viewProjectionMatrix, renderDrones);
         }
 
         Model model = null;
         if(obj instanceof Box){
             model = boxModel;
-        }else if(obj instanceof Drone){
+        }else if(obj instanceof Drone && renderDrones){
             model = droneModel;
         }else{
             return;
