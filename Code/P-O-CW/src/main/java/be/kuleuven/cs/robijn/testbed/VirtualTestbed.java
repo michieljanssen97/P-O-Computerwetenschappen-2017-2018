@@ -23,8 +23,9 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		Drone drone = new Drone(config, new ArrayRealVector(new double[] {0, 0, -933.0/3.6}, false));
 		this.addChild(drone);
 		Box box = new Box();
-		double zDistance = (933.0/240.0)*1000.0;
-		box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/3.0), zDistance*Math.tan(Math.PI/3.0), -zDistance}, false));
+		//double zDistance = (933.0/240.0)*1000.0;
+		//box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/6.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		box.setRelativePosition(new ArrayRealVector(new double[] {10, 10, -50}, false));
 		this.addChild(box);
 	}
 	
@@ -152,7 +153,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
             public float getHeading() { return drone.getHeading(); }
             public float getPitch() { return drone.getPitch(); }
             public float getRoll() { return drone.getRoll(); }
-            public float getElapsedTime() { return this.getElapsedTime(); }
+            public float getElapsedTime() { return VirtualTestbed.this.getElapsedTime(); }
         };
 	}
 
