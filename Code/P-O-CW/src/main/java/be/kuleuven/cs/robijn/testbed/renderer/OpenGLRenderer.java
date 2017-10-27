@@ -194,7 +194,8 @@ public class OpenGLRenderer implements Renderer {
         //This means that RGB pixels become BGR pixels and that the image is flipped vertically and horizontally (rotate 180°)
         //The colorspace issue is fixed in OpenGLFrameBuffer, and the flipped image is fixed here by rendering the world
         //with the camera rotated 180° so that upon reading, the correct result is produced.
-        viewMatrix.rotate((float)Math.PI, 0, 0 , 1);
+        //viewMatrix.rotate((float)Math.PI, 0, 0 , 1);
+        viewMatrix.m11(-1); //Apparently we only need to flip vertically instead of rotation 180°
         viewMatrix.rotate((float)camera.getRotation().getEntry(0), 1, 0 , 0);
         viewMatrix.rotate((float)camera.getRotation().getEntry(1), 0, 1 , 0);
         viewMatrix.rotate((float)camera.getRotation().getEntry(2), 0, 0 , 1);
