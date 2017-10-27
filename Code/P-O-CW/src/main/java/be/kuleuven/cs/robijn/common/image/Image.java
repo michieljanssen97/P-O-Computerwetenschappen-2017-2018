@@ -213,8 +213,10 @@ public class Image {
 	 * Calculates the average coordinates of the red pixels of the image.
 	 * @throws Exception	Something goes wrong while calculating the red pixels
 	 */
-	public int[] getAverageRedPixel() {
+	public int[] getAverageRedPixel() throws IllegalStateException {
 		ArrayList<Pixel> redPixels = getRedPixels();
+		if (redPixels.size() == 0)
+			throw new IllegalStateException("there is no red cube on the camera image");
 		int totalX = 0;
 		int totalY = 0;
 		for (Pixel p : redPixels){

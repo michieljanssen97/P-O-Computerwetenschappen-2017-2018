@@ -20,8 +20,12 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 
 	public VirtualTestbed(AutopilotConfig config) {
 		this.config = config;
-		Drone drone = new Drone(config, new ArrayRealVector(new double[] {0, 0, -1000.0/3.6}, false));
+		Drone drone = new Drone(config, new ArrayRealVector(new double[] {0, 0, -933.0/3.6}, false));
 		this.addChild(drone);
+		Box box = new Box();
+		double zDistance = (933.0/240.0)*1000.0;
+		box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/3.0), zDistance*Math.tan(Math.PI/3.0), -zDistance}, false));
+		this.addChild(box);
 	}
 	
 	/**

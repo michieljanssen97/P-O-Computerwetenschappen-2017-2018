@@ -11,7 +11,7 @@ import p_en_o_cw_2017.*;
 public class Autopilot extends WorldObject implements AutoPilot {
 	
 	public Autopilot(AutopilotConfig config) throws IllegalArgumentException {
-		Drone drone = new Drone(config, new ArrayRealVector(new double[] {0, 0, -1000.0/3.6}, false));
+		Drone drone = new Drone(config, new ArrayRealVector(new double[] {0, 0, -933.0/3.6}, false));
 		this.addChild(drone);
 		if (! isValidConfig(config))
 			throw new IllegalArgumentException();
@@ -27,6 +27,22 @@ public class Autopilot extends WorldObject implements AutoPilot {
 	}
 	
 	private final AutopilotConfig config;
+	
+	public AutopilotOutputs getPreviousOutput() {
+		return this.previousOutput;
+	}
+	
+	public static boolean isValidPreviousOutput(AutopilotOutputs previousOutput) {
+		return (previousOutput != null);
+	}
+	
+	public void setPreviousOutput(AutopilotOutputs previousOutput) throws IllegalArgumentException {
+		if (! isValidPreviousOutput(previousOutput))
+			throw new IllegalArgumentException();
+		this.previousOutput = previousOutput;
+	}
+	
+	private AutopilotOutputs previousOutput = null;
 	
 	public float getPreviousElapsedTime() {
 		return previousElapsedTime;
@@ -49,6 +65,10 @@ public class Autopilot extends WorldObject implements AutoPilot {
 	 */
 	public AutopilotOutputs update(AutopilotInputs inputs) {
 		Drone drone = this.getFirstChildOfType(Drone.class);
+		if (this.getPreviousOutput() != null)
+			this.moveDrone(inputs.getElapsedTime()-this.getPreviousElapsedTime(), this.getPreviousOutput());
+        this.setPreviousElapsedTime(inputs.getElapsedTime());
+        
 		ImageRecognizer imagerecognizer = new ImageRecognizer();
 		Image image = imagerecognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
 				this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView());
@@ -63,8 +83,9 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		float thrustTemp = drone.getMaxThrust();
 		float minDegrees = 1;
 		float bestInclination = 0.86f;
-		if (bestInclination > drone.getMaxAOA())
-			bestInclination = drone.getMaxAOA();
+		if (bestInclination > drone.getMaxAOA()) {
+			bestInclination = this.preventCrash(drone.getMaxAOA(), drone);
+		}
 		if (imageYRotation > minDegrees)
 			verStabInclinationTemp =  -bestInclination;
 		else if (imageYRotation < -minDegrees)
@@ -76,21 +97,8 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		final float horStabInclination = horStabInclinationTemp;
 		final float verStabInclination = verStabInclinationTemp;
 		
-		RealVector distance1 = drone.transformationToWorldCoordinates(new ArrayRealVector(new double[] {drone.getWingX(), 0, 0}, false));
-		RealVector velocityWorldCoordinates1 = drone.calculateVelocityWorldCo(drone.getVelocity(), drone.getHeadingAngularVelocityVector(), 
-				   drone.getPitchAngularVelocityVector(), drone.getRollAngularVelocityVector(), distance1);
-
-		RealVector velocityDroneCoordinates1 = drone.transformationToDroneCoordinates(velocityWorldCoordinates1);
-		velocityDroneCoordinates1.setEntry(0, 0);
-		double projectedVelocityLeftWing = drone.transformationToWorldCoordinates(velocityDroneCoordinates1).getNorm();
-		
-		RealVector distance2 = drone.transformationToWorldCoordinates(new ArrayRealVector(new double[] {drone.getWingX(), 0, 0}, false));
-		RealVector velocityWorldCoordinates2 = drone.calculateVelocityWorldCo(drone.getVelocity(), drone.getHeadingAngularVelocityVector(), 
-				   drone.getPitchAngularVelocityVector(), drone.getRollAngularVelocityVector(), distance2);
-
-		RealVector velocityDroneCoordinates2 = drone.transformationToDroneCoordinates(velocityWorldCoordinates2);
-		velocityDroneCoordinates1.setEntry(0, 0);
-		double projectedVelocityRightWing = drone.transformationToWorldCoordinates(velocityDroneCoordinates2).getNorm();
+		double projectedVelocityLeftWing = drone.getProjectedVelocityLeftWing().getNorm();
+		double projectedVelocityRightWing = drone.getProjectedVelocityRightWing().getNorm();
 		
 		UnivariateFunction function = (x)->{return Math.cos(x)*x - ((drone.transformationToDroneCoordinates(drone.getGravitationalForceEngine()).getEntry(1)
 				+ drone.transformationToDroneCoordinates(drone.getGravitationalForceTail()).getEntry(1) 
@@ -112,12 +120,12 @@ public class Autopilot extends WorldObject implements AutoPilot {
 			rightWingInclinationTemp = bestInclination;
 		}
 		if ((drone.getRoll()*(360/(2*Math.PI))) > minDegrees) {
-			leftWingInclinationTemp += (1/360)*2*Math.PI;
-			rightWingInclinationTemp -= (1/360)*2*Math.PI;
+			leftWingInclinationTemp += (1.0/360.0)*2*Math.PI;
+			rightWingInclinationTemp -= (1.0/360.0)*2*Math.PI;
 		}
 		if ((drone.getRoll()*(360/(2*Math.PI))) < -minDegrees) {
-			leftWingInclinationTemp -= (1/360)*2*Math.PI;
-			rightWingInclinationTemp += (1/360)*2*Math.PI;
+			leftWingInclinationTemp -= (1.0/360.0)*2*Math.PI;
+			rightWingInclinationTemp += (1.0/360.0)*2*Math.PI;
 		}
 		if (drone.getVelocity().getNorm() > (1000.0/3.6))
 			thrustTemp = 0;
@@ -143,10 +151,50 @@ public class Autopilot extends WorldObject implements AutoPilot {
 			}
         };
         
-        this.moveDrone(inputs.getElapsedTime()-this.getPreviousElapsedTime(), output);
-        this.setPreviousElapsedTime(inputs.getElapsedTime());
-        
+        this.setPreviousOutput(output);
         return output;
+	}
+	
+	@SuppressWarnings("unused")
+	public float preventCrash(float inclination, Drone drone) {
+		float newInclination = inclination;
+		boolean crash = true;
+		while (crash == true) {
+			crash = false;
+			try {
+				float AOALeftWing = drone.calculateAOA(drone.getNormalHor(newInclination),
+						drone.getProjectedVelocityLeftWing(), drone.getAttackVectorHor(newInclination));
+			} catch (IllegalArgumentException exc) {
+				crash = true;
+			}
+			if (crash == false) {
+				try {
+					float AOARightWing = drone.calculateAOA(drone.getNormalHor(newInclination),
+							drone.getProjectedVelocityRightWing(), drone.getAttackVectorHor(newInclination));
+				} catch (IllegalArgumentException exc) {
+					crash = true;
+				}
+			}
+			if (crash == false) {
+				try {
+					float AOAHorStab = drone.calculateAOA(drone.getNormalHor(newInclination),
+							drone.getProjectedVelocityHorStab(), drone.getAttackVectorHor(newInclination));
+				} catch (IllegalArgumentException exc) {
+					crash = true;
+				}
+			}
+			if (crash == false) {
+				try {
+					float AOAVerStab = drone.calculateAOA(drone.getNormalVer(newInclination),
+							drone.getProjectedVelocityVerStab(), drone.getAttackVectorVer(newInclination));
+				} catch (IllegalArgumentException exc) {
+					crash = true;
+				}
+			}
+			if (crash == true)
+				newInclination -= (1.0/360.0)*2*Math.PI;
+		}
+		return newInclination;
 	}
 	
 	/**
