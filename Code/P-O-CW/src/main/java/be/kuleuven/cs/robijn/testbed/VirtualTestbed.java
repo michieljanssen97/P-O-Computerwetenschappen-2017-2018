@@ -68,15 +68,15 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		drone.setRollAngularVelocity(rollAngularVelocity + rollAngularAcceleration*dt);
 	}
 	
-	public void setElapsedTime(long elapsedTime) throws IllegalArgumentException {
+	public void setElapsedTime(float elapsedTime) throws IllegalArgumentException {
 		if (! isValidElapsedTime(elapsedTime))
 			throw new IllegalArgumentException();
 		this.elapsedTime = elapsedTime;
 	}
 	
-	private long elapsedTime = 0;
+	private float elapsedTime = 0;
 	
-	public long getElapsedTime() {
+	public float getElapsedTime() {
 		return elapsedTime;
 	}
 
@@ -90,8 +90,8 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		return lastUpdate;
 	}
 	
-	public static boolean isValidElapsedTime(long elapsedTime) {
-		return ((elapsedTime >= 0) & (elapsedTime <= Long.MAX_VALUE));
+	public static boolean isValidElapsedTime(float elapsedTime) {
+		return ((elapsedTime >= 0) & (elapsedTime <= Float.MAX_VALUE));
 	}
 	
 	public static boolean isValidBeginSimulation(long beginSimulation) {
@@ -112,7 +112,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	
 	public void update(AutopilotOutputs output) {
 		long now = System.currentTimeMillis();
-		this.setElapsedTime(now - this.getBeginSimulation());
+		this.setElapsedTime((float)(now - this.getBeginSimulation())/1000f);
 		this.moveDrone((float)(now- this.getLastUpdate())/1000f, output);
 		this.setLastUpdate(now);
 	}

@@ -5,27 +5,62 @@ import org.apache.commons.math3.analysis.solvers.*;
 import org.apache.commons.math3.exception.*;
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.*;
+import be.kuleuven.cs.robijn.common.image.*;
 import p_en_o_cw_2017.*;
 
 public class Autopilot extends WorldObject implements AutoPilot {
 	
-	public Autopilot(AutopilotConfig config) {
+	public Autopilot(AutopilotConfig config) throws IllegalArgumentException {
 		Drone drone = new Drone(config, new ArrayRealVector(new double[] {0, 0, -1000.0/3.6}, false));
 		this.addChild(drone);
+		if (! isValidConfig(config))
+			throw new IllegalArgumentException();
+		this.config = config;
+	}
+	
+	public AutopilotConfig getConfig() {
+		return this.config;
+	}
+	
+	public static boolean isValidConfig(AutopilotConfig config) {
+		return (config != null);
+	}
+	
+	private final AutopilotConfig config;
+	
+	public float getPreviousElapsedTime() {
+		return previousElapsedTime;
+	}
+	
+	public static boolean isValidPreviousElapsedTime(float previousElapsedTime) {
+		return ((previousElapsedTime >= 0) & (previousElapsedTime <= Float.MAX_VALUE));
+	}
+	
+	private float previousElapsedTime = 0;
+	
+	public void setPreviousElapsedTime(float previousElapsedTime) throws IllegalArgumentException {
+		if (! isValidPreviousElapsedTime(previousElapsedTime))
+			throw new IllegalArgumentException();
+		this.previousElapsedTime = previousElapsedTime;
 	}
 	
 	/**
 	 * Wel roll ten gevolge van verschillende snelheid van vleugels (door de rotaties).
 	 */
-	public AutopilotOutputs update(AutopilotInputs input) {
+	public AutopilotOutputs update(AutopilotInputs inputs) {
 		Drone drone = this.getFirstChildOfType(Drone.class);
+		ImageRecognizer imagerecognizer = new ImageRecognizer();
+		Image image = imagerecognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
+				this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView());
+		float [] necessaryRotation = image.getRotationToRedCube();
+		float imageYRotation = necessaryRotation[0];
+		float imageXRotation = necessaryRotation[1];
+		
 		float horStabInclinationTemp = 0;
 		float verStabInclinationTemp = 0;
 		float leftWingInclinationTemp = 0;
 		float rightWingInclinationTemp = 0;
 		float thrustTemp = drone.getMaxThrust();
-		float imageYRotation = 0;
-		float imageXRotation = 0;
 		float minDegrees = 1;
 		float bestInclination = 0.86f;
 		if (bestInclination > drone.getMaxAOA())
@@ -89,7 +124,8 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		final float thrust = thrustTemp;
 		final float leftWingInclination = leftWingInclinationTemp;
 		final float rightWingInclination = rightWingInclinationTemp;
-		return new AutopilotOutputs() {
+		
+		AutopilotOutputs output = new AutopilotOutputs() {
 			public float getThrust() {
 				return thrust;
 			}
@@ -106,6 +142,11 @@ public class Autopilot extends WorldObject implements AutoPilot {
 				return verStabInclination;
 			}
         };
+        
+        this.moveDrone(inputs.getElapsedTime()-this.getPreviousElapsedTime(), output);
+        this.setPreviousElapsedTime(inputs.getElapsedTime());
+        
+        return output;
 	}
 	
 	/**
