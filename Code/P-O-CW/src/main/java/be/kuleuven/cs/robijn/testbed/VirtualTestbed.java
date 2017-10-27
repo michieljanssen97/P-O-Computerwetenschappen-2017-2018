@@ -56,9 +56,6 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		RealVector acceleration = drone.getAcceleration(output.getThrust(),
 				output.getLeftWingInclination(), output.getRightWingInclination(), output.getRightWingInclination(), output.getVerStabInclination());
 		
-		drone.setRelativePosition(position.add(velocity.mapMultiply(dt)).add(acceleration.mapMultiply(Math.pow(dt, 2)/2)));
-		drone.setVelocity(velocity.add(acceleration.mapMultiply(dt)));
-		
 		float[] angularAccelerations = drone.getAngularAccelerations(output.getLeftWingInclination(),
 				output.getRightWingInclination(), output.getRightWingInclination(), output.getVerStabInclination(), output.getThrust());
 		float heading = drone.getHeading();
@@ -71,9 +68,21 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		float rollAngularVelocity = drone.getRollAngularVelocity();
 		float rollAngularAcceleration = angularAccelerations[2];
 		
-		drone.setHeading((float) ((heading + headingAngularVelocity*dt + headingAngularAcceleration*(Math.pow(dt, 2)/2)) % (2*Math.PI)));
-		drone.setPitch((float) ((pitch + pitchAngularVelocity*dt + pitchAngularAcceleration*(Math.pow(dt, 2)/2)) % (2*Math.PI)));
-		drone.setRoll((float) ((roll + rollAngularVelocity*dt + rollAngularAcceleration*(Math.pow(dt, 2)/2)) % (2*Math.PI)));
+		drone.setRelativePosition(position.add(velocity.mapMultiply(dt)).add(acceleration.mapMultiply(Math.pow(dt, 2)/2)));
+		drone.setVelocity(velocity.add(acceleration.mapMultiply(dt)));
+		
+		float newHeading = (float) ((heading + headingAngularVelocity*dt + headingAngularAcceleration*(Math.pow(dt, 2)/2)) % (2*Math.PI));
+		if (newHeading < 0)
+			newHeading += (2*Math.PI);
+		float newPitch = (float) ((pitch + pitchAngularVelocity*dt + pitchAngularAcceleration*(Math.pow(dt, 2)/2)) % (2*Math.PI));
+		if (newPitch < 0)
+			newPitch += (2*Math.PI);
+		float newRoll = (float) ((roll + rollAngularVelocity*dt + rollAngularAcceleration*(Math.pow(dt, 2)/2)) % (2*Math.PI));
+		if (newRoll < 0)
+			newRoll += (2*Math.PI);
+		drone.setHeading(newHeading);
+		drone.setPitch(newPitch);
+		drone.setRoll(newRoll);
 		
 		drone.setHeadingAngularVelocity(headingAngularVelocity + headingAngularAcceleration*dt);
 		drone.setPitchAngularVelocity(pitchAngularVelocity + pitchAngularAcceleration*dt);
