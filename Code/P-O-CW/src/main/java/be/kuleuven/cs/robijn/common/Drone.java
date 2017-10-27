@@ -861,7 +861,7 @@ public class Drone extends WorldObject {
 	 */
 	public float calculateAOA(RealVector normal, RealVector projectedVelocity, RealVector attackVector) throws IllegalArgumentException {
 		float AOA = (float) -Math.atan2(normal.dotProduct(projectedVelocity), attackVector.dotProduct(projectedVelocity));
-		if (AOA > this.maxAOA) {
+		if ((AOA > this.maxAOA) || (AOA < -this.maxAOA)) {
 			throw new IllegalArgumentException();
 		}
 		return AOA;

@@ -83,8 +83,9 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		float thrustTemp = drone.getMaxThrust();
 		float minDegrees = 1;
 		float bestInclination = 0.86f;
-		if (bestInclination > drone.getMaxAOA()) {
-			bestInclination = this.preventCrash(drone.getMaxAOA(), drone);
+		float maxInclination = this.preventCrash(drone.getMaxAOA(), drone);
+		if (bestInclination > maxInclination) {
+			bestInclination = maxInclination;
 		}
 		if (imageYRotation > minDegrees)
 			verStabInclinationTemp =  -bestInclination;
@@ -112,20 +113,18 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		int maxOrder = 5;
 		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
 		try {
-			double solution = solver.solve(100, function, 0.0, Math.PI/2);
+			double solution = solver.solve(100, function, (1.0/360.0)*2*Math.PI, (49.0/360.0)*2*Math.PI);
 			rightWingInclinationTemp = (float) solution;
 			leftWingInclinationTemp = (float) solution;
-		} catch (TooManyEvaluationsException exc) {
+		} catch (NoBracketingException exc) {
 			leftWingInclinationTemp = bestInclination;
 			rightWingInclinationTemp = bestInclination;
 		}
 		if ((drone.getRoll()*(360/(2*Math.PI))) > minDegrees) {
-			leftWingInclinationTemp += (1.0/360.0)*2*Math.PI;
 			rightWingInclinationTemp -= (1.0/360.0)*2*Math.PI;
 		}
 		if ((drone.getRoll()*(360/(2*Math.PI))) < -minDegrees) {
 			leftWingInclinationTemp -= (1.0/360.0)*2*Math.PI;
-			rightWingInclinationTemp += (1.0/360.0)*2*Math.PI;
 		}
 		if (drone.getVelocity().getNorm() > (1000.0/3.6))
 			thrustTemp = 0;
