@@ -11,10 +11,10 @@ import p_en_o_cw_2017.*;
 public class Autopilot extends WorldObject implements AutoPilot {
 	
 	public Autopilot(AutopilotConfig config) throws IllegalArgumentException {
-		Drone drone = new Drone(config, new ArrayRealVector(new double[] {0, 0, -933.0/3.6}, false));
-		this.addChild(drone);
 		if (! isValidConfig(config))
 			throw new IllegalArgumentException();
+		Drone drone = new Drone(config, new ArrayRealVector(new double[] {0, 0, -933.0/3.6}, false));
+		this.addChild(drone);
 		this.config = config;
 	}
 	
