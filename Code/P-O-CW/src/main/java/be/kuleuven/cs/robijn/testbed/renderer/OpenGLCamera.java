@@ -5,6 +5,7 @@ import be.kuleuven.cs.robijn.common.Camera;
 public class OpenGLCamera extends Camera {
 	private float fovHorizontal = (float)Math.PI/2f;
 	private float fovVertical = (float)Math.PI/2f;
+	private boolean areDroneHidden;
 
 	@Override
 	public float getHorizontalFOV() {
@@ -24,5 +25,15 @@ public class OpenGLCamera extends Camera {
 	@Override
 	public void setVerticalFOV(float fov) {
 		this.fovVertical = fov;
+	}
+
+	@Override
+	public void setDronesHidden(boolean renderDrones) {
+		areDroneHidden = renderDrones;
+	}
+
+	@Override
+	public boolean areDronesHidden() {
+		return areDroneHidden;
 	}
 }

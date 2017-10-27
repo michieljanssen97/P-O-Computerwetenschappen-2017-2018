@@ -11,8 +11,15 @@ import p_en_o_cw_2017.*;
  * @author Pieter Vandensande en Roy De Prins.
  */
 public class VirtualTestbed extends WorldObject implements TestBed {
-	
+	private final AutopilotConfig config;
+
+	private OpenGLRenderer renderer;
+	private FrameBuffer frameBuffer;
+	private Camera droneCamera;
+	private byte[] latestCameraImage;
+
 	public VirtualTestbed(AutopilotConfig config) {
+		this.config = config;
 		Drone drone = new Drone(config, new ArrayRealVector(new double[] {0, 0, -1000.0/3.6}, false));
 		this.addChild(drone);
 	}
@@ -114,10 +121,9 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		long now = System.currentTimeMillis();
 		this.setElapsedTime(now - this.getBeginSimulation());
 		this.moveDrone((float)(now- this.getLastUpdate())/1000f, output);
+		this.renderCameraView();
 		this.setLastUpdate(now);
 	}
-	
-	private OpenGLRenderer renderer;
 	
 	public Renderer getRenderer() {
 		if (renderer == null)
@@ -133,7 +139,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	public AutopilotInputs getInputs() {
 		Drone drone = this.getFirstChildOfType(Drone.class);
 		return new AutopilotInputs() {
-            public byte[] getImage() { return null; }
+            public byte[] getImage() { return latestCameraImage; }
             public float getX() { return (float) drone.getWorldPosition().getEntry(0); }
             public float getY() { return (float) drone.getWorldPosition().getEntry(1); }
             public float getZ() { return (float) drone.getWorldPosition().getEntry(2); }
@@ -142,5 +148,46 @@ public class VirtualTestbed extends WorldObject implements TestBed {
             public float getRoll() { return drone.getRoll(); }
             public float getElapsedTime() { return this.getElapsedTime(); }
         };
+	}
+
+	private void renderCameraView(){
+		if(latestCameraImage == null){
+			int pixelCount = config.getNbRows() * config.getNbColumns();
+			latestCameraImage = new byte[pixelCount * 3]; //3 because RGB
+		}
+		renderCameraView(latestCameraImage);
+	}
+
+	//Renders the cameraview and stores the result in targetArray
+	private void renderCameraView(byte[] targetArray){
+		int pixelCount = config.getNbColumns() * config.getNbRows();
+		if(targetArray.length < pixelCount * 3){
+			throw new IllegalArgumentException("target buffer is too small");
+		}
+
+		Renderer renderer = getRenderer();
+		if(frameBuffer == null){
+			renderer.createFrameBuffer(config.getNbColumns(), config.getNbRows());
+		}
+		if(droneCamera == null){
+			droneCamera = createDroneCamera();
+		}
+		renderer.render(this, frameBuffer, droneCamera);
+		frameBuffer.readPixels(targetArray);
+
+		//Swap blue and red bytes (BGR -> RGB)
+		for(int i = 0; i < pixelCount; i++){
+			byte b = targetArray[(i*3)+0];
+			targetArray[(i*3)+0] = targetArray[(i*3)+2];
+			targetArray[(i*3)+2] = b;
+		}
+	}
+
+	private Camera createDroneCamera(){
+		Camera camera = getRenderer().createCamera();
+		camera.setDronesHidden(true);
+		Drone drone = this.getFirstChildOfType(Drone.class);
+		drone.addChild(camera);
+		return camera;
 	}
 }
