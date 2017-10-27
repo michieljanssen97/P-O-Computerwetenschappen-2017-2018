@@ -113,7 +113,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		int maxOrder = 5;
 		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
 		try {
-			double solution = solver.solve(100, function, 0, (49.0/360.0)*2*Math.PI);
+			double solution = solver.solve(100, function, 0, bestInclination);
 			rightWingInclinationTemp = (float) solution;
 			leftWingInclinationTemp = (float) solution;
 		} catch (NoBracketingException exc) {
