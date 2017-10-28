@@ -23,6 +23,7 @@ public class OpenGLFrameBuffer implements FrameBuffer {
 
         int renderBuffer = glGenRenderbuffers();
         glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
+        //Render as RGB, read as BGR. See OpenGLRenderer.createProjectionMatrix() for an explanation.
         glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB8, width, height);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderBuffer);
 
@@ -95,6 +96,7 @@ public class OpenGLFrameBuffer implements FrameBuffer {
         buf.position(0);
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
         //Read frame from GPU to RAM
+        //Render as RGB, read as BGR. See OpenGLRenderer.createProjectionMatrix() for an explanation.
         glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, buf);
 
         //Move cursor in buffer back to the begin and copy the contents to the java image

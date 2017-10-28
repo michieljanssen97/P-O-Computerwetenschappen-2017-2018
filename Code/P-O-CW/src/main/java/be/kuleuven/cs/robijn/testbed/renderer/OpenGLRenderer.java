@@ -105,6 +105,18 @@ public class OpenGLRenderer implements Renderer {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
+        //The projection matrix that is used mirrors the y-axis. (see createProjectionMatrix())
+        //This causes the winding order of the vertices to flip:
+        //   B
+        //  / \      Winding order is ABC: counter-clock-wise
+        // C - A
+        //-------
+        // C - A
+        //  \ /      Winding order is ABC: clock-wise
+        //   B
+        //We need to flip the OpenGL winding order as well to compensate and keep the face normals in the same direction.
+        //Otherwise face culling will cut away the front parts and leave behind only the back parts
+        glFrontFace(GL_CW);
         //Replace previous frame with a blank screen
         glClearColor(0.2f, 0.2f, 0.2f, 1f);
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -186,16 +198,6 @@ public class OpenGLRenderer implements Renderer {
     private Matrix4f createViewMatrix(OpenGLCamera camera){
         Matrix4f viewMatrix = new Matrix4f();
         viewMatrix.identity();
-        //Reading the pixels from an OpenGL framebuffer results in an array of bytes that is backwards.
-        //For example:
-        //000111222      888777666
-        //333444555  =>  555444333
-        //666777888      222111000
-        //This means that RGB pixels become BGR pixels and that the image is flipped vertically and horizontally (rotate 180°)
-        //The colorspace issue is fixed in OpenGLFrameBuffer, and the flipped image is fixed here by rendering the world
-        //with the camera rotated 180° so that upon reading, the correct result is produced.
-        //viewMatrix.rotate((float)Math.PI, 0, 0 , 1);
-        viewMatrix.m11(-1); //Apparently we only need to flip vertically instead of rotation 180°
         viewMatrix.rotate((float)camera.getRotation().getEntry(0), 1, 0 , 0);
         viewMatrix.rotate((float)camera.getRotation().getEntry(1), 0, 1 , 0);
         viewMatrix.rotate((float)camera.getRotation().getEntry(2), 0, 0 , 1);
@@ -215,6 +217,16 @@ public class OpenGLRenderer implements Renderer {
         Matrix4f projectionMatrix = new Matrix4f();
         projectionMatrix.identity();
         projectionMatrix.perspective(yFOV, xFOV/yFOV, zNear, zFar);
+        //Reading the pixels from an OpenGL framebuffer results in a flipped image.
+        //For example:
+        //000111222      666777888
+        //333444555  =>  333444555
+        //666777888      666777888
+        //This means that RGB pixels become BGR pixels and that the image is flipped vertically
+        //The colorspace issue is fixed in OpenGLFrameBuffer, and the flipped image is fixed here by rendering the world
+        //with y-axis flipped so that upon reading, the correct result is produced.
+        //Flipping the y-axis of the vertices also flips the winding order, this is fixed above in render()
+        projectionMatrix.scale(1, -1 ,1);
         return projectionMatrix;
     }
 
