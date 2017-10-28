@@ -1024,7 +1024,7 @@ public class Drone extends WorldObject {
 	 * 			The second element is the pitch angular acceleration.
 	 * 			The third element is the roll angular acceleration.
 	 */
-	public float[] getAngularAccelerations(float leftWingInclination, float rightWingInclination, float horStabInclination, float verStabInclination, float thrust) {
+	public float[] getAngularAccelerations(float leftWingInclination, float rightWingInclination, float horStabInclination, float verStabInclination) {
 		float inertiaMatrixXX = (float) (this.getTailMass()*Math.pow(this.getTailSize(),2) + this.getEngineMass()*Math.pow(this.getEngineDistance(), 2));
 		
 		float inertiaMatrixZZ = (float) (2*(this.getWingMass()*Math.pow(this.getWingX(),2)));
@@ -1056,8 +1056,7 @@ public class Drone extends WorldObject {
 		RealVector momentOnLeftWing =   VectorMath.crossProduct(
 										new ArrayRealVector(new double[] {-this.getWingX(), 0, 0}, false), //distance
 										this.transformationToDroneCoordinates(this.getGravitationalForceWing().add(this.getLiftForceLeftWing(leftWingInclination))) //forces
-			    						);
-		
+			    						);	
 		RealVector momentOnRightWing =  VectorMath.crossProduct(
 										new ArrayRealVector(new double[] {this.getWingX(), 0, 0}, false), //distance
 										this.transformationToDroneCoordinates(this.getGravitationalForceWing().add(this.getLiftForceRightWing(rightWingInclination))) //forces
@@ -1066,10 +1065,15 @@ public class Drone extends WorldObject {
 							   new ArrayRealVector(new double[] {0, 0, this.getTailSize()}, false), //distance
 							   this.transformationToDroneCoordinates(this.getGravitationalForceTail().add(this.getLiftForceHorStab(horStabInclination)).add(this.getLiftForceVerStab(verStabInclination))) //forces
 							   );
+		RealVector momentOnEngine = VectorMath.crossProduct(
+				                 new ArrayRealVector(new double[] {0, 0, -this.getEngineDistance()}, false),
+				                 this.transformationToDroneCoordinates(this.getGravitationalForceEngine())
+				                 );
 		
 		RealVector constants =  momentOnLeftWing
 								.add(momentOnRightWing)
 								.add(momentOnTail)
+								.add(momentOnEngine)
 								.subtract(VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates))
 								.subtract(inertiaMatrix.operate(
 									this.transformationToDroneCoordinates(
