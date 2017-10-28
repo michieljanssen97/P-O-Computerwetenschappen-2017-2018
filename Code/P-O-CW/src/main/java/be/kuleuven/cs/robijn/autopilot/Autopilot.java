@@ -64,24 +64,27 @@ public class Autopilot extends WorldObject implements AutoPilot {
 	 * Wel roll ten gevolge van verschillende snelheid van vleugels (door de rotaties).
 	 */
 	public AutopilotOutputs update(AutopilotInputs inputs) {
-		Drone drone = this.getFirstChildOfType(Drone.class);
 		if (this.getPreviousOutput() != null)
 			this.moveDrone(inputs.getElapsedTime()-this.getPreviousElapsedTime(), this.getPreviousOutput());
         this.setPreviousElapsedTime(inputs.getElapsedTime());
         
-		ImageRecognizer imagerecognizer = new ImageRecognizer();
-		Image image = imagerecognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
-				this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView());
-		float [] necessaryRotation = image.getRotationToRedCube();
-		float imageYRotation = necessaryRotation[0];
-		float imageXRotation = necessaryRotation[1];
-		
+        Drone drone = this.getFirstChildOfType(Drone.class);
+        
+        //ImageRecognizer imagerecognizer = new ImageRecognizer();
+        //Image image = imagerecognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
+        //		this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView());
+        //float [] necessaryRotation = image.getRotationToRedCube();
+        //float imageYRotation = necessaryRotation[0];
+		//float imageXRotation = necessaryRotation[1];
+        float imageYRotation = 0;
+        float imageXRotation = 0;
+
 		float horStabInclinationTemp = 0;
 		float verStabInclinationTemp = 0;
 		float leftWingInclinationTemp = 0;
 		float rightWingInclinationTemp = 0;
 		float thrustTemp = drone.getMaxThrust();
-		float minDegrees = 1;
+		float minDegrees = 3;
 		float bestInclination = 0.86f;
 		float maxInclination = this.preventCrash(drone.getMaxAOA(), drone);
 		if (bestInclination > maxInclination) {
@@ -126,7 +129,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		if ((drone.getRoll()*(360/(2*Math.PI))) < -minDegrees) {
 			leftWingInclinationTemp -= (1.0/360.0)*2*Math.PI;
 		}
-		if (drone.getVelocity().getNorm() > (1000.0/3.6))
+		if (drone.getVelocity().getNorm() > (933.0/3.6))
 			thrustTemp = 0;
 		final float thrust = thrustTemp;
 		final float leftWingInclination = leftWingInclinationTemp;
@@ -220,7 +223,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		RealVector position = drone.getWorldPosition();
 		RealVector velocity = drone.getVelocity();
 		RealVector acceleration = drone.getAcceleration(inputs.getThrust(),
-				inputs.getLeftWingInclination(), inputs.getRightWingInclination(), inputs.getRightWingInclination(), inputs.getVerStabInclination());
+				inputs.getLeftWingInclination(), inputs.getRightWingInclination(), inputs.getHorStabInclination(), inputs.getVerStabInclination());
 		
 		float[] angularAccelerations = drone.getAngularAccelerations(inputs.getLeftWingInclination(),
 				inputs.getRightWingInclination(), inputs.getRightWingInclination(), inputs.getVerStabInclination(), inputs.getThrust());
