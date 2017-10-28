@@ -1004,10 +1004,8 @@ public class Drone extends WorldObject {
 	}
 	
 	@Override
-	public RealVector getRotation() {
-		Rotation rotation = new Rotation(this.getRotationMatrix().getData(), 0.0001);
-		double[] angles = rotation.getAngles(RotationOrder.XYZ);
-		return new ArrayRealVector(angles, false);
+	public Rotation getRelativeRotation() {
+		return new Rotation(this.getRotationMatrix().getData(), 0.0001);
 	}
 	
 	/**
