@@ -219,13 +219,13 @@ public class WorldObject {
 
     /**
      * Returns the position of this object in world coordinates.
-     * @return a non-null vector that is immutable.
+     * @return a non-null vector of size 3 that is immutable.
      */
     public RealVector getWorldPosition() {
         //Get object to world transform
         RealMatrix transform = getObjectToWorldTransform();
         //Return the world coordinates of the local origin
-        return new ArrayRealVector(transform.operate(new double[]{0, 0, 0, 1}), false);
+        return new ArrayRealVector(transform.operate(new double[]{0, 0, 0, 1}), 0, 3);
     }
 
     /**
