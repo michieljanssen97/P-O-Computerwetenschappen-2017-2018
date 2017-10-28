@@ -65,7 +65,7 @@ public class MainController {
             Camera camera = getSimulation().getTestBed().getRenderer().createCamera();
             camera.setName(CameraViewControl.DRONE_CAMERA_ID);
             camera.setDronesHidden(true);
-            camera.setRelativePosition(new ArrayRealVector(new double[]{0, -2, 0}, false));
+            camera.setRelativePosition(new ArrayRealVector(new double[]{0, 0, 0}, false));
             drone.addChild(camera);
 
             camera = getSimulation().getTestBed().getRenderer().createCamera();

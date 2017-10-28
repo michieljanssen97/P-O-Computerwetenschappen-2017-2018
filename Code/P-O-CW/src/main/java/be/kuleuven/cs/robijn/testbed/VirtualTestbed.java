@@ -20,8 +20,13 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 
 	public VirtualTestbed(AutopilotConfig config) {
 		this.config = config;
-		Drone drone = new Drone(config, new ArrayRealVector(new double[] {0, 0, -1000.0/3.6}, false));
+		Drone drone = new Drone(config, new ArrayRealVector(new double[] {0, 0, -933.0/3.6}, false));
 		this.addChild(drone);
+		Box box = new Box();
+		//double zDistance = (933.0/240.0)*1000.0;
+		//box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/6.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		box.setRelativePosition(new ArrayRealVector(new double[] {0, 0, -50}, false));
+		this.addChild(box);
 	}
 	
 	/**
@@ -49,10 +54,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		RealVector position = drone.getWorldPosition();
 		RealVector velocity = drone.getVelocity();
 		RealVector acceleration = drone.getAcceleration(output.getThrust(),
-				output.getLeftWingInclination(), output.getRightWingInclination(), output.getRightWingInclination(), output.getVerStabInclination());
-		
-		drone.setRelativePosition(position.add(velocity.mapMultiply(dt)).add(acceleration.mapMultiply(Math.pow(dt, 2)/2)));
-		drone.setVelocity(velocity.add(acceleration.mapMultiply(dt)));
+				output.getLeftWingInclination(), output.getRightWingInclination(), output.getHorStabInclination(), output.getVerStabInclination());
 		
 		float[] angularAccelerations = drone.getAngularAccelerations(output.getLeftWingInclination(),
 				output.getRightWingInclination(), output.getRightWingInclination(), output.getVerStabInclination(), output.getThrust());
@@ -66,24 +68,36 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		float rollAngularVelocity = drone.getRollAngularVelocity();
 		float rollAngularAcceleration = angularAccelerations[2];
 		
-		drone.setHeading((float) ((heading + headingAngularVelocity*dt + headingAngularAcceleration*(Math.pow(dt, 2)/2)) % (2*Math.PI)));
-		drone.setPitch((float) ((pitch + pitchAngularVelocity*dt + pitchAngularAcceleration*(Math.pow(dt, 2)/2)) % (2*Math.PI)));
-		drone.setRoll((float) ((roll + rollAngularVelocity*dt + rollAngularAcceleration*(Math.pow(dt, 2)/2)) % (2*Math.PI)));
+		drone.setRelativePosition(position.add(velocity.mapMultiply(dt)).add(acceleration.mapMultiply(Math.pow(dt, 2)/2)));
+		drone.setVelocity(velocity.add(acceleration.mapMultiply(dt)));
+		
+		float newHeading = (float) ((heading + headingAngularVelocity*dt + headingAngularAcceleration*(Math.pow(dt, 2)/2)) % (2*Math.PI));
+		if (newHeading < 0)
+			newHeading += (2*Math.PI);
+		float newPitch = (float) ((pitch + pitchAngularVelocity*dt + pitchAngularAcceleration*(Math.pow(dt, 2)/2)) % (2*Math.PI));
+		if (newPitch < 0)
+			newPitch += (2*Math.PI);
+		float newRoll = (float) ((roll + rollAngularVelocity*dt + rollAngularAcceleration*(Math.pow(dt, 2)/2)) % (2*Math.PI));
+		if (newRoll < 0)
+			newRoll += (2*Math.PI);
+		drone.setHeading(newHeading);
+		drone.setPitch(newPitch);
+		drone.setRoll(newRoll);
 		
 		drone.setHeadingAngularVelocity(headingAngularVelocity + headingAngularAcceleration*dt);
 		drone.setPitchAngularVelocity(pitchAngularVelocity + pitchAngularAcceleration*dt);
 		drone.setRollAngularVelocity(rollAngularVelocity + rollAngularAcceleration*dt);
 	}
 	
-	public void setElapsedTime(long elapsedTime) throws IllegalArgumentException {
+	public void setElapsedTime(float elapsedTime) throws IllegalArgumentException {
 		if (! isValidElapsedTime(elapsedTime))
 			throw new IllegalArgumentException();
 		this.elapsedTime = elapsedTime;
 	}
 	
-	private long elapsedTime = 0;
+	private float elapsedTime = 0;
 	
-	public long getElapsedTime() {
+	public float getElapsedTime() {
 		return elapsedTime;
 	}
 
@@ -97,8 +111,8 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		return lastUpdate;
 	}
 	
-	public static boolean isValidElapsedTime(long elapsedTime) {
-		return ((elapsedTime >= 0) & (elapsedTime <= Long.MAX_VALUE));
+	public static boolean isValidElapsedTime(float elapsedTime) {
+		return ((elapsedTime >= 0) & (elapsedTime <= Float.MAX_VALUE));
 	}
 	
 	public static boolean isValidBeginSimulation(long beginSimulation) {
@@ -119,7 +133,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	
 	public void update(AutopilotOutputs output) {
 		long now = System.currentTimeMillis();
-		this.setElapsedTime(now - this.getBeginSimulation());
+		this.setElapsedTime((float)(now - this.getBeginSimulation())/1000f);
 		this.moveDrone((float)(now- this.getLastUpdate())/1000f, output);
 		this.renderCameraView();
 		this.setLastUpdate(now);
@@ -138,6 +152,8 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 
 	public AutopilotInputs getInputs() {
 		Drone drone = this.getFirstChildOfType(Drone.class);
+		if (latestCameraImage == null)
+			renderCameraView();
 		return new AutopilotInputs() {
             public byte[] getImage() { return latestCameraImage; }
             public float getX() { return (float) drone.getWorldPosition().getEntry(0); }
@@ -146,7 +162,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
             public float getHeading() { return drone.getHeading(); }
             public float getPitch() { return drone.getPitch(); }
             public float getRoll() { return drone.getRoll(); }
-            public float getElapsedTime() { return this.getElapsedTime(); }
+            public float getElapsedTime() { return VirtualTestbed.this.getElapsedTime(); }
         };
 	}
 
@@ -167,7 +183,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 
 		Renderer renderer = getRenderer();
 		if(frameBuffer == null){
-			renderer.createFrameBuffer(config.getNbColumns(), config.getNbRows());
+			frameBuffer = renderer.createFrameBuffer(config.getNbColumns(), config.getNbRows());
 		}
 		if(droneCamera == null){
 			droneCamera = createDroneCamera();

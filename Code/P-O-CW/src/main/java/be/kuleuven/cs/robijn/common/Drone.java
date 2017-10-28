@@ -1,5 +1,6 @@
 package be.kuleuven.cs.robijn.common;
 
+import org.apache.commons.math3.geometry.euclidean.threed.*;
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
 import p_en_o_cw_2017.*;
@@ -592,6 +593,28 @@ public class Drone extends WorldObject {
 		return this.rollTransformation(this.pitchTransformation(this.headingTransformation(realVector)));
 	}
 	
+	public RealMatrix getRotationMatrix() {
+		float rollAngle = this.getRoll();
+		float pitchAngle = this.getPitch();
+		float headingAngle = this.getHeading();
+		RealMatrix rollTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for roll
+			{Math.cos(rollAngle),      Math.sin(rollAngle),    0},
+			{-Math.sin(rollAngle),     Math.cos(rollAngle),    0}, 
+			{0,                        0,                      1}
+			}, false);
+		RealMatrix pitchTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for pitch
+			{1,       0,                          0},
+			{0,       Math.cos(pitchAngle),       Math.sin(pitchAngle)},
+			{0,      -Math.sin(pitchAngle),       Math.cos(pitchAngle)}
+			}, false);
+		RealMatrix headingTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for heading
+			{Math.cos(headingAngle),       0,          -Math.sin(headingAngle)},
+			{0,                            1,           0}, 
+			{Math.sin(headingAngle),       0,           Math.cos(headingAngle)}
+			}, false);
+		return rollTransformation.multiply(pitchTransformation.multiply(headingTransformation));	
+	}
+	
     //     -----------------      //
     //                            //
     //  TRANSFORMATION MATRICES   //				DRONE TO WORLD COORDINATES
@@ -838,10 +861,20 @@ public class Drone extends WorldObject {
 	 */
 	public float calculateAOA(RealVector normal, RealVector projectedVelocity, RealVector attackVector) throws IllegalArgumentException {
 		float AOA = (float) -Math.atan2(normal.dotProduct(projectedVelocity), attackVector.dotProduct(projectedVelocity));
-		if (AOA > this.maxAOA) {
+		if ((AOA > this.maxAOA) || (AOA < -this.maxAOA)) {
 			throw new IllegalArgumentException();
 		}
 		return AOA;
+	}
+	
+	public RealVector getProjectedVelocityLeftWing() {
+		RealVector distance = this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {-this.getWingX(), 0, 0}, false)); //distance between left wing and center of mass in World Coordinates
+		RealVector velocityWorldCoordinates = calculateVelocityWorldCo(this.getVelocity(), this.getHeadingAngularVelocityVector(), 
+																	   this.getPitchAngularVelocityVector(), this.getRollAngularVelocityVector(), distance);
+		
+		RealVector velocityDroneCoordinates = this.transformationToDroneCoordinates(velocityWorldCoordinates);
+		velocityDroneCoordinates.setEntry(0, 0); //Set first value (X) to zero
+		return this.transformationToWorldCoordinates(velocityDroneCoordinates);
 	}
 	
 	/**
@@ -851,18 +884,22 @@ public class Drone extends WorldObject {
 	 * @return The Lift Force on the Left Wing of this drone.
 	 */
 	public RealVector getLiftForceLeftWing(float leftWingInclination){
-		RealVector distance = this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {-this.getWingX(), 0, 0}, false)); //distance between left wing and center of mass in World Coordinates
-		RealVector velocityWorldCoordinates = calculateVelocityWorldCo(this.getVelocity(), this.getHeadingAngularVelocityVector(), 
-																	   this.getPitchAngularVelocityVector(), this.getRollAngularVelocityVector(), distance);
-		
-		RealVector velocityDroneCoordinates = this.transformationToDroneCoordinates(velocityWorldCoordinates);
-		velocityDroneCoordinates.setEntry(0, 0); //Set first value (X) to zero
-		RealVector projectedVelocity = this.transformationToWorldCoordinates(velocityDroneCoordinates);
+		RealVector projectedVelocity = this.getProjectedVelocityLeftWing();
 		
 		float AOA = this.calculateAOA(this.getNormalHor(leftWingInclination), projectedVelocity, this.getAttackVectorHor(leftWingInclination));
 		
 		float liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		return this.getNormalHor(leftWingInclination).mapMultiply(liftForce);
+	}
+	
+	public RealVector getProjectedVelocityRightWing() {
+		RealVector distance = this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {this.getWingX(), 0, 0}, false));
+		RealVector velocityWorldCoordinates = calculateVelocityWorldCo(this.getVelocity(), this.getHeadingAngularVelocityVector(), 
+				   													   this.getPitchAngularVelocityVector(), this.getRollAngularVelocityVector(), distance);
+		
+		RealVector velocityDroneCoordinates = this.transformationToDroneCoordinates(velocityWorldCoordinates);
+		velocityDroneCoordinates.setEntry(0, 0);
+		return this.transformationToWorldCoordinates(velocityDroneCoordinates);
 	}
 	
 	/**
@@ -872,18 +909,21 @@ public class Drone extends WorldObject {
 	 * @return The Lift Force on the Right Wing of this drone.
 	 */
 	public RealVector getLiftForceRightWing(float rightWingInclination){
-		RealVector distance = this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {this.getWingX(), 0, 0}, false));
-		RealVector velocityWorldCoordinates = calculateVelocityWorldCo(this.getVelocity(), this.getHeadingAngularVelocityVector(), 
-				   													   this.getPitchAngularVelocityVector(), this.getRollAngularVelocityVector(), distance);
-		
-		RealVector velocityDroneCoordinates = this.transformationToDroneCoordinates(velocityWorldCoordinates);
-		velocityDroneCoordinates.setEntry(0, 0);
-		RealVector projectedVelocity = this.transformationToWorldCoordinates(velocityDroneCoordinates);
+		RealVector projectedVelocity = this.getProjectedVelocityRightWing();
 		
 		float AOA = this.calculateAOA(this.getNormalHor(rightWingInclination), projectedVelocity, this.getAttackVectorHor(rightWingInclination));
 		
 		float liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		return this.getNormalHor(rightWingInclination).mapMultiply(liftForce);
+	}
+	
+	public RealVector getProjectedVelocityHorStab() {
+		RealVector distance = this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, this.getTailSize()}, false));
+		RealVector velocityWorldCoordinates = calculateVelocityWorldCo(this.getVelocity(), this.getHeadingAngularVelocityVector(), 
+				   													   this.getPitchAngularVelocityVector(), this.getRollAngularVelocityVector(), distance);
+		RealVector velocityDroneCoordinates = this.transformationToDroneCoordinates(velocityWorldCoordinates);
+		velocityDroneCoordinates.setEntry(0, 0);
+		return this.transformationToWorldCoordinates(velocityDroneCoordinates);
 	}
 	
 	/**
@@ -893,17 +933,21 @@ public class Drone extends WorldObject {
 	 * @return The Lift Force on the Horizontal Stabilizer of this drone.
 	 */
 	public RealVector getLiftForceHorStab(float horStabInclination){
-		RealVector distance = this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, this.getTailSize()}, false));
-		RealVector velocityWorldCoordinates = calculateVelocityWorldCo(this.getVelocity(), this.getHeadingAngularVelocityVector(), 
-				   													   this.getPitchAngularVelocityVector(), this.getRollAngularVelocityVector(), distance);
-		RealVector velocityDroneCoordinates = this.transformationToDroneCoordinates(velocityWorldCoordinates);
-		velocityDroneCoordinates.setEntry(0, 0);
-		RealVector projectedVelocity = this.transformationToWorldCoordinates(velocityDroneCoordinates);
+		RealVector projectedVelocity = this.getProjectedVelocityHorStab();
 		
 		float AOA = this.calculateAOA(this.getNormalHor(horStabInclination), projectedVelocity, this.getAttackVectorHor(horStabInclination));
 		
 		float liftForce = (float) (AOA * this.getHorStabLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		return this.getNormalHor(horStabInclination).mapMultiply(liftForce);
+	}
+	
+	public RealVector getProjectedVelocityVerStab() {
+		RealVector distance = this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, this.getTailSize()}, false));
+		RealVector velocityWorldCoordinates = calculateVelocityWorldCo(this.getVelocity(), this.getHeadingAngularVelocityVector(), 
+				   													   this.getPitchAngularVelocityVector(), this.getRollAngularVelocityVector(), distance);
+		RealVector velocityDroneCoordinates = this.transformationToDroneCoordinates(velocityWorldCoordinates);
+		velocityDroneCoordinates.setEntry(1, 0);
+		return this.transformationToWorldCoordinates(velocityDroneCoordinates);
 	}
 	
 	/**
@@ -913,12 +957,7 @@ public class Drone extends WorldObject {
 	 * @return The Lift Force on the Vertical Stabilizer of the drone.
 	 */
 	public RealVector getLiftForceVerStab(float verStabInclination){
-		RealVector distance = this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, this.getTailSize()}, false));
-		RealVector velocityWorldCoordinates = calculateVelocityWorldCo(this.getVelocity(), this.getHeadingAngularVelocityVector(), 
-				   													   this.getPitchAngularVelocityVector(), this.getRollAngularVelocityVector(), distance);
-		RealVector velocityDroneCoordinates = this.transformationToDroneCoordinates(velocityWorldCoordinates);
-		velocityDroneCoordinates.setEntry(1, 0);
-		RealVector projectedVelocity = this.transformationToWorldCoordinates(velocityDroneCoordinates);
+		RealVector projectedVelocity = this.getProjectedVelocityVerStab();
 		
 		float AOA = this.calculateAOA(this.getNormalHor(verStabInclination), projectedVelocity, this.getAttackVectorHor(verStabInclination));
 		
@@ -962,6 +1001,13 @@ public class Drone extends WorldObject {
 		float totalMass = this.getEngineMass() + (2*this.getWingMass()) + this.getTailMass();
 		
 		return totalForce.mapMultiply(1/totalMass);
+	}
+	
+	@Override
+	public RealVector getRotation() {
+		Rotation rotation = new Rotation(this.getRotationMatrix().getData(), 0.0001);
+		double[] angles = rotation.getAngles(RotationOrder.XYZ);
+		return new ArrayRealVector(angles, false);
 	}
 	
 	/**
