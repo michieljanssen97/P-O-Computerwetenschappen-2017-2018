@@ -597,22 +597,23 @@ public class Drone extends WorldObject {
 		float rollAngle = this.getRoll();
 		float pitchAngle = this.getPitch();
 		float headingAngle = this.getHeading();
-		RealMatrix rollTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for roll
-			{Math.cos(rollAngle),      Math.sin(rollAngle),    0},
-			{-Math.sin(rollAngle),     Math.cos(rollAngle),    0}, 
+		RealMatrix inverseRollTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for roll
+			{Math.cos(rollAngle),      -Math.sin(rollAngle),    0},
+			{Math.sin(rollAngle),       Math.cos(rollAngle),    0}, 
 			{0,                        0,                      1}
 			}, false);
-		RealMatrix pitchTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for pitch
+		RealMatrix inversePitchTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for pitch
 			{1,       0,                          0},
-			{0,       Math.cos(pitchAngle),       Math.sin(pitchAngle)},
-			{0,      -Math.sin(pitchAngle),       Math.cos(pitchAngle)}
+			{0,       Math.cos(pitchAngle),       -Math.sin(pitchAngle)},
+			{0,       Math.sin(pitchAngle),        Math.cos(pitchAngle)}
 			}, false);
-		RealMatrix headingTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for heading
-			{Math.cos(headingAngle),       0,          -Math.sin(headingAngle)},
+		RealMatrix inverseHeadingTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for heading
+			{Math.cos(headingAngle),       0,            Math.sin(headingAngle)},
 			{0,                            1,           0}, 
-			{Math.sin(headingAngle),       0,           Math.cos(headingAngle)}
+			{-Math.sin(headingAngle),       0,           Math.cos(headingAngle)}
 			}, false);
-		return rollTransformation.multiply(pitchTransformation.multiply(headingTransformation));	
+		//return rollTransformation.multiply(pitchTransformation.multiply(headingTransformation));
+		return inverseHeadingTransformation.multiply(inversePitchTransformation.multiply(inverseRollTransformation));
 	}
 	
     //     -----------------      //
