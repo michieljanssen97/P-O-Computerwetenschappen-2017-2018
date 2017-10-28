@@ -6,15 +6,24 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.RotationOrder;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
 public class WorldObject {
     private WorldObject parent;
     private ArrayList<WorldObject> children = new ArrayList<>();
     private RealVector position = new ArrayRealVector(new double[]{0, 0, 0}, false);
-    private RealVector rotation = new ArrayRealVector(new double[]{0, 0, 0}, false);
+    private Rotation rotation = new Rotation(new Vector3D(1, 0, 0), 0);
     private String name = "";
+
+    ////////////////////////
+    /// OBJECT HIERARCHY ///
+    ////////////////////////
 
     /**
      * Returns an immutable list of the children of this object.
@@ -115,58 +124,9 @@ public class WorldObject {
         return parent;
     }
 
-    /**
-     * Returns the position of this object in world coordinates.
-     * @return a non-null vector that is immutable.
-     */
-    public RealVector getWorldPosition() {
-        if(parent == null){
-            return getRelativePosition();
-        }
-
-        RealVector worldPosition = parent.getWorldPosition().add(this.getRelativePosition());
-        return RealVector.unmodifiableRealVector(worldPosition);
-    }
-
-    /**
-     * Returns the position of this object, relative to its parent.
-     * @return a non-null vector that is immutable.
-     */
-    public RealVector getRelativePosition() {
-        return RealVector.unmodifiableRealVector(position);
-    }
-
-    /**
-     * Sets the position of this object relative to its parent.
-     * @param vector the new position vector of this object. Must not be null.
-     */
-    public void setRelativePosition(RealVector vector) {
-        if(vector == null){
-            throw new IllegalArgumentException("vector cannot be null");
-        }
-
-        this.position = vector;
-    }
-
-    /**
-     * Returns the rotation of this object, relative to its parent.
-     * @return a non-null vector
-     */
-    public RealVector getRotation() {
-        return RealVector.unmodifiableRealVector(rotation);
-    }
-
-    /**
-     * Sets the rotation of this object relative to its parent.
-     * @param vector the new rotational vector of this object. Must not be null.
-     */
-    public void setRotation(RealVector vector) {
-        if(vector == null){
-            throw new IllegalArgumentException("vector cannot be null");
-        }
-
-        this.rotation = vector;
-    }
+    ///////////////////
+    /// OBJECT NAME ///
+    ///////////////////
 
     /**
      * Returns the name of this object. If no name was set using setName(), this method return "".
@@ -181,6 +141,104 @@ public class WorldObject {
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    ////////////////////////
+    /// OBJECT TRANSFORM ///
+    ////////////////////////
+
+    /// RELATIVE TRANSFORM ///
+
+    /**
+     * Sets the position of this object relative to its parent.
+     * @param vector the new position vector of this object. Must not be null.
+     */
+    public void setRelativePosition(RealVector vector) {
+        if(vector == null){
+            throw new IllegalArgumentException("vector cannot be null");
+        }
+
+        this.position = vector;
+    }
+
+    /**
+     * Returns the position of this object, relative to its parent.
+     * @return a non-null vector that is immutable.
+     */
+    public RealVector getRelativePosition() {
+        return RealVector.unmodifiableRealVector(position);
+    }
+
+    /**
+     * Sets the rotation of this object relative to its parent.
+     * @param rotation the new rotational vector of this object. Must not be null.
+     */
+    public void setRelativeRotation(Rotation rotation) {
+        if(rotation == null){
+            throw new IllegalArgumentException("rotation cannot be null");
+        }
+
+        this.rotation = rotation;
+    }
+
+    /**
+     * Returns the rotation of this object, relative to its parent.
+     * @return a non-null rotation
+     */
+    public Rotation getRelativeRotation() {
+        return rotation;
+    }
+
+    /// WORLD TRANSFORM ///
+
+    /**
+     * Returns an affine transformation matrix that transforms local coordinates to world coordinates.
+     * @return a non-null 4x4 homogeneous transformation matrix
+     */
+    public RealMatrix getObjectToWorldTransform(){
+        //Create local affine transformation matrix
+        RealMatrix rotationMatrix = new Array2DRowRealMatrix(new double[4][4], false);
+        rotationMatrix.setEntry(3, 3, 1); //Identity
+        rotationMatrix.setSubMatrix(this.getRelativeRotation().getMatrix(), 0, 0);
+
+        //Create local affine translation matrix
+        RealVector localTranslation = getRelativePosition();
+        RealMatrix translationMatrix = new Array2DRowRealMatrix(new double[][]{
+            {1, 0, 0, localTranslation.getEntry(0)},
+            {0, 1, 0, localTranslation.getEntry(1)},
+            {0, 0, 1, localTranslation.getEntry(2)},
+            {0, 0, 0, 1}
+        }, false);
+
+        RealMatrix objectToParentTransform = translationMatrix.multiply(rotationMatrix);
+        if(getParent() != null) {
+            return getParent().getObjectToWorldTransform().multiply(objectToParentTransform);
+        }
+        return objectToParentTransform;
+    }
+
+    /**
+     * Returns the position of this object in world coordinates.
+     * @return a non-null vector that is immutable.
+     */
+    public RealVector getWorldPosition() {
+        //Get object to world transform
+        RealMatrix transform = getObjectToWorldTransform();
+        //Return the world coordinates of the local origin
+        return new ArrayRealVector(transform.operate(new double[]{0, 0, 0, 1}), false);
+    }
+
+    /**
+     * Returns the rotation of this object, relative to the world axis.
+     * @return a non-null vector
+     */
+    public Rotation getWorldRotation() {
+        //Get object to world transform
+        RealMatrix transform = getObjectToWorldTransform();
+        //Cut out the translation and scaling bits.
+        RealMatrix rotationMatrix = transform.getSubMatrix(0, 2, 0, 2);
+        //Convert to rotation
+        return new Rotation(rotationMatrix.getData(), 0.0001d);
     }
 }
 

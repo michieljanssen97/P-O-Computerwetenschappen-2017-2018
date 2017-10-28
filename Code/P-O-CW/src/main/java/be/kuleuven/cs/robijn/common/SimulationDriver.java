@@ -12,7 +12,6 @@ import java.util.function.BiConsumer;
  * This class combines the testbed and autopilot into one runnable simulation.
  */
 public class SimulationDriver {
-    private WorldObject world;
     private TestBed testBed;
     private AutoPilot autoPilot;
     private boolean simulationPaused;

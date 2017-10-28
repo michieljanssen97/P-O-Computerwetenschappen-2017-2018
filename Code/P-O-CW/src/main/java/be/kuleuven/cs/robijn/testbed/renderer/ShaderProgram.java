@@ -1,6 +1,8 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.math.Matrix;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
 import org.joml.Matrix4f;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
@@ -116,63 +118,93 @@ public class ShaderProgram {
     }
 
     public void setUniformMatrix(String argumentName, boolean transpose, Matrix4f matrix){
-        glUseProgram(programId);
-        final int location = findUniformLocation(argumentName);
         float[] data = new float[16];
         matrix.get(data);
-        glUniformMatrix4fv(location, transpose, data);
+        setUniformMatrix(argumentName, transpose, 4, 4, data);
     }
 
-    public void setUniformMatrix(String argumentName, boolean transpose, Matrix matrix){
+    public void setUniformMatrix(String argumentName, boolean transpose, RealMatrix matrix){
+        double[][] data;
+        if(matrix instanceof Array2DRowRealMatrix){
+            data = ((Array2DRowRealMatrix)matrix).getDataRef();
+        }else{
+            data = matrix.getData();
+        }
+        int rows = data.length;
+        int columns = data[0].length;
+        setUniformMatrix(argumentName, transpose, rows, columns, getColumnLinearizedMatrix(data));
+    }
+
+    private void setUniformMatrix(String argumentName, boolean transpose, int rows, int columns, float[] values) {
+        if(argumentName == null || argumentName.isEmpty()){
+           throw new IllegalArgumentException("invalid argumentName: "+argumentName);
+        }
+
         glUseProgram(programId);
         final int location = findUniformLocation(argumentName);
-        if(matrix.getRowCount() == matrix.getColumnCount()){
-            setUniformSquareMatrix(location, transpose, matrix);
+        if(rows == columns){
+            setUniformSquareMatrix(location, transpose, rows, values);
         }else{
-            setUniformRectangleMatrix(location, transpose, matrix);
+            setUniformRectangleMatrix(location, transpose, rows, columns, values);
         }
     }
 
-    private void setUniformSquareMatrix(int uniformLocation, boolean transpose, Matrix matrix){
-        switch (matrix.getRowCount()){
+    private void setUniformSquareMatrix(int uniformLocation, boolean transpose, int matrixSize, float[] values){
+        switch (matrixSize){
             case 2:
-                glUniformMatrix2fv(uniformLocation, transpose, matrix.getValuesRowLinearized());
+                glUniformMatrix2fv(uniformLocation, transpose, values);
                 return;
             case 3:
-                glUniformMatrix3fv(uniformLocation, transpose, matrix.getValuesRowLinearized());
+                glUniformMatrix3fv(uniformLocation, transpose, values);
                 return;
             case 4:
-                glUniformMatrix4fv(uniformLocation, transpose, matrix.getValuesRowLinearized());
+                glUniformMatrix4fv(uniformLocation, transpose, values);
                 return;
         }
         throw new IllegalArgumentException("Unsupported matrix size");
     }
 
-    private void setUniformRectangleMatrix(int uniformLocation, boolean transpose, Matrix matrix){
-        switch (matrix.getColumnCount()){
+    private void setUniformRectangleMatrix(int uniformLocation, boolean transpose, int rowCount, int columnCount, float[] values){
+        switch (columnCount){
             case 2:
-                if(matrix.getRowCount() == 3){
-                    glUniformMatrix2x3fv(uniformLocation, transpose, matrix.getValuesRowLinearized());
-                }else if(matrix.getRowCount() == 4){
-                    glUniformMatrix2x4fv(uniformLocation, transpose, matrix.getValuesRowLinearized());
+                if(rowCount == 3){
+                    glUniformMatrix2x3fv(uniformLocation, transpose, values);
+                }else if(rowCount == 4){
+                    glUniformMatrix2x4fv(uniformLocation, transpose, values);
                 }
                 return;
             case 3:
-                if(matrix.getRowCount() == 2){
-                    glUniformMatrix3x2fv(uniformLocation, transpose, matrix.getValuesRowLinearized());
-                }else if(matrix.getRowCount() == 4){
-                    glUniformMatrix3x4fv(uniformLocation, transpose, matrix.getValuesRowLinearized());
+                if(rowCount == 2){
+                    glUniformMatrix3x2fv(uniformLocation, transpose, values);
+                }else if(rowCount == 4){
+                    glUniformMatrix3x4fv(uniformLocation, transpose, values);
                 }
                 return;
             case 4:
-                if(matrix.getRowCount() == 2){
-                    glUniformMatrix4x2fv(uniformLocation, transpose, matrix.getValuesRowLinearized());
-                }else if(matrix.getRowCount() == 3){
-                    glUniformMatrix4x3fv(uniformLocation, transpose, matrix.getValuesRowLinearized());
+                if(rowCount == 2){
+                    glUniformMatrix4x2fv(uniformLocation, transpose, values);
+                }else if(rowCount == 3){
+                    glUniformMatrix4x3fv(uniformLocation, transpose, values);
                 }
                 return;
         }
         throw new IllegalArgumentException("Unsupported matrix size");
+    }
+
+    /**
+     * Takes in a 2D row-major matrix, and outputs a column-linearized matrix.
+     * input[row][column] == output[(column * rowCount) + row]
+     */
+    private float[] getColumnLinearizedMatrix(double[][] input){
+        int rowCount = input.length;
+        int columnCount = input[0].length;
+        float[] rowLinearized = new float[rowCount * columnCount];
+        for(int column = 0; column < columnCount; column++){
+            for(int row = 0; row < rowCount; row++){
+                rowLinearized[(column * rowCount) + row] = (float)input[row][column];
+            }
+        }
+        return rowLinearized;
     }
 
     private int findUniformLocation(String argumentName){

@@ -1,9 +1,14 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.*;
+import org.apache.commons.math3.geometry.euclidean.threed.RotationOrder;
 import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
+import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
@@ -149,9 +154,9 @@ public class OpenGLRenderer implements Renderer {
         }
 
         //Setup per-object matrices
-        Matrix4f modelMatrix = createModelMatrix(obj.getWorldPosition(), obj.getRotation(), new ArrayRealVector(new double[]{1, 1, 1}, false));
         model.getShader().setUniformMatrix("viewProjectionTransformation", false, viewProjectionMatrix);
-        model.getShader().setUniformMatrix("modelTransformation", false, modelMatrix);
+        RealMatrix objectToWorldTransform = obj.getObjectToWorldTransform();
+        model.getShader().setUniformMatrix("modelTransformation", false, objectToWorldTransform);
 
         //Bind object model mesh, texture, shader, ...
         glBindVertexArray(model.getMesh().getVertexArrayObjectId());
@@ -168,39 +173,16 @@ public class OpenGLRenderer implements Renderer {
     }
 
     /**
-     * Returns a linear transformation matrix for transforming vertices from object space to world space.
-     * @return a non-null matrix
-     */
-    private Matrix4f createModelMatrix(RealVector position, RealVector rotation, RealVector scale){
-        Matrix4f matrix = new Matrix4f();
-        matrix.identity();
-
-        float posX = (float)position.getEntry(0);
-        float posY = (float)position.getEntry(1);
-        float posZ = (float)position.getEntry(2);
-        matrix.translate(posX, posY, posZ);
-
-        matrix.rotate((float)rotation.getEntry(0), 1, 0 , 0);
-        matrix.rotate((float)rotation.getEntry(1), 0, 1 , 0);
-        matrix.rotate((float)rotation.getEntry(2), 0, 0 , 1);
-
-        float scaleX = (float)scale.getEntry(0);
-        float scaleY = (float)scale.getEntry(1);
-        float scaleZ = (float)scale.getEntry(2);
-        matrix.scale(scaleX, scaleY, scaleZ);
-        return matrix;
-    }
-
-    /**
      * Returns a linear transformation matrix for transforming vertices from world space to camera space.
      * @return a non-null matrix
      */
     private Matrix4f createViewMatrix(OpenGLCamera camera){
         Matrix4f viewMatrix = new Matrix4f();
         viewMatrix.identity();
-        viewMatrix.rotate((float)camera.getRotation().getEntry(0), 1, 0 , 0);
-        viewMatrix.rotate((float)camera.getRotation().getEntry(1), 0, 1 , 0);
-        viewMatrix.rotate((float)camera.getRotation().getEntry(2), 0, 0 , 1);
+        double[] angles = camera.getWorldRotation().getAngles(RotationOrder.XYZ);
+        viewMatrix.rotate(-(float)angles[0], 1, 0, 0);
+        viewMatrix.rotate(-(float)angles[1], 0, 1, 0);
+        viewMatrix.rotate(-(float)angles[2], 0, 0, 1);
         viewMatrix.translate(
                 (float) -camera.getWorldPosition().getEntry(0),
                 (float) -camera.getWorldPosition().getEntry(1),
