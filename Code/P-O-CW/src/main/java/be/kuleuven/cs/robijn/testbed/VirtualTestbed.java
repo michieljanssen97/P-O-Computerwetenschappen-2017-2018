@@ -23,10 +23,11 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		Drone drone = new Drone(config, new ArrayRealVector(new double[] {0, 0, -13.3}, false));
 		this.addChild(drone);
 		Box box = new Box();
-		//double zDistance = (933.0/240.0)*1000.0;
 		double zDistance = 200.0;
-		//box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/2.0), zDistance*Math.tan(Math.PI/2.0), -zDistance}, false));
-		box.setRelativePosition(new ArrayRealVector(new double[] {0, 0, -zDistance}, false));
+		box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/96.0), zDistance*Math.tan(Math.PI/24.0), -zDistance}, false));
+		//box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/96.0), 0, -zDistance}, false));
+		//box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/24.0), -zDistance}, false));
+		//box.setRelativePosition(new ArrayRealVector(new double[] {0, 0, -zDistance}, false));
 		this.addChild(box);
 	}
 	
@@ -89,7 +90,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 			newRoll += (2*Math.PI);
 		drone.setHeading(newHeading);
 		drone.setPitch(newPitch);
-		drone.setRoll(newRoll);
+		drone.setRoll(0);
 		
 		drone.setHeadingAngularVelocity(headingAngularVelocity + headingAngularAcceleration*dt);
 		drone.setPitchAngularVelocity(pitchAngularVelocity + pitchAngularAcceleration*dt);
@@ -138,7 +139,11 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		this.lastUpdate = lastUpdate;
 	}
 	
-	public void update(AutopilotOutputs output) {
+	public void update(AutopilotOutputs output) throws IllegalStateException {
+		Drone drone = this.getFirstChildOfType(Drone.class);
+		Box box = this.getFirstChildOfType(Box.class);
+		if (drone.getRightWingPosition().getDistance(box.getWorldPosition()) < 7.0)
+			throw new IllegalStateException("simulation has ended");
 		long now = System.currentTimeMillis();
 		this.setElapsedTime((float)(now - this.getBeginSimulation())/1000f);
 		this.moveDrone((float)(now- this.getLastUpdate())/1000f, output);

@@ -1055,25 +1055,20 @@ public class Drone extends WorldObject {
 		
 		RealVector momentOnLeftWing =   VectorMath.crossProduct(
 										new ArrayRealVector(new double[] {-this.getWingX(), 0, 0}, false), //distance
-										this.transformationToDroneCoordinates(this.getGravitationalForceWing().add(this.getLiftForceLeftWing(leftWingInclination))) //forces
+										this.transformationToDroneCoordinates(this.getLiftForceLeftWing(leftWingInclination)) //forces
 			    						);	
 		RealVector momentOnRightWing =  VectorMath.crossProduct(
 										new ArrayRealVector(new double[] {this.getWingX(), 0, 0}, false), //distance
-										this.transformationToDroneCoordinates(this.getGravitationalForceWing().add(this.getLiftForceRightWing(rightWingInclination))) //forces
+										this.transformationToDroneCoordinates(this.getLiftForceRightWing(rightWingInclination)) //forces
 										);
 		RealVector momentOnTail =  	VectorMath.crossProduct(
 							   new ArrayRealVector(new double[] {0, 0, this.getTailSize()}, false), //distance
-							   this.transformationToDroneCoordinates(this.getGravitationalForceTail().add(this.getLiftForceHorStab(horStabInclination)).add(this.getLiftForceVerStab(verStabInclination))) //forces
+							   this.transformationToDroneCoordinates(this.getLiftForceHorStab(horStabInclination).add(this.getLiftForceVerStab(verStabInclination))) //forces
 							   );
-		RealVector momentOnEngine = VectorMath.crossProduct(
-				                 new ArrayRealVector(new double[] {0, 0, -this.getEngineDistance()}, false),
-				                 this.transformationToDroneCoordinates(this.getGravitationalForceEngine())
-				                 );
 		
 		RealVector constants =  momentOnLeftWing
 								.add(momentOnRightWing)
 								.add(momentOnTail)
-								.add(momentOnEngine)
 								.subtract(VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates))
 								.subtract(inertiaMatrix.operate(
 									this.transformationToDroneCoordinates(

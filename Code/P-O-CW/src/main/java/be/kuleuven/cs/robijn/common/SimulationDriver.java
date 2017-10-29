@@ -36,7 +36,11 @@ public class SimulationDriver {
             //Run the autopilot
             latestAutopilotOutputs = autoPilot.update(latestAutopilotInputs);
             //Run the testbed
-            testBed.update(latestAutopilotOutputs);
+            try {
+            	testBed.update(latestAutopilotOutputs);
+            } catch (IllegalStateException exc) {
+            	simulationPaused = true;
+            }
             latestAutopilotInputs = testBed.getInputs();
         }
 
