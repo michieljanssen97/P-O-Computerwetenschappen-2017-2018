@@ -43,7 +43,9 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		Box box = this.getFirstChildOfType(Box.class);
 
 		//Check simulation finished
-		if (drone.getRightWingPosition().getDistance(box.getWorldPosition()) < 7.0) {
+		if ((drone.getRightWingPosition().getDistance(box.getWorldPosition()) < 4.5)
+				|| (drone.getLeftWingPosition().getDistance(box.getWorldPosition()) < 4.5)
+				|| (drone.getEnginePosition().getDistance(box.getWorldPosition()) < 4.5)) {
 			return true;
 		}
 
@@ -162,7 +164,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	public static boolean isValidElapsedTime(float elapsedTime) {
 		return ((elapsedTime >= 0) & (elapsedTime <= Float.MAX_VALUE));
 	}
-
+	
 	/////////////////
 	/// RENDERING ///
 	/////////////////
