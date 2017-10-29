@@ -83,10 +83,14 @@ public class OpenGLFrameBuffer implements FrameBuffer {
 
         //Wait until GPU has finished rendering triangle
         long sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+        if(sync == 0){
+            throw new RuntimeException("glFenceSync failed");
+        }
         int waitResult;
         do {
             waitResult = glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, 2000);
         } while(waitResult == GL_TIMEOUT_EXPIRED);
+        glDeleteSync(sync);
 
         if(waitResult != GL_CONDITION_SATISFIED && waitResult != GL_ALREADY_SIGNALED){
             throw new RuntimeException("waiting for gpu failed: "+waitResult);
