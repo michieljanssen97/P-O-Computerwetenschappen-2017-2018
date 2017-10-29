@@ -216,12 +216,12 @@ public class Autopilot extends WorldObject implements AutoPilot {
 			leftWingInclinationTemp = bestInclination;
 			rightWingInclinationTemp = bestInclination;
 		}
-		if ((drone.getRoll()*(360/(2*Math.PI))) > minDegrees) {
-			rightWingInclinationTemp -= (1.0/360.0)*2*Math.PI;
-		}
-		if ((drone.getRoll()*(360/(2*Math.PI))) < -minDegrees) {
-			leftWingInclinationTemp -= (1.0/360.0)*2*Math.PI;
-		}
+//		if ((drone.getRoll()*(360/(2*Math.PI))) > minDegrees) {
+//			rightWingInclinationTemp -= (1.0/360.0)*2*Math.PI;
+//		}
+//		if ((drone.getRoll()*(360/(2*Math.PI))) < -minDegrees) {
+//			leftWingInclinationTemp -= (1.0/360.0)*2*Math.PI;
+//		}
 		final float leftWingInclination = leftWingInclinationTemp;
 		final float rightWingInclination = rightWingInclinationTemp;
 		
