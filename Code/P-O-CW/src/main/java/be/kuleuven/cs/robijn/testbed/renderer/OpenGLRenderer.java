@@ -73,10 +73,13 @@ public class OpenGLRenderer implements Renderer {
     }
 
     private void initializeModels(){
-        //Load shader for textured models
-        Shader vertexShader = Shader.compileVertexShader(Resources.loadTextResource("/shaders/textured/vertex.glsl"));
-        Shader fragmentShader = Shader.compileFragmentShader(Resources.loadTextResource("/shaders/textured/fragment.glsl"));
-        ShaderProgram texturedProgram = ShaderProgram.link(vertexShader, fragmentShader);
+        //Load shader for textured models (the shaders will be closed after linking, but the reference in the program will keep them from being deleted)
+        ShaderProgram texturedProgram;
+        try(Shader vertexShader = Shader.compileVertexShader(Resources.loadTextResource("/shaders/textured/vertex.glsl"))){
+            try(Shader fragmentShader = Shader.compileFragmentShader(Resources.loadTextResource("/shaders/textured/fragment.glsl"))){
+                texturedProgram = ShaderProgram.link(vertexShader, fragmentShader);
+            }
+        }
 
         //Load drone
         Mesh droneMesh = OBJLoader.loadFromResources("/models/drone/drone.obj");
@@ -84,9 +87,12 @@ public class OpenGLRenderer implements Renderer {
         droneModel = new Model(droneMesh, texture, texturedProgram);
 
         //Load shader for box model
-        vertexShader = Shader.compileVertexShader(Resources.loadTextResource("/shaders/box/vertex.glsl"));
-        fragmentShader = Shader.compileFragmentShader(Resources.loadTextResource("/shaders/box/fragment.glsl"));
-        ShaderProgram boxProgram = ShaderProgram.link(vertexShader, fragmentShader);
+        ShaderProgram boxProgram;
+        try(Shader vertexShader = Shader.compileVertexShader(Resources.loadTextResource("/shaders/box/vertex.glsl"))){
+            try(Shader fragmentShader = Shader.compileFragmentShader(Resources.loadTextResource("/shaders/box/fragment.glsl"))){
+                boxProgram = ShaderProgram.link(vertexShader, fragmentShader);
+            }
+        }
 
         //Load cube
         Mesh mesh = OBJLoader.loadFromResources("/models/cube/cube.obj");
@@ -224,7 +230,15 @@ public class OpenGLRenderer implements Renderer {
 
     @Override
     public void close() {
-        //TODO: destroy model resources?
+        //Destroy model resources
+        boxModel.getTexture().close();
+        boxModel.getMesh().close();
+        boxModel.getShader().close();
+
+        droneModel.getTexture().close();
+        droneModel.getMesh().close();
+        droneModel.getShader().close();
+
         //Destroy LWJGL resources
         glfwDestroyWindow(windowHandle);
         glfwTerminate();
