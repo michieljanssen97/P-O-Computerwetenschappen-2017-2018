@@ -24,17 +24,22 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		this.config = config;
 
 		//Add drone to world
-		Drone drone = new Drone(config, new ArrayRealVector(new double[] {0, 0, -13.3}, false));
+		Drone drone = new Drone(config, new ArrayRealVector(new double[] {0, 0, -6.667}, false));
 		this.addChild(drone);
 
 		//Add box to world
 		Box box = new Box();
-		double zDistance = 200.0;
-		box.setRelativePosition(new ArrayRealVector(new double[] {
-				zDistance*Math.tan(Math.PI/96.0),
-				zDistance*Math.tan(Math.PI/24.0),
-				-zDistance
-		}, false));
+		double zDistance = 100.0;
+		
+		//simulatie1
+		//box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		
+		//simulatie2
+		//box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		
+		//simulatie3
+		box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/48.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		
 		this.addChild(box);
 	}
 
@@ -140,7 +145,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 			newRoll += (2*Math.PI);
 		drone.setHeading(newHeading);
 		drone.setPitch(newPitch);
-		drone.setRoll(0);
+		drone.setRoll(newRoll);
 		
 		drone.setHeadingAngularVelocity(headingAngularVelocity + headingAngularAcceleration*dt);
 		drone.setPitchAngularVelocity(pitchAngularVelocity + pitchAngularAcceleration*dt);
