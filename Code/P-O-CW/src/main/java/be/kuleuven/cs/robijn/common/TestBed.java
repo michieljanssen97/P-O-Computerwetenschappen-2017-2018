@@ -8,9 +8,10 @@ import p_en_o_cw_2017.*;
 public interface TestBed {
     /**
      * Runs the physics and graphics simulation.
-     * @param output the drone parameters calculated by the autopilot 
+     * @param output the drone parameters calculated by the autopilot
+	 * @return a boolean that is true when the simulation is finished.
      */
-	void update(AutopilotOutputs output);
+	boolean update(AutopilotOutputs output);
 	
 	/**
 	 * Returns the latest world state as autopilot inputs.

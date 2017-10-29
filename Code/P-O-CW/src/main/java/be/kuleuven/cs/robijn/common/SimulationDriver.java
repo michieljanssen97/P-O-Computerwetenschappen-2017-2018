@@ -15,6 +15,7 @@ public class SimulationDriver {
     private TestBed testBed;
     private AutoPilot autoPilot;
     private boolean simulationPaused;
+    private boolean simulationFinished;
     private AutopilotInputs latestAutopilotInputs;
     private AutopilotOutputs latestAutopilotOutputs;
 
@@ -32,15 +33,11 @@ public class SimulationDriver {
      * If isSimulationPaused() is true, the simulation is not actually updated, but the update event handlers are still run.
      */
     public void runUpdate(){
-        if(!simulationPaused){
+        if(!simulationPaused && !simulationFinished){
             //Run the autopilot
             latestAutopilotOutputs = autoPilot.update(latestAutopilotInputs);
             //Run the testbed
-            try {
-            	testBed.update(latestAutopilotOutputs);
-            } catch (IllegalStateException exc) {
-            	simulationPaused = true;
-            }
+            simulationFinished = testBed.update(latestAutopilotOutputs);
             latestAutopilotInputs = testBed.getInputs();
         }
 
@@ -65,6 +62,8 @@ public class SimulationDriver {
     public boolean isSimulationPaused() {
         return simulationPaused;
     }
+
+    public boolean isSimulationFinished() {return simulationFinished;}
 
     public void addOnUpdateEventHandler(BiConsumer<AutopilotInputs, AutopilotOutputs> eventHandler){
         updateEventHandlers.add(eventHandler);
