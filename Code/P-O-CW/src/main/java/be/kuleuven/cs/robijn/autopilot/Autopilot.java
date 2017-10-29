@@ -5,7 +5,7 @@ import org.apache.commons.math3.analysis.solvers.*;
 import org.apache.commons.math3.exception.*;
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.*;
-import be.kuleuven.cs.robijn.common.image.*;
+import be.kuleuven.cs.robijn.autopilot.image.*;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
 import p_en_o_cw_2017.*;
 
@@ -74,7 +74,14 @@ public class Autopilot extends WorldObject implements AutoPilot {
         ImageRecognizer imagerecognizer = new ImageRecognizer();
         Image image = imagerecognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
         		this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView());
-        float [] necessaryRotation = image.getRotationToRedCube();
+		float[] necessaryRotation;
+        try {
+			necessaryRotation = image.getRotationToRedCube();
+		}
+		catch (IllegalStateException ex){
+        	//No red cube found, just fly forward
+			necessaryRotation = new float[2];
+		}
         float imageYRotation = necessaryRotation[0];
 		float imageXRotation = necessaryRotation[1];
 		

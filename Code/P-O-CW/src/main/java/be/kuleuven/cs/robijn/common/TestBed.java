@@ -8,10 +8,12 @@ import p_en_o_cw_2017.*;
 public interface TestBed {
     /**
      * Runs the physics and graphics simulation.
+	 * @param secondsSinceStart time since the start of the simulation, minus the time spent paused, in seconds.
+	 * @param secondsSinceLastUpdate time since the last update, minus the time spent paused, in seconds.
      * @param output the drone parameters calculated by the autopilot
 	 * @return a boolean that is true when the simulation is finished.
      */
-	boolean update(AutopilotOutputs output);
+	boolean update(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs output);
 	
 	/**
 	 * Returns the latest world state as autopilot inputs.

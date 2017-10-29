@@ -14,6 +14,8 @@ import javafx.scene.effect.BoxBlur;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.ArrayRealVector;
 
 /**
@@ -60,18 +62,30 @@ public class MainController {
             WorldObject world = getSimulation().getTestBed().getWorldRepresentation();
 
             Drone drone = world.getFirstChildOfType(Drone.class);
-            drone.setRelativePosition(new ArrayRealVector(new double[]{0, 0, 0}, false));
 
             Camera camera = getSimulation().getTestBed().getRenderer().createCamera();
+            camera.setHorizontalFOV((float)Math.toRadians(120));
+            camera.setVerticalFOV((float)Math.toRadians(120));
             camera.setName(CameraViewControl.DRONE_CAMERA_ID);
             camera.setDronesHidden(true);
             camera.setRelativePosition(new ArrayRealVector(new double[]{0, 0, 0}, false));
             drone.addChild(camera);
 
             camera = getSimulation().getTestBed().getRenderer().createCamera();
+            camera.setHorizontalFOV((float)Math.toRadians(120));
+            camera.setVerticalFOV((float)Math.toRadians(120));
             camera.setName(CameraViewControl.THIRDPERSON_CAMERA_ID);
-            camera.setRelativePosition(new ArrayRealVector(new double[]{0, 0.8d, 7}, false));
+            camera.setRelativePosition(new ArrayRealVector(new double[]{0, 0.8d, 3}, false));
             drone.addChild(camera);
+
+            Box box = world.getFirstChildOfType(Box.class);
+            camera = getSimulation().getTestBed().getRenderer().createCamera();
+            camera.setHorizontalFOV((float)Math.toRadians(120));
+            camera.setVerticalFOV((float)Math.toRadians(120));
+            camera.setName(CameraViewControl.BOX_CAMERA_ID);
+            camera.setRelativePosition(new ArrayRealVector(new double[]{0, 0, 0}, false));
+            camera.setRelativeRotation(new Rotation(new Vector3D(0, 1, 0), Math.PI));
+            box.addChild(camera);
         });
     }
 

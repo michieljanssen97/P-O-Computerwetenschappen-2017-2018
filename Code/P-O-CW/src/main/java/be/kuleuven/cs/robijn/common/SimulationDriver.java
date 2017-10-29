@@ -19,6 +19,11 @@ public class SimulationDriver {
     private AutopilotInputs latestAutopilotInputs;
     private AutopilotOutputs latestAutopilotOutputs;
 
+    private long simulationStart = -1; //timestamp of when the simulation started
+    private long totalTimeSpentPaused = 0; //total amount of time, between start and last update, that was spent paused (in ms)
+    private long lastUpdate = -1; //timestamp of last update
+    private long timeSpentPausedSinceLastUpdate = 0; //total amount of time, between last update and now, that was spent paused (in ms)
+
     //List of eventhandlers that are invoked when the simulation has updated.
     private ArrayList<BiConsumer<AutopilotInputs, AutopilotOutputs>> updateEventHandlers = new ArrayList<>();
 
@@ -33,11 +38,20 @@ public class SimulationDriver {
      * If isSimulationPaused() is true, the simulation is not actually updated, but the update event handlers are still run.
      */
     public void runUpdate(){
+        if(simulationStart == -1 || lastUpdate == -1){
+            lastUpdate = simulationStart = System.currentTimeMillis();
+        }
+
         if(!simulationPaused && !simulationFinished){
             //Run the autopilot
             latestAutopilotOutputs = autoPilot.update(latestAutopilotInputs);
             //Run the testbed
-            simulationFinished = testBed.update(latestAutopilotOutputs);
+            long now = System.currentTimeMillis();
+            float secondsSinceStart = ((float)((now - simulationStart) - totalTimeSpentPaused)/1000f);
+            float secondsSinceLastUpdate = ((float)((now - lastUpdate) - timeSpentPausedSinceLastUpdate)/1000f);
+            simulationFinished = testBed.update(secondsSinceStart, secondsSinceLastUpdate, latestAutopilotOutputs);
+            timeSpentPausedSinceLastUpdate = 0;
+            lastUpdate = now;
             latestAutopilotInputs = testBed.getInputs();
         }
 
@@ -47,15 +61,16 @@ public class SimulationDriver {
         }
     }
 
-    public TestBed getTestBed(){
-        return testBed;
-    }
-
-    public AutoPilot getAutoPilot(){
-        return autoPilot;
-    }
-
+    long pauseTime = -1; //timestamp of when the simulation was paused
     public void setSimulationPaused(boolean simulationPaused) {
+        if(this.simulationPaused && !simulationPaused){
+            long timePaused = System.currentTimeMillis() - pauseTime;
+            totalTimeSpentPaused += timePaused;
+            timeSpentPausedSinceLastUpdate += timePaused;
+            pauseTime = -1;
+        }else if(!this.simulationPaused && simulationPaused){
+            pauseTime = System.currentTimeMillis();
+        }
         this.simulationPaused = simulationPaused;
     }
 
@@ -64,6 +79,14 @@ public class SimulationDriver {
     }
 
     public boolean isSimulationFinished() {return simulationFinished;}
+
+    public TestBed getTestBed(){
+        return testBed;
+    }
+
+    public AutoPilot getAutoPilot(){
+        return autoPilot;
+    }
 
     public void addOnUpdateEventHandler(BiConsumer<AutopilotInputs, AutopilotOutputs> eventHandler){
         updateEventHandlers.add(eventHandler);

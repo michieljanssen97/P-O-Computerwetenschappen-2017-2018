@@ -1,6 +1,5 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
-import be.kuleuven.cs.robijn.common.math.Matrix;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.joml.Matrix4f;

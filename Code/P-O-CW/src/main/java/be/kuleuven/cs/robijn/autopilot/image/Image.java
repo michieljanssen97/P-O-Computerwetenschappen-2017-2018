@@ -1,11 +1,9 @@
-package be.kuleuven.cs.robijn.common.image;
+package be.kuleuven.cs.robijn.autopilot.image;
 
 import be.kuleuven.cs.robijn.common.math.Vector3f;
-import java.io.ByteArrayInputStream;
+
 import java.io.IOException;
 import java.util.ArrayList;
-
-import javax.imageio.ImageIO;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;

@@ -14,6 +14,9 @@ public class OpenGLCamera extends Camera {
 
 	@Override
 	public void setHorizontalFOV(float fov) {
+		if(Float.isNaN(fov) || Float.isInfinite(fov)){
+			throw new IllegalArgumentException();
+		}
 		this.fovHorizontal = fov;
 	}
 
@@ -24,6 +27,9 @@ public class OpenGLCamera extends Camera {
 
 	@Override
 	public void setVerticalFOV(float fov) {
+		if(Float.isNaN(fov) || Float.isInfinite(fov)){
+			throw new IllegalArgumentException();
+		}
 		this.fovVertical = fov;
 	}
 
