@@ -1,10 +1,8 @@
-package be.kuleuven.cs.robijn.common.image;
+package be.kuleuven.cs.robijn.autopilot.image;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 
 import org.junit.Test;
 

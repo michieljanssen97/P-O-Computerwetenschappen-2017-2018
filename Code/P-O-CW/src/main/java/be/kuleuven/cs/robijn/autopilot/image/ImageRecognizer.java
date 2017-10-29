@@ -1,4 +1,4 @@
-package be.kuleuven.cs.robijn.common.image;
+package be.kuleuven.cs.robijn.autopilot.image;
 
 import be.kuleuven.cs.robijn.common.math.Vector3f;
 

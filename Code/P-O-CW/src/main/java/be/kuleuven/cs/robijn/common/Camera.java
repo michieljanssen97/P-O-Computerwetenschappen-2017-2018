@@ -11,7 +11,7 @@ public abstract class Camera extends WorldObject {
 
     /**
      * Sets the horizontal FOV, in radians
-     * @throws IllegalArgumentException if the specified value is NaN or infinite
+     * @throws IllegalArgumentException if the specified value is NaN, infinite, negative or larger than Math.PI
      */
     public abstract void setHorizontalFOV(float fov);
 
@@ -22,7 +22,7 @@ public abstract class Camera extends WorldObject {
 
     /**
      * Sets the horizontal FOV, in radians
-     * @throws IllegalArgumentException if the specified value is NaN or infinite
+     * @throws IllegalArgumentException if the specified value is NaN, infinite, negative or larger than Math.PI
      */
     public abstract void setVerticalFOV(float fov);
 

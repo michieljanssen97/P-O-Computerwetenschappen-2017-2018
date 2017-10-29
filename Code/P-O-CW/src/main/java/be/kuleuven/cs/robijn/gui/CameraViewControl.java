@@ -26,6 +26,7 @@ public class CameraViewControl extends AnchorPane {
     //The object names for the cameras that provide the different perspectives.
     public static final String DRONE_CAMERA_ID = "gui_drone_camera";
     public static final String THIRDPERSON_CAMERA_ID = "gui_thirdperson_camera";
+    public static final String BOX_CAMERA_ID = "gui_box_camera";
 
     @FXML
     private ScrollPane imageViewHost;
@@ -134,9 +135,10 @@ public class CameraViewControl extends AnchorPane {
         //Get the active camera and set its camera FOV to match the image width to height ratio so the image isnt warped/stretched.
         String selectedCameraId = (String)perspectiveToggleGroup.getSelectedToggle().getUserData();
         Camera camera = world.getDescendantsStream().filter(o -> Objects.equals(o.getName(), selectedCameraId)).map(o -> (Camera)o).findFirst().get();
-        double ratio = imageView.getFitWidth()/imageView.getFitHeight();
-        camera.setHorizontalFOV(120*(float)ratio);
-        camera.setVerticalFOV(120f);
+        //TODO: fix viewport FOV compensation
+        //double ratio = imageView.getFitWidth()/imageView.getFitHeight();
+        //float targetFOV = camera.getVerticalFOV();
+        //camera.setHorizontalFOV(targetFOV*(float)ratio);
 
         //Render to framebuffer, copy from framebuffer to image, convert image to javafx image, display javafx image
         renderer.render(world, frameBuffer, camera);

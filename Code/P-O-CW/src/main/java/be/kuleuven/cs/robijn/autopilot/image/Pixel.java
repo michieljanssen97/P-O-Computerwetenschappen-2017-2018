@@ -1,4 +1,4 @@
-package be.kuleuven.cs.robijn.common.image;
+package be.kuleuven.cs.robijn.autopilot.image;
 
 /**
  * A class that represents the pixels of an image.

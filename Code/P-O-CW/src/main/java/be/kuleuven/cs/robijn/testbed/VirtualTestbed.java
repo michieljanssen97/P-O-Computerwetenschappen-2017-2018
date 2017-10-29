@@ -13,6 +13,8 @@ import p_en_o_cw_2017.*;
 public class VirtualTestbed extends WorldObject implements TestBed {
 	private final AutopilotConfig config;
 
+	private float elapsedTime = 0; //Time between simulation start and latest update, in seconds
+
 	private OpenGLRenderer renderer;
 	private FrameBuffer frameBuffer;
 	private Camera droneCamera;
@@ -20,16 +22,69 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 
 	public VirtualTestbed(AutopilotConfig config) {
 		this.config = config;
-		Drone drone = new Drone(config, new ArrayRealVector(new double[] {0, 0, -13.3}, false));
+
+		//Add drone to world
+		Drone drone = new Drone(config, new ArrayRealVector(new double[] {0, 0, -6.667}, false));
 		this.addChild(drone);
+
+		//Add box to world
 		Box box = new Box();
-		double zDistance = 200.0;
-		box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/96.0), zDistance*Math.tan(Math.PI/24.0), -zDistance}, false));
-		//box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/96.0), 0, -zDistance}, false));
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/24.0), -zDistance}, false));
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, 0, -zDistance}, false));
+		double zDistance = 100.0;
+		
+		//simulatie1
+		//box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		
+		//simulatie2
+		//box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		
+		//simulatie3
+		box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/48.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		
 		this.addChild(box);
 	}
+
+	public boolean update(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs output){
+		Drone drone = this.getFirstChildOfType(Drone.class);
+		Box box = this.getFirstChildOfType(Box.class);
+
+		//Check simulation finished
+		if ((drone.getRightWingPosition().getDistance(box.getWorldPosition()) < 4.5)
+				|| (drone.getLeftWingPosition().getDistance(box.getWorldPosition()) < 4.5)
+				|| (drone.getEnginePosition().getDistance(box.getWorldPosition()) < 4.5)) {
+			return true;
+		}
+
+		this.setElapsedTime(secondsSinceStart);
+		this.moveDrone(secondsSinceLastUpdate, output);
+		this.renderCameraView();
+
+		return false;
+	}
+
+	@Override
+	public WorldObject getWorldRepresentation() {
+		return this;
+	}
+
+	public AutopilotInputs getInputs() {
+		Drone drone = this.getFirstChildOfType(Drone.class);
+		if (latestCameraImage == null)
+			renderCameraView();
+		return new AutopilotInputs() {
+			public byte[] getImage() { return latestCameraImage; }
+			public float getX() { return (float) drone.getWorldPosition().getEntry(0); }
+			public float getY() { return (float) drone.getWorldPosition().getEntry(1); }
+			public float getZ() { return (float) drone.getWorldPosition().getEntry(2); }
+			public float getHeading() { return drone.getHeading(); }
+			public float getPitch() { return drone.getPitch(); }
+			public float getRoll() { return drone.getRoll(); }
+			public float getElapsedTime() { return VirtualTestbed.this.getElapsedTime(); }
+		};
+	}
+
+	///////////////
+	/// PHYSICS ///
+	///////////////
 	
 	/**
 	 * Method to move the drone of this virtual testbed.
@@ -90,94 +145,39 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 			newRoll += (2*Math.PI);
 		drone.setHeading(newHeading);
 		drone.setPitch(newPitch);
-		drone.setRoll(0);
+		drone.setRoll(newRoll);
 		
 		drone.setHeadingAngularVelocity(headingAngularVelocity + headingAngularAcceleration*dt);
 		drone.setPitchAngularVelocity(pitchAngularVelocity + pitchAngularAcceleration*dt);
 		drone.setRollAngularVelocity(rollAngularVelocity + rollAngularAcceleration*dt);
 	}
+
+	///////////////////////
+	/// TIME MANAGEMENT ///
+	///////////////////////
 	
 	public void setElapsedTime(float elapsedTime) throws IllegalArgumentException {
 		if (! isValidElapsedTime(elapsedTime))
 			throw new IllegalArgumentException();
 		this.elapsedTime = elapsedTime;
 	}
-	
-	private float elapsedTime = 0;
-	
+
 	public float getElapsedTime() {
 		return elapsedTime;
 	}
 
-	public long getBeginSimulation() {
-		return beginSimulation;
-	}
-
-	private final long beginSimulation = System.currentTimeMillis();
-	
-	public long getLastUpdate() {
-		return lastUpdate;
-	}
-	
 	public static boolean isValidElapsedTime(float elapsedTime) {
 		return ((elapsedTime >= 0) & (elapsedTime <= Float.MAX_VALUE));
 	}
 	
-	public static boolean isValidBeginSimulation(long beginSimulation) {
-		return ((beginSimulation >= 0) & (beginSimulation <= Long.MAX_VALUE));
-	}
-	
-	public static boolean isValidLastUpdate(long LastUpdate) {
-		return ((LastUpdate >= 0) & (LastUpdate <= Long.MAX_VALUE));
-	}
-	
-	private long lastUpdate = System.currentTimeMillis();
-	
-	public void setLastUpdate(long lastUpdate) throws IllegalArgumentException {
-		if (! isValidLastUpdate(lastUpdate))
-			throw new IllegalArgumentException();
-		this.lastUpdate = lastUpdate;
-	}
-	
-	public void update(AutopilotOutputs output) throws IllegalStateException {
-		Drone drone = this.getFirstChildOfType(Drone.class);
-		Box box = this.getFirstChildOfType(Box.class);
-		if ((drone.getRightWingPosition().getDistance(box.getWorldPosition()) < 4.5) 
-				|| (drone.getLeftWingPosition().getDistance(box.getWorldPosition()) < 4.5) 
-				|| (drone.getEnginePosition().getDistance(box.getWorldPosition()) < 4.5))
-			throw new IllegalStateException("simulation has ended");
-		long now = System.currentTimeMillis();
-		this.setElapsedTime((float)(now - this.getBeginSimulation())/1000f);
-		this.moveDrone((float)(now- this.getLastUpdate())/1000f, output);
-		this.renderCameraView();
-		this.setLastUpdate(now);
-	}
+	/////////////////
+	/// RENDERING ///
+	/////////////////
 	
 	public Renderer getRenderer() {
 		if (renderer == null)
 			renderer = OpenGLRenderer.create();
 		return renderer;
-	}
-
-	@Override
-	public WorldObject getWorldRepresentation() {
-		return this;
-	}
-
-	public AutopilotInputs getInputs() {
-		Drone drone = this.getFirstChildOfType(Drone.class);
-		if (latestCameraImage == null)
-			renderCameraView();
-		return new AutopilotInputs() {
-            public byte[] getImage() { return latestCameraImage; }
-            public float getX() { return (float) drone.getWorldPosition().getEntry(0); }
-            public float getY() { return (float) drone.getWorldPosition().getEntry(1); }
-            public float getZ() { return (float) drone.getWorldPosition().getEntry(2); }
-            public float getHeading() { return drone.getHeading(); }
-            public float getPitch() { return drone.getPitch(); }
-            public float getRoll() { return drone.getRoll(); }
-            public float getElapsedTime() { return VirtualTestbed.this.getElapsedTime(); }
-        };
 	}
 
 	private void renderCameraView(){
@@ -215,6 +215,8 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 
 	private Camera createDroneCamera(){
 		Camera camera = getRenderer().createCamera();
+		camera.setHorizontalFOV((float)Math.toRadians(config.getHorizontalAngleOfView()));
+		camera.setVerticalFOV((float)Math.toRadians(config.getVerticalAngleOfView()));
 		camera.setDronesHidden(true);
 		Drone drone = this.getFirstChildOfType(Drone.class);
 		drone.addChild(camera);
