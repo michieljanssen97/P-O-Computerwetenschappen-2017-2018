@@ -117,7 +117,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
 			}, false);
 		RealVector angularMomentumDroneCoordinates = inertiaMatrix.operate(totalAngularVelocityDroneCoordinates);
 		
-		if ((imageXRotation > minDegrees) && (drone.getPitchAngularVelocity() < ((minDegrees/360.0)*2*Math.PI))) {
+		if (imageXRotation > minDegrees) {
 		//if (imageXRotation > minDegrees) {
 			try {
 				UnivariateFunction function1 = (x)->{return Math.cos(x)*x - ((inertiaMatrixXX*(minDegrees/360.0)*4*Math.PI
@@ -137,9 +137,9 @@ public class Autopilot extends WorldObject implements AutoPilot {
 				horStabInclinationTemp = -bestInclination;
 			}
 		}
-		else if ((imageXRotation < -minDegrees) && (drone.getPitchAngularVelocity() < -((minDegrees/360.0)*2*Math.PI))) {
+		else if (imageXRotation < -minDegrees) {
 			try {
-				UnivariateFunction function1 = (x)->{return Math.cos(x)*x - ((-inertiaMatrixXX*(minDegrees/360.0)*4*Math.PI
+				UnivariateFunction function1 = (x)->{return Math.cos(x)*x + ((-inertiaMatrixXX*(minDegrees/360.0)*4*Math.PI
 						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(0)
 						+ inertiaMatrix.operate(
 								drone.transformationToDroneCoordinates(
@@ -158,9 +158,9 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		}
 		final float horStabInclination = horStabInclinationTemp;
 		
-		if ((imageYRotation > minDegrees) && (drone.getHeadingAngularVelocity() < ((minDegrees/360.0)*Math.PI))) {
+		if (imageYRotation > minDegrees) {
 			try {
-				UnivariateFunction function2 = (x)->{return Math.cos(x)*x - ((inertiaMatrixYY*Math.cos(drone.getPitch())*(minDegrees/360.0)*2*Math.PI
+				UnivariateFunction function2 = (x)->{return Math.cos(x)*x - ((inertiaMatrixYY*Math.cos(drone.getPitch())*(minDegrees/360.0)*4*Math.PI
 						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(1)
 						+ inertiaMatrix.operate(
 								drone.transformationToDroneCoordinates(
@@ -177,9 +177,9 @@ public class Autopilot extends WorldObject implements AutoPilot {
 				verStabInclinationTemp = -bestInclination;
 			}
 		}
-		else if ((imageYRotation < -minDegrees) && (drone.getHeadingAngularVelocity() > -((minDegrees/360.0)*Math.PI))) {
+		else if (imageYRotation < -minDegrees) {
 			try {
-				UnivariateFunction function2 = (x)->{return Math.cos(x)*x - ((-inertiaMatrixYY*Math.cos(drone.getPitch())*(minDegrees/360.0)*2*Math.PI
+				UnivariateFunction function2 = (x)->{return Math.cos(x)*x + ((-inertiaMatrixYY*Math.cos(drone.getPitch())*(minDegrees/360.0)*4*Math.PI
 						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(1)
 						+ inertiaMatrix.operate(
 								drone.transformationToDroneCoordinates(
@@ -195,7 +195,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
 			} catch (NoBracketingException exc) {
 				verStabInclinationTemp = bestInclination;
 			}
-		}		
+		}
 		final float verStabInclination = verStabInclinationTemp;
 		
 		double projectedVelocityLeftWing = drone.getProjectedVelocityLeftWing().getNorm();

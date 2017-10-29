@@ -142,7 +142,9 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	public void update(AutopilotOutputs output) throws IllegalStateException {
 		Drone drone = this.getFirstChildOfType(Drone.class);
 		Box box = this.getFirstChildOfType(Box.class);
-		if (drone.getRightWingPosition().getDistance(box.getWorldPosition()) < 7.0)
+		if ((drone.getRightWingPosition().getDistance(box.getWorldPosition()) < 4.5) 
+				|| (drone.getLeftWingPosition().getDistance(box.getWorldPosition()) < 4.5) 
+				|| (drone.getEnginePosition().getDistance(box.getWorldPosition()) < 4.5))
 			throw new IllegalStateException("simulation has ended");
 		long now = System.currentTimeMillis();
 		this.setElapsedTime((float)(now - this.getBeginSimulation())/1000f);
