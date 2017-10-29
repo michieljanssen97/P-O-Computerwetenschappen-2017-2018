@@ -135,9 +135,10 @@ public class CameraViewControl extends AnchorPane {
         //Get the active camera and set its camera FOV to match the image width to height ratio so the image isnt warped/stretched.
         String selectedCameraId = (String)perspectiveToggleGroup.getSelectedToggle().getUserData();
         Camera camera = world.getDescendantsStream().filter(o -> Objects.equals(o.getName(), selectedCameraId)).map(o -> (Camera)o).findFirst().get();
-        double ratio = imageView.getFitWidth()/imageView.getFitHeight();
-        float targetFOV = camera.getVerticalFOV();
-        camera.setHorizontalFOV(targetFOV*(float)ratio);
+        //TODO: fix viewport FOV compensation
+        //double ratio = imageView.getFitWidth()/imageView.getFitHeight();
+        //float targetFOV = camera.getVerticalFOV();
+        //camera.setHorizontalFOV(targetFOV*(float)ratio);
 
         //Render to framebuffer, copy from framebuffer to image, convert image to javafx image, display javafx image
         renderer.render(world, frameBuffer, camera);
