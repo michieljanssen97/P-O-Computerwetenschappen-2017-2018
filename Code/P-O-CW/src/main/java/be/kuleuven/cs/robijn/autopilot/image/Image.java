@@ -42,6 +42,11 @@ public class Image {
 	private float verticalAngleOfView;
 	
 	/**
+	 * A variable containing a list of all pixels of this Image.
+	 */
+	private ArrayList<Pixel> pixels;
+	
+	/**
 	 * Initiate this Image with a given byte array (represents the image), number of rows, number of columns and horizontal and vertical angle of view.
 	 * @param image 				The given byte array that represents the image.
 	 * @param nbRows				The amount of rows.
@@ -51,8 +56,10 @@ public class Image {
 	 * @throws IOException	One of the parameters is invalid or the image cannot be read.
 	 */
 	public Image(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView) {
-		if ( (!isValidImage(image, nbRows, nbColumns)) || (!isValidAngle(horizontalAngleOfView)) || (!isValidAngle(verticalAngleOfView)) )
+		if ( !isValidImage(image, nbRows, nbColumns) )
 			throw new IllegalArgumentException("The given byte array is invalid or does not have the right dimensions.");
+		if ( (!isValidAngle(horizontalAngleOfView)) || (!isValidAngle(verticalAngleOfView)) )
+			throw new IllegalArgumentException("One of the given image angles is invalid.");
 		this.nbRows = nbRows;
 		this.nbColumns = nbColumns;
 		this.horizontalAngleOfView = horizontalAngleOfView;
@@ -63,6 +70,14 @@ public class Image {
 			image[(i*3)+2] = b;
 		}
 		this.image = new BufferedImage(nbColumns, nbRows, BufferedImage.TYPE_3BYTE_BGR);
+		ArrayList<Pixel> pixels = new ArrayList<Pixel>();
+		for (int y = 0; y < getnbRows(); y++){
+			for (int x = 0; x < getnbColumns(); x++){
+				pixels.add(new Pixel(x, y, getPixelHSV(x, y)));
+			}
+		}
+		this.pixels = pixels;
+		
 		byte[] imageBackingBuffer = ((DataBufferByte) this.image.getRaster().getDataBuffer()).getData();
 		System.arraycopy(image, 0, imageBackingBuffer, 0, image.length);
 	}
@@ -123,6 +138,13 @@ public class Image {
 	}
 	
 	/**
+	 * Return the list of all pixels in this Image.
+	 */
+	public ArrayList<Pixel> getAllPixels(){
+		return this.pixels;
+	}
+	
+	/**
 	 * Calculates the HSV-value of the given pixel of this image.
 	 * @param x	The x coordinate
 	 * @param y	The y coordinate
@@ -131,7 +153,7 @@ public class Image {
 	 */
 	public float[] getPixelHSV(int x, int y) {
 		if ((!isValidXCoordinate(x)) || (!isValidYCoordinate(y))) 
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Asking for HSV of a non-existent coördinate.");
 		int rgb = getImage().getRGB(x, y);
 		Color col = new Color(rgb);
 		float[] hsv = new float[3];
@@ -188,13 +210,10 @@ public class Image {
 	 */
 	private ArrayList<Pixel> getRedPixels() {
 		ArrayList<Pixel> redPixels = new ArrayList<Pixel>();
-		for (int y = 0; y < getnbRows(); y++){
-			for (int x = 0; x < getnbColumns(); x++){
-				float[] hsv = getPixelHSV(x, y);
-				if (isRedHSV(hsv)){
-					redPixels.add(new Pixel(x, y, hsv));
-				}
-			}
+		for (Pixel p : getAllPixels()){
+			float[] hsv = p.getHSV();
+			if (isRedHSV(hsv))
+				redPixels.add(p);
 		}
 		return redPixels;
 	}
@@ -267,10 +286,10 @@ public class Image {
 	}
 	
 	/**
-	 * Return an array containing all the red pixels that are on the edge of a cube.
+	 * Return an array containing all the red pixels that are on the outside edge of a cube.
 	 * @throws Exception	Something goes wrong while calculating the red pixels
 	 */
-	public ArrayList<Pixel> getRedEdgePixels() throws Exception{
+	public ArrayList<Pixel> getRedEdgePixels() throws IllegalStateException{
 		ArrayList<Pixel> edge = new ArrayList<Pixel>();
 		boolean isEdge = false;
 		for (Pixel p : getRedPixels()){
@@ -296,7 +315,7 @@ public class Image {
 	 * Return the minimum distance from the red pixels that are on the edge of the cube, to its center.
 	 * @throws Exception Something goes wrong while calculating the red pixels
 	 */
-	public float getMinimumDistanceSpherePixels() throws Exception{
+	public float getMinimumDistanceSpherePixels() throws IllegalStateException{
 		float minimum = (float) Math.sqrt( Math.pow(getnbRows(), 2) + Math.pow(getnbColumns(), 2) );
 		int[] centerPixel = getAverageRedPixel();
 		for(Pixel p : getRedEdgePixels()){
@@ -311,7 +330,7 @@ public class Image {
 	 * Return the maximum distance from the red pixels that are on the edge of the cube, to its center.
 	 * @throws Exception	Something goes wrong while calculating the red pixels
 	 */
-	public float getMaximumDistanceSpherePixels() throws Exception{
+	public float getMaximumDistanceSpherePixels() throws IllegalStateException{
 		float maximum = 0;
 		int[] centerPixel = getAverageRedPixel();
 		for(Pixel p : getRedEdgePixels()){
@@ -326,7 +345,7 @@ public class Image {
 	 * Return the amount of sides of the cube that are visible in the Image.
 	 * @throws Exception	Something goes wrong while calculating the red pixels
 	 */
-	public int getAmountSidesVisible() throws Exception{
+	public int getAmountSidesVisible() throws IllegalStateException{
 		boolean checkX = true;
 		boolean checkY = true;
 		boolean checkZ = true;
@@ -382,7 +401,7 @@ public class Image {
 	 * Return the distance from the red cube to the camera along the (negative) z axis of the drone coordinate system.
 	 * @throws Exception	There are no sides of a red cube visible in this Image
 	 */
-	public float getTotalDistance() throws Exception{
+	public float getTotalDistance() throws IllegalStateException{
 		int sides = getAmountSidesVisible();
 		if (sides == 3){
 			float pixels = getMaximumDistanceSpherePixels();
@@ -393,7 +412,7 @@ public class Image {
 			float angle = (pixels * getHorizontalAngle()) / getnbColumns();
 			return (float) (0.5 / Math.tan(degreesToRadians(angle)));
 		} else
-			throw new Exception("The cube does not have the right values to be visible or no cube is present.");
+			throw new IllegalStateException("The cube does not have the right values to be visible or no cube is present.");
 	}
 	
 	
@@ -422,5 +441,35 @@ public class Image {
 	public float degreesToRadians(float degrees){
 		return (degrees * ((float) Math.PI / 180.0f));
 	}
+	
+	public ArrayList<Pixel> getAllEdgePixels(){
+		ArrayList<Pixel> edgePixels = new ArrayList<Pixel>();
+		boolean isEdge = false;
+		for (Pixel p : getAllPixels()){
+			int x = p.getX();
+			int y = p.getY();
+			float[] hsv = p.getHSV();
+			if (x < getnbColumns()-1 && !isEqualHSV(hsv, getPixelHSV(x+1, y)))
+				isEdge = true;
+			if (x > 0 && !isEqualHSV(hsv, getPixelHSV(x-1, y)))
+				isEdge = true;
+			if (y < getnbRows()-1 && !isEqualHSV(hsv, getPixelHSV(x, y+1)))
+				isEdge = true;
+			if (y > 0 && !isEqualHSV(hsv, getPixelHSV(x, y-1)))
+				isEdge = true;
+			if (isEdge){
+				edgePixels.add(p);
+				isEdge = false;
+			}
+		}
+		return edgePixels;
+	}
+	
+	public boolean isEqualHSV(float[] hsv1, float[] hsv2) throws IllegalArgumentException{
+		if ( (!isValidHSV(hsv1)) || !isValidHSV(hsv2) )
+			throw new IllegalArgumentException("One of the given HSV is invalid.");
+		return ( (hsv1[0] == hsv2[0]) && (hsv1[1] == hsv2[1]) && (hsv1[2] == hsv2[2]) );
+	}
+	
 }
 
