@@ -441,6 +441,9 @@ public class Image {
 		return (degrees * ((float) Math.PI / 180.0f));
 	}
 	
+	/**
+	 * Returns a list of all pixels in the image that are part of an edge of a cube.
+	 */
 	public ArrayList<Pixel> getAllEdgePixels(){
 		ArrayList<Pixel> edgePixels = new ArrayList<Pixel>();
 		boolean isEdge = false;
@@ -464,6 +467,16 @@ public class Image {
 		return edgePixels;
 	}
 	
+	/**
+	 * Returns whether or not two HSV values are equal.
+	 * @param hsv1
+	 * The first HSV value.
+	 * @param hsv2
+	 * The second HSV value.
+	 * @return
+	 * True if equal, false if not.
+	 * @throws IllegalArgumentException
+	 */
 	public boolean isEqualHSV(float[] hsv1, float[] hsv2) throws IllegalArgumentException{
 		if ( (!isValidHSV(hsv1)) || !isValidHSV(hsv2) )
 			throw new IllegalArgumentException("One of the given HSV is invalid.");
