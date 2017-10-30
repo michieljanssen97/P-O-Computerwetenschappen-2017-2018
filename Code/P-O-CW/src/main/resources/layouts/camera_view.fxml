@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import be.kuleuven.cs.robijn.gui.CameraViewControl?>
+<fx:root type="AnchorPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <ScrollPane fx:id="imageViewHost" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <ImageView fx:id="imageView" pickOnBounds="true" preserveRatio="false"/>
+      </ScrollPane>
+      <HBox prefHeight="25.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+         <children>
+            <fx:define>
+               <ToggleGroup fx:id="perspectiveToggleGroup"/>
+            </fx:define>
+            <ToggleButton toggleGroup="$perspectiveToggleGroup" selected="true" mnemonicParsing="false" text="Drone camera">
+               <userData>
+                  <CameraViewControl fx:constant="DRONE_CAMERA_ID"/>
+               </userData>
+            </ToggleButton>
+            <ToggleButton toggleGroup="$perspectiveToggleGroup" mnemonicParsing="false" text="Third person">
+               <userData>
+                  <CameraViewControl fx:constant="THIRDPERSON_CAMERA_ID"/>
+               </userData>
+               <HBox.margin>
+                  <Insets left="5.0" />
+               </HBox.margin>
+            </ToggleButton>
+            <ToggleButton toggleGroup="$perspectiveToggleGroup" mnemonicParsing="false" text="Box camera">
+               <userData>
+                  <CameraViewControl fx:constant="BOX_CAMERA_ID"/>
+               </userData>
+               <HBox.margin>
+                  <Insets left="5.0" />
+               </HBox.margin>
+            </ToggleButton>
+            <!--<ToggleButton toggleGroup="$perspectiveToggleGroup" mnemonicParsing="false" text="Free camera">
+               <userData>
+                  <CameraViewControl fx:constant="FREE_CAMERA_ID"/>
+               </userData>
+               <HBox.margin>
+                  <Insets left="5.0" />
+               </HBox.margin>
+            </ToggleButton>-->
+         </children>
+      </HBox>
+   </children>
+</fx:root>

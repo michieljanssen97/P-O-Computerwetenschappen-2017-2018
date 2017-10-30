@@ -1,13 +1,12 @@
 package be.kuleuven.cs.robijn;
 
-/**
- * Hello world!
- *
- */
+import be.kuleuven.cs.robijn.gui.GUI;
+import javafx.application.Application;
+
 public class App 
 {
     public static void main( String[] args )
     {
-        System.out.println( "Hello World!" );
+        Application.launch(GUI.class);
     }
 }

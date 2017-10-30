@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<fx:root type="javafx.scene.layout.AnchorPane" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" prefHeight="700.0" prefWidth="1000.0" style="-fx-border-style: solid; -fx-border-color: #999999; -fx-background-color: white;">
+   <children>
+      <VBox prefHeight="100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <Label text="Simulatie configuratie">
+               <font>
+                  <Font size="24.0" />
+               </font>
+               <VBox.margin>
+                  <Insets left="15.0" top="10.0" />
+               </VBox.margin>
+            </Label>
+            <HBox prefHeight="25.0" prefWidth="698.0">
+               <children>
+                  <Button fx:id="loadFileButton" mnemonicParsing="false" text="Bestand inladen…">
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="saveFileButton" mnemonicParsing="false" text="Opslaan als…">
+                     <HBox.margin>
+                        <Insets left="10.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="loadDefaultsButton" mnemonicParsing="false" text="Standaardwaarden herstellen">
+                     <HBox.margin>
+                        <Insets left="10.0" />
+                     </HBox.margin>
+                  </Button>
+               </children>
+               <VBox.margin>
+                  <Insets left="15.0" right="15.0" top="15.0" />
+               </VBox.margin>
+            </HBox>
+         </children>
+      </VBox>
+      <TableView fx:id="propertiesTable" AnchorPane.bottomAnchor="53.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="100.0">
+         <columns>
+         </columns>
+      </TableView>
+      <Button fx:id="okButton" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0" text="OK" AnchorPane.bottomAnchor="16.0" AnchorPane.rightAnchor="16.0" />
+   </children>
+</fx:root>
