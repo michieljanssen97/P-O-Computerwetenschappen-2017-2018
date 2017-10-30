@@ -16,6 +16,7 @@ public class SimulationDriver {
     private AutoPilot autoPilot;
     private boolean simulationPaused;
     private boolean simulationFinished;
+    private boolean simulationCrashed;
     private AutopilotInputs latestAutopilotInputs;
     private AutopilotOutputs latestAutopilotOutputs;
 
@@ -42,7 +43,7 @@ public class SimulationDriver {
             lastUpdate = simulationStart = System.currentTimeMillis();
         }
 
-        if(!simulationPaused && !simulationFinished){
+        if(!simulationPaused && !simulationFinished && !simulationCrashed){
         	try {
         		//Run the autopilot
         		latestAutopilotOutputs = autoPilot.update(latestAutopilotInputs);
@@ -55,8 +56,9 @@ public class SimulationDriver {
                 lastUpdate = now;
                 latestAutopilotInputs = testBed.getInputs();
         	} catch (IllegalStateException exc){
-        		simulationPaused = true;
-        		System.out.println("simulation not possible");
+                simulationCrashed = true;
+                System.err.println("Simulation failed!");
+        		exc.printStackTrace();
         	}
         }
 
@@ -83,7 +85,9 @@ public class SimulationDriver {
         return simulationPaused;
     }
 
-    public boolean isSimulationFinished() {return simulationFinished;}
+    public boolean hasSimulationFinished() {return simulationFinished;}
+
+    public boolean hasSimulationCrashed(){return simulationCrashed;}
 
     public TestBed getTestBed(){
         return testBed;
