@@ -459,53 +459,22 @@ public class Autopilot extends WorldObject implements AutoPilot {
         return output;
 	}
 	
-	@SuppressWarnings("unused")
 	public float preventCrash(float inclination, boolean positive, Drone drone) {
 		float newInclination = inclination;
 		boolean crash = true;
 		while (crash == true) {
-			crash = false;
-			try {
-				float AOALeftWing = drone.calculateAOA(drone.getNormalHor(newInclination),
-						drone.getProjectedVelocityLeftWing(), drone.getAttackVectorHor(newInclination));
-			} catch (IllegalArgumentException exc) {
-				crash = true;
-			}
-			if (crash == false) {
-				try {
-					float AOARightWing = drone.calculateAOA(drone.getNormalHor(newInclination),
-							drone.getProjectedVelocityRightWing(), drone.getAttackVectorHor(newInclination));
-				} catch (IllegalArgumentException exc) {
-					crash = true;
-				}
-			}
-			if (crash == false) {
-				try {
-					float AOAHorStab = drone.calculateAOA(drone.getNormalHor(newInclination),
-							drone.getProjectedVelocityHorStab(), drone.getAttackVectorHor(newInclination));
-				} catch (IllegalArgumentException exc) {
-					crash = true;
-				}
-			}
-			if (crash == false) {
-				try {
-					float AOAVerStab = drone.calculateAOA(drone.getNormalVer(newInclination),
-							drone.getProjectedVelocityVerStab(), drone.getAttackVectorVer(newInclination));
-				} catch (IllegalArgumentException exc) {
-					crash = true;
-				}
-			}
+			crash = this.hasCrash(newInclination, drone);
 			if (crash == true) {
 				if (positive == true) {
 					newInclination -= (1.0/360.0)*2*Math.PI;
 					if (newInclination < -drone.getMaxAOA()) {
-						throw new IllegalStateException("simulation not possible");
+						throw new IllegalStateException("simulation failed!");
 					}
 				}
 				if (positive == false) {
 					newInclination += (1.0/360.0)*2*Math.PI;
 					if (newInclination > drone.getMaxAOA())
-						throw new IllegalStateException("simulation not possible");
+						throw new IllegalStateException("simulation failed!");
 				}
 			}
 		}
