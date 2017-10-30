@@ -50,7 +50,7 @@ public class Texture implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         glDeleteTextures(textureId);
     }
 }

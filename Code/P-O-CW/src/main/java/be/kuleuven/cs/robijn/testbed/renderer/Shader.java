@@ -4,7 +4,7 @@ import static org.lwjgl.opengl.GL11.GL_TRUE;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL20.glGetShaderInfoLog;
 
-public class Shader {
+public class Shader implements AutoCloseable{
     public static Shader compileVertexShader(String source){
         return compileShader(source, GL_VERTEX_SHADER);
     }
@@ -40,5 +40,10 @@ public class Shader {
 
     public int getShaderId(){
         return shaderId;
+    }
+
+    @Override
+    public void close() {
+        glDeleteShader(shaderId);
     }
 }

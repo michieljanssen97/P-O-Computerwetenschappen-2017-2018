@@ -33,7 +33,12 @@
                         <Insets />
                     </VBox.margin>
                 </HBox>
-                <Label fx:id="simulationFinishedLabel" text="Simulation has finished." style="-fx-font-weight: bold">
+                <Label fx:id="simulationFinishedLabel" text="Simulation has finished." style="-fx-font-weight: bold;">
+                    <VBox.margin>
+                        <Insets top="5.0" />
+                    </VBox.margin>
+                </Label>
+                <Label fx:id="simulationErrorLabel" text="The autopilot is out of control!" style="-fx-font-weight: bold; -fx-text-fill: red;">
                     <VBox.margin>
                         <Insets top="5.0" />
                     </VBox.margin>
@@ -43,7 +48,7 @@
                 <Insets left="15.0" right="15.0" top="5.0" />
             </VBox.margin>
         </VBox>
-        <Label text="Autopilot">
+        <!--<Label text="Autopilot">
             <font>
                 <Font size="20.0" />
             </font>
@@ -67,6 +72,6 @@
             <VBox.margin>
                 <Insets left="15.0" right="15.0" top="5.0" />
             </VBox.margin>
-        </VBox>
+        </VBox>-->
     </children>
 </fx:root>

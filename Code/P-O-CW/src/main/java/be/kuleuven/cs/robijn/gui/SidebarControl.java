@@ -30,12 +30,16 @@ public class SidebarControl extends VBox {
     private ToggleGroup simulationRunningToggleGroup;
     private BooleanProperty simulationRunningProperty = new SimpleBooleanProperty(this, "simulationRunning");
     private BooleanProperty simulationFinishedProperty = new SimpleBooleanProperty(this, "simulationFinished");
+    private BooleanProperty simulationErrorProperty = new SimpleBooleanProperty(this, "simulationError");
 
     @FXML
     private Label simulationFinishedLabel;
 
     @FXML
-    private ProgressBar progressBar;
+    private Label simulationErrorLabel;
+
+    //@FXML
+    //private ProgressBar progressBar;
 
     private ObjectProperty<SimulationDriver> simulationProperty = new SimpleObjectProperty<>(this, "simulation");
 
@@ -64,13 +68,18 @@ public class SidebarControl extends VBox {
                 return;
             }
             getSimulation().addOnUpdateEventHandler((inputs, outputs) -> {
-                simulationFinishedProperty.setValue(getSimulation().isSimulationFinished());
+                simulationFinishedProperty.set(getSimulation().hasSimulationFinished());
+                simulationErrorProperty.set(getSimulation().hasSimulationCrashed());
             });
         });
-        playButton.disableProperty().bind(simulationFinishedProperty);
-        pauseButton.disableProperty().bind(simulationFinishedProperty);
+        playButton.disableProperty().bind(simulationFinishedProperty.or(simulationErrorProperty));
+        pauseButton.disableProperty().bind(simulationFinishedProperty.or(simulationErrorProperty));
 
         simulationFinishedLabel.visibleProperty().bind(simulationFinishedProperty);
+        simulationFinishedLabel.managedProperty().bind(simulationFinishedProperty);
+
+        simulationErrorLabel.visibleProperty().bind(simulationErrorProperty);
+        simulationErrorLabel.managedProperty().bind(simulationErrorProperty);
     }
 
     public void setSimulation(SimulationDriver simulationProperty) {

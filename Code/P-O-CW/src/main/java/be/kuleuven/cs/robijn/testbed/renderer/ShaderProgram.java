@@ -7,7 +7,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL21.*;
 
-public class ShaderProgram {
+public class ShaderProgram implements AutoCloseable{
     public static ShaderProgram link(Shader... shaders){
         if(shaders == null || shaders.length == 0){
             throw new IllegalArgumentException("'shaders' can not be null or empty");
@@ -40,6 +40,11 @@ public class ShaderProgram {
 
     public int getProgramId(){
         return programId;
+    }
+
+    @Override
+    public void close() {
+        glDeleteProgram(programId);
     }
 
     //

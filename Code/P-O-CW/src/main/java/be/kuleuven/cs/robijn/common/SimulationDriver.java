@@ -16,6 +16,7 @@ public class SimulationDriver {
     private AutoPilot autoPilot;
     private boolean simulationPaused;
     private boolean simulationFinished;
+    private boolean simulationCrashed;
     private AutopilotInputs latestAutopilotInputs;
     private AutopilotOutputs latestAutopilotOutputs;
 
@@ -42,17 +43,23 @@ public class SimulationDriver {
             lastUpdate = simulationStart = System.currentTimeMillis();
         }
 
-        if(!simulationPaused && !simulationFinished){
-            //Run the autopilot
-            latestAutopilotOutputs = autoPilot.update(latestAutopilotInputs);
-            //Run the testbed
-            long now = System.currentTimeMillis();
-            float secondsSinceStart = ((float)((now - simulationStart) - totalTimeSpentPaused)/1000f);
-            float secondsSinceLastUpdate = ((float)((now - lastUpdate) - timeSpentPausedSinceLastUpdate)/1000f);
-            simulationFinished = testBed.update(secondsSinceStart, secondsSinceLastUpdate, latestAutopilotOutputs);
-            timeSpentPausedSinceLastUpdate = 0;
-            lastUpdate = now;
-            latestAutopilotInputs = testBed.getInputs();
+        if(!simulationPaused && !simulationFinished && !simulationCrashed){
+        	try {
+        		//Run the autopilot
+        		latestAutopilotOutputs = autoPilot.update(latestAutopilotInputs);
+        		//Run the testbed
+                long now = System.currentTimeMillis();
+                float secondsSinceStart = ((float)((now - simulationStart) - totalTimeSpentPaused)/1000f);
+                float secondsSinceLastUpdate = ((float)((now - lastUpdate) - timeSpentPausedSinceLastUpdate)/1000f);
+                simulationFinished = testBed.update(secondsSinceStart, secondsSinceLastUpdate, latestAutopilotOutputs);
+                timeSpentPausedSinceLastUpdate = 0;
+                lastUpdate = now;
+                latestAutopilotInputs = testBed.getInputs();
+        	} catch (IllegalStateException exc){
+                simulationCrashed = true;
+                System.err.println("Simulation failed!");
+        		exc.printStackTrace();
+        	}
         }
 
         //Invokes the event handlers
@@ -78,7 +85,9 @@ public class SimulationDriver {
         return simulationPaused;
     }
 
-    public boolean isSimulationFinished() {return simulationFinished;}
+    public boolean hasSimulationFinished() {return simulationFinished;}
+
+    public boolean hasSimulationCrashed(){return simulationCrashed;}
 
     public TestBed getTestBed(){
         return testBed;
