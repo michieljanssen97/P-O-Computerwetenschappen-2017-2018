@@ -12,6 +12,7 @@ import static org.junit.Assert.*;
 
 
 public class ImageTest {
+	
 	private byte[] loadImageRGBBytes(String resourceName) throws IOException {
 		BufferedImage image = ImageIO.read(getClass().getClassLoader().getResource(resourceName));
 		byte[] rgbBytes = new byte[image.getWidth() * image.getHeight()*3];

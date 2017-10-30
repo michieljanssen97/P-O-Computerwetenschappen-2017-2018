@@ -70,6 +70,8 @@ public class Image {
 			image[(i*3)+2] = b;
 		}
 		this.image = new BufferedImage(nbColumns, nbRows, BufferedImage.TYPE_3BYTE_BGR);
+		byte[] imageBackingBuffer = ((DataBufferByte) this.image.getRaster().getDataBuffer()).getData();
+		System.arraycopy(image, 0, imageBackingBuffer, 0, image.length);
 		ArrayList<Pixel> pixels = new ArrayList<Pixel>();
 		for (int y = 0; y < getnbRows(); y++){
 			for (int x = 0; x < getnbColumns(); x++){
@@ -77,9 +79,6 @@ public class Image {
 			}
 		}
 		this.pixels = pixels;
-		
-		byte[] imageBackingBuffer = ((DataBufferByte) this.image.getRaster().getDataBuffer()).getData();
-		System.arraycopy(image, 0, imageBackingBuffer, 0, image.length);
 	}
 	
 	/**
