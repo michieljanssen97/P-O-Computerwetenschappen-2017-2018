@@ -90,15 +90,17 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		float leftWingInclinationTemp = 0;
 		float rightWingInclinationTemp = 0;
 		float minDegrees = 1;
-		float bestInclinationPositive = 0.86f;
-		float bestInclinationNegative = -0.86f;
-		float maxInclinationPositive = this.preventCrash(drone.getMaxAOA(), true, drone);
-		float maxInclinationNegative = this.preventCrash(-drone.getMaxAOA(), false, drone);
-		if (bestInclinationPositive > maxInclinationPositive) {
-			bestInclinationPositive = maxInclinationPositive;
+		float bestInclinationPositive;
+		if (! hasCrash(0.86f, drone))
+			bestInclinationPositive = 0.86f;
+		else {
+			bestInclinationPositive = this.preventCrash(drone.getMaxAOA(), true, drone);
 		}
-		if (bestInclinationNegative < maxInclinationNegative) {
-			bestInclinationNegative = maxInclinationNegative;
+		float bestInclinationNegative;
+		if (! hasCrash(-0.86f, drone))
+			bestInclinationNegative = -0.86f;
+		else {
+			bestInclinationNegative = this.preventCrash(-drone.getMaxAOA(), false, drone);
 		}
 		double headingAngularAcceleration = (1.0/360.0)*6*Math.PI;
 		double maxHeadingAngularVelocity = (1.0/360.0)*12*Math.PI;
@@ -508,6 +510,42 @@ public class Autopilot extends WorldObject implements AutoPilot {
 			}
 		}
 		return newInclination;
+	}
+	
+	@SuppressWarnings("unused")
+	public boolean hasCrash(float inclination, Drone drone) {
+		boolean crash = false;
+		try {
+			float AOALeftWing = drone.calculateAOA(drone.getNormalHor(inclination),
+					drone.getProjectedVelocityLeftWing(), drone.getAttackVectorHor(inclination));
+		} catch (IllegalArgumentException exc) {
+			crash = true;
+		}
+		if (crash == false) {
+			try {
+				float AOARightWing = drone.calculateAOA(drone.getNormalHor(inclination),
+						drone.getProjectedVelocityRightWing(), drone.getAttackVectorHor(inclination));
+			} catch (IllegalArgumentException exc) {
+				crash = true;
+			}
+		}
+		if (crash == false) {
+			try {
+				float AOAHorStab = drone.calculateAOA(drone.getNormalHor(inclination),
+						drone.getProjectedVelocityHorStab(), drone.getAttackVectorHor(inclination));
+			} catch (IllegalArgumentException exc) {
+				crash = true;
+			}
+		}
+		if (crash == false) {
+			try {
+				float AOAVerStab = drone.calculateAOA(drone.getNormalVer(inclination),
+						drone.getProjectedVelocityVerStab(), drone.getAttackVectorVer(inclination));
+			} catch (IllegalArgumentException exc) {
+				crash = true;
+			}
+		}
+		return crash;	
 	}
 	
 	/**
