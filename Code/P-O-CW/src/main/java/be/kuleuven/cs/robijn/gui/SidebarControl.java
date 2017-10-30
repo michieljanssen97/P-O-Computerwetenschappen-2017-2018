@@ -72,8 +72,8 @@ public class SidebarControl extends VBox {
                 simulationErrorProperty.set(getSimulation().hasSimulationCrashed());
             });
         });
-        playButton.disableProperty().bind(simulationFinishedProperty);
-        pauseButton.disableProperty().bind(simulationFinishedProperty);
+        playButton.disableProperty().bind(simulationFinishedProperty.or(simulationErrorProperty));
+        pauseButton.disableProperty().bind(simulationFinishedProperty.or(simulationErrorProperty));
 
         simulationFinishedLabel.visibleProperty().bind(simulationFinishedProperty);
         simulationFinishedLabel.managedProperty().bind(simulationFinishedProperty);
