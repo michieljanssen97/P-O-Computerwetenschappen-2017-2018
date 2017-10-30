@@ -48,7 +48,7 @@
                 <Insets left="15.0" right="15.0" top="5.0" />
             </VBox.margin>
         </VBox>
-        <Label text="Autopilot">
+        <!--<Label text="Autopilot">
             <font>
                 <Font size="20.0" />
             </font>
@@ -72,6 +72,6 @@
             <VBox.margin>
                 <Insets left="15.0" right="15.0" top="5.0" />
             </VBox.margin>
-        </VBox>
+        </VBox>-->
     </children>
 </fx:root>

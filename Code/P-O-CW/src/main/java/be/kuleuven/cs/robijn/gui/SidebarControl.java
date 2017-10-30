@@ -38,8 +38,8 @@ public class SidebarControl extends VBox {
     @FXML
     private Label simulationErrorLabel;
 
-    @FXML
-    private ProgressBar progressBar;
+    //@FXML
+    //private ProgressBar progressBar;
 
     private ObjectProperty<SimulationDriver> simulationProperty = new SimpleObjectProperty<>(this, "simulation");
 
