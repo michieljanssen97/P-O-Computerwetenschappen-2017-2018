@@ -348,7 +348,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		}
 		else if ((imageYRotation > minDegrees) && (drone.getHeadingAngularVelocity() < maxHeadingAngularVelocity)) {
 			try {
-				UnivariateFunction function2 = (x)->{return Math.cos(x)*x - ((inertiaMatrixYY*Math.cos(drone.getPitch())*Math.cos(drone.getRoll())
+				UnivariateFunction function2 = (x)->{return Math.cos(x)*x + ((inertiaMatrixYY*Math.cos(drone.getPitch())*Math.cos(drone.getRoll())
 							*headingAngularAcceleration
 						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(1)
 						+ inertiaMatrix.operate(
@@ -494,11 +494,17 @@ public class Autopilot extends WorldObject implements AutoPilot {
 				}
 			}
 			if (crash == true) {
-				if (positive = true) {
+				if (positive == true) {
 					newInclination -= (1.0/360.0)*2*Math.PI;
+					if (newInclination < -drone.getMaxAOA()) {
+						throw new IllegalStateException("simulation not possible");
+					}
 				}
-				if (positive = false)
+				if (positive == false) {
 					newInclination += (1.0/360.0)*2*Math.PI;
+					if (newInclination > drone.getMaxAOA())
+						throw new IllegalStateException("simulation not possible");
+				}
 			}
 		}
 		return newInclination;

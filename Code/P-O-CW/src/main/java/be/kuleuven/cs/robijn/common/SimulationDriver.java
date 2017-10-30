@@ -43,16 +43,21 @@ public class SimulationDriver {
         }
 
         if(!simulationPaused && !simulationFinished){
-            //Run the autopilot
-            latestAutopilotOutputs = autoPilot.update(latestAutopilotInputs);
-            //Run the testbed
-            long now = System.currentTimeMillis();
-            float secondsSinceStart = ((float)((now - simulationStart) - totalTimeSpentPaused)/1000f);
-            float secondsSinceLastUpdate = ((float)((now - lastUpdate) - timeSpentPausedSinceLastUpdate)/1000f);
-            simulationFinished = testBed.update(secondsSinceStart, secondsSinceLastUpdate, latestAutopilotOutputs);
-            timeSpentPausedSinceLastUpdate = 0;
-            lastUpdate = now;
-            latestAutopilotInputs = testBed.getInputs();
+        	try {
+        		//Run the autopilot
+        		latestAutopilotOutputs = autoPilot.update(latestAutopilotInputs);
+        		//Run the testbed
+                long now = System.currentTimeMillis();
+                float secondsSinceStart = ((float)((now - simulationStart) - totalTimeSpentPaused)/1000f);
+                float secondsSinceLastUpdate = ((float)((now - lastUpdate) - timeSpentPausedSinceLastUpdate)/1000f);
+                simulationFinished = testBed.update(secondsSinceStart, secondsSinceLastUpdate, latestAutopilotOutputs);
+                timeSpentPausedSinceLastUpdate = 0;
+                lastUpdate = now;
+                latestAutopilotInputs = testBed.getInputs();
+        	} catch (IllegalStateException exc){
+        		simulationPaused = true;
+        		System.out.println("simulation not possible");
+        	}
         }
 
         //Invokes the event handlers
