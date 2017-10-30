@@ -128,18 +128,19 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		drone.setRelativePosition(position.add(velocity.mapMultiply(dt)).add(acceleration.mapMultiply(Math.pow(dt, 2)/2)));
 		drone.setVelocity(velocity.add(acceleration.mapMultiply(dt)));
 		
+		float epsilon = (float) 0.0001;
 		float newHeading = (float) ((heading + headingAngularVelocity*dt + headingAngularAcceleration*(Math.pow(dt, 2)/2)) % (2*Math.PI));
-		if ((Math.abs(newHeading - 0) < 0.0001) || (Math.abs(newHeading - 2*Math.PI) < 0.0001))
+		if ((Math.abs(newHeading - 0) < epsilon) || (Math.abs(newHeading - 2*Math.PI) < epsilon))
 			newHeading = 0;
 		else if (newHeading < 0)
 			newHeading += (2*Math.PI);
 		float newPitch = (float) ((pitch + pitchAngularVelocity*dt + pitchAngularAcceleration*(Math.pow(dt, 2)/2)) % (2*Math.PI));
-		if ((Math.abs(newPitch - 0) < 0.0001) || (Math.abs(newPitch - 2*Math.PI) < 0.0001))
+		if ((Math.abs(newPitch - 0) < epsilon) || (Math.abs(newPitch - 2*Math.PI) < epsilon))
 			newPitch = 0;
 		else if (newPitch < 0)
 			newPitch += (2*Math.PI);
 		float newRoll = (float) ((roll + rollAngularVelocity*dt + rollAngularAcceleration*(Math.pow(dt, 2)/2)) % (2*Math.PI));
-		if ((Math.abs(newRoll - 0) < 0.0001) || (Math.abs(newRoll - 2*Math.PI) < 0.0001))
+		if ((Math.abs(newRoll - 0) < epsilon) || (Math.abs(newRoll - 2*Math.PI) < epsilon))
 			newRoll = 0;
 		else if (newRoll < 0)
 			newRoll += (2*Math.PI);
