@@ -131,7 +131,7 @@ public class OpenGLRenderer implements Renderer {
         //Otherwise face culling will cut away the front parts and leave behind only the back parts
         glFrontFace(GL_CW);
         //Replace previous frame with a blank screen
-        glClearColor(0.2f, 0.2f, 0.2f, 1f);
+        glClearColor(1f, 1f, 1f, 1f);
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
         //Setup per-camera matrices
