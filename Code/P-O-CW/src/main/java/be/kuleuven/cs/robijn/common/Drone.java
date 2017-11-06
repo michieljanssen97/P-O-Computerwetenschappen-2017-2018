@@ -65,6 +65,7 @@ public class Drone extends WorldObject {
 		if (! isValidVelocity(velocity))
 			throw new IllegalArgumentException();
 		this.velocity = velocity;
+		this.initialVelocity = velocity;
 	}
 	
     //     -----------------     //
@@ -358,6 +359,8 @@ public class Drone extends WorldObject {
 	 */
 	private RealVector velocity;
 	
+	private final RealVector initialVelocity;
+	
 	/**
 	 * Variable registering the angular velocity of the heading of this drone.
 	 */
@@ -379,6 +382,10 @@ public class Drone extends WorldObject {
 	 */
 	public RealVector getVelocity() {
 		return this.velocity;
+	}
+	
+	public RealVector getInitialVelocity() {
+		return this.initialVelocity;
 	}
 	
 	/**
