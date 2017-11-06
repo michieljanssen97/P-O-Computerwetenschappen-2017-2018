@@ -168,19 +168,6 @@ public class Image {
 	}
 	
 	/**
-	 * Returns whether or not the given color is part of the red spectrum.
-	 * @param hsv	The hue, saturation and value of the given color.
-	 * @return	Whether or not the given color is part of the red spectrum.
-	 * @throws IllegalArgumentException	The given HSV is invalid.
-	 */
-	public static boolean isRedHSV(float[] hsv) throws IllegalArgumentException{
-		if (!isValidHSV(hsv)) {throw new IllegalArgumentException();}
-		float hue = hsv[0];
-		float saturation = hsv[1];
-		return (((hue >= (1.0 - (5.0/360.0))) || (hue <= (10.0/360.0))) && (saturation >= 0.25));
-	}
-	
-	/**
 	 * Check whether the given HSV-values are valid.
 	 * @param hsv	The given HSV-values
 	 * @return	True if all the values are between 0 and 1
@@ -192,7 +179,6 @@ public class Image {
 		return ( (h >= 0.0) && (h <= 1.0) && (s >= 0.0) && (s <= 1.0) && (v >= 0.0) && (v <= 1.0) );
 	}
 	
-	
 	/**
 	 * Calculates the coordinates of the center pixel of the image.
 	 */
@@ -200,7 +186,6 @@ public class Image {
 		int[] center = {getnbColumns()/2, getnbRows()/2};
 		return center;
 	}
-	
 	
 	/**
 	 * Return the distance (measured in pixels) that a given position is from the center pixel of the image.
@@ -232,7 +217,6 @@ public class Image {
 		float x_rotation = -y_to_center * fov_vertical / height;
 		return new float[] {y_rotation, x_rotation};
 	}
-	
 	
 	/**
 	 * Return the minimum distance from the red pixels that are on the edge of the cube, to its center.
