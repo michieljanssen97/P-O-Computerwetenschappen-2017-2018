@@ -219,10 +219,10 @@ public class Image {
 	 * Return the minimum distance from the red pixels that are on the edge of the cube, to its center.
 	 * @throws Exception Something goes wrong while calculating the red pixels
 	 */
-	public float getMinimumDistanceSpherePixels() throws Exception{
+	public float getMinimumDistanceSpherePixels(float hue, float sat) throws Exception{
 		float minimum = (float) Math.sqrt( Math.pow(getnbRows(), 2) + Math.pow(getnbColumns(), 2) );
-		int[] centerPixel = getAverageRedPixel();
-		for(Pixel p : getRedEdgePixels()){
+		int[] centerPixel = getCubeCenterPixel(hue, sat);
+		for(Pixel p : getCubeEdgePixels(hue, sat)){
 			float distance = (float) Math.sqrt(Math.pow(p.getX()-centerPixel[0], 2) + Math.pow(p.getY()-centerPixel[1], 2));
 			if (distance < minimum)
 				minimum = distance;
@@ -234,10 +234,10 @@ public class Image {
 	 * Return the maximum distance from the red pixels that are on the edge of the cube, to its center.
 	 * @throws Exception	Something goes wrong while calculating the red pixels
 	 */
-	public float getMaximumDistanceSpherePixels() throws Exception{
+	public float getMaximumDistanceSpherePixels(float hue, float sat) throws Exception{
 		float maximum = 0;
-		int[] centerPixel = getAverageRedPixel();
-		for(Pixel p : getRedEdgePixels()){
+		int[] centerPixel = getCubeCenterPixel(hue, sat);
+		for(Pixel p : getCubeEdgePixels(hue, sat)){
 			float distance = (float) Math.sqrt(Math.pow(p.getX()-centerPixel[0], 2) + Math.pow(p.getY()-centerPixel[1], 2));
 			if (distance > maximum)
 				maximum = distance;
@@ -249,21 +249,21 @@ public class Image {
 	 * Return the amount of sides of the cube that are visible in the Image.
 	 * @throws Exception	Something goes wrong while calculating the red pixels
 	 */
-	public int getAmountSidesVisible() throws Exception{
+	public int getAmountSidesVisible(float hue, float sat) throws Exception{
 		boolean checkX = true;
 		boolean checkY = true;
 		boolean checkZ = true;
 		int visible = 0;
-		for (Pixel p : getRedPixels()){
-			if (checkX && isRedXPixel(p)){
+		for (Pixel p : getCubePixels(hue, sat)){
+			if (checkX && isXPixel(p)){
 				checkX = false;
 				visible++;
 			}
-			if (checkY && isRedYPixel(p)){
+			if (checkY && isYPixel(p)){
 				checkY = false;
 				visible++;
 			}
-			if (checkZ && isRedZPixel(p)){
+			if (checkZ && isZPixel(p)){
 				checkZ = false;
 				visible++;
 			}
@@ -276,7 +276,7 @@ public class Image {
 	 * @param p	The given pixel
 	 * @return	True if the value of the pixel is either between 0.8 and 0.9 or between 0.25 and 0.35
 	 */
-	private boolean isRedXPixel(Pixel p){
+	private boolean isXPixel(Pixel p){
 		float v = p.getValue();
 		return ( (v >= 0.8 && v <= 0.9) || (v >= 0.25 && v <= 0.35) );
 	}
@@ -286,7 +286,7 @@ public class Image {
 	 * @param p	The given pixel
 	 * @return	True if the value of the pixel is either between 0.1 and 0.2 or larger than 0.95
 	 */
-	private boolean isRedYPixel(Pixel p){
+	private boolean isYPixel(Pixel p){
 		float v = p.getValue();
 		return ( (v >= 0.95) || (v >= 0.1 && v <= 0.2) );
 	}
@@ -296,7 +296,7 @@ public class Image {
 	 * @param p	The given pixel
 	 * @return	True if the value of the pixel is either between 0.4 and 0.5 or between 0.65 and 0.75
 	 */
-	private boolean isRedZPixel(Pixel p){
+	private boolean isZPixel(Pixel p){
 		float v = p.getValue();
 		return ( (v >= 0.65 && v <= 0.75) || (v >= 0.4 && v <= 0.5) );
 	}
@@ -305,12 +305,12 @@ public class Image {
 	 * Return the distance from the red cube to the camera along the (negative) z axis of the drone coordinate system.
 	 * @throws Exception	There are no sides of a red cube visible in this Image
 	 */
-	public float getTotalDistance() throws Exception{
-		int sides = getAmountSidesVisible();
+	public float getTotalDistance(float hue, float sat) throws Exception{
+		int sides = getAmountSidesVisible(hue, sat);
 		if (sides == 3){
-			float[] percentageXYZPixels = getPercentageXYZPixels();
+			float[] percentageXYZPixels = getPercentageXYZPixels(hue, sat);
 			if (percentageXYZPixels[0] < 0.1 || percentageXYZPixels[1] < 0.1 || percentageXYZPixels[2] < 0.1){
-				float pixels = getMinimumDistanceSpherePixels();
+				float pixels = getMinimumDistanceSpherePixels(hue, sat);
 				float angle = (pixels * getHorizontalAngle()) / getnbColumns();
 				float ratio = 1;
 				if (percentageXYZPixels[0] < 0.1){
@@ -330,19 +330,19 @@ public class Image {
 				return (float) (0.5/Math.tan(degreesToRadians(angle)) + 0.5 / Math.sin(planeAngle));
 			}
 			else{
-				float pixels = getMaximumDistanceSpherePixels();
+				float pixels = getMaximumDistanceSpherePixels(hue, sat);
 				float angle = (pixels * getHorizontalAngle()) / getnbColumns();
 				return (float) (Math.sqrt(0.75) / Math.tan((degreesToRadians(angle))));
 			}
 		} else if (sides == 2) {
-			float pixels = getMinimumDistanceSpherePixels();
+			float pixels = getMinimumDistanceSpherePixels(hue, sat);
 			float angle = (pixels * getHorizontalAngle()) / getnbColumns();
-			float ratio = getRatioPixelsIfTwoPlanesVisible();
+			float ratio = getRatioPixelsIfTwoPlanesVisible(hue, sat);
 			float angleCos = (float) Math.sqrt(1 / (1 + Math.pow(ratio, 2)));
 			float planeAngle = (float) Math.acos(angleCos);
 			return (float) (0.5/Math.tan(degreesToRadians(angle)) + 0.5 / Math.sin(planeAngle));
 		} else if (sides == 1){
-			float pixels = getMinimumDistanceSpherePixels();
+			float pixels = getMinimumDistanceSpherePixels(hue, sat);
 			float angle = (pixels * getHorizontalAngle()) / getnbColumns();
 			return (float) (0.5 / Math.tan(degreesToRadians(angle)) + 0.5);
 		} else
@@ -354,14 +354,14 @@ public class Image {
 	 * Return a vector containing the x, y and z distance from the camera to the cube.
 	 * @throws Exception	Something goes wrong while calculating the red pixels
 	 */
-	public Vector3f getXYZDistance() throws Exception{
-		int[] averageRed = getAverageRedPixel();
-		int[] center = getCenterPixel();
-		float angleX = (averageRed[0] - center[0]) * getHorizontalAngle() / getnbColumns();
-		float angleY = (center[1] - averageRed[1]) * getVerticalAngle() / getnbRows();
-		float distanceX =  (float) (getTotalDistance()*Math.sin(degreesToRadians(angleX)));
-		float distanceY =  (float) (getTotalDistance()*Math.sin(degreesToRadians(angleY)));
-		float distanceZ = (float) - Math.sqrt(Math.pow(getTotalDistance(), 2) - Math.pow(distanceX, 2) - Math.pow(distanceY, 2));
+	public Vector3f getXYZDistance(float hue, float sat) throws Exception{
+		int[] cubeCenter = getCubeCenterPixel(hue, sat);
+		int[] imageCenter = getCenterPixel();
+		float angleX = (cubeCenter[0] - imageCenter[0]) * getHorizontalAngle() / getnbColumns();
+		float angleY = (imageCenter[1] - cubeCenter[1]) * getVerticalAngle() / getnbRows();
+		float distanceX =  (float) (getTotalDistance(hue, sat)*Math.sin(degreesToRadians(angleX)));
+		float distanceY =  (float) (getTotalDistance(hue, sat)*Math.sin(degreesToRadians(angleY)));
+		float distanceZ = (float) - Math.sqrt(Math.pow(getTotalDistance(hue, sat), 2) - Math.pow(distanceX, 2) - Math.pow(distanceY, 2));
 		Vector3f ResultVector = new Vector3f(distanceX, distanceY, distanceZ);
 		return ResultVector;
 	}
@@ -380,20 +380,20 @@ public class Image {
 	 * Return the percentages of the red pixels that are in planes perpendicular to the x-axis, the y-axis and the z-axis.
 	 * @throws IllegalStateException There is no red cube on the image.
 	 */
-	public float[] getPercentageXYZPixels() throws IllegalStateException{
-		ArrayList<Pixel> redPixels = getRedPixels();
-		float TotalRedPixels = getRedPixels().size();
+	public float[] getPercentageXYZPixels(float hue, float sat) throws IllegalStateException{
+		ArrayList<Pixel> redPixels = getCubePixels(hue, sat);
+		float TotalRedPixels = getCubePixels(hue, sat).size();
 		float redXPixels = 0;
 		float redYPixels = 0;
 		float redZPixels = 0;
 		if (redPixels.size() == 0)
 			throw new IllegalStateException("there is no red cube on the camera image");
 		for (Pixel p : redPixels){
-			if (isRedXPixel(p)){
+			if (isXPixel(p)){
 				redXPixels += 1;
-			} else if (isRedYPixel(p)){
+			} else if (isYPixel(p)){
 				redYPixels += 1;
-			} else if (isRedZPixel(p)){
+			} else if (isZPixel(p)){
 				redZPixels += 1;
 			}
 		}
@@ -409,12 +409,12 @@ public class Image {
 	 * @throws Exception				Something goes wrong while calculating the red pixels. 		
 	 * @throws IllegalStateException	The amount of visible sides is not equal to 2.
 	 */
-	public float getRatioPixelsIfTwoPlanesVisible() throws Exception,IllegalStateException{
-		if (getAmountSidesVisible() != 2){
+	public float getRatioPixelsIfTwoPlanesVisible(float hue, float sat) throws Exception,IllegalStateException{
+		if (getAmountSidesVisible(hue, sat) != 2){
 			throw new IllegalStateException("The amount of visible sides is not equal to 2");
 		}
 		float ratio = 0;
-		float[] percentageXYZPixels = getPercentageXYZPixels();
+		float[] percentageXYZPixels = getPercentageXYZPixels(hue, sat);
 		if (percentageXYZPixels[0] == 0){
 			ratio = percentageXYZPixels[1] / percentageXYZPixels[2];
 		} else if (percentageXYZPixels[1] == 0){
