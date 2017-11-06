@@ -569,5 +569,39 @@ public class Image {
 		return avg;
 	}
 	
+	public float[] getRotationToCube(float hue, float sat) {
+		int[] average = getCubeCenterPixel(hue, sat);
+		int[] pixelsToCube = getPixelsFromCenter(average[0], average[1]);
+		return getNecessaryRotation(getHorizontalAngle(), getVerticalAngle(), pixelsToCube[0], pixelsToCube[1]);
+	}
+	
+	public ArrayList<Pixel> getCubeEdgePixels(float hue, float sat) throws Exception{
+		ArrayList<Pixel> edge = new ArrayList<Pixel>();
+		boolean isEdge = false;
+		for (Pixel p : getCubePixels(hue, sat)){
+			int x = p.getX();
+			int y = p.getY();
+			if (x < getnbColumns()-1 && !isEqualHSCombination(p.getHSV(), getPixelHSV(x+1, y)))
+				isEdge = true;
+			if (x > 0 && !isEqualHSCombination(p.getHSV(), getPixelHSV(x-1, y)))
+				isEdge = true;
+			if (y < getnbRows()-1 && !isEqualHSCombination(p.getHSV(), getPixelHSV(x, y+1)))
+				isEdge = true;
+			if (y > 0 && !isEqualHSCombination(p.getHSV(), getPixelHSV(x, y-1)))
+				isEdge = true;
+			if (isEdge){
+				edge.add(p);
+				isEdge = false;
+			}
+		}
+		return edge;
+	}
+	
+	public boolean isEqualHSCombination(float[] hsv1, float[] hsv2){
+		if ( (!isValidHSV(hsv1)) || (!isValidHSV(hsv2)) )
+			throw new IllegalArgumentException();
+		return ( (hsv1[0] == hsv2[0]) && (hsv1[1] == hsv2[1]) );
+	}
+	
 }
 

@@ -280,7 +280,7 @@ public class ImageTest {
 	public void test3DDistanceToCube3() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.get3DDistanceToCube()));
+//		System.out.println(Float.toString(im.getTotalDistance()));
 		assertTrue(true);
 	}
 	
@@ -317,6 +317,16 @@ public class ImageTest {
 //		System.out.println(Float.toString(im.getXYZDistance().getY()));
 //		System.out.println(Float.toString(im.getXYZDistance().getZ()));
 //		System.out.println(Integer.toString(im.getAmountSidesVisible()));
+		assertTrue(true);
+	}
+	
+	@Test
+	public void testPercentageXYZCube3() throws Exception {
+		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
+		Image im = new Image(image1, 200, 200, 120, 120);
+//		System.out.println(Float.toString(im.getPercentageXYZPixels()[0]));
+//		System.out.println(Float.toString(im.getPercentageXYZPixels()[1]));
+//		System.out.println(Float.toString(im.getPercentageXYZPixels()[2]));
 		assertTrue(true);
 	}
 	
