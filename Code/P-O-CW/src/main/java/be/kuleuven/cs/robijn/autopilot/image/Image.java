@@ -165,19 +165,6 @@ public class Image {
 	}
 	
 	/**
-	 * Returns whether or not the given color is part of the red spectrum.
-	 * @param hsv	The hue, saturation and value of the given color.
-	 * @return	Whether or not the given color is part of the red spectrum.
-	 * @throws IllegalArgumentException	The given HSV is invalid.
-	 */
-	public static boolean isRedHSV(float[] hsv) throws IllegalArgumentException{
-		if (!isValidHSV(hsv)) {throw new IllegalArgumentException();}
-		float hue = hsv[0];
-		float saturation = hsv[1];
-		return (((hue >= (1.0 - (5.0/360.0))) || (hue <= (10.0/360.0))) && (saturation >= 0.25));
-	}
-	
-	/**
 	 * Check whether the given HSV-values are valid.
 	 * @param hsv	The given HSV-values
 	 * @return	True if all the values are between 0 and 1
@@ -190,46 +177,11 @@ public class Image {
 	}
 	
 	/**
-	 * Returns a list of all red pixels in the image.
-	 * @throws Exception	The coordinates of the scanned pixels are invalid
-	 */
-	private ArrayList<Pixel> getRedPixels() {
-		ArrayList<Pixel> redPixels = new ArrayList<Pixel>();
-		for (int y = 0; y < getnbRows(); y++){
-			for (int x = 0; x < getnbColumns(); x++){
-				float[] hsv = getPixelHSV(x, y);
-				if (isRedHSV(hsv)){
-					redPixels.add(new Pixel(x, y, hsv));
-				}
-			}
-		}
-		return redPixels;
-	}
-	
-	/**
 	 * Calculates the coordinates of the center pixel of the image.
 	 */
 	public int[] getCenterPixel(){
 		int[] center = {getnbColumns()/2, getnbRows()/2};
 		return center;
-	}
-	
-	/**
-	 * Calculates the average coordinates of the red pixels of the image.
-	 * @throws Exception	Something goes wrong while calculating the red pixels
-	 */
-	public int[] getAverageRedPixel() throws IllegalStateException {
-		ArrayList<Pixel> redPixels = getRedPixels();
-		if (redPixels.size() == 0)
-			throw new IllegalStateException("there is no red cube on the camera image");
-		int totalX = 0;
-		int totalY = 0;
-		for (Pixel p : redPixels){
-			totalX += p.getX();
-			totalY += p.getY();
-		}
-		int[] avg = {totalX / redPixels.size(), totalY / redPixels.size()};
-		return avg;
 	}
 	
 	/**
@@ -261,42 +213,6 @@ public class Image {
 		float y_rotation = -x_to_center * fov_horizontal / width;
 		float x_rotation = -y_to_center * fov_vertical / height;
 		return new float[] {y_rotation, x_rotation};
-	}
-	
-	/**
-	 * Returns the rotation necessary to fly towards the red cube in the image.
-	 * @throws Exception	Something goes wrong while calculating the average coordinates of the red pixels
-	 */
-	public float[] getRotationToRedCube() {
-		int[] averageRed = getAverageRedPixel();
-		int[] pixelsToRedCube = getPixelsFromCenter(averageRed[0], averageRed[1]);
-		return getNecessaryRotation(getHorizontalAngle(), getVerticalAngle(), pixelsToRedCube[0], pixelsToRedCube[1]);
-	}
-	
-	/**
-	 * Return an array containing all the red pixels that are on the edge of a cube.
-	 * @throws Exception	Something goes wrong while calculating the red pixels
-	 */
-	public ArrayList<Pixel> getRedEdgePixels() throws Exception{
-		ArrayList<Pixel> edge = new ArrayList<Pixel>();
-		boolean isEdge = false;
-		for (Pixel p : getRedPixels()){
-			int x = p.getX();
-			int y = p.getY();
-			if (x < getnbColumns()-1 && !isRedHSV(getPixelHSV(x+1, y)))
-				isEdge = true;
-			if (x > 0 && !isRedHSV(getPixelHSV(x-1, y)))
-				isEdge = true;
-			if (y < getnbRows()-1 && !isRedHSV(getPixelHSV(x, y+1)))
-				isEdge = true;
-			if (y > 0 && !isRedHSV(getPixelHSV(x, y-1)))
-				isEdge = true;
-			if (isEdge){
-				edge.add(p);
-				isEdge = false;
-			}
-		}
-		return edge;
 	}
 	
 	/**
