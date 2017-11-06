@@ -41,6 +41,8 @@ public class Image {
 	 */
 	private float verticalAngleOfView;
 	
+	private ArrayList<ImageCube> cubes;
+	
 	/**
 	 * Initiate this Image with a given byte array (represents the image), number of rows, number of columns and horizontal and vertical angle of view.
 	 * @param image 				The given byte array that represents the image.
@@ -65,6 +67,7 @@ public class Image {
 		this.image = new BufferedImage(nbColumns, nbRows, BufferedImage.TYPE_3BYTE_BGR);
 		byte[] imageBackingBuffer = ((DataBufferByte) this.image.getRaster().getDataBuffer()).getData();
 		System.arraycopy(image, 0, imageBackingBuffer, 0, image.length);
+		this.cubes = scanImageForCubes();
 	}
 	
 	/**
@@ -120,6 +123,10 @@ public class Image {
 	 */
 	public float getVerticalAngle(){
 		return this.verticalAngleOfView;
+	}
+	
+	public ArrayList<ImageCube> getImageCubes(){
+		return this.cubes;
 	}
 	
 	/**
@@ -459,10 +466,10 @@ public class Image {
 	 */
 	public float[] getPercentageXYZPixels() throws IllegalStateException{
 		ArrayList<Pixel> redPixels = getRedPixels();
-		int TotalRedPixels = getRedPixels().size();
-		int redXPixels = 0;
-		int redYPixels = 0;
-		int redZPixels = 0;
+		float TotalRedPixels = getRedPixels().size();
+		float redXPixels = 0;
+		float redYPixels = 0;
+		float redZPixels = 0;
 		if (redPixels.size() == 0)
 			throw new IllegalStateException("there is no red cube on the camera image");
 		for (Pixel p : redPixels){
@@ -504,5 +511,63 @@ public class Image {
 		}
 		return ratio;
 	}
+	
+	public boolean isWhiteHSV(float[] hsv){
+		if (!isValidHSV(hsv)) {throw new IllegalArgumentException();}
+		return (hsv[1] == 0.0f) && (hsv[2] == 1.0f);
+	}
+	
+	public ArrayList<ImageCube> scanImageForCubes(){
+		ArrayList<ImageCube> cubeCollection = new ArrayList<ImageCube>();
+		for (int y = 0; y < getnbRows(); y++){
+			for (int x = 0; x < getnbColumns(); x++){
+				float[] hsv = getPixelHSV(x, y);
+				if (!isWhiteHSV(hsv)){
+					boolean cubeExists = false;
+					for (ImageCube c : cubeCollection){
+						if ((hsv[0] == c.getHue()) && (hsv[1] == c.getSaturation())){
+							c.addPixel(new Pixel(x, y, hsv));
+							cubeExists = true;
+							break;
+						}
+					}
+					if (!cubeExists){
+						ArrayList<Pixel> p = new ArrayList<Pixel>();
+						p.add(new Pixel(x, y, hsv));
+						ImageCube cu = new ImageCube(p, hsv[0], hsv[1]);
+						cubeCollection.add(cu);
+					}
+				}
+			}
+		}
+		return cubeCollection;
+	}
+	
+	public ArrayList<Pixel> getCubePixels(float hue, float sat){
+		ImageCube cube = null;
+		for (ImageCube c : getImageCubes()){
+			if ( (hue == c.getHue()) && (sat == c.getSaturation()) )
+				cube = c;
+		}
+		if (cube == null)
+			throw new IllegalArgumentException("No cube with the given hue and saturation exists in this image.");
+		else
+			return cube.getPixels();
+	}
+	
+	public int[] getCubeCenterPixel(float hue, float sat){
+		ArrayList<Pixel> cubePixels = getCubePixels(hue, sat);
+		if (cubePixels.size() == 0)
+			throw new IllegalStateException("There is no cube on the camera image with the given hue and saturation.");
+		int totalX = 0;
+		int totalY = 0;
+		for (Pixel p : cubePixels){
+			totalX += p.getX();
+			totalY += p.getY();
+		}
+		int[] avg = {totalX / cubePixels.size(), totalY / cubePixels.size()};
+		return avg;
+	}
+	
 }
 
