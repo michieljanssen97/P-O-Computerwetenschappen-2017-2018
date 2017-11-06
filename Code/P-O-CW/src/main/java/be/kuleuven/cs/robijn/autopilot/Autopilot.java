@@ -70,7 +70,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
 	 */
 	public AutopilotOutputs update(AutopilotInputs inputs) {
 		if (this.getPreviousOutput() != null)
-			this.moveDrone(inputs.getElapsedTime(), inputs.getElapsedTime() - this.getPreviousElapsedTime(), this.getPreviousOutput());
+			this.moveDrone(inputs.getElapsedTime(), inputs.getElapsedTime() - this.getPreviousElapsedTime(), this.getPreviousOutput(), inputs);
         this.setPreviousElapsedTime(inputs.getElapsedTime());  
         
         Drone drone = this.getFirstChildOfType(Drone.class);
@@ -536,7 +536,8 @@ public class Autopilot extends WorldObject implements AutoPilot {
 	 *         This autopilot has no drone.
 	 *         drone == null
 	 */
-	public void moveDrone(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs output) throws IllegalArgumentException, IllegalStateException {
+	public void moveDrone(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs output, AutopilotInputs inputs) 
+			throws IllegalArgumentException, IllegalStateException {
 		if (secondsSinceLastUpdate < 0)
 			throw new IllegalArgumentException();
 		Drone drone = this.getFirstChildOfType(Drone.class);
@@ -569,33 +570,14 @@ public class Autopilot extends WorldObject implements AutoPilot {
 				drone.getRoll(), drone.getRollAngularVelocity() };
 		dp853.integrate(ode, secondsSinceStart - secondsSinceLastUpdate, y, secondsSinceStart, y);
 		
-		drone.setRelativePosition(new ArrayRealVector(new double[] {y[0], y[2], y[4]}, false));
+		drone.setRelativePosition(new ArrayRealVector(new double[] {inputs.getX(), inputs.getY(), inputs.getZ()}, false));
 		drone.setVelocity(new ArrayRealVector(new double[] {y[1], y[3], y[5]}, false));
 //		drone.setRelativePosition(position.add(velocity.mapMultiply(secondsSinceLastUpdate)).add(acceleration.mapMultiply(Math.pow(secondsSinceLastUpdate, 2)/2)));
 //		drone.setVelocity(velocity.add(acceleration.mapMultiply(secondsSinceLastUpdate)));
 		
-		float epsilon = (float) 0.0001;
-//		float newHeading = (float) ((heading + headingAngularVelocity*secondsSinceLastUpdate + headingAngularAcceleration*(Math.pow(secondsSinceLastUpdate, 2)/2)) % (2*Math.PI));
-		float newHeading = (float) y[6];
-		if ((Math.abs(newHeading - 0) < epsilon) || (Math.abs(newHeading - 2*Math.PI) < epsilon))
-			newHeading = 0;
-		else if (newHeading < 0)
-			newHeading += (2*Math.PI);
-//		float newPitch = (float) ((pitch + pitchAngularVelocity*secondsSinceLastUpdate + pitchAngularAcceleration*(Math.pow(secondsSinceLastUpdate, 2)/2)) % (2*Math.PI));
-		float newPitch = (float) y[8];
-		if ((Math.abs(newPitch - 0) < epsilon) || (Math.abs(newPitch - 2*Math.PI) < epsilon))
-			newPitch = 0;
-		else if (newPitch < 0)
-			newPitch += (2*Math.PI);
-//		float newRoll = (float) ((roll + rollAngularVelocity*secondsSinceLastUpdate + rollAngularAcceleration*(Math.pow(secondsSinceLastUpdate, 2)/2)) % (2*Math.PI));
-		float newRoll = (float) y[10];
-		if ((Math.abs(newRoll - 0) < epsilon) || (Math.abs(newRoll - 2*Math.PI) < epsilon))
-			newRoll = 0;
-		else if (newRoll < 0)
-			newRoll += (2*Math.PI);
-		drone.setHeading(newHeading);
-		drone.setPitch(newPitch);
-		drone.setRoll(newRoll);
+		drone.setHeading(inputs.getHeading());
+		drone.setPitch(inputs.getPitch());
+		drone.setRoll(inputs.getRoll());
 		
 //		drone.setHeadingAngularVelocity(headingAngularVelocity + headingAngularAcceleration*secondsSinceLastUpdate);
 //		drone.setPitchAngularVelocity(pitchAngularVelocity + pitchAngularAcceleration*secondsSinceLastUpdate);
