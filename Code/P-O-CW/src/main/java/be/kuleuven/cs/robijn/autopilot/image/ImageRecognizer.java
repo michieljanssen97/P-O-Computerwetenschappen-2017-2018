@@ -27,10 +27,10 @@ public class ImageRecognizer {
 	}
 	
 	/**
-	 * Returns the average coordinates of the pixels of the red cube in the given image.
+	 * Returns the average coordinates of the pixels of the cube with given hue and saturation in the given image.
 	 * @param image	The given image
-	 * @return	A list with the x-coordinate and y-coordinate of the center red pixel
-	 * @throws Exception	Something goes wrong while calculating the red pixels
+	 * @return	A list with the x-coordinate and y-coordinate of the center of all pixels with given hue and saturation
+	 * @throws Exception	Something goes wrong while calculating the pixels with given hue and saturation.
 	 */
 	public int[] getCubeAveragePixel(Image image, float hue, float sat) throws Exception{
 		return image.getCubeCenterPixel(hue, sat);
@@ -39,9 +39,9 @@ public class ImageRecognizer {
 	/**
 	 * 
 	 * @param image	The given image
-	 * @return	The rotation necessary for the drone to turn towards the center of the red cube
+	 * @return	The rotation necessary for the drone to turn towards the center of the cube with given hue and saturation
 	 * 			(an x-value and a y-value given in degrees)
-	 * @throws Exception Something goes wrong while calculating the average coordinates of the red pixels
+	 * @throws Exception Something goes wrong while calculating the average coordinates of the pixels with given hue and saturation
 	 */
 	public float[] getNecessaryRotation(Image image, float hue, float sat) throws Exception{
 		return image.getRotationToCube(hue, sat);
@@ -49,20 +49,20 @@ public class ImageRecognizer {
 	
 
 	/**
-	 * Returns the distance to red cube in the given image.
+	 * Returns the distance to cube with given hue and saturation in the given image.
 	 * @param image	The given image
-	 * @return	The distance to the red cube
-	 * @throws Exception	There are no red cube sides visible in this Image
+	 * @return	The distance to the cube
+	 * @throws Exception	There are no sides of a cube with given hue and saturation visible in this Image
 	 */
 	public float getDistanceToCube(Image image, float hue, float sat) throws Exception{
 		return image.getTotalDistance(hue, sat);
 	}
 	
 	/**
-	 * Returns the vector from the camera to the center of the red cube.
+	 * Returns the vector from the camera to the center of the cube with given hue and saturation.
 	 * @param image	The given image
-	 * @return	The vector from the camera to the center of the red cube
-	 * @throws Exception There are no red cube sides visible in this Image
+	 * @return	The vector from the camera to the center of the cube
+	 * @throws Exception There are no sides of a cube with given hue and saturation visible in this Image
 	 */
 	public Vector3f getVectorToCube(Image image, float hue, float sat) throws Exception{
 		return image.getXYZDistance(hue, sat);
