@@ -125,6 +125,9 @@ public class Image {
 		return this.verticalAngleOfView;
 	}
 	
+	/**
+	 * Return the cubes on this image.
+	 */
 	public ArrayList<ImageCube> getImageCubes(){
 		return this.cubes;
 	}
@@ -444,11 +447,19 @@ public class Image {
 		return ratio;
 	}
 	
+	/**
+	 * Check whether the given hue, saturation and value represent the white color.
+	 * @param hsv	The given hue, saturation and value.
+	 * @return		True if the saturation is 0 and the value is 1.
+	 */
 	public boolean isWhiteHSV(float[] hsv){
 		if (!isValidHSV(hsv)) {throw new IllegalArgumentException();}
 		return (hsv[1] == 0.0f) && (hsv[2] == 1.0f);
 	}
 	
+	/**
+	 * Return a list containing all the cubes that are visible on this image.
+	 */
 	public ArrayList<ImageCube> scanImageForCubes(){
 		ArrayList<ImageCube> cubeCollection = new ArrayList<ImageCube>();
 		for (int y = 0; y < getnbRows(); y++){
@@ -475,6 +486,11 @@ public class Image {
 		return cubeCollection;
 	}
 	
+	/**
+	 * Return a list containing all the pixels that have the given hue and saturation.
+	 * @param hue	The given hue
+	 * @param sat	The given saturation
+	 */
 	public ArrayList<Pixel> getCubePixels(float hue, float sat){
 		ImageCube cube = null;
 		for (ImageCube c : getImageCubes()){
@@ -487,6 +503,11 @@ public class Image {
 			return cube.getPixels();
 	}
 	
+	/**
+	 * Return the center of all the pixels with given hue and saturation.
+	 * @param hue 	The given hue
+	 * @param sat	The given saturation
+	 */
 	public int[] getCubeCenterPixel(float hue, float sat){
 		ArrayList<Pixel> cubePixels = getCubePixels(hue, sat);
 		if (cubePixels.size() == 0)
@@ -501,13 +522,23 @@ public class Image {
 		return avg;
 	}
 	
+	/**
+	 * Return the rotation that is necessary to fly towards the cube with given hue and saturation.
+	 * @param hue	The given hue
+	 * @param sat	The given saturation
+	 */
 	public float[] getRotationToCube(float hue, float sat) {
 		int[] average = getCubeCenterPixel(hue, sat);
 		int[] pixelsToCube = getPixelsFromCenter(average[0], average[1]);
 		return getNecessaryRotation(getHorizontalAngle(), getVerticalAngle(), pixelsToCube[0], pixelsToCube[1]);
 	}
 	
-	public ArrayList<Pixel> getCubeEdgePixels(float hue, float sat) throws Exception{
+	/**
+	 * Return the pixels that are on the edge of the cube with given hue and saturation.
+	 * @param hue	The given hue
+	 * @param sat	The given saturation
+	 */
+	public ArrayList<Pixel> getCubeEdgePixels(float hue, float sat){
 		ArrayList<Pixel> edge = new ArrayList<Pixel>();
 		boolean isEdge = false;
 		for (Pixel p : getCubePixels(hue, sat)){
@@ -529,6 +560,12 @@ public class Image {
 		return edge;
 	}
 	
+	/**
+	 * Check whether two given hsv-arrays have equal hue and saturation.
+	 * @param hsv1	The first given hsv-array
+	 * @param hsv2	The second given hsv-array
+	 * @return	True if the first and the second values of the arrays are equal.
+	 */
 	public boolean isEqualHSCombination(float[] hsv1, float[] hsv2){
 		if ( (!isValidHSV(hsv1)) || (!isValidHSV(hsv2)) )
 			throw new IllegalArgumentException();
