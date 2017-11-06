@@ -161,9 +161,9 @@ public class Image {
 	 * Returns whether or not the given color is part of the red spectrum.
 	 * @param hsv	The hue, saturation and value of the given color.
 	 * @return	Whether or not the given color is part of the red spectrum.
-	 * @throws Exception	The given HSV is invalid.
+	 * @throws IllegalArgumentException	The given HSV is invalid.
 	 */
-	public static boolean isRedHSV(float[] hsv) {
+	public static boolean isRedHSV(float[] hsv) throws IllegalArgumentException{
 		if (!isValidHSV(hsv)) {throw new IllegalArgumentException();}
 		float hue = hsv[0];
 		float saturation = hsv[1];
@@ -385,13 +385,43 @@ public class Image {
 	public float getTotalDistance() throws Exception{
 		int sides = getAmountSidesVisible();
 		if (sides == 3){
-			float pixels = getMaximumDistanceSpherePixels();
-			float angle = (pixels * getHorizontalAngle()) / getnbColumns();
-			return (float) (Math.sqrt(0.75) / Math.tan((degreesToRadians(angle))));
-		} else if ((sides == 1) || (sides == 2)) {
+			float[] percentageXYZPixels = getPercentageXYZPixels();
+			if (percentageXYZPixels[0] < 0.1 || percentageXYZPixels[1] < 0.1 || percentageXYZPixels[2] < 0.1){
+				float pixels = getMinimumDistanceSpherePixels();
+				float angle = (pixels * getHorizontalAngle()) / getnbColumns();
+				float ratio = 1;
+				if (percentageXYZPixels[0] < 0.1){
+					ratio = percentageXYZPixels[1] / percentageXYZPixels[2];
+				}
+				if (percentageXYZPixels[1] < 0.1){
+					ratio = percentageXYZPixels[0] / percentageXYZPixels[2];
+				}
+				if (percentageXYZPixels[2] < 0.1){
+					ratio = percentageXYZPixels[0] / percentageXYZPixels[1];
+				}
+				if (ratio < 1){
+					ratio = 1 / ratio;
+				}
+				float angleCos = (float) Math.sqrt(1 / (1 + Math.pow(ratio, 2)));
+				float planeAngle = (float) Math.acos(angleCos);
+				return (float) (0.5/Math.tan(degreesToRadians(angle)) + 0.5 / Math.sin(planeAngle));
+			}
+			else{
+				float pixels = getMaximumDistanceSpherePixels();
+				float angle = (pixels * getHorizontalAngle()) / getnbColumns();
+				return (float) (Math.sqrt(0.75) / Math.tan((degreesToRadians(angle))));
+			}
+		} else if (sides == 2) {
 			float pixels = getMinimumDistanceSpherePixels();
 			float angle = (pixels * getHorizontalAngle()) / getnbColumns();
-			return (float) (0.5 / Math.tan(degreesToRadians(angle)));
+			float ratio = getRatioPixelsIfTwoPlanesVisible();
+			float angleCos = (float) Math.sqrt(1 / (1 + Math.pow(ratio, 2)));
+			float planeAngle = (float) Math.acos(angleCos);
+			return (float) (0.5/Math.tan(degreesToRadians(angle)) + 0.5 / Math.sin(planeAngle));
+		} else if (sides == 1){
+			float pixels = getMinimumDistanceSpherePixels();
+			float angle = (pixels * getHorizontalAngle()) / getnbColumns();
+			return (float) (0.5 / Math.tan(degreesToRadians(angle)) + 0.5);
 		} else
 			throw new Exception("The cube does not have the right values to be visible or no cube is present.");
 	}
@@ -421,6 +451,58 @@ public class Image {
 	 */
 	public float degreesToRadians(float degrees){
 		return (degrees * ((float) Math.PI / 180.0f));
+	}
+	
+	/**
+	 * Return the percentages of the red pixels that are in planes perpendicular to the x-axis, the y-axis and the z-axis.
+	 * @throws IllegalStateException There is no red cube on the image.
+	 */
+	public float[] getPercentageXYZPixels() throws IllegalStateException{
+		ArrayList<Pixel> redPixels = getRedPixels();
+		int TotalRedPixels = getRedPixels().size();
+		int redXPixels = 0;
+		int redYPixels = 0;
+		int redZPixels = 0;
+		if (redPixels.size() == 0)
+			throw new IllegalStateException("there is no red cube on the camera image");
+		for (Pixel p : redPixels){
+			if (isRedXPixel(p)){
+				redXPixels += 1;
+			} else if (isRedYPixel(p)){
+				redYPixels += 1;
+			} else if (isRedZPixel(p)){
+				redZPixels += 1;
+			}
+		}
+		float percentageXPixels = redXPixels / TotalRedPixels;
+		float percentageYPixels = redYPixels / TotalRedPixels;
+		float percentageZPixels = redZPixels / TotalRedPixels;
+		float[] percentageXYZPixels = new float[] {percentageXPixels, percentageYPixels, percentageZPixels};
+		return percentageXYZPixels;
+	}
+	
+	/**
+	 * Return the ratio of the amount of pixels of the two planes that are visible.
+	 * @throws Exception				Something goes wrong while calculating the red pixels. 		
+	 * @throws IllegalStateException	The amount of visible sides is not equal to 2.
+	 */
+	public float getRatioPixelsIfTwoPlanesVisible() throws Exception,IllegalStateException{
+		if (getAmountSidesVisible() != 2){
+			throw new IllegalStateException("The amount of visible sides is not equal to 2");
+		}
+		float ratio = 0;
+		float[] percentageXYZPixels = getPercentageXYZPixels();
+		if (percentageXYZPixels[0] == 0){
+			ratio = percentageXYZPixels[1] / percentageXYZPixels[2];
+		} else if (percentageXYZPixels[1] == 0){
+			ratio = percentageXYZPixels[0] / percentageXYZPixels[2];
+		} else if (percentageXYZPixels[2] == 0){
+			ratio = percentageXYZPixels[0] / percentageXYZPixels[1];
+		}
+		if (0 < ratio && ratio < 1){
+			return 1 / ratio;
+		}
+		return ratio;
 	}
 }
 
