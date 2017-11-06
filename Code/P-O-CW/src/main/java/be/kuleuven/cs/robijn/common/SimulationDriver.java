@@ -7,6 +7,7 @@ import p_en_o_cw_2017.AutopilotInputs;
 import p_en_o_cw_2017.AutopilotOutputs;
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
+import org.apache.commons.math3.linear.*;
 
 /**
  * This class combines the testbed and autopilot into one runnable simulation.
@@ -27,10 +28,11 @@ public class SimulationDriver {
 
     //List of eventhandlers that are invoked when the simulation has updated.
     private ArrayList<BiConsumer<AutopilotInputs, AutopilotOutputs>> updateEventHandlers = new ArrayList<>();
-
+    
     public SimulationDriver(AutopilotConfig config){
-        testBed = new VirtualTestbed(config);
-        autoPilot = new Autopilot(config);
+    	RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -6.667}, false);
+        testBed = new VirtualTestbed(config, initialVelocity);
+        autoPilot = new Autopilot(config, initialVelocity);
         latestAutopilotInputs = testBed.getInputs();
     }
 
