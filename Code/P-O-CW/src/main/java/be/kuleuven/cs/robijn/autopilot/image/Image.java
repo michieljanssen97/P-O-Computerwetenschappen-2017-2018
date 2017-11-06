@@ -202,7 +202,7 @@ public class Image {
 	}
 	
 	/** Return the horizontal and vertical rotation necessary to fly towards a given point,
-	 *  of which the distance to the center is given in terms of x and y coordinate.
+	 *  of which the distance to the center on the image is given in terms of x and y coordinate.
 	 * @param img				The given image
 	 * @param fov_horizontal	The horizontal angle of view
 	 * @param fov_vertical		The vertical angle of view
@@ -220,6 +220,8 @@ public class Image {
 	
 	/**
 	 * Return the minimum distance from the red pixels that are on the edge of the cube, to its center.
+	 * @param hue	The given hue
+	 * @param sat	The given saturation
 	 * @throws Exception Something goes wrong while calculating the red pixels
 	 */
 	public float getMinimumDistanceSpherePixels(float hue, float sat) throws Exception{
@@ -235,6 +237,8 @@ public class Image {
 	
 	/**
 	 * Return the maximum distance from the red pixels that are on the edge of the cube, to its center.
+	 * @param hue	The given hue
+	 * @param sat	The given saturation
 	 * @throws Exception	Something goes wrong while calculating the red pixels
 	 */
 	public float getMaximumDistanceSpherePixels(float hue, float sat) throws Exception{
@@ -249,8 +253,10 @@ public class Image {
 	}
 	
 	/**
-	 * Return the amount of sides of the cube that are visible in the Image.
-	 * @throws Exception	Something goes wrong while calculating the red pixels
+	 * Return the amount of sides of the cube with given hue and saturation that are visible in the Image.
+	 * @param hue	The given hue
+	 * @param sat	The given saturation
+	 * @throws Exception	Something goes wrong while calculating the pixels of the cube.
 	 */
 	public int getAmountSidesVisible(float hue, float sat) throws Exception{
 		boolean checkX = true;
@@ -275,7 +281,7 @@ public class Image {
 	}
 	
 	/**
-	 * Check whether the given red pixel is in a surface perpendicular to the x axis of the world coordinate system.
+	 * Check whether the given pixel is in a surface perpendicular to the x axis of the world coordinate system.
 	 * @param p	The given pixel
 	 * @return	True if the value of the pixel is either between 0.8 and 0.9 or between 0.25 and 0.35
 	 */
@@ -285,7 +291,7 @@ public class Image {
 	}
 	
 	/**
-	 * Check whether the given red pixel is in a surface perpendicular to the y axis of the world coordinate system.
+	 * Check whether the given pixel is in a surface perpendicular to the y axis of the world coordinate system.
 	 * @param p	The given pixel
 	 * @return	True if the value of the pixel is either between 0.1 and 0.2 or larger than 0.95
 	 */
@@ -295,7 +301,7 @@ public class Image {
 	}
 	
 	/**
-	 * Check whether the given red pixel is in a surface perpendicular to the z axis of the world coordinate system.
+	 * Check whether the given pixel is in a surface perpendicular to the z axis of the world coordinate system.
 	 * @param p	The given pixel
 	 * @return	True if the value of the pixel is either between 0.4 and 0.5 or between 0.65 and 0.75
 	 */
@@ -305,8 +311,10 @@ public class Image {
 	}
 	
 	/**
-	 * Return the distance from the red cube to the camera along the (negative) z axis of the drone coordinate system.
-	 * @throws Exception	There are no sides of a red cube visible in this Image
+	 * Return the distance from the cube with given hue and saturation to the camera along the (negative) z axis of the drone coordinate system.
+	 * @param hue	The given hue
+	 * @param sat	The given saturation
+	 * @throws Exception	There are no sides of a cube with given hue and saturation visible in this Image
 	 */
 	public float getTotalDistance(float hue, float sat) throws Exception{
 		int sides = getAmountSidesVisible(hue, sat);
@@ -354,8 +362,8 @@ public class Image {
 	
 	
 	/**
-	 * Return a vector containing the x, y and z distance from the camera to the cube.
-	 * @throws Exception	Something goes wrong while calculating the red pixels
+	 * Return a vector containing the x, y and z distance from the camera to the cube with given hue and saturation.
+	 * @throws Exception	Something goes wrong while calculating the pixels with given hue and saturation
 	 */
 	public Vector3f getXYZDistance(float hue, float sat) throws Exception{
 		int[] cubeCenter = getCubeCenterPixel(hue, sat);
@@ -380,8 +388,10 @@ public class Image {
 	}
 	
 	/**
-	 * Return the percentages of the red pixels that are in planes perpendicular to the x-axis, the y-axis and the z-axis.
-	 * @throws IllegalStateException There is no red cube on the image.
+	 * Return the percentages of the pixels with given hue and saturation that are in planes perpendicular to the x-axis, the y-axis and the z-axis.
+	 * @param hue	The given hue
+	 * @param sat	The given saturation
+	 * @throws IllegalStateException There is no cube with given hue and saturation on the image.
 	 */
 	public float[] getPercentageXYZPixels(float hue, float sat) throws IllegalStateException{
 		ArrayList<Pixel> redPixels = getCubePixels(hue, sat);
@@ -409,6 +419,8 @@ public class Image {
 	
 	/**
 	 * Return the ratio of the amount of pixels of the two planes that are visible.
+	 * @param hue	The given hue
+	 * @param sat	The given saturation
 	 * @throws Exception				Something goes wrong while calculating the red pixels. 		
 	 * @throws IllegalStateException	The amount of visible sides is not equal to 2.
 	 */
@@ -556,5 +568,23 @@ public class Image {
 		return ( (hsv1[0] == hsv2[0]) && (hsv1[1] == hsv2[1]) );
 	}
 	
+	/**
+	 * Return the cube that is closest to the drone in this image.
+	 * @throws Exception	There are no sides of a cube visible in this image.
+	 */
+	public ImageCube getClosestCube() throws Exception{
+		float minimum = 100;
+		ImageCube cube = null;
+		for (ImageCube cu : this.cubes){
+			float hue = cu.getHue();
+			float saturation = cu.getSaturation();
+			float distance = getTotalDistance(hue, saturation);
+			if (distance < minimum){
+				cube = cu;
+				minimum = distance;
+			}
+		}
+		return cube;
+	}
 }
 
