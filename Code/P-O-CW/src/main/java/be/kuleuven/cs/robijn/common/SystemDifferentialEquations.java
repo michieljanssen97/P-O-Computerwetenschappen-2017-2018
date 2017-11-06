@@ -34,11 +34,11 @@ public class SystemDifferentialEquations implements FirstOrderDifferentialEquati
 	}
 
 	public void computeDerivatives(double t, double[] y, double[] yDot) {
-		RealVector acceleration = drone.getAcceleration(this.getAutopilotOutputs().getThrust(),
+		RealVector acceleration = this.getDrone().getAcceleration(this.getAutopilotOutputs().getThrust(),
 				this.getAutopilotOutputs().getLeftWingInclination(), this.getAutopilotOutputs().getRightWingInclination(),
 				this.getAutopilotOutputs().getHorStabInclination(), this.getAutopilotOutputs().getVerStabInclination());
 		
-		float[] angularAccelerations = drone.getAngularAccelerations(this.getAutopilotOutputs().getLeftWingInclination(),
+		float[] angularAccelerations = this.getDrone().getAngularAccelerations(this.getAutopilotOutputs().getLeftWingInclination(),
 				this.getAutopilotOutputs().getRightWingInclination(), this.getAutopilotOutputs().getHorStabInclination(), 
 				this.getAutopilotOutputs().getVerStabInclination());
 		float headingAngularAcceleration = angularAccelerations[0];
