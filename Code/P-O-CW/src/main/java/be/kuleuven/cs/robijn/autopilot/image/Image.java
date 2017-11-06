@@ -1,6 +1,7 @@
 package be.kuleuven.cs.robijn.autopilot.image;
 
-import be.kuleuven.cs.robijn.common.math.Vector3f;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealVector;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -401,7 +402,7 @@ public class Image {
 	 * Return a vector containing the x, y and z distance from the camera to the cube.
 	 * @throws Exception	Something goes wrong while calculating the red pixels
 	 */
-	public Vector3f getXYZDistance() throws Exception{
+	public RealVector getXYZDistance() throws Exception{
 		int[] averageRed = getAverageRedPixel();
 		int[] center = getCenterPixel();
 		float angleX = (averageRed[0] - center[0]) * getHorizontalAngle() / getnbColumns();
@@ -409,7 +410,7 @@ public class Image {
 		float distanceX =  (float) (getTotalDistance()*Math.sin(degreesToRadians(angleX)));
 		float distanceY =  (float) (getTotalDistance()*Math.sin(degreesToRadians(angleY)));
 		float distanceZ = (float) - Math.sqrt(Math.pow(getTotalDistance(), 2) - Math.pow(distanceX, 2) - Math.pow(distanceY, 2));
-		Vector3f ResultVector = new Vector3f(distanceX, distanceY, distanceZ);
+		RealVector ResultVector = new ArrayRealVector(new double[] {distanceX, distanceY, distanceZ},false);
 		return ResultVector;
 	}
 	
