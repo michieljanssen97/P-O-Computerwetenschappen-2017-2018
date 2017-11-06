@@ -34,13 +34,13 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		double zDistance = 100.0;
 		
 		//simulatie1
-		box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		//box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
 		
 		//simulatie2
 		//box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
 		
 		//simulatie3
-		//box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/48.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/48.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
 		
 		this.addChild(box);
 	}
@@ -49,11 +49,19 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		Drone drone = this.getFirstChildOfType(Drone.class);
 		Box box = this.getFirstChildOfType(Box.class);
 
+		float stopDistanceToBox = 4;
+		float cubeRadius = (float) 0.5;
+		float stopDistanceToCenterBox = stopDistanceToBox + cubeRadius;
+		
 		//Check simulation finished
-		if ((drone.getRightWingPosition().getDistance(box.getWorldPosition()) < 4.5)
-				|| (drone.getLeftWingPosition().getDistance(box.getWorldPosition()) < 4.5)
-				|| (drone.getEnginePosition().getDistance(box.getWorldPosition()) < 4.5)) {
-			return true;
+		if ((drone.getRightWingPosition().getDistance(box.getWorldPosition()) <= stopDistanceToCenterBox)
+				|| (drone.getLeftWingPosition().getDistance(box.getWorldPosition()) <= stopDistanceToCenterBox)
+				|| (drone.getEnginePosition().getDistance(box.getWorldPosition()) <= stopDistanceToCenterBox)){
+			box.getAllBoxes().remove(box);
+			//TODO zorg ervoor dat getFirstTypeOfChild deze box niet meer in rekening brengt
+			if(box.getAllBoxes().isEmpty()) {//only stop if all boxes are handled
+				return true;
+			}
 		}
 
 		this.setElapsedTime(secondsSinceStart);
