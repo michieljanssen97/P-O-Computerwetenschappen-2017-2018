@@ -34,7 +34,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		double zDistance = 100.0;
 		
 		//simulatie1
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
 		
 		//simulatie2
 		//box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
@@ -161,6 +161,10 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 			newRoll = 0;
 		else if (newRoll < 0)
 			newRoll += (2*Math.PI);
+		System.out.println("help");
+		System.out.println(newHeading);
+		System.out.println(newPitch);
+		System.out.println(newRoll);
 		drone.setHeading(newHeading);
 		drone.setPitch(newPitch);
 		drone.setRoll(newRoll);
