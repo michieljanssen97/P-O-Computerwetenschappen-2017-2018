@@ -558,14 +558,31 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		drone.setHeading(newHeading);
 		drone.setPitch(newPitch);
 		drone.setRoll(newRoll);
-		System.out.println(newHeading);
-		System.out.println(newPitch);
-		System.out.println(newRoll);
 		
-		drone.setVelocity(newPosition.subtract(this.getPreviousPosition()).mapMultiply(1/secondsSinceLastUpdate));
-		drone.setHeadingAngularVelocity((newHeading - this.getPreviousHeading())/(secondsSinceLastUpdate));
-		drone.setPitchAngularVelocity((newPitch - this.getPreviousPitch())/(secondsSinceLastUpdate));
-		drone.setRollAngularVelocity((newRoll - this.getPreviousRoll())/(secondsSinceLastUpdate));
+		RealVector newVelocity = newPosition.subtract(this.getPreviousPosition()).mapMultiply(1/secondsSinceLastUpdate);
+		float headingDifference = newHeading - this.getPreviousHeading();
+		if (headingDifference > Math.PI)
+			headingDifference -= 2*Math.PI;
+		else if (headingDifference < -Math.PI)
+			headingDifference += 2*Math.PI;
+		float newHeadingAngularVelocity = headingDifference/secondsSinceLastUpdate;
+		float pitchDifference = newPitch - this.getPreviousPitch();
+		if (pitchDifference > Math.PI)
+			pitchDifference -= 2*Math.PI;
+		else if (pitchDifference < -Math.PI)
+			pitchDifference += 2*Math.PI;
+		float newPitchAngularVelocity = pitchDifference/secondsSinceLastUpdate;
+		float rollDifference = newRoll - this.getPreviousRoll();
+		if (rollDifference > Math.PI)
+			rollDifference -= 2*Math.PI;
+		else if (rollDifference < -Math.PI)
+			rollDifference += 2*Math.PI;
+		float newRollAngularVelocity = rollDifference/secondsSinceLastUpdate;
+		
+		drone.setVelocity(newVelocity);
+		drone.setHeadingAngularVelocity(newHeadingAngularVelocity);
+		drone.setPitchAngularVelocity(newPitchAngularVelocity);
+		drone.setRollAngularVelocity(newRollAngularVelocity);
 		
 		this.setPreviousPosition(newPosition);
 		this.setPreviousHeading(newHeading);

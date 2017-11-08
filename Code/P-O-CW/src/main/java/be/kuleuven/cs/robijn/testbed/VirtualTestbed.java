@@ -1,8 +1,6 @@
 package be.kuleuven.cs.robijn.testbed;
 
 import org.apache.commons.math3.linear.*;
-import org.apache.commons.math3.ode.*;
-import org.apache.commons.math3.ode.nonstiff.*;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
 import p_en_o_cw_2017.*;
@@ -57,7 +55,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		}
 
 		this.setElapsedTime(secondsSinceStart);
-		this.moveDrone(secondsSinceStart, secondsSinceLastUpdate, output);
+		this.moveDrone(secondsSinceLastUpdate, output);
 		this.renderCameraView();
 
 		return false;
@@ -104,7 +102,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	 *         This virtual testbed has no drone.
 	 *         drone == null
 	 */
-	public void moveDrone(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs output) throws IllegalArgumentException, IllegalStateException {
+	public void moveDrone(float secondsSinceLastUpdate, AutopilotOutputs output) throws IllegalArgumentException, IllegalStateException {
 		if (secondsSinceLastUpdate < 0)
 			throw new IllegalArgumentException();
 		Drone drone = this.getFirstChildOfType(Drone.class);
@@ -142,29 +140,18 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		drone.setRelativePosition(position.add(velocity.mapMultiply(secondsSinceLastUpdate)).add(acceleration.mapMultiply(Math.pow(secondsSinceLastUpdate, 2)/2)));
 		drone.setVelocity(velocity.add(acceleration.mapMultiply(secondsSinceLastUpdate)));
 		
-		float epsilon = (float) 0.0001;
 		float newHeading = (float) ((heading + headingAngularVelocity*secondsSinceLastUpdate + headingAngularAcceleration*(Math.pow(secondsSinceLastUpdate, 2)/2)) % (2*Math.PI));
 //		float newHeading = (float) y[6];
-		if ((Math.abs(newHeading - 0) < epsilon) || (Math.abs(newHeading - 2*Math.PI) < epsilon))
-			newHeading = 0;
-		else if (newHeading < 0)
+		if (newHeading < 0)
 			newHeading += (2*Math.PI);
 		float newPitch = (float) ((pitch + pitchAngularVelocity*secondsSinceLastUpdate + pitchAngularAcceleration*(Math.pow(secondsSinceLastUpdate, 2)/2)) % (2*Math.PI));
 //		float newPitch = (float) y[8];
-		if ((Math.abs(newPitch - 0) < epsilon) || (Math.abs(newPitch - 2*Math.PI) < epsilon))
-			newPitch = 0;
-		else if (newPitch < 0)
+		if (newPitch < 0)
 			newPitch += (2*Math.PI);
 		float newRoll = (float) ((roll + rollAngularVelocity*secondsSinceLastUpdate + rollAngularAcceleration*(Math.pow(secondsSinceLastUpdate, 2)/2)) % (2*Math.PI));
 //		float newRoll = (float) y[10];
-		if ((Math.abs(newRoll - 0) < epsilon) || (Math.abs(newRoll - 2*Math.PI) < epsilon))
-			newRoll = 0;
-		else if (newRoll < 0)
+		if (newRoll < 0)
 			newRoll += (2*Math.PI);
-		System.out.println("help");
-		System.out.println(newHeading);
-		System.out.println(newPitch);
-		System.out.println(newRoll);
 		drone.setHeading(newHeading);
 		drone.setPitch(newPitch);
 		drone.setRoll(newRoll);
