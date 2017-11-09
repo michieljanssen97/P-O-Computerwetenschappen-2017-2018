@@ -10,6 +10,11 @@ import be.kuleuven.cs.robijn.autopilot.image.*;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
 import p_en_o_cw_2017.*;
 
+/**
+ * A class of autopilots.
+ * 
+ * @author Pieter Vandensande
+ */
 public class Autopilot extends WorldObject implements AutoPilot {
 	
 	public Autopilot(AutopilotConfig config, RealVector initialVelocity) throws IllegalArgumentException {

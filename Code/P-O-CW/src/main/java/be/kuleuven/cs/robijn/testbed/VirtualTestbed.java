@@ -8,7 +8,7 @@ import p_en_o_cw_2017.*;
 /**
  * A class of virtual testbeds.
  * 
- * @author Pieter Vandensande en Roy De Prins.
+ * @author Pieter Vandensande
  */
 public class VirtualTestbed extends WorldObject implements TestBed {
 	private final AutopilotConfig config;
