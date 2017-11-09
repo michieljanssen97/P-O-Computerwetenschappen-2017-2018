@@ -31,14 +31,20 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		Box box = new Box();
 		double zDistance = 100.0;
 		
-		//simulatie1
+		//Case 1
+		//box.setRelativePosition(new ArrayRealVector(new double[] {0, 0, -zDistance}, false));
+		
+		//Case 2
 		box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		
+		//simulatie1
+		//box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
 		
 		//simulatie2
 		//box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
 		
 		//simulatie3
-		box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/48.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		//box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/48.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
 		
 		this.addChild(box);
 	}
@@ -140,17 +146,24 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		drone.setRelativePosition(position.add(velocity.mapMultiply(secondsSinceLastUpdate)).add(acceleration.mapMultiply(Math.pow(secondsSinceLastUpdate, 2)/2)));
 		drone.setVelocity(velocity.add(acceleration.mapMultiply(secondsSinceLastUpdate)));
 		
+		float epsilon = 0.0001f;
 		float newHeading = (float) ((heading + headingAngularVelocity*secondsSinceLastUpdate + headingAngularAcceleration*(Math.pow(secondsSinceLastUpdate, 2)/2)) % (2*Math.PI));
 //		float newHeading = (float) y[6];
-		if (newHeading < 0)
+		if ((Math.abs(newHeading - 0) < epsilon) || (Math.abs(newHeading - 2*Math.PI) < epsilon))
+			newHeading = 0;
+		else if (newHeading < 0)
 			newHeading += (2*Math.PI);
 		float newPitch = (float) ((pitch + pitchAngularVelocity*secondsSinceLastUpdate + pitchAngularAcceleration*(Math.pow(secondsSinceLastUpdate, 2)/2)) % (2*Math.PI));
 //		float newPitch = (float) y[8];
-		if (newPitch < 0)
+		if ((Math.abs(newPitch - 0) < epsilon) || (Math.abs(newPitch - 2*Math.PI) < epsilon))
+			newPitch = 0;
+		else if (newPitch < 0)
 			newPitch += (2*Math.PI);
 		float newRoll = (float) ((roll + rollAngularVelocity*secondsSinceLastUpdate + rollAngularAcceleration*(Math.pow(secondsSinceLastUpdate, 2)/2)) % (2*Math.PI));
 //		float newRoll = (float) y[10];
-		if (newRoll < 0)
+		if ((Math.abs(newRoll - 0) < epsilon) || (Math.abs(newRoll - 2*Math.PI) < epsilon))
+			newRoll = 0;
+		else if (newRoll < 0)
 			newRoll += (2*Math.PI);
 		drone.setHeading(newHeading);
 		drone.setPitch(newPitch);

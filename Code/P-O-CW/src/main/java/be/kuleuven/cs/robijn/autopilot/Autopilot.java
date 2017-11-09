@@ -71,7 +71,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
 	/**
 	 * Wel roll ten gevolge van verschillende snelheid van vleugels (door de rotaties).
 	 */
-	public AutopilotOutputs update(AutopilotInputs inputs) {
+	public AutopilotOutputs update(AutopilotInputs inputs) throws IllegalStateException {
 		if (this.isFirstUpdate())
 			this.firstUpdate = false;
 		else {
@@ -100,352 +100,440 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		float leftWingInclinationTemp = 0;
 		float rightWingInclinationTemp = 0;
 		float minDegrees = 1;
-		float bestInclinationPositive;
-		if (! hasCrash(0.86f, drone))
-			bestInclinationPositive = 0.86f;
-		else {
-			bestInclinationPositive = this.preventCrash(drone.getMaxAOA(), true, drone);
-		}
-		float bestInclinationNegative;
-		if (! hasCrash(-0.86f, drone))
-			bestInclinationNegative = -0.86f;
-		else {
-			bestInclinationNegative = this.preventCrash(-drone.getMaxAOA(), false, drone);
-		}
-		double headingAngularAcceleration = (1.0/360.0)*6*Math.PI;
-		double maxHeadingAngularVelocity = (1.0/360.0)*12*Math.PI;
-		double pitchAngularAcceleration = (1.0/360.0)*48*Math.PI;
 		
 		double relativeAccuracy = 1.0e-12;
 		double absoluteAccuracy = 1.0e-8;
 		int maxOrder = 5;
 		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
 		
-//		if (imageYRotation > minDegrees)
-//			verStabInclinationTemp =  -bestInclination;
-//		else if (imageYRotation < -minDegrees)
-//			verStabInclinationTemp = bestInclination;
-//		if (imageXRotation > minDegrees)
-//			horStabInclinationTemp = -bestInclination;
-//		else if (imageXRotation < -minDegrees)
-//			horStabInclinationTemp = bestInclination;
-		float inertiaMatrixXX = (float) (drone.getTailMass()*Math.pow(drone.getTailSize(),2) +drone.getEngineMass()*Math.pow(drone.getEngineDistance(), 2));
-		float inertiaMatrixZZ = (float) (2*(drone.getWingMass()*Math.pow(drone.getWingX(),2)));
-		float inertiaMatrixYY = inertiaMatrixXX + inertiaMatrixZZ;
-		double projectedVelocityHorStab = drone.getProjectedVelocityHorStab().getNorm();
-		double projectedVelocityVerStab = drone.getProjectedVelocityVerStab().getNorm();
-		RealVector totalAngularVelocityDroneCoordinates = drone.transformationToDroneCoordinates(drone.getHeadingAngularVelocityVector()
-					.add(drone.getPitchAngularVelocityVector())
-					.add(drone.getRollAngularVelocityVector()));
-		RealMatrix inertiaMatrix = new Array2DRowRealMatrix(new double[][] {
-			{inertiaMatrixXX, 0,                0},
-			{0,               inertiaMatrixYY,  0}, 
-			{0,               0,                inertiaMatrixZZ}
-			}, false);
-		RealVector angularMomentumDroneCoordinates = inertiaMatrix.operate(totalAngularVelocityDroneCoordinates);
+		//Case 1
+//		float maxInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)0.0, true, (float)((1.0/360.0)*2*Math.PI), drone, 1);
+//		float minInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)0.0, false, (float)((1.0/360.0)*2*Math.PI), drone, 1);
+//		
+//		final float horStabInclination = horStabInclinationTemp;
+//		final float verStabInclination = verStabInclinationTemp;
+//		
+//		UnivariateFunction function = (x)->{return drone.getLiftForceLeftWing((float)x).getEntry(1)
+//				+ drone.getLiftForceRightWing((float)x).getEntry(1)
+//				+ drone.getGravitationalForceEngine().getEntry(1)
+//				+ drone.getGravitationalForceTail().getEntry(1) 
+//				+ (2*drone.getGravitationalForceWing().getEntry(1))
+//				;};
+//		try {
+//			double solution = solver.solve(100, function, minInclinationWing, maxInclinationWing);
+//			rightWingInclinationTemp = (float) solution;
+//			leftWingInclinationTemp = (float) solution;
+//		} catch (NoBracketingException exc) {
+//			throw new IllegalStateException("simulation failed!");
+//		}
+//		
+//		final float leftWingInclination = leftWingInclinationTemp;
+//		final float rightWingInclination = rightWingInclinationTemp;
+//		
+//		float thrustTemp = (float) (drone.transformationToDroneCoordinates(drone.getLiftForceLeftWing(leftWingInclination)).getEntry(2)
+//				+ drone.transformationToDroneCoordinates(drone.getLiftForceRightWing(rightWingInclination)).getEntry(2));
+//		if (thrustTemp > drone.getMaxThrust())
+//			thrustTemp = drone.getMaxThrust();
+//		final float thrust = thrustTemp;
 		
-		if ((imageXRotation > minDegrees) && (imageYRotation > minDegrees) && (drone.getHeadingAngularVelocity() < maxHeadingAngularVelocity)) {
-			try {
-				UnivariateFunction function1 = (x)->{return Math.cos(x)*x + ((inertiaMatrixXX*Math.cos(drone.getRoll())*pitchAngularAcceleration
-						+ inertiaMatrixXX*Math.cos(drone.getPitch())*Math.sin(drone.getRoll())*headingAngularAcceleration
-						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(0)
-						+ inertiaMatrix.operate(
-								drone.transformationToDroneCoordinates(
-										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
-										.add(VectorMath.crossProduct(
-											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
-											drone.getRollAngularVelocityVector()
-										))
-									)).getEntry(0))
-						/(drone.getHorStabLiftSlope()*Math.pow(projectedVelocityHorStab, 2)));};
-				double solution1 = solver.solve(100, function1, bestInclinationNegative, 0);
-				horStabInclinationTemp = (float) solution1;
-			} catch (NoBracketingException exc1) {
-				horStabInclinationTemp = bestInclinationNegative;
-			} catch (NumberIsTooLargeException exc2) {
-				horStabInclinationTemp = bestInclinationNegative;
-			}
-			try {
-				UnivariateFunction function2 = (x)->{return Math.cos(x)*x + ((inertiaMatrixYY*Math.cos(drone.getPitch())*Math.cos(drone.getRoll())
-							*headingAngularAcceleration
-						- inertiaMatrixYY*Math.sin(drone.getRoll())*pitchAngularAcceleration
-						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(1)
-						+ inertiaMatrix.operate(
-								drone.transformationToDroneCoordinates(
-										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
-										.add(VectorMath.crossProduct(
-											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
-											drone.getRollAngularVelocityVector()
-										))
-									)).getEntry(1))
-						/(drone.getVerStabLiftSlope()*Math.pow(projectedVelocityVerStab, 2)));};
-				double solution2 = solver.solve(100, function2, bestInclinationNegative, 0);
-				verStabInclinationTemp = (float) solution2;
-			} catch (NoBracketingException exc1) {
-				verStabInclinationTemp = bestInclinationNegative;
-			} catch (NumberIsTooLargeException exc2) {
-				verStabInclinationTemp = bestInclinationNegative;
-			}
+		//Case 2
+		float yAcceleration = 1.0f;
+		float maxYVelocity = 1.0f;
+		
+		float maxInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)0.0, true, (float)((1.0/360.0)*2*Math.PI), drone, 1);
+		float minInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)0.0, false, (float)((1.0/360.0)*2*Math.PI), drone, 1);
+		float maxInclinationHorStab = this.minMaxInclination((float)(Math.PI/2), (float)0.0, true, (float)((1.0/360.0)*2*Math.PI), drone, 2);
+		float minInclinationHorStab = this.minMaxInclination((float)(Math.PI/2), (float)0.0, false, (float)((1.0/360.0)*2*Math.PI), drone, 2);
+		
+		UnivariateFunction function1;
+		float yVelocity = (float)drone.getVelocity().getEntry(1);
+		if (((imageXRotation > minDegrees) && (yVelocity < maxYVelocity)) || (yVelocity < -maxYVelocity)) {
+			function1 = (x)->{return drone.getLiftForceLeftWing((float)x).getEntry(1)
+					+ drone.getLiftForceRightWing((float)x).getEntry(1)
+					+ drone.getGravitationalForceEngine().getEntry(1)
+					+ drone.getGravitationalForceTail().getEntry(1) 
+					+ (2*drone.getGravitationalForceWing().getEntry(1))
+					- ((drone.getEngineMass() + drone.getTailMass() + (2 * drone.getWingMass())) * yAcceleration)
+					;};
 		}
-		else if ((imageXRotation > minDegrees) && (imageYRotation < -minDegrees) && (drone.getHeadingAngularVelocity() > -maxHeadingAngularVelocity)) {
-			try {
-				UnivariateFunction function1 = (x)->{return Math.cos(x)*x + ((inertiaMatrixXX*Math.cos(drone.getRoll())*pitchAngularAcceleration
-						- inertiaMatrixXX*Math.cos(drone.getPitch())*Math.sin(drone.getRoll())*headingAngularAcceleration
-						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(0)
-						+ inertiaMatrix.operate(
-								drone.transformationToDroneCoordinates(
-										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
-										.add(VectorMath.crossProduct(
-											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
-											drone.getRollAngularVelocityVector()
-										))
-									)).getEntry(0))
-						/(drone.getHorStabLiftSlope()*Math.pow(projectedVelocityHorStab, 2)));};
-				double solution1 = solver.solve(100, function1, bestInclinationNegative, 0);
-				horStabInclinationTemp = (float) solution1;
-			} catch (NoBracketingException exc1) {
-				horStabInclinationTemp = bestInclinationNegative;
-			} catch (NumberIsTooLargeException exc2) {
-				horStabInclinationTemp = bestInclinationNegative;
-			}
-			try {
-				UnivariateFunction function2 = (x)->{return Math.cos(x)*x + ((-inertiaMatrixYY*Math.cos(drone.getPitch())*Math.cos(drone.getRoll())
-							*headingAngularAcceleration
-						- inertiaMatrixYY*Math.sin(drone.getRoll())*pitchAngularAcceleration
-						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(1)
-						+ inertiaMatrix.operate(
-								drone.transformationToDroneCoordinates(
-										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
-										.add(VectorMath.crossProduct(
-											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
-											drone.getRollAngularVelocityVector()
-										))
-									)).getEntry(1))
-						/(drone.getVerStabLiftSlope()*Math.pow(projectedVelocityVerStab, 2)));};
-				double solution2 = solver.solve(100, function2, 0, bestInclinationPositive);
-				verStabInclinationTemp = (float) solution2;
-			} catch (NoBracketingException exc1) {
-				verStabInclinationTemp = bestInclinationPositive;
-			} catch (NumberIsTooLargeException exc2) {
-				verStabInclinationTemp = bestInclinationPositive;
-			}
+		else if (((imageXRotation < -minDegrees) && (yVelocity > -maxYVelocity)) || (yVelocity > maxYVelocity)) {	
+			function1 = (x)->{return drone.getLiftForceLeftWing((float)x).getEntry(1)
+					+ drone.getLiftForceRightWing((float)x).getEntry(1)
+					+ drone.getGravitationalForceEngine().getEntry(1)
+					+ drone.getGravitationalForceTail().getEntry(1) 
+					+ (2*drone.getGravitationalForceWing().getEntry(1))
+					+ ((drone.getEngineMass() + drone.getTailMass() + (2 * drone.getWingMass())) * yAcceleration)
+					;};
 		}
-		else if ((imageXRotation < -minDegrees) && (imageYRotation > minDegrees) && (drone.getHeadingAngularVelocity() < maxHeadingAngularVelocity)) {
-			try {
-				UnivariateFunction function1 = (x)->{return Math.cos(x)*x + ((-inertiaMatrixXX*Math.cos(drone.getRoll())*pitchAngularAcceleration
-						+ inertiaMatrixXX*Math.cos(drone.getPitch())*Math.sin(drone.getRoll())*headingAngularAcceleration
-						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(0)
-						+ inertiaMatrix.operate(
-								drone.transformationToDroneCoordinates(
-										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
-										.add(VectorMath.crossProduct(
-											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
-											drone.getRollAngularVelocityVector()
-										))
-									)).getEntry(0))
-						/(drone.getHorStabLiftSlope()*Math.pow(projectedVelocityHorStab, 2)));};
-				double solution1 = solver.solve(100, function1, 0, bestInclinationPositive);
-				horStabInclinationTemp = (float) solution1;
-			} catch (NoBracketingException exc1) {
-				horStabInclinationTemp = bestInclinationPositive;
-			} catch (NumberIsTooLargeException exc2) {
-				horStabInclinationTemp = bestInclinationPositive;
-			}
-			try {
-				UnivariateFunction function2 = (x)->{return Math.cos(x)*x + ((inertiaMatrixYY*Math.cos(drone.getPitch())*Math.cos(drone.getRoll())
-							*headingAngularAcceleration
-						+ inertiaMatrixYY*Math.sin(drone.getRoll())*pitchAngularAcceleration
-						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(1)
-						+ inertiaMatrix.operate(
-								drone.transformationToDroneCoordinates(
-										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
-										.add(VectorMath.crossProduct(
-											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
-											drone.getRollAngularVelocityVector()
-										))
-									)).getEntry(1))
-						/(drone.getVerStabLiftSlope()*Math.pow(projectedVelocityVerStab, 2)));};
-				double solution2 = solver.solve(100, function2, bestInclinationNegative, 0);
-				verStabInclinationTemp = (float) solution2;
-			} catch (NoBracketingException exc1) {
-				verStabInclinationTemp = bestInclinationNegative;
-			} catch (NumberIsTooLargeException exc2) {
-				verStabInclinationTemp = bestInclinationNegative;
-			}
+		else {
+			function1 = (x)->{return drone.getLiftForceLeftWing((float)x).getEntry(1)
+					+ drone.getLiftForceRightWing((float)x).getEntry(1)
+					+ drone.getGravitationalForceEngine().getEntry(1)
+					+ drone.getGravitationalForceTail().getEntry(1) 
+					+ (2*drone.getGravitationalForceWing().getEntry(1))
+					;};
 		}
-		else if ((imageXRotation < -minDegrees) && (imageYRotation < -minDegrees) && (drone.getHeadingAngularVelocity() > -maxHeadingAngularVelocity)) {
-			try {
-				UnivariateFunction function1 = (x)->{return Math.cos(x)*x + ((-inertiaMatrixXX*Math.cos(drone.getRoll())*pitchAngularAcceleration
-						- inertiaMatrixXX*Math.cos(drone.getPitch())*Math.sin(drone.getRoll())*headingAngularAcceleration
-						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(0)
-						+ inertiaMatrix.operate(
-								drone.transformationToDroneCoordinates(
-										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
-										.add(VectorMath.crossProduct(
-											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
-											drone.getRollAngularVelocityVector()
-										))
-									)).getEntry(0))
-						/(drone.getHorStabLiftSlope()*Math.pow(projectedVelocityHorStab, 2)));};
-				double solution1 = solver.solve(100, function1, 0, bestInclinationPositive);
-				horStabInclinationTemp = (float) solution1;
-			} catch (NoBracketingException exc1) {
-				horStabInclinationTemp = bestInclinationPositive;
-			} catch (NumberIsTooLargeException exc2) {
-				horStabInclinationTemp = bestInclinationPositive;
-			}
-			try {
-				UnivariateFunction function2 = (x)->{return Math.cos(x)*x + ((-inertiaMatrixYY*Math.cos(drone.getPitch())*Math.cos(drone.getRoll())
-							*headingAngularAcceleration
-						+ inertiaMatrixYY*Math.sin(drone.getRoll())*pitchAngularAcceleration
-						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(1)
-						+ inertiaMatrix.operate(
-								drone.transformationToDroneCoordinates(
-										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
-										.add(VectorMath.crossProduct(
-											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
-											drone.getRollAngularVelocityVector()
-										))
-									)).getEntry(1))
-						/(drone.getVerStabLiftSlope()*Math.pow(projectedVelocityVerStab, 2)));};
-				double solution2 = solver.solve(100, function2, 0, bestInclinationPositive);
-				verStabInclinationTemp = (float) solution2;
-			} catch (NoBracketingException exc1) {
-				verStabInclinationTemp = bestInclinationPositive;
-			} catch (NumberIsTooLargeException exc2) {
-				verStabInclinationTemp = bestInclinationPositive;
-			}
+		try {
+			double solution1 = solver.solve(100, function1, minInclinationWing, maxInclinationWing);
+			rightWingInclinationTemp = (float) solution1;
+			leftWingInclinationTemp = (float) solution1;
+		} catch (NoBracketingException exc) {
+			throw new IllegalStateException("simulation failed!");
 		}
-		else if (imageXRotation > minDegrees) {
-			try {
-				UnivariateFunction function1 = (x)->{return Math.cos(x)*x + ((inertiaMatrixXX*Math.cos(drone.getRoll())*pitchAngularAcceleration
-						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(0)
-						+ inertiaMatrix.operate(
-								drone.transformationToDroneCoordinates(
-										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
-										.add(VectorMath.crossProduct(
-											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
-											drone.getRollAngularVelocityVector()
-										))
-									)).getEntry(0))
-						/(drone.getHorStabLiftSlope()*Math.pow(projectedVelocityHorStab, 2)));};
-				double solution1 = solver.solve(100, function1, bestInclinationNegative, 0);
-				horStabInclinationTemp = (float) solution1;
-			} catch (NoBracketingException exc1) {
-				horStabInclinationTemp = bestInclinationNegative;
-			} catch (NumberIsTooLargeException exc2) {
-				horStabInclinationTemp = bestInclinationNegative;
-			}
-		}
-		else if (imageXRotation < -minDegrees) {
-			try {
-				UnivariateFunction function1 = (x)->{return Math.cos(x)*x + ((-inertiaMatrixXX*Math.cos(drone.getRoll())*pitchAngularAcceleration
-						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(0)
-						+ inertiaMatrix.operate(
-								drone.transformationToDroneCoordinates(
-										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
-										.add(VectorMath.crossProduct(
-											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
-											drone.getRollAngularVelocityVector()
-										))
-									)).getEntry(0))
-						/(drone.getHorStabLiftSlope()*Math.pow(projectedVelocityHorStab, 2)));};
-				double solution1 = solver.solve(100, function1, 0, bestInclinationPositive);
-				horStabInclinationTemp = (float) solution1;
-			} catch (NoBracketingException exc1) {
-				horStabInclinationTemp = bestInclinationPositive;
-			} catch (NumberIsTooLargeException exc2) {
-				horStabInclinationTemp = bestInclinationPositive;
-			}
-		}
-		else if ((imageYRotation > minDegrees) && (drone.getHeadingAngularVelocity() < maxHeadingAngularVelocity)) {
-			try {
-				UnivariateFunction function2 = (x)->{return Math.cos(x)*x + ((inertiaMatrixYY*Math.cos(drone.getPitch())*Math.cos(drone.getRoll())
-							*headingAngularAcceleration
-						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(1)
-						+ inertiaMatrix.operate(
-								drone.transformationToDroneCoordinates(
-										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
-										.add(VectorMath.crossProduct(
-											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
-											drone.getRollAngularVelocityVector()
-										))
-									)).getEntry(1))
-						/(drone.getVerStabLiftSlope()*Math.pow(projectedVelocityVerStab, 2)));};
-				double solution2 = solver.solve(100, function2, bestInclinationNegative, 0);
-				verStabInclinationTemp = (float) solution2;
-			} catch (NoBracketingException exc1) {
-				verStabInclinationTemp = bestInclinationNegative;
-			} catch (NumberIsTooLargeException exc2) {
-				verStabInclinationTemp = bestInclinationNegative;
-			}
-		}
-		else if ((imageYRotation < -minDegrees) && (drone.getHeadingAngularVelocity() > -maxHeadingAngularVelocity)) {
-			try {
-				UnivariateFunction function2 = (x)->{return Math.cos(x)*x + ((-inertiaMatrixYY*Math.cos(drone.getPitch())*Math.cos(drone.getRoll())
-							*headingAngularAcceleration
-						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(1)
-						+ inertiaMatrix.operate(
-								drone.transformationToDroneCoordinates(
-										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
-										.add(VectorMath.crossProduct(
-											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
-											drone.getRollAngularVelocityVector()
-										))
-									)).getEntry(1))
-						/(drone.getVerStabLiftSlope()*Math.pow(projectedVelocityVerStab, 2)));};
-				double solution2 = solver.solve(100, function2, 0, bestInclinationPositive);
-				verStabInclinationTemp = (float) solution2;
-			} catch (NoBracketingException exc1) {
-				verStabInclinationTemp = bestInclinationPositive;
-			} catch (NumberIsTooLargeException exc2) {
-				verStabInclinationTemp = bestInclinationPositive;
-			}
+		
+		final float leftWingInclination = leftWingInclinationTemp;
+		final float rightWingInclination = rightWingInclinationTemp;
+		
+		UnivariateFunction function2 = (x)->{return drone.calculateAOA(drone.getNormalHor((float)x), drone.getProjectedVelocityHorStab(),
+				drone.getAttackVectorHor((float)x));};
+		try {
+			double solution2 = solver.solve(100, function2, minInclinationHorStab, maxInclinationHorStab);
+			horStabInclinationTemp = (float) solution2;
+		} catch (NoBracketingException exc) {
+			throw new IllegalStateException("simulation failed!");
 		}
 		
 		final float horStabInclination = horStabInclinationTemp;
 		final float verStabInclination = verStabInclinationTemp;
 		
-		double projectedVelocityLeftWing = drone.getProjectedVelocityLeftWing().getNorm();
-		double projectedVelocityRightWing = drone.getProjectedVelocityRightWing().getNorm();
-		
-		UnivariateFunction function3 = (x)->{return Math.cos(x)*x + ((drone.transformationToDroneCoordinates(drone.getGravitationalForceEngine()).getEntry(1)
-				+ drone.transformationToDroneCoordinates(drone.getGravitationalForceTail()).getEntry(1) 
-				+ (2*drone.transformationToDroneCoordinates(drone.getGravitationalForceWing()).getEntry(1))
-				+ drone.transformationToDroneCoordinates(drone.getLiftForceHorStab(horStabInclination)).getEntry(1)
-				+ drone.transformationToDroneCoordinates(drone.getLiftForceVerStab(verStabInclination)).getEntry(1))
-				/(drone.getWingLiftSlope()*(Math.pow(projectedVelocityLeftWing, 2)
-						+Math.pow(projectedVelocityRightWing, 2))));};
-		try {
-			double solution3 = solver.solve(100, function3, 0, bestInclinationPositive);
-			rightWingInclinationTemp = (float) solution3;
-			leftWingInclinationTemp = (float) solution3;
-		} catch (NoBracketingException exc1) {
-			leftWingInclinationTemp = bestInclinationPositive;
-			rightWingInclinationTemp = bestInclinationPositive;
-		} catch (NumberIsTooLargeException exc2) {
-			leftWingInclinationTemp = bestInclinationPositive;
-			rightWingInclinationTemp = bestInclinationPositive;
-		}
-//		if ((drone.getRoll()*(360/(2*Math.PI))) > minDegrees) {
-//			rightWingInclinationTemp -= (1.0/360.0)*2*Math.PI;
-//		}
-//		if ((drone.getRoll()*(360/(2*Math.PI))) < -minDegrees) {
-//			leftWingInclinationTemp -= (1.0/360.0)*2*Math.PI;
-//		}
-		final float leftWingInclination = leftWingInclinationTemp;
-		final float rightWingInclination = rightWingInclinationTemp;
-		
-		float thrustTemp = (float) (drone.transformationToDroneCoordinates(drone.getGravitationalForceEngine()).getEntry(2)
-				+ drone.transformationToDroneCoordinates(drone.getGravitationalForceTail()).getEntry(2) 
-				+ (2*drone.transformationToDroneCoordinates(drone.getGravitationalForceWing()).getEntry(2))
-				+ drone.transformationToDroneCoordinates(drone.getLiftForceHorStab(horStabInclination)).getEntry(2)
-				+ drone.transformationToDroneCoordinates(drone.getLiftForceVerStab(verStabInclination)).getEntry(2)
-				+ drone.transformationToDroneCoordinates(drone.getLiftForceLeftWing(leftWingInclination)).getEntry(2)
+		float thrustTemp = (float) (drone.transformationToDroneCoordinates(drone.getLiftForceLeftWing(leftWingInclination)).getEntry(2)
 				+ drone.transformationToDroneCoordinates(drone.getLiftForceRightWing(rightWingInclination)).getEntry(2));
 		if (thrustTemp > drone.getMaxThrust())
 			thrustTemp = drone.getMaxThrust();
 		final float thrust = thrustTemp;
+		
+//		float bestInclinationPositive;
+//		if (! hasCrash(0.86f, drone))
+//			bestInclinationPositive = 0.86f;
+//		else {
+//			bestInclinationPositive = this.preventCrash(drone.getMaxAOA(), true, drone);
+//		}
+//		float bestInclinationNegative;
+//		if (! hasCrash(-0.86f, drone))
+//			bestInclinationNegative = -0.86f;
+//		else {
+//			bestInclinationNegative = this.preventCrash(-drone.getMaxAOA(), false, drone);
+//		}
+//		double headingAngularAcceleration = (1.0/360.0)*6*Math.PI;
+//		double maxHeadingAngularVelocity = (1.0/360.0)*12*Math.PI;
+//		double pitchAngularAcceleration = (1.0/360.0)*48*Math.PI;
+//		
+//		double relativeAccuracy = 1.0e-12;
+//		double absoluteAccuracy = 1.0e-8;
+//		int maxOrder = 5;
+//		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
+//		
+//		float inertiaMatrixXX = (float) (drone.getTailMass()*Math.pow(drone.getTailSize(),2) +drone.getEngineMass()*Math.pow(drone.getEngineDistance(), 2));
+//		float inertiaMatrixZZ = (float) (2*(drone.getWingMass()*Math.pow(drone.getWingX(),2)));
+//		float inertiaMatrixYY = inertiaMatrixXX + inertiaMatrixZZ;
+//		double projectedVelocityHorStab = drone.getProjectedVelocityHorStab().getNorm();
+//		double projectedVelocityVerStab = drone.getProjectedVelocityVerStab().getNorm();
+//		RealVector totalAngularVelocityDroneCoordinates = drone.transformationToDroneCoordinates(drone.getHeadingAngularVelocityVector()
+//					.add(drone.getPitchAngularVelocityVector())
+//					.add(drone.getRollAngularVelocityVector()));
+//		RealMatrix inertiaMatrix = new Array2DRowRealMatrix(new double[][] {
+//			{inertiaMatrixXX, 0,                0},
+//			{0,               inertiaMatrixYY,  0}, 
+//			{0,               0,                inertiaMatrixZZ}
+//			}, false);
+//		RealVector angularMomentumDroneCoordinates = inertiaMatrix.operate(totalAngularVelocityDroneCoordinates);
+//		
+//		if ((imageXRotation > minDegrees) && (imageYRotation > minDegrees) && (drone.getHeadingAngularVelocity() < maxHeadingAngularVelocity)) {
+//			try {
+//				UnivariateFunction function1 = (x)->{return Math.cos(x)*x + ((inertiaMatrixXX*Math.cos(drone.getRoll())*pitchAngularAcceleration
+//						+ inertiaMatrixXX*Math.cos(drone.getPitch())*Math.sin(drone.getRoll())*headingAngularAcceleration
+//						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(0)
+//						+ inertiaMatrix.operate(
+//								drone.transformationToDroneCoordinates(
+//										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
+//										.add(VectorMath.crossProduct(
+//											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
+//											drone.getRollAngularVelocityVector()
+//										))
+//									)).getEntry(0))
+//						/(drone.getHorStabLiftSlope()*Math.pow(projectedVelocityHorStab, 2)));};
+//				double solution1 = solver.solve(100, function1, bestInclinationNegative, 0);
+//				horStabInclinationTemp = (float) solution1;
+//			} catch (NoBracketingException exc1) {
+//				horStabInclinationTemp = bestInclinationNegative;
+//			} catch (NumberIsTooLargeException exc2) {
+//				horStabInclinationTemp = bestInclinationNegative;
+//			}
+//			try {
+//				UnivariateFunction function2 = (x)->{return Math.cos(x)*x + ((inertiaMatrixYY*Math.cos(drone.getPitch())*Math.cos(drone.getRoll())
+//							*headingAngularAcceleration
+//						- inertiaMatrixYY*Math.sin(drone.getRoll())*pitchAngularAcceleration
+//						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(1)
+//						+ inertiaMatrix.operate(
+//								drone.transformationToDroneCoordinates(
+//										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
+//										.add(VectorMath.crossProduct(
+//											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
+//											drone.getRollAngularVelocityVector()
+//										))
+//									)).getEntry(1))
+//						/(drone.getVerStabLiftSlope()*Math.pow(projectedVelocityVerStab, 2)));};
+//				double solution2 = solver.solve(100, function2, bestInclinationNegative, 0);
+//				verStabInclinationTemp = (float) solution2;
+//			} catch (NoBracketingException exc1) {
+//				verStabInclinationTemp = bestInclinationNegative;
+//			} catch (NumberIsTooLargeException exc2) {
+//				verStabInclinationTemp = bestInclinationNegative;
+//			}
+//		}
+//		else if ((imageXRotation > minDegrees) && (imageYRotation < -minDegrees) && (drone.getHeadingAngularVelocity() > -maxHeadingAngularVelocity)) {
+//			try {
+//				UnivariateFunction function1 = (x)->{return Math.cos(x)*x + ((inertiaMatrixXX*Math.cos(drone.getRoll())*pitchAngularAcceleration
+//						- inertiaMatrixXX*Math.cos(drone.getPitch())*Math.sin(drone.getRoll())*headingAngularAcceleration
+//						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(0)
+//						+ inertiaMatrix.operate(
+//								drone.transformationToDroneCoordinates(
+//										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
+//										.add(VectorMath.crossProduct(
+//											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
+//											drone.getRollAngularVelocityVector()
+//										))
+//									)).getEntry(0))
+//						/(drone.getHorStabLiftSlope()*Math.pow(projectedVelocityHorStab, 2)));};
+//				double solution1 = solver.solve(100, function1, bestInclinationNegative, 0);
+//				horStabInclinationTemp = (float) solution1;
+//			} catch (NoBracketingException exc1) {
+//				horStabInclinationTemp = bestInclinationNegative;
+//			} catch (NumberIsTooLargeException exc2) {
+//				horStabInclinationTemp = bestInclinationNegative;
+//			}
+//			try {
+//				UnivariateFunction function2 = (x)->{return Math.cos(x)*x + ((-inertiaMatrixYY*Math.cos(drone.getPitch())*Math.cos(drone.getRoll())
+//							*headingAngularAcceleration
+//						- inertiaMatrixYY*Math.sin(drone.getRoll())*pitchAngularAcceleration
+//						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(1)
+//						+ inertiaMatrix.operate(
+//								drone.transformationToDroneCoordinates(
+//										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
+//										.add(VectorMath.crossProduct(
+//											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
+//											drone.getRollAngularVelocityVector()
+//										))
+//									)).getEntry(1))
+//						/(drone.getVerStabLiftSlope()*Math.pow(projectedVelocityVerStab, 2)));};
+//				double solution2 = solver.solve(100, function2, 0, bestInclinationPositive);
+//				verStabInclinationTemp = (float) solution2;
+//			} catch (NoBracketingException exc1) {
+//				verStabInclinationTemp = bestInclinationPositive;
+//			} catch (NumberIsTooLargeException exc2) {
+//				verStabInclinationTemp = bestInclinationPositive;
+//			}
+//		}
+//		else if ((imageXRotation < -minDegrees) && (imageYRotation > minDegrees) && (drone.getHeadingAngularVelocity() < maxHeadingAngularVelocity)) {
+//			try {
+//				UnivariateFunction function1 = (x)->{return Math.cos(x)*x + ((-inertiaMatrixXX*Math.cos(drone.getRoll())*pitchAngularAcceleration
+//						+ inertiaMatrixXX*Math.cos(drone.getPitch())*Math.sin(drone.getRoll())*headingAngularAcceleration
+//						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(0)
+//						+ inertiaMatrix.operate(
+//								drone.transformationToDroneCoordinates(
+//										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
+//										.add(VectorMath.crossProduct(
+//											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
+//											drone.getRollAngularVelocityVector()
+//										))
+//									)).getEntry(0))
+//						/(drone.getHorStabLiftSlope()*Math.pow(projectedVelocityHorStab, 2)));};
+//				double solution1 = solver.solve(100, function1, 0, bestInclinationPositive);
+//				horStabInclinationTemp = (float) solution1;
+//			} catch (NoBracketingException exc1) {
+//				horStabInclinationTemp = bestInclinationPositive;
+//			} catch (NumberIsTooLargeException exc2) {
+//				horStabInclinationTemp = bestInclinationPositive;
+//			}
+//			try {
+//				UnivariateFunction function2 = (x)->{return Math.cos(x)*x + ((inertiaMatrixYY*Math.cos(drone.getPitch())*Math.cos(drone.getRoll())
+//							*headingAngularAcceleration
+//						+ inertiaMatrixYY*Math.sin(drone.getRoll())*pitchAngularAcceleration
+//						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(1)
+//						+ inertiaMatrix.operate(
+//								drone.transformationToDroneCoordinates(
+//										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
+//										.add(VectorMath.crossProduct(
+//											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
+//											drone.getRollAngularVelocityVector()
+//										))
+//									)).getEntry(1))
+//						/(drone.getVerStabLiftSlope()*Math.pow(projectedVelocityVerStab, 2)));};
+//				double solution2 = solver.solve(100, function2, bestInclinationNegative, 0);
+//				verStabInclinationTemp = (float) solution2;
+//			} catch (NoBracketingException exc1) {
+//				verStabInclinationTemp = bestInclinationNegative;
+//			} catch (NumberIsTooLargeException exc2) {
+//				verStabInclinationTemp = bestInclinationNegative;
+//			}
+//		}
+//		else if ((imageXRotation < -minDegrees) && (imageYRotation < -minDegrees) && (drone.getHeadingAngularVelocity() > -maxHeadingAngularVelocity)) {
+//			try {
+//				UnivariateFunction function1 = (x)->{return Math.cos(x)*x + ((-inertiaMatrixXX*Math.cos(drone.getRoll())*pitchAngularAcceleration
+//						- inertiaMatrixXX*Math.cos(drone.getPitch())*Math.sin(drone.getRoll())*headingAngularAcceleration
+//						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(0)
+//						+ inertiaMatrix.operate(
+//								drone.transformationToDroneCoordinates(
+//										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
+//										.add(VectorMath.crossProduct(
+//											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
+//											drone.getRollAngularVelocityVector()
+//										))
+//									)).getEntry(0))
+//						/(drone.getHorStabLiftSlope()*Math.pow(projectedVelocityHorStab, 2)));};
+//				double solution1 = solver.solve(100, function1, 0, bestInclinationPositive);
+//				horStabInclinationTemp = (float) solution1;
+//			} catch (NoBracketingException exc1) {
+//				horStabInclinationTemp = bestInclinationPositive;
+//			} catch (NumberIsTooLargeException exc2) {
+//				horStabInclinationTemp = bestInclinationPositive;
+//			}
+//			try {
+//				UnivariateFunction function2 = (x)->{return Math.cos(x)*x + ((-inertiaMatrixYY*Math.cos(drone.getPitch())*Math.cos(drone.getRoll())
+//							*headingAngularAcceleration
+//						+ inertiaMatrixYY*Math.sin(drone.getRoll())*pitchAngularAcceleration
+//						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(1)
+//						+ inertiaMatrix.operate(
+//								drone.transformationToDroneCoordinates(
+//										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
+//										.add(VectorMath.crossProduct(
+//											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
+//											drone.getRollAngularVelocityVector()
+//										))
+//									)).getEntry(1))
+//						/(drone.getVerStabLiftSlope()*Math.pow(projectedVelocityVerStab, 2)));};
+//				double solution2 = solver.solve(100, function2, 0, bestInclinationPositive);
+//				verStabInclinationTemp = (float) solution2;
+//			} catch (NoBracketingException exc1) {
+//				verStabInclinationTemp = bestInclinationPositive;
+//			} catch (NumberIsTooLargeException exc2) {
+//				verStabInclinationTemp = bestInclinationPositive;
+//			}
+//		}
+//		else if (imageXRotation > minDegrees) {
+//			try {
+//				UnivariateFunction function1 = (x)->{return Math.cos(x)*x + ((inertiaMatrixXX*Math.cos(drone.getRoll())*pitchAngularAcceleration
+//						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(0)
+//						+ inertiaMatrix.operate(
+//								drone.transformationToDroneCoordinates(
+//										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
+//										.add(VectorMath.crossProduct(
+//											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
+//											drone.getRollAngularVelocityVector()
+//										))
+//									)).getEntry(0))
+//						/(drone.getHorStabLiftSlope()*Math.pow(projectedVelocityHorStab, 2)));};
+//				double solution1 = solver.solve(100, function1, bestInclinationNegative, 0);
+//				horStabInclinationTemp = (float) solution1;
+//			} catch (NoBracketingException exc1) {
+//				horStabInclinationTemp = bestInclinationNegative;
+//			} catch (NumberIsTooLargeException exc2) {
+//				horStabInclinationTemp = bestInclinationNegative;
+//			}
+//		}
+//		else if (imageXRotation < -minDegrees) {
+//			try {
+//				UnivariateFunction function1 = (x)->{return Math.cos(x)*x + ((-inertiaMatrixXX*Math.cos(drone.getRoll())*pitchAngularAcceleration
+//						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(0)
+//						+ inertiaMatrix.operate(
+//								drone.transformationToDroneCoordinates(
+//										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
+//										.add(VectorMath.crossProduct(
+//											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
+//											drone.getRollAngularVelocityVector()
+//										))
+//									)).getEntry(0))
+//						/(drone.getHorStabLiftSlope()*Math.pow(projectedVelocityHorStab, 2)));};
+//				double solution1 = solver.solve(100, function1, 0, bestInclinationPositive);
+//				horStabInclinationTemp = (float) solution1;
+//			} catch (NoBracketingException exc1) {
+//				horStabInclinationTemp = bestInclinationPositive;
+//			} catch (NumberIsTooLargeException exc2) {
+//				horStabInclinationTemp = bestInclinationPositive;
+//			}
+//		}
+//		else if ((imageYRotation > minDegrees) && (drone.getHeadingAngularVelocity() < maxHeadingAngularVelocity)) {
+//			try {
+//				UnivariateFunction function2 = (x)->{return Math.cos(x)*x + ((inertiaMatrixYY*Math.cos(drone.getPitch())*Math.cos(drone.getRoll())
+//							*headingAngularAcceleration
+//						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(1)
+//						+ inertiaMatrix.operate(
+//								drone.transformationToDroneCoordinates(
+//										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
+//										.add(VectorMath.crossProduct(
+//											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
+//											drone.getRollAngularVelocityVector()
+//										))
+//									)).getEntry(1))
+//						/(drone.getVerStabLiftSlope()*Math.pow(projectedVelocityVerStab, 2)));};
+//				double solution2 = solver.solve(100, function2, bestInclinationNegative, 0);
+//				verStabInclinationTemp = (float) solution2;
+//			} catch (NoBracketingException exc1) {
+//				verStabInclinationTemp = bestInclinationNegative;
+//			} catch (NumberIsTooLargeException exc2) {
+//				verStabInclinationTemp = bestInclinationNegative;
+//			}
+//		}
+//		else if ((imageYRotation < -minDegrees) && (drone.getHeadingAngularVelocity() > -maxHeadingAngularVelocity)) {
+//			try {
+//				UnivariateFunction function2 = (x)->{return Math.cos(x)*x + ((-inertiaMatrixYY*Math.cos(drone.getPitch())*Math.cos(drone.getRoll())
+//							*headingAngularAcceleration
+//						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(1)
+//						+ inertiaMatrix.operate(
+//								drone.transformationToDroneCoordinates(
+//										VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
+//										.add(VectorMath.crossProduct(
+//											drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
+//											drone.getRollAngularVelocityVector()
+//										))
+//									)).getEntry(1))
+//						/(drone.getVerStabLiftSlope()*Math.pow(projectedVelocityVerStab, 2)));};
+//				double solution2 = solver.solve(100, function2, 0, bestInclinationPositive);
+//				verStabInclinationTemp = (float) solution2;
+//			} catch (NoBracketingException exc1) {
+//				verStabInclinationTemp = bestInclinationPositive;
+//			} catch (NumberIsTooLargeException exc2) {
+//				verStabInclinationTemp = bestInclinationPositive;
+//			}
+//		}
+//		
+//		final float horStabInclination = horStabInclinationTemp;
+//		final float verStabInclination = verStabInclinationTemp;
+//		
+//		double projectedVelocityLeftWing = drone.getProjectedVelocityLeftWing().getNorm();
+//		double projectedVelocityRightWing = drone.getProjectedVelocityRightWing().getNorm();
+//		
+//		UnivariateFunction function3 = (x)->{return Math.cos(x)*x + ((drone.transformationToDroneCoordinates(drone.getGravitationalForceEngine()).getEntry(1)
+//				+ drone.transformationToDroneCoordinates(drone.getGravitationalForceTail()).getEntry(1) 
+//				+ (2*drone.transformationToDroneCoordinates(drone.getGravitationalForceWing()).getEntry(1))
+//				+ drone.transformationToDroneCoordinates(drone.getLiftForceHorStab(horStabInclination)).getEntry(1)
+//				+ drone.transformationToDroneCoordinates(drone.getLiftForceVerStab(verStabInclination)).getEntry(1))
+//				/(drone.getWingLiftSlope()*(Math.pow(projectedVelocityLeftWing, 2)
+//						+Math.pow(projectedVelocityRightWing, 2))));};
+//		try {
+//			double solution3 = solver.solve(100, function3, 0, bestInclinationPositive);
+//			rightWingInclinationTemp = (float) solution3;
+//			leftWingInclinationTemp = (float) solution3;
+//		} catch (NoBracketingException exc1) {
+//			leftWingInclinationTemp = bestInclinationPositive;
+//			rightWingInclinationTemp = bestInclinationPositive;
+//		} catch (NumberIsTooLargeException exc2) {
+//			leftWingInclinationTemp = bestInclinationPositive;
+//			rightWingInclinationTemp = bestInclinationPositive;
+//		}
+//		final float leftWingInclination = leftWingInclinationTemp;
+//		final float rightWingInclination = rightWingInclinationTemp;
+//		
+//		float thrustTemp = (float) (drone.transformationToDroneCoordinates(drone.getGravitationalForceEngine()).getEntry(2)
+//				+ drone.transformationToDroneCoordinates(drone.getGravitationalForceTail()).getEntry(2) 
+//				+ (2*drone.transformationToDroneCoordinates(drone.getGravitationalForceWing()).getEntry(2))
+//				+ drone.transformationToDroneCoordinates(drone.getLiftForceHorStab(horStabInclination)).getEntry(2)
+//				+ drone.transformationToDroneCoordinates(drone.getLiftForceVerStab(verStabInclination)).getEntry(2)
+//				+ drone.transformationToDroneCoordinates(drone.getLiftForceLeftWing(leftWingInclination)).getEntry(2)
+//				+ drone.transformationToDroneCoordinates(drone.getLiftForceRightWing(rightWingInclination)).getEntry(2));
+//		if (thrustTemp > drone.getMaxThrust())
+//			thrustTemp = drone.getMaxThrust();
+//		final float thrust = thrustTemp;
 		
 		AutopilotOutputs output = new AutopilotOutputs() {
 			public float getThrust() {
@@ -490,6 +578,34 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		return newInclination;
 	}
 	
+	public float minMaxInclination(float upperBound, float lowerBound, boolean max, float accuracy, Drone drone, int airfoil) {
+		float inclination;
+		if (max == true) {
+			inclination = upperBound;
+		}
+		else {
+			inclination = lowerBound;
+		}
+		boolean crash = true;
+		while (crash == true) {
+			crash = this.hasCrash(inclination, drone, airfoil);
+			if (crash == true) {
+				if (max == true) {
+					inclination -= accuracy;
+					if (inclination < lowerBound) {
+						throw new IllegalStateException("simulation failed!");
+					}
+				}
+				else {
+					inclination += (1.0/360.0)*2*Math.PI;
+					if (inclination > upperBound)
+						throw new IllegalStateException("simulation failed!");
+				}
+			}
+		}
+		return inclination;
+	}
+	
 	@SuppressWarnings("unused")
 	public boolean hasCrash(float inclination, Drone drone) {
 		boolean crash = false;
@@ -516,6 +632,44 @@ public class Autopilot extends WorldObject implements AutoPilot {
 			}
 		}
 		if (crash == false) {
+			try {
+				float AOAVerStab = drone.calculateAOA(drone.getNormalVer(inclination),
+						drone.getProjectedVelocityVerStab(), drone.getAttackVectorVer(inclination));
+			} catch (IllegalArgumentException exc) {
+				crash = true;
+			}
+		}
+		return crash;	
+	}
+	
+	@SuppressWarnings("unused")
+	public boolean hasCrash(float inclination, Drone drone, int airfoil) {
+		boolean crash = false;
+		if (airfoil == 1) {
+			try {
+				float AOALeftWing = drone.calculateAOA(drone.getNormalHor(inclination),
+						drone.getProjectedVelocityLeftWing(), drone.getAttackVectorHor(inclination));
+			} catch (IllegalArgumentException exc) {
+				crash = true;
+			}
+		}
+		if ((airfoil == 1) && (crash == false)) {
+			try {
+				float AOARightWing = drone.calculateAOA(drone.getNormalHor(inclination),
+						drone.getProjectedVelocityRightWing(), drone.getAttackVectorHor(inclination));
+			} catch (IllegalArgumentException exc) {
+				crash = true;
+			}
+		}
+		if ((airfoil == 2) && (crash == false)) {
+			try {
+				float AOAHorStab = drone.calculateAOA(drone.getNormalHor(inclination),
+						drone.getProjectedVelocityHorStab(), drone.getAttackVectorHor(inclination));
+			} catch (IllegalArgumentException exc) {
+				crash = true;
+			}
+		}
+		if ((airfoil == 3) && (crash == false)) {
 			try {
 				float AOAVerStab = drone.calculateAOA(drone.getNormalVer(inclination),
 						drone.getProjectedVelocityVerStab(), drone.getAttackVectorVer(inclination));
