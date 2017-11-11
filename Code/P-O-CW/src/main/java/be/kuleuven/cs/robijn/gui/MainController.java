@@ -63,29 +63,37 @@ public class MainController {
 
             Drone drone = world.getFirstChildOfType(Drone.class);
 
-            Camera camera = getSimulation().getTestBed().getRenderer().createCamera();
-            camera.setHorizontalFOV((float)Math.toRadians(120));
-            camera.setVerticalFOV((float)Math.toRadians(120));
-            camera.setName(CameraViewControl.DRONE_CAMERA_ID);
-            camera.setDronesHidden(true);
-            camera.setRelativePosition(new ArrayRealVector(new double[]{0, 0, 0}, false));
-            drone.addChild(camera);
+            Camera droneCamera = getSimulation().getTestBed().getRenderer().createCamera();
+            droneCamera.setHorizontalFOV((float)Math.toRadians(120));
+            droneCamera.setVerticalFOV((float)Math.toRadians(120));
+            droneCamera.setName(CameraViewControl.DRONE_CAMERA_ID);
+            droneCamera.setDronesHidden(true);
+            droneCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 0, 0}, false));
+            drone.addChild(droneCamera);
 
-            camera = getSimulation().getTestBed().getRenderer().createCamera();
-            camera.setHorizontalFOV((float)Math.toRadians(120));
-            camera.setVerticalFOV((float)Math.toRadians(120));
-            camera.setName(CameraViewControl.THIRDPERSON_CAMERA_ID);
-            camera.setRelativePosition(new ArrayRealVector(new double[]{0, 0.8d, 3}, false));
-            drone.addChild(camera);
+            Camera chaseCamera = getSimulation().getTestBed().getRenderer().createCamera();
+            chaseCamera.setHorizontalFOV((float)Math.toRadians(120));
+            chaseCamera.setVerticalFOV((float)Math.toRadians(120));
+            chaseCamera.setName(CameraViewControl.THIRDPERSON_CAMERA_ID);
+            chaseCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 0d, 7}, false));
+            getSimulation().addOnUpdateEventHandler((inputs, outputs) -> {
+                //Put camera at rotation (0, 0, 0), at position of drone +7 on z-axis.
+                chaseCamera.setRelativePosition(drone.getRelativePosition().add(new ArrayRealVector(new double[]{0, 0, 7}, false)));
+                chaseCamera.setRelativeRotation(Rotation.IDENTITY);
+
+                //Perform rotatearound of camera around drone position along y-axis with plane yaw.
+                chaseCamera.rotateAround(drone.getWorldPosition(), new Rotation(new Vector3D(0, 1, 0), drone.getHeading()));
+            });
+            world.addChild(chaseCamera);
 
             Box box = world.getFirstChildOfType(Box.class);
-            camera = getSimulation().getTestBed().getRenderer().createCamera();
-            camera.setHorizontalFOV((float)Math.toRadians(120));
-            camera.setVerticalFOV((float)Math.toRadians(120));
-            camera.setName(CameraViewControl.BOX_CAMERA_ID);
-            camera.setRelativePosition(new ArrayRealVector(new double[]{0, 0, 0}, false));
-            camera.setRelativeRotation(new Rotation(new Vector3D(0, 1, 0), Math.PI));
-            box.addChild(camera);
+            Camera boxCamera = getSimulation().getTestBed().getRenderer().createCamera();
+            boxCamera.setHorizontalFOV((float)Math.toRadians(120));
+            boxCamera.setVerticalFOV((float)Math.toRadians(120));
+            boxCamera.setName(CameraViewControl.BOX_CAMERA_ID);
+            boxCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 0, 0}, false));
+            boxCamera.setRelativeRotation(new Rotation(new Vector3D(0, 1, 0), Math.PI));
+            box.addChild(boxCamera);
         });
     }
 
