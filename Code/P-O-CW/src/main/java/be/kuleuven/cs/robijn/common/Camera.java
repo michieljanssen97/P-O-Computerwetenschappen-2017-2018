@@ -37,4 +37,8 @@ public abstract class Camera extends WorldObject {
      * False by default.
      */
     public abstract boolean areDronesHidden();
+
+    public abstract void setDrawGround(boolean drawGround);
+
+    public abstract boolean isGroundDrawn();
 }
