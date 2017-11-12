@@ -586,9 +586,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		else {
 			inclination = lowerBound;
 		}
-		boolean crash = this.hasCrash(inclination, drone, airfoil);
-		while (crash == true) {
-			crash = this.hasCrash(inclination, drone, airfoil);
+		while (this.hasCrash(inclination, drone, airfoil)) {
 			if (max == true) {
 				inclination -= accuracy;
 				if (inclination < lowerBound) {
