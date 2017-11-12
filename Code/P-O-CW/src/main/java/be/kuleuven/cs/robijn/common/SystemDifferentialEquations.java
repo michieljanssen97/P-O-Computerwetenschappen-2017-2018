@@ -4,6 +4,13 @@ import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.ode.*;
 import p_en_o_cw_2017.*;
 
+/**
+ * A class to solve a system of 12 differential equations with position, velocity, 
+ * heading, angular velocity of the heading, pitch, angular velocity of the pitch, roll and angular velocity of the roll.
+ * 
+ * @author Pieter Vandensande
+ *
+ */
 public class SystemDifferentialEquations implements FirstOrderDifferentialEquations {
 	
 	public SystemDifferentialEquations(Drone drone, AutopilotOutputs autopilotOutputs) throws IllegalArgumentException {
