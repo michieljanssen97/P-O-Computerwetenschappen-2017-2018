@@ -1,15 +1,13 @@
 package be.kuleuven.cs.robijn.autopilot.image;
 
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import org.junit.Test;
-
 import javax.imageio.ImageIO;
-
-import static org.junit.Assert.*;
-
 
 public class ImageTest {
 	private byte[] loadImageRGBBytes(String resourceName) throws IOException {
