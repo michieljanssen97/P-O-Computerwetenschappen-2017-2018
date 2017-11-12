@@ -602,76 +602,58 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		return inclination;
 	}
 	
-	@SuppressWarnings("unused")
 	public boolean hasCrash(float inclination, Drone drone) {
 		boolean crash = false;
-		try {
-			float AOALeftWing = drone.calculateAOA(drone.getNormalHor(inclination),
-					drone.getProjectedVelocityLeftWing(), drone.getAttackVectorHor(inclination));
-		} catch (IllegalArgumentException exc) {
+		float AOALeftWing = drone.calculateAOA(drone.getNormalHor(inclination),
+				drone.getProjectedVelocityLeftWing(), drone.getAttackVectorHor(inclination));
+		if (AOALeftWing == Float.NaN)
 			crash = true;
+		if (crash == false) {
+			float AOARightWing = drone.calculateAOA(drone.getNormalHor(inclination),
+					drone.getProjectedVelocityRightWing(), drone.getAttackVectorHor(inclination));
+			if (AOARightWing == Float.NaN)
+				crash = true;
 		}
 		if (crash == false) {
-			try {
-				float AOARightWing = drone.calculateAOA(drone.getNormalHor(inclination),
-						drone.getProjectedVelocityRightWing(), drone.getAttackVectorHor(inclination));
-			} catch (IllegalArgumentException exc) {
+			float AOAHorStab = drone.calculateAOA(drone.getNormalHor(inclination),
+					drone.getProjectedVelocityHorStab(), drone.getAttackVectorHor(inclination));
+			if (AOAHorStab == Float.NaN)
 				crash = true;
-			}
 		}
 		if (crash == false) {
-			try {
-				float AOAHorStab = drone.calculateAOA(drone.getNormalHor(inclination),
-						drone.getProjectedVelocityHorStab(), drone.getAttackVectorHor(inclination));
-			} catch (IllegalArgumentException exc) {
+			float AOAVerStab = drone.calculateAOA(drone.getNormalVer(inclination),
+					drone.getProjectedVelocityVerStab(), drone.getAttackVectorVer(inclination));
+			if (AOAVerStab == Float.NaN)
 				crash = true;
-			}
-		}
-		if (crash == false) {
-			try {
-				float AOAVerStab = drone.calculateAOA(drone.getNormalVer(inclination),
-						drone.getProjectedVelocityVerStab(), drone.getAttackVectorVer(inclination));
-			} catch (IllegalArgumentException exc) {
-				crash = true;
-			}
 		}
 		return crash;	
 	}
 	
-	@SuppressWarnings("unused")
 	public boolean hasCrash(float inclination, Drone drone, int airfoil) {
 		boolean crash = false;
 		if (airfoil == 1) {
-			try {
-				float AOALeftWing = drone.calculateAOA(drone.getNormalHor(inclination),
-						drone.getProjectedVelocityLeftWing(), drone.getAttackVectorHor(inclination));
-			} catch (IllegalArgumentException exc) {
+			float AOALeftWing = drone.calculateAOA(drone.getNormalHor(inclination),
+					drone.getProjectedVelocityLeftWing(), drone.getAttackVectorHor(inclination));
+			if (AOALeftWing == Float.NaN)
 				crash = true;
-			}
 		}
 		if ((airfoil == 1) && (crash == false)) {
-			try {
-				float AOARightWing = drone.calculateAOA(drone.getNormalHor(inclination),
-						drone.getProjectedVelocityRightWing(), drone.getAttackVectorHor(inclination));
-			} catch (IllegalArgumentException exc) {
+			float AOARightWing = drone.calculateAOA(drone.getNormalHor(inclination),
+					drone.getProjectedVelocityRightWing(), drone.getAttackVectorHor(inclination));
+			if (AOARightWing == Float.NaN)
 				crash = true;
-			}
 		}
 		if ((airfoil == 2) && (crash == false)) {
-			try {
-				float AOAHorStab = drone.calculateAOA(drone.getNormalHor(inclination),
-						drone.getProjectedVelocityHorStab(), drone.getAttackVectorHor(inclination));
-			} catch (IllegalArgumentException exc) {
+			float AOAHorStab = drone.calculateAOA(drone.getNormalHor(inclination),
+					drone.getProjectedVelocityHorStab(), drone.getAttackVectorHor(inclination));
+			if (AOAHorStab == Float.NaN)
 				crash = true;
-			}
 		}
 		if ((airfoil == 3) && (crash == false)) {
-			try {
-				float AOAVerStab = drone.calculateAOA(drone.getNormalVer(inclination),
-						drone.getProjectedVelocityVerStab(), drone.getAttackVectorVer(inclination));
-			} catch (IllegalArgumentException exc) {
+			float AOAVerStab = drone.calculateAOA(drone.getNormalVer(inclination),
+					drone.getProjectedVelocityVerStab(), drone.getAttackVectorVer(inclination));
+			if (AOAVerStab == Float.NaN)
 				crash = true;
-			}
 		}
 		return crash;	
 	}
