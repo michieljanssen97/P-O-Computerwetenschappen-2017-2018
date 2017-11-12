@@ -606,24 +606,24 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		boolean crash = false;
 		float AOALeftWing = drone.calculateAOA(drone.getNormalHor(inclination),
 				drone.getProjectedVelocityLeftWing(), drone.getAttackVectorHor(inclination));
-		if (AOALeftWing == Float.NaN)
+		if (Float.isNaN(AOALeftWing))
 			crash = true;
 		if (crash == false) {
 			float AOARightWing = drone.calculateAOA(drone.getNormalHor(inclination),
 					drone.getProjectedVelocityRightWing(), drone.getAttackVectorHor(inclination));
-			if (AOARightWing == Float.NaN)
+			if (Float.isNaN(AOARightWing))
 				crash = true;
 		}
 		if (crash == false) {
 			float AOAHorStab = drone.calculateAOA(drone.getNormalHor(inclination),
 					drone.getProjectedVelocityHorStab(), drone.getAttackVectorHor(inclination));
-			if (AOAHorStab == Float.NaN)
+			if (Float.isNaN(AOAHorStab))
 				crash = true;
 		}
 		if (crash == false) {
 			float AOAVerStab = drone.calculateAOA(drone.getNormalVer(inclination),
 					drone.getProjectedVelocityVerStab(), drone.getAttackVectorVer(inclination));
-			if (AOAVerStab == Float.NaN)
+			if (Float.isNaN(AOAVerStab))
 				crash = true;
 		}
 		return crash;	
@@ -634,25 +634,25 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		if (airfoil == 1) {
 			float AOALeftWing = drone.calculateAOA(drone.getNormalHor(inclination),
 					drone.getProjectedVelocityLeftWing(), drone.getAttackVectorHor(inclination));
-			if (AOALeftWing == Float.NaN)
+			if (Float.isNaN(AOALeftWing))
 				crash = true;
 		}
 		if ((airfoil == 1) && (crash == false)) {
 			float AOARightWing = drone.calculateAOA(drone.getNormalHor(inclination),
 					drone.getProjectedVelocityRightWing(), drone.getAttackVectorHor(inclination));
-			if (AOARightWing == Float.NaN)
+			if (Float.isNaN(AOARightWing))
 				crash = true;
 		}
 		if ((airfoil == 2) && (crash == false)) {
 			float AOAHorStab = drone.calculateAOA(drone.getNormalHor(inclination),
 					drone.getProjectedVelocityHorStab(), drone.getAttackVectorHor(inclination));
-			if (AOAHorStab == Float.NaN)
+			if (Float.isNaN(AOAHorStab))
 				crash = true;
 		}
 		if ((airfoil == 3) && (crash == false)) {
 			float AOAVerStab = drone.calculateAOA(drone.getNormalVer(inclination),
 					drone.getProjectedVelocityVerStab(), drone.getAttackVectorVer(inclination));
-			if (AOAVerStab == Float.NaN)
+			if (Float.isNaN(AOAVerStab))
 				crash = true;
 		}
 		return crash;	

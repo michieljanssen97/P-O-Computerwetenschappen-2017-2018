@@ -893,7 +893,7 @@ public class Drone extends WorldObject {
 		RealVector projectedVelocity = this.getProjectedVelocityLeftWing();
 		
 		float AOA = this.calculateAOA(this.getNormalHor(leftWingInclination), projectedVelocity, this.getAttackVectorHor(leftWingInclination));
-		if (AOA == Float.NaN)
+		if (Float.isNaN(AOA))
 			throw new IllegalArgumentException();
 		
 		float liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
@@ -920,7 +920,7 @@ public class Drone extends WorldObject {
 		RealVector projectedVelocity = this.getProjectedVelocityRightWing();
 		
 		float AOA = this.calculateAOA(this.getNormalHor(rightWingInclination), projectedVelocity, this.getAttackVectorHor(rightWingInclination));
-		if (AOA == Float.NaN)
+		if (Float.isNaN(AOA))
 			throw new IllegalArgumentException();
 		
 		float liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
@@ -946,7 +946,7 @@ public class Drone extends WorldObject {
 		RealVector projectedVelocity = this.getProjectedVelocityHorStab();
 		
 		float AOA = this.calculateAOA(this.getNormalHor(horStabInclination), projectedVelocity, this.getAttackVectorHor(horStabInclination));
-		if (AOA == Float.NaN)
+		if (Float.isNaN(AOA))
 			throw new IllegalArgumentException();
 		
 		float liftForce = (float) (AOA * this.getHorStabLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
@@ -972,7 +972,7 @@ public class Drone extends WorldObject {
 		RealVector projectedVelocity = this.getProjectedVelocityVerStab();
 		
 		float AOA = this.calculateAOA(this.getNormalHor(verStabInclination), projectedVelocity, this.getAttackVectorHor(verStabInclination));
-		if (AOA == Float.NaN)
+		if (Float.isNaN(AOA))
 			throw new IllegalArgumentException();
 		
 		float liftForce = (float) (AOA * this.getVerStabLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
