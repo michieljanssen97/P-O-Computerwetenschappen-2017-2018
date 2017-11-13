@@ -45,7 +45,9 @@ public class WorldObject {
 
         for(WorldObject child : children){
             if(child.getClass().isAssignableFrom(clazz)){
-                return (T)child;
+            	if ((T) child != null){//make sure the child is a valid child
+                	return (T) child;
+            	}
             }
         }
 

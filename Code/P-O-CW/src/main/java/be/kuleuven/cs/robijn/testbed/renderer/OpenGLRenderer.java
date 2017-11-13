@@ -12,6 +12,8 @@ import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
+import java.awt.*;
+
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
@@ -129,7 +131,7 @@ public class OpenGLRenderer implements Renderer {
         //Otherwise face culling will cut away the front parts and leave behind only the back parts
         glFrontFace(GL_CW);
         //Replace previous frame with a blank screen
-        glClearColor(0.2f, 0.2f, 0.2f, 1f);
+        glClearColor(1f, 1f, 1f, 1f);
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
         //Setup per-camera matrices
@@ -153,6 +155,10 @@ public class OpenGLRenderer implements Renderer {
         Model model = null;
         if(obj instanceof Box){
             model = boxModel;
+            Color boxColor = ((Box)obj).getColor();
+            float[] rgbValues = new float[3];
+            boxColor.getRGBColorComponents(rgbValues);
+            model.getShader().setUniformFloat("color", rgbValues);
         }else if(obj instanceof Drone && renderDrones){
             model = droneModel;
         }else{

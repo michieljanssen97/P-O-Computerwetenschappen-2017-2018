@@ -98,9 +98,9 @@ public class ShaderProgram implements AutoCloseable{
         glUseProgram(programId);
         final int location = findUniformLocation(argumentName);
         switch (value.length){
-            case 2: glUniform2fv(location, value);
-            case 3: glUniform3fv(location, value);
-            case 4: glUniform4fv(location, value);
+            case 2: glUniform2fv(location, value); break;
+            case 3: glUniform3fv(location, value); break;
+            case 4: glUniform4fv(location, value); break;
             default: throw new IllegalArgumentException("A uniform float vector cannot contain more than 4 elements");
         }
     }
@@ -114,9 +114,9 @@ public class ShaderProgram implements AutoCloseable{
         glUseProgram(programId);
         final int location = findUniformLocation(argumentName);
         switch (value.length){
-            case 2: glUniform2iv(location, value);
-            case 3: glUniform3iv(location, value);
-            case 4: glUniform4iv(location, value);
+            case 2: glUniform2iv(location, value); break;
+            case 3: glUniform3iv(location, value); break;
+            case 4: glUniform4iv(location, value); break;
             default: throw new IllegalArgumentException("A uniform integer vector cannot contain more than 4 elements");
         }
     }

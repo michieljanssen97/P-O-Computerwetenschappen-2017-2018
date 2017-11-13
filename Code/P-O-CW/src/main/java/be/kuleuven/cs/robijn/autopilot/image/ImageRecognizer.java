@@ -1,6 +1,6 @@
 package be.kuleuven.cs.robijn.autopilot.image;
 
-import be.kuleuven.cs.robijn.common.math.Vector3f;
+import org.apache.commons.math3.linear.RealVector;
 
 /**
  * A class that can create and work with images.
@@ -64,7 +64,7 @@ public class ImageRecognizer {
 	 * @return	The vector from the camera to the center of the red cube
 	 * @throws Exception There are no red cube sides visible in this Image
 	 */
-	public Vector3f getVectorToRedCube(Image image) throws Exception{
+	public RealVector getVectorToRedCube(Image image) throws Exception{
 		return image.getXYZDistance();
 	}
 	
