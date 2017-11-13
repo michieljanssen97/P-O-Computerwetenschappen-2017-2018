@@ -26,6 +26,9 @@ public class SimulationDriver {
     private long lastUpdate = -1; //timestamp of last update
     private long timeSpentPausedSinceLastUpdate = 0; //total amount of time, between last update and now, that was spent paused (in ms)
 
+    private boolean simulationStarted = false;
+    private final AutopilotConfig config;
+
     //List of eventhandlers that are invoked when the simulation has updated.
     private TreeSet<UpdateEventHandler> updateEventHandlers = new TreeSet<>();
 
@@ -33,8 +36,9 @@ public class SimulationDriver {
         this.config = config;
     	RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -6.667}, false);
         testBed = new VirtualTestbed(boxes, config, initialVelocity);
-        autoPilot = new Autopilot(config, initialVelocity);
+        autoPilot = new Autopilot();
         latestAutopilotInputs = testBed.getInputs();
+        this.config = config;
     }
 
     /**
@@ -49,7 +53,13 @@ public class SimulationDriver {
         if(!simulationPaused && !simulationFinished && !simulationCrashed){
         	try {
         		//Run the autopilot
-        		latestAutopilotOutputs = autoPilot.update(latestAutopilotInputs);
+                if (simulationStarted == false ){
+                    latestAutopilotOutputs = autoPilot.simulationStarted(config,latestAutopilotInputs);
+                    simulationStarted = true;
+                }
+        		else {
+                    latestAutopilotOutputs = autoPilot.timePassed(latestAutopilotInputs);
+                }
         		//Run the testbed
                 long now = System.currentTimeMillis();
                 float secondsSinceStart = ((float)((now - simulationStart) - totalTimeSpentPaused)/1000f);
