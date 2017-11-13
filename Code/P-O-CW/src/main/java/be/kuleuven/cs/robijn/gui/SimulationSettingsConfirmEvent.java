@@ -5,7 +5,7 @@ import javafx.event.Event;
 import javafx.event.EventTarget;
 import javafx.event.EventType;
 
-import p_en_o_cw_2017.AutopilotConfig;
+import interfaces.AutopilotConfig;
 
 import java.util.List;
 

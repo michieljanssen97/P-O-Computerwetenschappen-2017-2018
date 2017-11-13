@@ -2,11 +2,9 @@ package be.kuleuven.cs.robijn.common;
 
 import be.kuleuven.cs.robijn.autopilot.Autopilot;
 import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
-import p_en_o_cw_2017.AutopilotConfig;
-import p_en_o_cw_2017.AutopilotInputs;
-import p_en_o_cw_2017.AutopilotOutputs;
-
-import java.util.List;
+import interfaces.AutopilotConfig;
+import interfaces.AutopilotInputs;
+import interfaces.AutopilotOutputs;
 import java.util.TreeSet;
 import org.apache.commons.math3.linear.*;
 
@@ -15,7 +13,7 @@ import org.apache.commons.math3.linear.*;
  */
 public class SimulationDriver {
     private TestBed testBed;
-    private AutoPilot autoPilot;
+    private Autopilot autoPilot;
     private boolean simulationPaused;
     private boolean simulationFinished;
     private boolean simulationCrashed;
@@ -102,7 +100,7 @@ public class SimulationDriver {
         return testBed;
     }
 
-    public AutoPilot getAutoPilot(){
+    public Autopilot getAutoPilot(){
         return autoPilot;
     }
 
