@@ -54,11 +54,7 @@ public class ImageRecognizer {
 	 * @return	The distance to the cube
 	 * @throws Exception	There are no sides of a cube with given hue and saturation visible in this Image
 	 */
-<<<<<<< HEAD
-	public float getDistanceToRedCube(Image image, float hue, float sat) throws Exception{
-=======
 	public float getDistanceToCube(Image image, float hue, float sat) throws Exception{
->>>>>>> e4b07f9bfdab3e945124d3866afeff2786c86626
 		return image.getTotalDistance(hue, sat);
 	}
 	
@@ -68,11 +64,7 @@ public class ImageRecognizer {
 	 * @return	The vector from the camera to the center of the cube
 	 * @throws Exception There are no sides of a cube with given hue and saturation visible in this Image
 	 */
-<<<<<<< HEAD
-	public Vector3f getVectorToRedCube(Image image, float hue, float sat) throws Exception{
-=======
 	public Vector3f getVectorToCube(Image image, float hue, float sat) throws Exception{
->>>>>>> e4b07f9bfdab3e945124d3866afeff2786c86626
 		return image.getXYZDistance(hue, sat);
 	}
 	

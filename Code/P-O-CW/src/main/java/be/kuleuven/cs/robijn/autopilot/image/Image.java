@@ -443,16 +443,12 @@ public class Image {
 		return ratio;
 	}
 	
-<<<<<<< HEAD
-	public static boolean isWhiteHSV(float[] hsv){
-=======
 	/**
 	 * Check whether the given hue, saturation and value represent the white color.
 	 * @param hsv	The given hue, saturation and value.
 	 * @return		True if the saturation is 0 and the value is 1.
 	 */
-	public boolean isWhiteHSV(float[] hsv){
->>>>>>> e4b07f9bfdab3e945124d3866afeff2786c86626
+	public static boolean isWhiteHSV(float[] hsv){
 		if (!isValidHSV(hsv)) {throw new IllegalArgumentException();}
 		return (hsv[1] == 0.0f) && (hsv[2] == 1.0f);
 	}
@@ -462,11 +458,11 @@ public class Image {
 	 */
 	public ArrayList<ImageCube> scanImageForCubes(){
 		ArrayList<ImageCube> cubeCollection = new ArrayList<ImageCube>();
+		boolean cubeExists = false;
 		for (int y = 0; y < getnbRows(); y++){
 			for (int x = 0; x < getnbColumns(); x++){
 				float[] hsv = getPixelHSV(x, y);
 				if (!isWhiteHSV(hsv)){
-					boolean cubeExists = false;
 					for (ImageCube c : cubeCollection){
 						if ((hsv[0] == c.getHue()) && (hsv[1] == c.getSaturation())){
 							c.addPixel(new Pixel(x, y, hsv));
@@ -480,6 +476,7 @@ public class Image {
 						ImageCube cu = new ImageCube(p, hsv[0], hsv[1]);
 						cubeCollection.add(cu);
 					}
+					cubeExists = false;
 				}
 			}
 		}
@@ -533,16 +530,12 @@ public class Image {
 		return getNecessaryRotation(getHorizontalAngle(), getVerticalAngle(), pixelsToCube[0], pixelsToCube[1]);
 	}
 	
-<<<<<<< HEAD
-	public ArrayList<Pixel> getCubeEdgePixels(float hue, float sat) {
-=======
 	/**
 	 * Return the pixels that are on the edge of the cube with given hue and saturation.
 	 * @param hue	The given hue
 	 * @param sat	The given saturation
 	 */
 	public ArrayList<Pixel> getCubeEdgePixels(float hue, float sat){
->>>>>>> e4b07f9bfdab3e945124d3866afeff2786c86626
 		ArrayList<Pixel> edge = new ArrayList<Pixel>();
 		boolean isEdge = false;
 		for (Pixel p : getCubePixels(hue, sat)){

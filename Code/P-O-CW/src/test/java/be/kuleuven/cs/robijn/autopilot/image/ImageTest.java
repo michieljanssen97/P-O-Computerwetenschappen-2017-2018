@@ -37,14 +37,12 @@ public class ImageTest {
 		float[] expected = {0.0f, 1.0f, 1.0f};
 		Color.RGBtoHSB(255, 0, 0, hsv);
 		assertArrayEquals(expected, hsv, 0.01f);
-		assertTrue(true);
 	}
 	
 	@Test
 	public void testIsWhiteHSV() throws Exception {
 		float[] hsv = {0.5f, 0.0f, 1.0f};
 		assertTrue(Image.isWhiteHSV(hsv));
-		assertTrue(true);
 	}
 	
 	@Test
@@ -52,7 +50,7 @@ public class ImageTest {
 		ImageRecognizer rec = new ImageRecognizer();
 		byte[] image1 = this.loadImageRGBBytes("5x5-Red-255-0-0-Center-3-3.png");
 		Image im = rec.createImage(image1, 5, 5, 120, 120);
-		int[] redCo = rec.getRedCubeAveragePixel(im);
+		int[] redCo = rec.getCubeAveragePixel(im, 0.0f, 1.0f);
 		int[] expected = {3,3};
 		assertArrayEquals(expected, redCo);
 	}
@@ -62,7 +60,7 @@ public class ImageTest {
 		ImageRecognizer rec = new ImageRecognizer();
 		byte[] image1 = this.loadImageRGBBytes("10x10-Red-255-0-0-Center-3-2.png");
 		Image im = rec.createImage(image1, 10, 10, 120, 120);
-		int[] redCo = rec.getRedCubeAveragePixel(im);
+		int[] redCo = rec.getCubeAveragePixel(im, 0.0f, 1.0f);
 		int[] expected = {3,2};
 		assertArrayEquals(expected, redCo);
 	}
@@ -92,10 +90,9 @@ public class ImageTest {
 		ImageRecognizer rec = new ImageRecognizer();
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = rec.createImage(image1, 200, 200, 120, 120);
-		int[] center = rec.getRedCubeAveragePixel(im);
-//		System.out.println(Integer.toString(center[0]));
-//		System.out.println(Integer.toString(center[1]));
-		assertTrue(true);
+		int[] center = rec.getCubeAveragePixel(im, 0.0f, 1.0f);
+		int[] expected = {104, 97};
+		assertArrayEquals(expected, center);
 	}
 	
 	@Test
@@ -103,34 +100,36 @@ public class ImageTest {
 		ImageRecognizer rec = new ImageRecognizer();
 		byte[] image1 = this.loadImageRGBBytes("cube3sidecorner.png");
 		Image im = rec.createImage(image1, 200, 200, 120, 120);
-		int[] center = rec.getRedCubeAveragePixel(im);
-//		System.out.println(Integer.toString(center[0]));
-//		System.out.println(Integer.toString(center[1]));
-		assertTrue(true);
+		int[] center = rec.getCubeAveragePixel(im, 0.0f, 1.0f);
+		int[] expected = {130, 62};
+		assertArrayEquals(expected, center);
 	}
 	
 	@Test
 	public void testRedEdgePixels10x10() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("10x10-Red-255-0-0-Center-3-2.png");
 		Image im = new Image(image1, 10, 10, 120, 120);
-//		System.out.println(Integer.toString(im.getRedEdgePixels().size()));
-		assertTrue(true);
+		int result = im.getCubeEdgePixels(0.0f, 1.0f).size();
+		int expected = 8;
+		assertEquals(expected, result);
 	}
 	
 	@Test
 	public void testRedEdgePixelsCube3() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Integer.toString(im.getRedEdgePixels().size()));
-		assertTrue(true);
+		int result = im.getCubeEdgePixels(0.0f, 1.0f).size();
+		int expected = 349;
+		assertEquals(expected, result);
 	}
 	
 	@Test
 	public void testMinimumDistanceSpherePixelsCube1Square() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube1sidesquare.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.getMinimumDistanceSpherePixels()));
-		assertTrue(true);
+		float result = im.getMinimumDistanceSpherePixels(0.0f, 1.0f);
+		float expected = 40.0f;
+		assertEquals(result, expected);
 	}
 	
 	@Test
