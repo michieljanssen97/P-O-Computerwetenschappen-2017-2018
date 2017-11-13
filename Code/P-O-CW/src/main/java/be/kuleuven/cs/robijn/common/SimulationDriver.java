@@ -30,7 +30,7 @@ public class SimulationDriver {
 
     //List of eventhandlers that are invoked when the simulation has updated.
     private TreeSet<UpdateEventHandler> updateEventHandlers = new TreeSet<>();
-    
+
     public SimulationDriver(List<Box> boxes, AutopilotConfig config){
         this.config = config;
     	RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -6.667}, false);
