@@ -1,2 +1,5 @@
-0.000000 0.000000 30.000000
-5.000000 0.000000 30.000000
+# One box per line, each line contains the box coordinates (X Y Z) seperated by a single space.
+# Blank lines are ignored, comments can be made by putting text after a # symbol.
+-10.0 0.0 -100.0
+0.0 10.0 -100.0
+10.0 0.0 -100.0

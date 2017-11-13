@@ -10,6 +10,8 @@ import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
 import p_en_o_cw_2017.*;
 
+import java.util.List;
+
 /**
  * A class of virtual testbeds.
  * 
@@ -27,44 +29,16 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	
 	private ArrayList<Box> allBoxList = new ArrayList<Box>();
 
-	public VirtualTestbed(AutopilotConfig config, RealVector initialVelocity) {
+	public VirtualTestbed(List<Box> boxes, AutopilotConfig config, RealVector initialVelocity) {
 		this.config = config;
 		//Add drone to world
 		Drone drone = new Drone(config, initialVelocity);
 		this.addChild(drone);
 
-		//Add box to world
-		Box box = new Box();
-		
-		double zDistance = 100.0;
-		
-		//Case 1
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, 0, -zDistance}, false));
-		
-		//Case 2
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-		
-		//Case 3
-		box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/12.0), -zDistance}, false));
-		
-		//Case 4
-		box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/6.0), 0, -zDistance}, false));
-		
-		//Case 5
-		//box.setRelativePosition(new ArrayRealVector(new double[] {-zDistance*Math.tan(Math.PI/6.0), 0, -zDistance}, false));
-		
-		//Case 6
-		//box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/48.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-
-//		box.setRelativePosition(new ArrayRealVector(new double[] {0, 5, -80}, false));		
-//		Box box2 = new Box();
-//		box2.setRelativePosition(new ArrayRealVector(new double[] {0, 0, -40}, false));
-//		this.addChild(box2);
-//		allBoxList.add(box2);
-		
-		this.addChild(box); //add box to Virtual testbed
-		allBoxList.add(box); //add box to list of all boxes to reach
-		
+		//Add boxes to world
+		for (Box box : boxes){
+			this.addChild(box);
+		}
 	}
 	
 	public ArrayList<Box> getAllBoxes(){
