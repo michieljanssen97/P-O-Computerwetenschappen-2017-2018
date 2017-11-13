@@ -12,7 +12,6 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.AnchorPane;
-
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.IOException;
@@ -71,9 +70,9 @@ public class CameraViewControl extends AnchorPane {
             setupImages();
 
             //When the simulation is updated, update the displayed image
-            newValue.addOnUpdateEventHandler((inputs, outputs)->{
-                update();
-            });
+            newValue.addOnUpdateEventHandler(new UpdateEventHandler((inputs, outputs) -> {
+               update();
+            },UpdateEventHandler.LOW_PRIORITY));
         });
 
         //When the image viewport changes, resize the framebuffer and image buffers

@@ -76,14 +76,15 @@ public class MainController {
             chaseCamera.setVerticalFOV((float)Math.toRadians(120));
             chaseCamera.setName(CameraViewControl.THIRDPERSON_CAMERA_ID);
             chaseCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 0d, 7}, false));
-            getSimulation().addOnUpdateEventHandler((inputs, outputs) -> {
+            getSimulation().addOnUpdateEventHandler(new UpdateEventHandler((inputs, outputs) -> {
                 //Put camera at rotation (0, 0, 0), at position of drone +7 on z-axis.
                 chaseCamera.setRelativePosition(drone.getRelativePosition().add(new ArrayRealVector(new double[]{0, 0, 7}, false)));
                 chaseCamera.setRelativeRotation(Rotation.IDENTITY);
 
                 //Perform rotatearound of camera around drone position along y-axis with plane yaw.
+
                 chaseCamera.rotateAround(drone.getWorldPosition(), new Rotation(new Vector3D(0, 1, 0), drone.getHeading()));
-            });
+            },UpdateEventHandler.HIGH_PRIORITY));
             world.addChild(chaseCamera);
 
             Box box = world.getFirstChildOfType(Box.class);
