@@ -2,6 +2,7 @@ package be.kuleuven.cs.robijn.gui;
 
 import be.kuleuven.cs.robijn.common.Resources;
 import be.kuleuven.cs.robijn.common.SimulationDriver;
+import be.kuleuven.cs.robijn.common.UpdateEventHandler;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -9,11 +10,9 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
@@ -67,10 +66,10 @@ public class SidebarControl extends VBox {
             if(getSimulation() == null){
                 return;
             }
-            getSimulation().addOnUpdateEventHandler((inputs, outputs) -> {
+            getSimulation().addOnUpdateEventHandler(new UpdateEventHandler((inputs, outputs) -> {
                 simulationFinishedProperty.set(getSimulation().hasSimulationFinished());
                 simulationErrorProperty.set(getSimulation().hasSimulationCrashed());
-            });
+            },UpdateEventHandler.LOW_PRIORITY));
         });
         playButton.disableProperty().bind(simulationFinishedProperty.or(simulationErrorProperty));
         pauseButton.disableProperty().bind(simulationFinishedProperty.or(simulationErrorProperty));
