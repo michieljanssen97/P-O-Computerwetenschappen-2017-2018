@@ -18,6 +18,9 @@ public class BoxFileLoader {
      *     ^        ^        ^
      *     X        Y        Z
      *
+     * As a backwards-compatible extension to the specification, any text on a line after the # sign
+     * is ignored to allow for comments. Blank lines are ignored aswell.
+     *
      * @param in the ASCII InputStream to read from.
      * @throws IOException thrown when the inputstream contains invalid data, or when reading failed.
      * @throws IllegalArgumentException thrown when the inputstream is null
@@ -35,6 +38,14 @@ public class BoxFileLoader {
         while((line = reader.readLine()) != null){
             i++;
             line = line.trim(); //Remove extra whitespace at beginning and end of line
+
+            if(line.contains("#")){
+                line = line.split("#")[0].trim();
+            }
+            if(line.equals("")){
+                continue;
+            }
+
             String[] coordinateStrings = line.split(" "); //Split line into three strings, each with a coordinate
             if(coordinateStrings.length != 3){ //Check that there are 3 coordinates on this line
                 throw new IOException("File layout error on line "+i);
@@ -61,8 +72,13 @@ public class BoxFileLoader {
      * @param boxes the list of boxes to save
      * @param out the outputstream to write the box setup file data to.
      * @throws IOException thrown when an exception occurs during the writing to the stream.
+     * @throws IllegalArgumentException thrown when 'boxes' or 'out' is null.
      */
     public static void write(List<Box> boxes, OutputStream out) throws IOException{
+        if(boxes == null || out == null){
+            throw new IllegalArgumentException("'boxes' and 'out' must not be null");
+        }
+
         PrintWriter writer = new PrintWriter(new OutputStreamWriter(out));
         for (Box box : boxes){
             double x = box.getRelativePosition().getEntry(0);
