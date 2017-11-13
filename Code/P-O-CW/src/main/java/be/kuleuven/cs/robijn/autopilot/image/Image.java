@@ -448,7 +448,11 @@ public class Image {
 	 * @param hsv	The given hue, saturation and value.
 	 * @return		True if the saturation is 0 and the value is 1.
 	 */
+<<<<<<< HEAD
+	public boolean isWhiteHSV(float[] hsv){
+=======
 	public static boolean isWhiteHSV(float[] hsv){
+>>>>>>> a7735bee8efce2ce786a2b3938225752b14ae61e
 		if (!isValidHSV(hsv)) {throw new IllegalArgumentException();}
 		return (hsv[1] == 0.0f) && (hsv[2] == 1.0f);
 	}

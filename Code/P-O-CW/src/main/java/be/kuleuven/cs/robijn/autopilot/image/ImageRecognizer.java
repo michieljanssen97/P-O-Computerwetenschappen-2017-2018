@@ -1,6 +1,8 @@
 package be.kuleuven.cs.robijn.autopilot.image;
 
 import be.kuleuven.cs.robijn.common.math.Vector3f;
+import java.util.ArrayList;
+
 
 /**
  * A class that can create and work with images.
@@ -22,9 +24,13 @@ public class ImageRecognizer {
 	 * @return	An instance of the Image class containing the given values
 	 * @throws Exception	One of the parameters is invalid or the image can't be read
 	 */
-	public Image createImage(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView) {
-		return new Image(image, nbRows, nbColumns, horizontalAngleOfView, verticalAngleOfView);
+	public Image createImage(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView) throws Exception{
+		Image im = new Image(image, nbRows, nbColumns, horizontalAngleOfView, verticalAngleOfView);
+		this.UpdateImageRecognizerCubeList(im);
+		return im;
 	}
+	
+	public ArrayList<ImageRecognizerCube> ImageRecognizerCubeList = new ArrayList<ImageRecognizerCube>();
 	
 	/**
 	 * Returns the average coordinates of the pixels of the cube with given hue and saturation in the given image.
@@ -66,6 +72,29 @@ public class ImageRecognizer {
 	 */
 	public Vector3f getVectorToCube(Image image, float hue, float sat) throws Exception{
 		return image.getXYZDistance(hue, sat);
+	}
+	
+	public ImageRecognizerCube getImageRecognizerCube(Image image, float hue, float sat) throws Exception{
+		for (ImageRecognizerCube cu : ImageRecognizerCubeList){
+			if (cu.getHue() == hue && cu.getSaturation() == sat){
+				Vector3f vector = image.getXYZDistance(hue, sat);
+				ImageRecognizerCube cube = new ImageRecognizerCube(vector.getX(), vector.getY(), vector.getZ(), hue, sat);
+				return cube;
+			}
+		}
+		return null;
+	}
+	
+	public void UpdateImageRecognizerCubeList(Image image) throws Exception{
+		for (ImageCube cu : image.getImageCubes()){
+			float hue = cu.getHue();
+			float sat = cu.getSaturation();
+			Vector3f vector = image.getXYZDistance(hue, sat);
+			ImageRecognizerCube cube = getImageRecognizerCube(image, hue, sat);
+			if (cube == null){
+				ImageRecognizerCubeList.add(new ImageRecognizerCube(vector.getX(), vector.getY(), vector.getZ(), hue, sat));
+			}
+		}
 	}
 	
 }
