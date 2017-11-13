@@ -41,9 +41,9 @@ public class ImageTest {
 	}
 	
 	@Test
-	public void testIsRedHSV() throws Exception {
-		float[] hsv = {0.0f, 1.0f, 1.0f};
-//		assertTrue(Image.isRedHSV(hsv));
+	public void testIsWhiteHSV() throws Exception {
+		float[] hsv = {0.5f, 0.0f, 1.0f};
+		assertTrue(Image.isWhiteHSV(hsv));
 		assertTrue(true);
 	}
 	

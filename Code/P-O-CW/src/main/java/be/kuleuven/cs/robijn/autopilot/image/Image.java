@@ -428,7 +428,7 @@ public class Image {
 		return ratio;
 	}
 	
-	public boolean isWhiteHSV(float[] hsv){
+	public static boolean isWhiteHSV(float[] hsv){
 		if (!isValidHSV(hsv)) {throw new IllegalArgumentException();}
 		return (hsv[1] == 0.0f) && (hsv[2] == 1.0f);
 	}
@@ -491,7 +491,7 @@ public class Image {
 		return getNecessaryRotation(getHorizontalAngle(), getVerticalAngle(), pixelsToCube[0], pixelsToCube[1]);
 	}
 	
-	public ArrayList<Pixel> getCubeEdgePixels(float hue, float sat) throws Exception{
+	public ArrayList<Pixel> getCubeEdgePixels(float hue, float sat) {
 		ArrayList<Pixel> edge = new ArrayList<Pixel>();
 		boolean isEdge = false;
 		for (Pixel p : getCubePixels(hue, sat)){

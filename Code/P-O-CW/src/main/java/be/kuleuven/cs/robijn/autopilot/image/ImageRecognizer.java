@@ -32,8 +32,8 @@ public class ImageRecognizer {
 	 * @return	A list with the x-coordinate and y-coordinate of the center red pixel
 	 * @throws Exception	Something goes wrong while calculating the red pixels
 	 */
-	public int[] getRedCubeAveragePixel(Image image) throws Exception{
-		return image.getAverageRedPixel();
+	public int[] getCubeAveragePixel(Image image, float hue, float sat) throws Exception{
+		return image.getCubeCenterPixel(hue, sat);
 	}
 	
 	/**
@@ -43,8 +43,8 @@ public class ImageRecognizer {
 	 * 			(an x-value and a y-value given in degrees)
 	 * @throws Exception Something goes wrong while calculating the average coordinates of the red pixels
 	 */
-	public float[] getNecessaryRotation(Image image) throws Exception{
-		return image.getRotationToRedCube();
+	public float[] getNecessaryRotation(Image image, float hue, float sat) throws Exception{
+		return image.getRotationToCube(hue, sat);
 	}
 	
 
@@ -54,8 +54,8 @@ public class ImageRecognizer {
 	 * @return	The distance to the red cube
 	 * @throws Exception	There are no red cube sides visible in this Image
 	 */
-	public float getDistanceToRedCube(Image image) throws Exception{
-		return image.getTotalDistance();
+	public float getDistanceToRedCube(Image image, float hue, float sat) throws Exception{
+		return image.getTotalDistance(hue, sat);
 	}
 	
 	/**
@@ -64,8 +64,8 @@ public class ImageRecognizer {
 	 * @return	The vector from the camera to the center of the red cube
 	 * @throws Exception There are no red cube sides visible in this Image
 	 */
-	public Vector3f getVectorToRedCube(Image image) throws Exception{
-		return image.getXYZDistance();
+	public Vector3f getVectorToRedCube(Image image, float hue, float sat) throws Exception{
+		return image.getXYZDistance(hue, sat);
 	}
 	
 }
