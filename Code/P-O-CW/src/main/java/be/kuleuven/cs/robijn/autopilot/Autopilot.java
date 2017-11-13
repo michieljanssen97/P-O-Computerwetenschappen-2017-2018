@@ -258,30 +258,45 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		final float horStabInclination = horStabInclinationTemp;
 		final float verStabInclination = verStabInclinationTemp;
 		
-		UnivariateFunction function2 = (x)->{return drone.transformationToDroneCoordinates(drone.getLiftForceLeftWing((float)x)).getEntry(1)
-				+ drone.transformationToDroneCoordinates(drone.getLiftForceRightWing((float)x)).getEntry(1)
-				+ drone.transformationToDroneCoordinates(drone.getGravitationalForceEngine()).getEntry(1)
-				+ drone.transformationToDroneCoordinates(drone.getGravitationalForceTail()).getEntry(1) 
-				+ (2*drone.transformationToDroneCoordinates(drone.getGravitationalForceWing()).getEntry(1))
-				+ drone.transformationToDroneCoordinates(drone.getLiftForceHorStab(horStabInclination)).getEntry(1)
-				;};
+		float yAcceleration = 5.0f;
+		float maxYVelocity = (float) (-drone.getVelocity().getEntry(2)*Math.tan(drone.getPitch()));
+		
+		UnivariateFunction function2;
+		float yVelocity = (float)drone.getVelocity().getEntry(1);
+		if (yVelocity <= maxYVelocity) {
+			function2 = (x)->{return drone.getLiftForceLeftWing((float)x).getEntry(1)
+					+ drone.getLiftForceRightWing((float)x).getEntry(1)
+					+ drone.getGravitationalForceEngine().getEntry(1)
+					+ drone.getGravitationalForceTail().getEntry(1)
+					+ drone.getLiftForceHorStab(horStabInclination).getEntry(1)
+					+ (2*drone.getGravitationalForceWing().getEntry(1))
+					- ((drone.getEngineMass() + drone.getTailMass() + (2 * drone.getWingMass())) * yAcceleration)
+					;};
+		}
+		else {	
+			function2 = (x)->{return drone.getLiftForceLeftWing((float)x).getEntry(1)
+					+ drone.getLiftForceRightWing((float)x).getEntry(1)
+					+ drone.getGravitationalForceEngine().getEntry(1)
+					+ drone.getGravitationalForceTail().getEntry(1)
+					+ drone.getLiftForceHorStab(horStabInclination).getEntry(1)
+					+ (2*drone.getGravitationalForceWing().getEntry(1))
+					+ ((drone.getEngineMass() + drone.getTailMass() + (2 * drone.getWingMass())) * yAcceleration)
+					;};
+		}
 		try {
 			double solution2 = solver.solve(100, function2, minInclinationWing, maxInclinationWing);
 			rightWingInclinationTemp = (float) solution2;
 			leftWingInclinationTemp = (float) solution2;
-		} catch (NoBracketingException exc1) {
+		} catch (NoBracketingException exc) {
 			throw new IllegalStateException("simulation failed!");
 		}
 				
 		final float leftWingInclination = leftWingInclinationTemp;
 		final float rightWingInclination = rightWingInclinationTemp;
 		
-		float thrustTemp = (float) (drone.transformationToDroneCoordinates(drone.getGravitationalForceEngine()).getEntry(2)
-				+ drone.transformationToDroneCoordinates(drone.getGravitationalForceTail()).getEntry(2) 
-				+ (2*drone.transformationToDroneCoordinates(drone.getGravitationalForceWing()).getEntry(2))
-				+ drone.transformationToDroneCoordinates(drone.getLiftForceHorStab(horStabInclination)).getEntry(2)
-				+ drone.transformationToDroneCoordinates(drone.getLiftForceLeftWing(leftWingInclination)).getEntry(2)
-				+ drone.transformationToDroneCoordinates(drone.getLiftForceRightWing(rightWingInclination)).getEntry(2));
+		float thrustTemp = (float) ((drone.getLiftForceHorStab(horStabInclination).getEntry(2)
+				+ drone.getLiftForceLeftWing(leftWingInclination).getEntry(2)
+				+ drone.getLiftForceRightWing(rightWingInclination).getEntry(2))/Math.cos(drone.getPitch()));
 		if (thrustTemp > drone.getMaxThrust())
 			thrustTemp = drone.getMaxThrust();
 		final float thrust = thrustTemp;
