@@ -20,7 +20,7 @@
             </Label>
          </children>
       </VBox>
-      <Accordion AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="51.0" AnchorPane.bottomAnchor="30.0">
+      <Accordion AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="51.0" AnchorPane.bottomAnchor="51.0">
         <panes>
           <TitledPane animated="false" text="Eigenschappen">
             <content>
