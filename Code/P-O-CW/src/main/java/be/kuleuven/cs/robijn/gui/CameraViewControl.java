@@ -133,7 +133,10 @@ public class CameraViewControl extends AnchorPane {
 
         //Get the active camera and set its camera FOV to match the image width to height ratio so the image isnt warped/stretched.
         String selectedCameraId = (String)perspectiveToggleGroup.getSelectedToggle().getUserData();
-        Camera camera = world.getDescendantsStream().filter(o -> Objects.equals(o.getName(), selectedCameraId)).map(o -> (Camera)o).findFirst().get();
+        PerspectiveCamera camera = world.getDescendantsStream()
+                .filter(o -> Objects.equals(o.getName(), selectedCameraId))
+                .map(o -> (PerspectiveCamera)o)
+                .findFirst().get();
 
         double aspect = ((double)frameBuffer.getWidth())/((double)frameBuffer.getHeight());
         //TODO: pick a permanent preference and replace hotfix with real solution that stops warping and remembers target FOV

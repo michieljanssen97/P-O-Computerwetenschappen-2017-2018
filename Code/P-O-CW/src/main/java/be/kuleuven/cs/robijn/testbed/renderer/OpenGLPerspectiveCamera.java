@@ -1,10 +1,13 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.Camera;
+import be.kuleuven.cs.robijn.common.PerspectiveCamera;
 
-public class OpenGLCamera extends Camera {
+public class OpenGLPerspectiveCamera extends PerspectiveCamera {
 	private float fovHorizontal = (float)Math.PI/2f;
 	private float fovVertical = (float)Math.PI/2f;
+	private float zNear = 0.1f;
+	private float zFar = 1000f;
 	private boolean areDronesHidden;
 	private boolean drawGround;
 
@@ -32,6 +35,32 @@ public class OpenGLCamera extends Camera {
 			throw new IllegalArgumentException();
 		}
 		this.fovVertical = fov;
+	}
+
+	@Override
+	public float getNearPlane() {
+		return zNear;
+	}
+
+	@Override
+	public void setNearPlane(float zNear) {
+		if(zNear < 0 || Float.isNaN(zNear) || Float.isInfinite(zNear)){
+			throw new IllegalArgumentException("'zNear' must be a positive number, not NaN or infinite");
+		}
+		this.zNear = zNear;
+	}
+
+	@Override
+	public float getFarPlane() {
+		return zFar;
+	}
+
+	@Override
+	public void setFarPlane(float zFar) {
+		if(zFar < 0 || Float.isNaN(zFar) || Float.isInfinite(zFar)){
+			throw new IllegalArgumentException("'zFar' must be a positive number, not NaN or infinite");
+		}
+		this.zFar = zFar;
 	}
 
 	@Override
