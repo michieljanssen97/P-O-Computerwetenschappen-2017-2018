@@ -4,7 +4,7 @@ import javafx.event.Event;
 import javafx.event.EventTarget;
 import javafx.event.EventType;
 
-import p_en_o_cw_2017.AutopilotConfig;
+import interfaces.AutopilotConfig;
 
 public class SimulationSettingsConfirmEvent extends Event {
     public static EventType<SimulationSettingsConfirmEvent> CONFIRM = new EventType<>(Event.ANY, "CONFIRM");
