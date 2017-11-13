@@ -49,9 +49,9 @@ public class ImageTest {
 	public void testRedCenterPixel5x5() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("5x5-Red-255-0-0-Center-3-3.png");
 		Image im = new Image(image1, 5, 5, 120, 120);
-		int[] redCo = im.getCubeCenterPixel(0.0f, 1.0f);
-		int[] expected = {3,3};
-		assertArrayEquals(expected, redCo);
+		float[] redCo = im.getCubeCenterPixel(0.0f, 1.0f);
+		float[] expected = {3f,3f};
+		assertArrayEquals(expected, redCo, 0.01f);
 	}
 	
 	@Test
@@ -59,18 +59,18 @@ public class ImageTest {
 		ImageRecognizer rec = new ImageRecognizer();
 		byte[] image1 = this.loadImageRGBBytes("10x10-Red-255-0-0-Center-3-2.png");
 		Image im = rec.createImage(image1, 10, 10, 120, 120);
-		int[] redCo = rec.getCubeAveragePixel(im, 0.0f, 1.0f);
-		int[] expected = {3,2};
-		assertArrayEquals(expected, redCo);
+		float[] redCo = rec.getCubeAveragePixel(im, 0.0f, 1.0f);
+		float[] expected = {3,2};
+		assertArrayEquals(expected, redCo, 0.01f);
 	}
 	
 	@Test
 	public void testCenterPixel5x5() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("5x5-Red-255-0-0-Center-3-3.png");
 		Image im = new Image(image1, 5, 5, 120, 120);
-		int[] center = im.getCenterPixel();
-		int[] expected = {2,2};
-		assertArrayEquals(expected, center);
+		float[] center = im.getCenterPixel();
+		float[] expected = {2,2};
+		assertArrayEquals(expected, center, 0.01f);
 	}
 	
 	@Test
@@ -78,9 +78,9 @@ public class ImageTest {
 		ImageRecognizer rec = new ImageRecognizer();
 		byte[] image1 = this.loadImageRGBBytes("cube1side.png");
 		Image im = rec.createImage(image1, 200, 200, 120, 120);
-		int[] center = im.getCenterPixel();
-		int[] expected = {100,100};
-		assertArrayEquals(expected, center);
+		float[] center = im.getCenterPixel();
+		float[] expected = {100,100};
+		assertArrayEquals(expected, center, 0.01f);
 	}
 	
 	@Test
@@ -88,9 +88,9 @@ public class ImageTest {
 		ImageRecognizer rec = new ImageRecognizer();
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = rec.createImage(image1, 200, 200, 120, 120);
-		int[] center = rec.getCubeAveragePixel(im, 0.0f, 1.0f);
-		int[] expected = {104, 97};
-		assertArrayEquals(expected, center);
+		float[] center = rec.getCubeAveragePixel(im, 0.0f, 1.0f);
+		float[] expected = {104.77f, 97.275f};
+		assertArrayEquals(expected, center, 0.01f);
 	}
 	
 	@Test
@@ -98,9 +98,9 @@ public class ImageTest {
 		ImageRecognizer rec = new ImageRecognizer();
 		byte[] image1 = this.loadImageRGBBytes("cube3sidecorner.png");
 		Image im = rec.createImage(image1, 200, 200, 120, 120);
-		int[] center = rec.getCubeAveragePixel(im, 0.0f, 1.0f);
-		int[] expected = {130, 62};
-		assertArrayEquals(expected, center);
+		float[] center = rec.getCubeAveragePixel(im, 0.0f, 1.0f);
+		float[] expected = {130.542f, 62.668f};
+		assertArrayEquals(expected, center, 0.01f);
 	}
 	
 	@Test
@@ -126,7 +126,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube1side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getMinimumDistanceSpherePixels(0.0f, 1.0f);
-		float expected = 39.0f;
+		float expected = 39.647f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -144,7 +144,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getMinimumDistanceSpherePixels(0.0f, 1.0f);
-		float expected = 39.0f;
+		float expected = 39.837f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -153,7 +153,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getMaximumDistanceSpherePixels(0.0f, 1.0f);
-		float expected = 67.00746f;
+		float expected = 66.2375f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -162,7 +162,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube3sidecorner.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getMaximumDistanceSpherePixels(0.0f, 1.0f);
-		float expected = 67.00746f;
+		float expected = 66.478f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -207,7 +207,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getXYZDistance(0.0f, 1.0f).getX();
-		float expected = 0.075f;
+		float expected = 0.0926f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -216,8 +216,8 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getXYZDistance(0.0f, 1.0f).getY();
-		float expected = 0.02f;
-		assertEquals(expected, result, 0.01f);
+		float expected = 0.0000797f;
+		assertEquals(expected, result, 0.000001f);
 	}
 	
 	@Test
@@ -225,7 +225,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getXYZDistance(0.0f, 1.0f).getZ();
-		float expected = -1.85f;
+		float expected = -1.82666f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -234,7 +234,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getTotalDistance(0.0f, 1.0f);
-		float expected = 1.85f;
+		float expected = 1.82f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -243,7 +243,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getXYZDistance(0.0f, 1.0f).getX();
-		float expected = 2.77f;
+		float expected = 2.68f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -252,7 +252,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getXYZDistance(0.0f, 1.0f).getY();
-		float expected = 2.73f;
+		float expected = 2.586f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -261,7 +261,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getXYZDistance(0.0f, 1.0f).getZ();
-		float expected = -3.55f;
+		float expected = -3.389f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -270,7 +270,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getTotalDistance(0.0f, 1.0f);
-		float expected = 5.26f;
+		float expected = 5.036f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -279,7 +279,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getXYZDistance(0.0f, 1.0f).getX();
-		float expected = 0.04f;
+		float expected = 0.052f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -297,7 +297,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getXYZDistance(0.0f, 1.0f).getZ();
-		float expected = -1.02f;
+		float expected = -1.039f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -306,7 +306,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getTotalDistance(0.0f, 1.0f);
-		float expected = 1.02f;
+		float expected = 1.04f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -333,7 +333,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube3sidecorner.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getXYZDistance(0.0f, 1.0f).getZ();
-		float expected = -0.89f;
+		float expected = -0.90f;
 		assertEquals(expected, result, 0.01f);
 	}
 	

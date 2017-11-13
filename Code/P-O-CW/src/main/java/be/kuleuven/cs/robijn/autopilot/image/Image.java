@@ -182,8 +182,8 @@ public class Image {
 	/**
 	 * Calculates the coordinates of the center pixel of the image.
 	 */
-	public int[] getCenterPixel(){
-		int[] center = {getnbColumns()/2, getnbRows()/2};
+	public float[] getCenterPixel(){
+		float[] center = {getnbColumns()/2, getnbRows()/2};
 		return center;
 	}
 	
@@ -194,11 +194,11 @@ public class Image {
 	 * @param y		The y coordinate of the given position
 	 * @return	An array which contains the x-value and the y-value of the distance to the centre of the image
 	 */
-	public int[] getPixelsFromCenter(int x, int y){
-		int[] center = getCenterPixel();
-		int x_value = x - center[0];
-		int y_value = y - center[1];
-		return new int[] {x_value, y_value};
+	public float[] getPixelsFromCenter(float x, float y){
+		float[] center = getCenterPixel();
+		float x_value = x - center[0];
+		float y_value = y - center[1];
+		return new float[] {x_value, y_value};
 	}
 	
 	/** Return the horizontal and vertical rotation necessary to fly towards a given point,
@@ -226,7 +226,7 @@ public class Image {
 	 */
 	public float getMinimumDistanceSpherePixels(float hue, float sat) throws Exception{
 		float minimum = (float) Math.sqrt( Math.pow(getnbRows(), 2) + Math.pow(getnbColumns(), 2) );
-		int[] centerPixel = getCubeCenterPixel(hue, sat);
+		float[] centerPixel = getCubeCenterPixel(hue, sat);
 		for(Pixel p : getCubeEdgePixels(hue, sat)){
 			float distance = (float) Math.sqrt(Math.pow(p.getX()-centerPixel[0], 2) + Math.pow(p.getY()-centerPixel[1], 2));
 			if (distance < minimum)
@@ -243,7 +243,7 @@ public class Image {
 	 */
 	public float getMaximumDistanceSpherePixels(float hue, float sat) throws Exception{
 		float maximum = 0;
-		int[] centerPixel = getCubeCenterPixel(hue, sat);
+		float[] centerPixel = getCubeCenterPixel(hue, sat);
 		for(Pixel p : getCubeEdgePixels(hue, sat)){
 			float distance = (float) Math.sqrt(Math.pow(p.getX()-centerPixel[0], 2) + Math.pow(p.getY()-centerPixel[1], 2));
 			if (distance > maximum)
@@ -366,8 +366,8 @@ public class Image {
 	 * @throws Exception	Something goes wrong while calculating the pixels with given hue and saturation
 	 */
 	public Vector3f getXYZDistance(float hue, float sat) throws Exception{
-		int[] cubeCenter = getCubeCenterPixel(hue, sat);
-		int[] imageCenter = getCenterPixel();
+		float[] cubeCenter = getCubeCenterPixel(hue, sat);
+		float[] imageCenter = getCenterPixel();
 		float angleX = (cubeCenter[0] - imageCenter[0]) * getHorizontalAngle() / getnbColumns();
 		float angleY = (imageCenter[1] - cubeCenter[1]) * getVerticalAngle() / getnbRows();
 		float distanceX =  (float) (getTotalDistance(hue, sat)*Math.sin(degreesToRadians(angleX)));
@@ -505,17 +505,17 @@ public class Image {
 	 * @param hue 	The given hue
 	 * @param sat	The given saturation
 	 */
-	public int[] getCubeCenterPixel(float hue, float sat){
+	public float[] getCubeCenterPixel(float hue, float sat){
 		ArrayList<Pixel> cubePixels = getCubePixels(hue, sat);
 		if (cubePixels.size() == 0)
 			throw new IllegalStateException("There is no cube on the camera image with the given hue and saturation.");
-		int totalX = 0;
-		int totalY = 0;
+		float totalX = 0.0f;
+		float totalY = 0.0f;
 		for (Pixel p : cubePixels){
 			totalX += p.getX();
 			totalY += p.getY();
 		}
-		int[] avg = {totalX / cubePixels.size(), totalY / cubePixels.size()};
+		float[] avg = {totalX / cubePixels.size(), totalY / cubePixels.size()};
 		return avg;
 	}
 	
@@ -525,8 +525,8 @@ public class Image {
 	 * @param sat	The given saturation
 	 */
 	public float[] getRotationToCube(float hue, float sat) {
-		int[] average = getCubeCenterPixel(hue, sat);
-		int[] pixelsToCube = getPixelsFromCenter(average[0], average[1]);
+		float[] average = getCubeCenterPixel(hue, sat);
+		float[] pixelsToCube = getPixelsFromCenter(average[0], average[1]);
 		return getNecessaryRotation(getHorizontalAngle(), getVerticalAngle(), pixelsToCube[0], pixelsToCube[1]);
 	}
 	

@@ -38,7 +38,7 @@ public class ImageRecognizer {
 	 * @return	A list with the x-coordinate and y-coordinate of the center of all pixels with given hue and saturation
 	 * @throws Exception	Something goes wrong while calculating the pixels with given hue and saturation.
 	 */
-	public int[] getCubeAveragePixel(Image image, float hue, float sat) throws Exception{
+	public float[] getCubeAveragePixel(Image image, float hue, float sat) throws Exception{
 		return image.getCubeCenterPixel(hue, sat);
 	}
 	
