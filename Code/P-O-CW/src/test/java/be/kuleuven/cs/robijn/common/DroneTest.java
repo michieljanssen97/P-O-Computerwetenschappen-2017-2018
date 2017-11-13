@@ -3,9 +3,7 @@ package be.kuleuven.cs.robijn.common;
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.math.*;
 import org.junit.jupiter.api.Test;
-import p_en_o_cw_2017.*;
-
-import java.io.IOException;
+import interfaces.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 

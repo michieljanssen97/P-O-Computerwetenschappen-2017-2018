@@ -16,9 +16,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.util.converter.NumberStringConverter;
 
-import p_en_o_cw_2017.AutopilotConfig;
-import p_en_o_cw_2017.AutopilotConfigReader;
-import p_en_o_cw_2017.AutopilotConfigWriter;
+import interfaces.AutopilotConfig;
+import interfaces.AutopilotConfigReader;
+import interfaces.AutopilotConfigWriter;
 
 import java.io.*;
 

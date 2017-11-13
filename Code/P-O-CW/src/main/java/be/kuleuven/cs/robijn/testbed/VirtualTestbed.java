@@ -3,7 +3,7 @@ package be.kuleuven.cs.robijn.testbed;
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
-import p_en_o_cw_2017.*;
+import interfaces.*;
 
 /**
  * A class of virtual testbeds.

@@ -8,15 +8,14 @@ import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.autopilot.image.*;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
-import p_en_o_cw_2017.*;
+import interfaces.*;
 
 /**
  * A class of autopilots.
  * 
  * @author Pieter Vandensande
  */
-public class Autopilot extends WorldObject implements AutoPilot {
-	
+public class Autopilot extends WorldObject implements interfaces.Autopilot {
 	public Autopilot(AutopilotConfig config, RealVector initialVelocity) throws IllegalArgumentException {
 		if (! isValidConfig(config))
 			throw new IllegalArgumentException();
