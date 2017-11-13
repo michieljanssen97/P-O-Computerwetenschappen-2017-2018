@@ -5,6 +5,8 @@ import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
 import p_en_o_cw_2017.*;
 
+import java.util.List;
+
 /**
  * A class of virtual testbeds.
  * 
@@ -20,33 +22,17 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	private Camera droneCamera;
 	private byte[] latestCameraImage;
 
-	public VirtualTestbed(AutopilotConfig config, RealVector initialVelocity) {
+	public VirtualTestbed(List<Box> boxes, AutopilotConfig config, RealVector initialVelocity) {
 		this.config = config;
 
 		//Add drone to world
 		Drone drone = new Drone(config, initialVelocity);
 		this.addChild(drone);
 
-		//Add box to world
-		Box box = new Box();
-		double zDistance = 100.0;
-		
-		//Case 1
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, 0, -zDistance}, false));
-		
-		//Case 2
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-		
-		//simulatie1
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-		
-		//simulatie2
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-		
-		//simulatie3
-		box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/48.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-		
-		this.addChild(box);
+		//Add boxes to world
+		for (Box box : boxes){
+			this.addChild(box);
+		}
 	}
 
 	public boolean update(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs output){

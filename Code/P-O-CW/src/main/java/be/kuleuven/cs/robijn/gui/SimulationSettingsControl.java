@@ -15,6 +15,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
 
 import org.apache.commons.math3.linear.ArrayRealVector;
@@ -100,6 +101,7 @@ public class SimulationSettingsControl extends AnchorPane {
         okButton.setOnAction(e -> {
             SimulationSettingsConfirmEvent confirmEvent = new SimulationSettingsConfirmEvent();
             confirmEvent.setSettings(configProperty.get());
+            confirmEvent.setBoxes(getBoxes());
             fireEvent(confirmEvent);
         });
 
@@ -226,16 +228,32 @@ public class SimulationSettingsControl extends AnchorPane {
     }
 
     private Box generateNextBox(){
-        int i = boxTable.getItems().size();
-        int hueSlices = roundDownToPowerOfTwo(i);
-        int hueSliceI = i - hueSlices;
-
-        float hue = (float)hueSliceI * (360f / (float)hueSlices);
-
         Box newBox = new Box();
-        //newBox.setColor(Color.getHSBColor(hue, 1.0f, 1.0f));
-        newBox.setColor(Color.RED); //TODO
+        newBox.setColor(generateBoxColor(boxTable.getItems().size()));
         return newBox;
+    }
+
+    private Color generateBoxColor(int i){
+        float hue = getMaximalRadianDistanceSequenceElement(i)/(2f*(float)Math.PI);
+        return Color.getHSBColor(hue, 1.0f, 1.0f);
+    }
+
+    /**
+     * Returns element i from the sequence that is constructed as follows:
+     * Given a circle, return the coordinate of the point that has a maximal distance from the n-1 previous points in this sequence.
+     * If multiple coordinates are possible, the smallest one is chosen.
+     * @param i the index in the sequence
+     * @return the coordinate of the point on the circle, in radians
+     */
+    private float getMaximalRadianDistanceSequenceElement(int i){
+        if(i == 0){
+            return 0;
+        }
+
+        int powOf2 = roundDownToPowerOfTwo(i);
+        int y = i % powOf2;
+        int x = (y * 2) + 1;
+        return (float)((double)x * Math.PI / (double)powOf2);
     }
 
     private int roundDownToPowerOfTwo(int value){
@@ -300,23 +318,30 @@ public class SimulationSettingsControl extends AnchorPane {
         //Column 1 is box colors and is readonly
         TableColumn<Box, Color> colorColumn = new TableColumn<>();
         colorColumn.setText("Box color");
-        colorColumn.setEditable(false);
         colorColumn.setCellValueFactory(cd -> Bindings.createObjectBinding(() -> cd.getValue().getColor()));
-        colorColumn.setCellFactory(column -> new TableCell<Box, Color>() {
+        colorColumn.setCellFactory(x -> new TextFieldTableCell(new ColorStringConverter()){
             @Override
-            protected void updateItem(Color item, boolean empty) {
+            public void updateItem(Object item, boolean empty) {
                 super.updateItem(item, empty);
 
                 if (item == null || empty) {
-                    setText(null);
                     setStyle("");
                 } else {
                     // Format date.
-                    String color = String.format("#%02x%02x%02x", item.getRed(), item.getGreen(), item.getBlue());
-                    setText(color);
-                    setStyle("-fx-background-color: "+color);
+                    Color color = (Color)item;
+                    String colorHex = String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
+                    setStyle("-fx-background-color: "+colorHex);
                 }
             }
+        });
+        colorColumn.setOnEditCommit((e) -> {
+            Box curBox = (Box)boxTable.getItems().get(e.getTablePosition().getRow());
+            Color color = e.getNewValue();
+            float[] hsv = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
+            hsv[1] = hsv[2] = 1.0f;
+            color = Color.getHSBColor(hsv[0], hsv[1], hsv[2]);
+            curBox.setColor(color);
+            boxTable.refresh();
         });
         boxTable.getColumns().add(colorColumn);
 
@@ -383,6 +408,10 @@ public class SimulationSettingsControl extends AnchorPane {
     }
 
     private void loadBoxSetup(List<Box> boxes){
+        for(int i = 0; i < boxes.size(); i++){
+            boxes.get(i).setColor(generateBoxColor(i));
+        }
+
         boxTable.getItems().clear();
         boxTable.getItems().addAll(boxes);
     }
