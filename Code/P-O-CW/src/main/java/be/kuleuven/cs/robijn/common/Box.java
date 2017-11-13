@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class Box extends WorldObject {
 	private Color color = Color.RED;
 	
-	private ArrayList<Box> allBoxList = new ArrayList<Box>();
+	private static ArrayList<Box> allBoxList = new ArrayList<Box>();
 	
 	public Box() { allBoxList.add(this);}
 
@@ -29,7 +29,11 @@ public class Box extends WorldObject {
 		this.color = color;
 	}
 	
-	public ArrayList<Box> getAllBoxes(){
+	public static ArrayList<Box> getAllBoxes(){
 		return allBoxList;
+	}
+	
+	public void removeBoxFromList() {
+		allBoxList.remove(this);
 	}
 }

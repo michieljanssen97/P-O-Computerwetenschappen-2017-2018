@@ -37,10 +37,10 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		//box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
 		
 		//simulatie2
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
 		
 		//simulatie3
-		box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/48.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		//box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/48.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
 		
 		this.addChild(box);
 	}
@@ -57,9 +57,12 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		if ((drone.getRightWingPosition().getDistance(box.getWorldPosition()) <= stopDistanceToCenterBox)
 				|| (drone.getLeftWingPosition().getDistance(box.getWorldPosition()) <= stopDistanceToCenterBox)
 				|| (drone.getEnginePosition().getDistance(box.getWorldPosition()) <= stopDistanceToCenterBox)){
-			box.getAllBoxes().remove(box);
-			//TODO zorg ervoor dat getFirstTypeOfChild deze box niet meer in rekening brengt
-			if(box.getAllBoxes().isEmpty()) {//only stop if all boxes are handled
+			box.removeBoxFromList(); //The box should not be taken into account anymore, it is already reached
+			
+			//Make an invalid box of this reached box
+			drone = null;
+			
+			if(Box.getAllBoxes().isEmpty()) {//only stop if all boxes are handled
 				return true;
 			}
 		}
