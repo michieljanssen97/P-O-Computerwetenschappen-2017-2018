@@ -448,7 +448,11 @@ public class Image {
 	 * @param hsv	The given hue, saturation and value.
 	 * @return		True if the saturation is 0 and the value is 1.
 	 */
+<<<<<<< HEAD
 	public boolean isWhiteHSV(float[] hsv){
+=======
+	public static boolean isWhiteHSV(float[] hsv){
+>>>>>>> a7735bee8efce2ce786a2b3938225752b14ae61e
 		if (!isValidHSV(hsv)) {throw new IllegalArgumentException();}
 		return (hsv[1] == 0.0f) && (hsv[2] == 1.0f);
 	}
@@ -458,11 +462,11 @@ public class Image {
 	 */
 	public ArrayList<ImageCube> scanImageForCubes(){
 		ArrayList<ImageCube> cubeCollection = new ArrayList<ImageCube>();
+		boolean cubeExists = false;
 		for (int y = 0; y < getnbRows(); y++){
 			for (int x = 0; x < getnbColumns(); x++){
 				float[] hsv = getPixelHSV(x, y);
 				if (!isWhiteHSV(hsv)){
-					boolean cubeExists = false;
 					for (ImageCube c : cubeCollection){
 						if ((hsv[0] == c.getHue()) && (hsv[1] == c.getSaturation())){
 							c.addPixel(new Pixel(x, y, hsv));
@@ -476,6 +480,7 @@ public class Image {
 						ImageCube cu = new ImageCube(p, hsv[0], hsv[1]);
 						cubeCollection.add(cu);
 					}
+					cubeExists = false;
 				}
 			}
 		}
