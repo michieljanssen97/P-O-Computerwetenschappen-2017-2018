@@ -47,10 +47,9 @@ public class ImageTest {
 	
 	@Test
 	public void testRedCenterPixel5x5() throws Exception {
-		ImageRecognizer rec = new ImageRecognizer();
 		byte[] image1 = this.loadImageRGBBytes("5x5-Red-255-0-0-Center-3-3.png");
-		Image im = rec.createImage(image1, 5, 5, 120, 120);
-		int[] redCo = rec.getCubeAveragePixel(im, 0.0f, 1.0f);
+		Image im = new Image(image1, 5, 5, 120, 120);
+		int[] redCo = im.getCubeCenterPixel(0.0f, 1.0f);
 		int[] expected = {3,3};
 		assertArrayEquals(expected, redCo);
 	}
@@ -67,9 +66,8 @@ public class ImageTest {
 	
 	@Test
 	public void testCenterPixel5x5() throws Exception {
-		ImageRecognizer rec = new ImageRecognizer();
 		byte[] image1 = this.loadImageRGBBytes("5x5-Red-255-0-0-Center-3-3.png");
-		Image im = rec.createImage(image1, 5, 5, 120, 120);
+		Image im = new Image(image1, 5, 5, 120, 120);
 		int[] center = im.getCenterPixel();
 		int[] expected = {2,2};
 		assertArrayEquals(expected, center);
@@ -146,7 +144,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getMinimumDistanceSpherePixels(0.0f, 1.0f);
-		float expected = 28.0f;
+		float expected = 39.0f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
