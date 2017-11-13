@@ -124,210 +124,237 @@ public class ImageTest {
 	}
 	
 	@Test
+	public void testMinimumDistanceSpherePixelsCube1() throws Exception {
+		byte[] image1 = this.loadImageRGBBytes("cube1side.png");
+		Image im = new Image(image1, 200, 200, 120, 120);
+		float result = im.getMinimumDistanceSpherePixels(0.0f, 1.0f);
+		float expected = 39.0f;
+		assertEquals(expected, result, 0.01f);
+	}
+	
+	@Test
 	public void testMinimumDistanceSpherePixelsCube1Square() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube1sidesquare.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getMinimumDistanceSpherePixels(0.0f, 1.0f);
 		float expected = 40.0f;
-		assertEquals(result, expected);
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
 	public void testMinimumDistanceSpherePixelsCube2() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.getMinimumDistanceSpherePixels()));
-		assertTrue(true);
+		float result = im.getMinimumDistanceSpherePixels(0.0f, 1.0f);
+		float expected = 28.0f;
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
 	public void testMaximumDistanceSpherePixelsCube3() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.getMaximumDistanceSpherePixels()));
-		assertTrue(true);
+		float result = im.getMaximumDistanceSpherePixels(0.0f, 1.0f);
+		float expected = 67.00746f;
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
 	public void testMaximumDistanceSpherePixelsCube3Corner() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3sidecorner.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.getMaximumDistanceSpherePixels()));
-		assertTrue(true);
+		float result = im.getMaximumDistanceSpherePixels(0.0f, 1.0f);
+		float expected = 67.00746f;
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
 	public void testSidesVisibleCube2() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Integer.toString(im.getAmountSidesVisible()));
-		assertTrue(true);
+		int result = im.getAmountSidesVisible(0.0f, 1.0f);
+		int expected = 2;
+		assertEquals(result, expected);
 	}
 	
 	@Test
 	public void testSidesVisibleCube2Small() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Integer.toString(im.getAmountSidesVisible()));
-		assertTrue(true);
+		int result = im.getAmountSidesVisible(0.0f, 1.0f);
+		int expected = 2;
+		assertEquals(expected, result);
 	}
 	
 	@Test
 	public void testSidesVisibleCube3() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Integer.toString(im.getAmountSidesVisible()));
-		assertTrue(true);
+		int result = im.getAmountSidesVisible(0.0f, 1.0f);
+		int expected = 3;
+		assertEquals(expected, result);
 	}
 	
 	@Test
 	public void testSidesVisibleCube3Corner() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3sidecorner.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Integer.toString(im.getAmountSidesVisible()));
-		assertTrue(true);
+		int result = im.getAmountSidesVisible(0.0f, 1.0f);
+		int expected = 3;
+		assertEquals(expected, result);
 	}
 	
 	@Test
 	public void testDistanceXToCube2() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.getXDistance()));
-		assertTrue(true);
+		float result = im.getXYZDistance(0.0f, 1.0f).getX();
+		float expected = 0.075f;
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
 	public void testDistanceYToCube2() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.getYDistance()));
-		assertTrue(true);
+		float result = im.getXYZDistance(0.0f, 1.0f).getY();
+		float expected = 0.02f;
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
 	public void testDistanceZToCube2() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.getZDistance()));
-		assertTrue(true);
+		float result = im.getXYZDistance(0.0f, 1.0f).getZ();
+		float expected = -1.85f;
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
-	public void test3DDistanceToCube2() throws Exception {
+	public void testTotalDistanceToCube2() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.get3DDistanceToCube()));
-		assertTrue(true);
+		float result = im.getTotalDistance(0.0f, 1.0f);
+		float expected = 1.85f;
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
 	public void testDistanceXToCube2Small() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.getXDistance()));
-		assertTrue(true);
+		float result = im.getXYZDistance(0.0f, 1.0f).getX();
+		float expected = 2.77f;
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
 	public void testDistanceYToCube2Small() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.getYDistance()));
-		assertTrue(true);
+		float result = im.getXYZDistance(0.0f, 1.0f).getY();
+		float expected = 2.73f;
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
 	public void testDistanceZToCube2Small() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.getZDistance()));
-		assertTrue(true);
+		float result = im.getXYZDistance(0.0f, 1.0f).getZ();
+		float expected = -3.55f;
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
-	public void test3DDistanceToCube2Small() throws Exception {
+	public void testTotalDistanceToCube2Small() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.get3DDistanceToCube()));
-		assertTrue(true);
+		float result = im.getTotalDistance(0.0f, 1.0f);
+		float expected = 5.26f;
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
 	public void testDistanceXToCube3() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.getXDistance()));
-		assertTrue(true);
+		float result = im.getXYZDistance(0.0f, 1.0f).getX();
+		float expected = 0.04f;
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
 	public void testDistanceYToCube3() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.getYDistance()));
-		assertTrue(true);
+		float result = im.getXYZDistance(0.0f, 1.0f).getY();
+		float expected = 0.03f;
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
 	public void testDistanceZToCube3() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.getZDistance()));
-		assertTrue(true);
+		float result = im.getXYZDistance(0.0f, 1.0f).getZ();
+		float expected = -1.02f;
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
-	public void test3DDistanceToCube3() throws Exception {
+	public void testTotalDistanceToCube3() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.getTotalDistance()));
-		assertTrue(true);
+		float result = im.getTotalDistance(0.0f, 1.0f);
+		float expected = 1.02f;
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
 	public void testDistanceXToCube3Corner() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3sidecorner.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.getXDistance()));
-		assertTrue(true);
+		float result = im.getXYZDistance(0.0f, 1.0f).getX();
+		float expected = 0.32f;
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
 	public void testDistanceYToCube3Corner() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3sidecorner.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.getYDistance()));
-		assertTrue(true);
+		float result = im.getXYZDistance(0.0f, 1.0f).getY();
+		float expected = 0.40f;
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
 	public void testDistanceZToCube3Corner() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3sidecorner.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.getZDistance()));
-		assertTrue(true);
+		float result = im.getXYZDistance(0.0f, 1.0f).getZ();
+		float expected = -0.89f;
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
 	public void test3DDistanceToCube3Corner() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3sidecorner.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.getTotalDistance()));
-//		System.out.println(Float.toString(im.getXYZDistance().getX()));
-//		System.out.println(Float.toString(im.getXYZDistance().getY()));
-//		System.out.println(Float.toString(im.getXYZDistance().getZ()));
-//		System.out.println(Integer.toString(im.getAmountSidesVisible()));
-		assertTrue(true);
+		float result = im.getTotalDistance(0.0f, 1.0f);
+		float expected = 1.03f;
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
 	public void testPercentageXYZCube3() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-//		System.out.println(Float.toString(im.getPercentageXYZPixels()[0]));
-//		System.out.println(Float.toString(im.getPercentageXYZPixels()[1]));
-//		System.out.println(Float.toString(im.getPercentageXYZPixels()[2]));
-		assertTrue(true);
+		float[] result = im.getPercentageXYZPixels(0.0f, 1.0f);
+		float[] expected = {0.36f, 0.31f, 0.32f};
+		assertArrayEquals(expected, result, 0.01f);
 	}
 	
 }
