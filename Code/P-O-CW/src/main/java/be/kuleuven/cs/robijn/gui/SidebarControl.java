@@ -9,10 +9,11 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Label;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import p_en_o_cw_2017.AutopilotInputs;
+import p_en_o_cw_2017.AutopilotOutputs;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
@@ -36,6 +37,64 @@ public class SidebarControl extends VBox {
 
     @FXML
     private Label simulationErrorLabel;
+
+    /// TESTBED INFO
+
+    @FXML
+    private Label positionLabel;
+
+    @FXML
+    private ProgressIndicator headingIndicator;
+
+    @FXML
+    private Label headingLabel;
+
+    @FXML
+    private ProgressIndicator pitchIndicator;
+
+    @FXML
+    private Label pitchLabel;
+
+    @FXML
+    private ProgressIndicator rollIndicator;
+
+    @FXML
+    private Label rollLabel;
+
+    /// AUTOPILOT INFO
+
+    //Thrust
+    @FXML
+    private ProgressBar thrustBar;
+
+    @FXML
+    private Label thrustLabel;
+
+    //Wing inclination
+    @FXML
+    private ProgressIndicator leftWingInclinationIndicator;
+
+    @FXML
+    private Label leftWingInclinationLabel;
+
+    @FXML
+    private ProgressIndicator rightWingInclinationIndicator;
+
+    @FXML
+    private Label rightWingInclinationLabel;
+
+    //Stabilizer inclination
+    @FXML
+    private ProgressIndicator horStabInclinationIndicator;
+
+    @FXML
+    private Label horStabInclinationLabel;
+
+    @FXML
+    private ProgressIndicator verStabInclinationIndicator;
+
+    @FXML
+    private Label verStabInclinationLabel;
 
     //@FXML
     //private ProgressBar progressBar;
@@ -69,6 +128,7 @@ public class SidebarControl extends VBox {
             getSimulation().addOnUpdateEventHandler(new UpdateEventHandler((inputs, outputs) -> {
                 simulationFinishedProperty.set(getSimulation().hasSimulationFinished());
                 simulationErrorProperty.set(getSimulation().hasSimulationCrashed());
+                updateLabels(inputs, outputs);
             },UpdateEventHandler.LOW_PRIORITY));
         });
         playButton.disableProperty().bind(simulationFinishedProperty.or(simulationErrorProperty));
@@ -79,6 +139,41 @@ public class SidebarControl extends VBox {
 
         simulationErrorLabel.visibleProperty().bind(simulationErrorProperty);
         simulationErrorLabel.managedProperty().bind(simulationErrorProperty);
+    }
+
+    private void updateLabels(AutopilotInputs inputs, AutopilotOutputs outputs){
+        positionLabel.setText(String.format("X:%6.2f  Y:%6.2f  Z:%6.2f", inputs.getX(), inputs.getY(), inputs.getZ()));
+
+        //Heading
+        headingIndicator.setProgress((inputs.getHeading()+Math.PI) / (2d*Math.PI));
+        headingLabel.setText(String.format("%.2f", Math.toDegrees(inputs.getHeading())));
+
+        //Pitch
+        pitchIndicator.setProgress((inputs.getPitch()+Math.PI) / (2d*Math.PI));
+        pitchLabel.setText(String.format("%.2f", Math.toDegrees(inputs.getPitch())));
+
+        //Roll
+        rollIndicator.setProgress((inputs.getRoll()+Math.PI) / (2d*Math.PI));
+        rollLabel.setText(String.format("%.2f", Math.toDegrees(inputs.getRoll())));
+
+        //Thrust
+        double thrustValue = outputs.getThrust()/getSimulation().getConfig().getMaxThrust();
+        thrustBar.setProgress(thrustValue);
+        thrustLabel.setText(String.format("%15.2f", outputs.getThrust()));
+
+        //Wing inclination
+        leftWingInclinationIndicator.setProgress((outputs.getLeftWingInclination()+(Math.PI/2d)) / Math.PI);
+        leftWingInclinationLabel.setText(String.format("%8.5f", outputs.getLeftWingInclination()));
+
+        rightWingInclinationIndicator.setProgress((outputs.getRightWingInclination()+(Math.PI/2d)) / Math.PI);
+        rightWingInclinationLabel.setText(String.format("%8.5f", outputs.getRightWingInclination()));
+
+        //Stabilizer inclination
+        horStabInclinationIndicator.setProgress((outputs.getHorStabInclination()+(Math.PI/2d)) / Math.PI);
+        horStabInclinationLabel.setText(String.format("%8.5f", outputs.getHorStabInclination()));
+
+        verStabInclinationIndicator.setProgress((outputs.getVerStabInclination()+(Math.PI/2d)) / Math.PI);
+        verStabInclinationLabel.setText(String.format("%8.5f", outputs.getVerStabInclination()));
     }
 
     public void setSimulation(SimulationDriver simulationProperty) {
