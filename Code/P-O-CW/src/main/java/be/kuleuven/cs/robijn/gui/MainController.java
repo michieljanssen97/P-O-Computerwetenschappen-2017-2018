@@ -87,8 +87,28 @@ public class MainController {
             },UpdateEventHandler.HIGH_PRIORITY));
             world.addChild(chaseCamera);
 
-            Box box = world.getFirstChildOfType(Box.class);
+            OrthographicCamera sideCamera = getSimulation().getTestBed().getRenderer().createOrthographicCamera();
+            sideCamera.setWidth(130);
+            sideCamera.setHeight(30);
+            sideCamera.setName(CameraViewControl.SIDE_CAMERA_ID);
+            sideCamera.setRelativePosition(new ArrayRealVector(new double[]{1000, 5, -55}, false));
+            sideCamera.setRelativeRotation(new Rotation(new Vector3D(0, 1, 0), Math.PI/2d));
+            sideCamera.setFarPlane(100000);
+            world.addChild(sideCamera);
+
+            OrthographicCamera topCamera = getSimulation().getTestBed().getRenderer().createOrthographicCamera();
+            topCamera.setWidth(130);
+            topCamera.setHeight(40);
+            topCamera.setName(CameraViewControl.TOPDOWN_CAMERA_ID);
+            topCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 1000, -55}, false));
+            Rotation rot = new Rotation(new Vector3D(0, 0, 1), Math.PI/2d)
+                    .applyTo(new Rotation(new Vector3D(0, 1, 0), Math.PI/2d));
+            topCamera.setRelativeRotation(rot);
+            topCamera.setFarPlane(100000);
+            world.addChild(topCamera);
+
             PerspectiveCamera boxCamera = getSimulation().getTestBed().getRenderer().createPerspectiveCamera();
+            Box box = world.getFirstChildOfType(Box.class);
             boxCamera.setHorizontalFOV((float)Math.toRadians(120));
             boxCamera.setVerticalFOV((float)Math.toRadians(120));
             boxCamera.setName(CameraViewControl.BOX_CAMERA_ID);
