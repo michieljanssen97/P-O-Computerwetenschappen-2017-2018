@@ -36,11 +36,6 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		//Add box to world
 		Box box = new Box();
 		
-//		Box box2 = new Box();
-//		box2.setRelativePosition(new ArrayRealVector(new double[] {0, 150, -100}, false));
-//		this.addChild(box2);
-//		allBoxList.add(box2);
-		
 		double zDistance = 100.0;
 		
 		//simulatie1
@@ -51,9 +46,16 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		
 		//simulatie3
 		//box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/48.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-		
+
+		//box.setRelativePosition(new ArrayRealVector(new double[] {0, 100, -100}, false));
 		this.addChild(box); //add box to Virtual testbed
 		allBoxList.add(box); //add box to list of all boxes to reach
+		
+//		Box box2 = new Box();
+//		box2.setRelativePosition(new ArrayRealVector(new double[] {0, 150, -100}, false));
+//		this.addChild(box2);
+//		allBoxList.add(box2);
+		
 	}
 	
 	public ArrayList<Box> getAllBoxes(){
@@ -66,7 +68,8 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 
 	public boolean update(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs output){
 		Drone drone = this.getFirstChildOfType(Drone.class);
-		Box box = this.getFirstChildOfType(Box.class);
+		//Box box = this.getFirstChildOfType(Box.class);
+		Box box = getAllBoxes().get(0);
 
 		float stopDistanceToBox = 4;
 		float cubeRadius = (float) 0.5;
@@ -74,11 +77,13 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		
 		//Check if the drone reached a cube
 		//true if the center of mass of the drone is in a specified distance of the center of a cube
+		//System.out.println(getAllBoxes().size());
+		//System.out.println("diiiiiiiiiiiiiiiist "+drone.getWorldPosition().getDistance(box.getWorldPosition()));
 		if (drone.getWorldPosition().getDistance(box.getWorldPosition()) <= stopDistanceToCenterBox){
 			//The box should not be taken into account anymore, it is already reached
 			removeBoxFromList(box); 
 			//Remove the reached box from the testbed
-			removeChild(box);
+			//removeChild(box);
 			
 			//Stop the simulation if all boxes are handled
 			if(getAllBoxes().isEmpty()) {
