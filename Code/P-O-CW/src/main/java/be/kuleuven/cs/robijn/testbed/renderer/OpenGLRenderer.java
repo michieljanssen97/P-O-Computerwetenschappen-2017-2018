@@ -115,7 +115,7 @@ public class OpenGLRenderer implements Renderer {
         if(!(buffer instanceof OpenGLFrameBuffer)){
             throw new IllegalArgumentException("Incompatible framebuffer");
         }
-        if(!(camera instanceof OpenGLCamera)){
+        if(!(camera instanceof OpenGLPerspectiveCamera) && !(camera instanceof OpenGLOrthographicCamera)){
             throw new IllegalArgumentException("Incompatible camera");
         }
 
@@ -144,9 +144,8 @@ public class OpenGLRenderer implements Renderer {
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
         //Setup per-camera matrices
-        OpenGLCamera openglCamera = (OpenGLCamera)camera;
-        Matrix4f viewMatrix = createViewMatrix(openglCamera);
-        Matrix4f projectionMatrix = createProjectionMatrix(openglCamera.getHorizontalFOV(), openglCamera.getVerticalFOV(), 0.1f, 1000f);
+        Matrix4f viewMatrix = createViewMatrix(camera);
+        Matrix4f projectionMatrix = createProjectionMatrix(camera);
         Matrix4f viewProjectionMatrix = new Matrix4f(projectionMatrix).mul(viewMatrix);
 
         //Render ground if needed
@@ -156,7 +155,7 @@ public class OpenGLRenderer implements Renderer {
 
         //Render objects
         for (WorldObject child : worldRoot.getChildren()){
-            renderChildren(child, viewProjectionMatrix, !openglCamera.areDronesHidden());
+            renderChildren(child, viewProjectionMatrix, !camera.areDronesHidden());
         }
     }
 
@@ -205,7 +204,7 @@ public class OpenGLRenderer implements Renderer {
      * Returns a linear transformation matrix for transforming vertices from world space to camera space.
      * @return a non-null matrix
      */
-    private Matrix4f createViewMatrix(OpenGLCamera camera){
+    private Matrix4f createViewMatrix(Camera camera){
         Matrix4f viewMatrix = new Matrix4f();
         viewMatrix.identity();
 
@@ -225,10 +224,28 @@ public class OpenGLRenderer implements Renderer {
      * Returns a linear transformation matrix for transforming vertices from camera space to screen space.
      * @return a non-null matrix
      */
-    private Matrix4f createProjectionMatrix(float xFOV, float yFOV, float zNear, float zFar){
+    private Matrix4f createProjectionMatrix(Camera camera){
         Matrix4f projectionMatrix = new Matrix4f();
         projectionMatrix.identity();
-        projectionMatrix.perspective(yFOV, xFOV/yFOV, zNear, zFar);
+
+        if(camera instanceof OpenGLPerspectiveCamera){
+            OpenGLPerspectiveCamera perspCam = (OpenGLPerspectiveCamera)camera;
+            projectionMatrix.perspective(
+                    perspCam.getVerticalFOV(), perspCam.getHorizontalFOV()/perspCam.getVerticalFOV(),
+                    perspCam.getNearPlane(), perspCam.getFarPlane()
+            );
+        }else if(camera instanceof OpenGLOrthographicCamera){
+            OpenGLOrthographicCamera orthoCam = (OpenGLOrthographicCamera)camera;
+            float width = orthoCam.getWidth();
+            float height = orthoCam.getHeight();
+            projectionMatrix.ortho(
+                    -width/2f, width/2f, -height/2f,height/2f,
+                    orthoCam.getNearPlane(), orthoCam.getFarPlane()
+            );
+        }else{
+            throw new RuntimeException("No projection matrix defined for camera type");
+        }
+
         //Reading the pixels from an OpenGL framebuffer results in a flipped image.
         //For example:
         //000111222      666777888
@@ -248,8 +265,13 @@ public class OpenGLRenderer implements Renderer {
     }
 
     @Override
-    public OpenGLCamera createCamera() {
-        return new OpenGLCamera();
+    public OpenGLPerspectiveCamera createPerspectiveCamera() {
+        return new OpenGLPerspectiveCamera();
+    }
+
+    @Override
+    public OrthographicCamera createOrthographicCamera() {
+        return new OpenGLOrthographicCamera();
     }
 
     @Override
