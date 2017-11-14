@@ -245,7 +245,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		final float verStabInclination = verStabInclinationTemp;
 		
 		float yAccelerationTemp = 5.0f;
-		float maxYVelocity = (float) (-drone.getVelocity().getEntry(2)*Math.tan(drone.getPitch()));
+		float maxYVelocity = (float) (-drone.getVelocity().getEntry(2)*Math.tan(drone.getPitch()+(imageXRotation/360)*2*Math.PI));
 		
 		float yVelocity = (float)drone.getVelocity().getEntry(1);
 		if (yVelocity > maxYVelocity)
