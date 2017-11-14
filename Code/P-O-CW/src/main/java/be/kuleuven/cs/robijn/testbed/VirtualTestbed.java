@@ -1,5 +1,7 @@
 package be.kuleuven.cs.robijn.testbed;
 
+import java.util.ArrayList;
+
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
@@ -19,6 +21,8 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	private FrameBuffer frameBuffer;
 	private PerspectiveCamera droneCamera;
 	private byte[] latestCameraImage;
+	
+	private ArrayList<Box> allBoxList = new ArrayList<Box>();
 
 	public VirtualTestbed(AutopilotConfig config, RealVector initialVelocity) {
 		this.config = config;
@@ -29,6 +33,12 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 
 		//Add box to world
 		Box box = new Box();
+		
+//		Box box2 = new Box();
+//		box2.setRelativePosition(new ArrayRealVector(new double[] {0, 150, -100}, false));
+//		this.addChild(box2);
+//		allBoxList.add(box2);
+		
 		double zDistance = 100.0;
 		
 		//Case 1
@@ -49,18 +59,38 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		//simulatie3
 		//box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/48.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
 		
-		this.addChild(box);
+		this.addChild(box); //add box to Virtual testbed
+		allBoxList.add(box); //add box to list of all boxes to reach
+	}
+	
+	public ArrayList<Box> getAllBoxes(){
+		return allBoxList;
+	}
+	
+	public void removeBoxFromList(Box box) {
+		allBoxList.remove(box);
 	}
 
 	public boolean update(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs output){
 		Drone drone = this.getFirstChildOfType(Drone.class);
 		Box box = this.getFirstChildOfType(Box.class);
 
-		//Check simulation finished
-		if ((drone.getRightWingPosition().getDistance(box.getWorldPosition()) < 4.5)
-				|| (drone.getLeftWingPosition().getDistance(box.getWorldPosition()) < 4.5)
-				|| (drone.getEnginePosition().getDistance(box.getWorldPosition()) < 4.5)) {
-			return true;
+		float stopDistanceToBox = 4;
+		float cubeRadius = (float) 0.5;
+		float stopDistanceToCenterBox = stopDistanceToBox + cubeRadius;
+		
+		//Check if the drone reached a cube
+		//true if the center of mass of the drone is in a specified distance of the center of a cube
+		if (drone.getWorldPosition().getDistance(box.getWorldPosition()) <= stopDistanceToCenterBox){
+			//The box should not be taken into account anymore, it is already reached
+			removeBoxFromList(box); 
+			//Remove the reached box from the testbed
+			removeChild(box);
+			
+			//Stop the simulation if all boxes are handled
+			if(getAllBoxes().isEmpty()) {
+				return true;
+			}
 		}
 
 		this.setElapsedTime(secondsSinceStart);
