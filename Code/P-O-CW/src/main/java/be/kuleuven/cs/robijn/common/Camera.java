@@ -5,26 +5,28 @@ package be.kuleuven.cs.robijn.common;
  */
 public abstract class Camera extends WorldObject {
     /**
-     * Returns the horizontal FOV, in radians
+     * Returns the distance from the camera to the near plane.
+     * Any object closer than this distance to the camera will not be visible.
+     * @return the near plane distance
      */
-    public abstract float getHorizontalFOV();
+    public abstract float getNearPlane();
 
     /**
-     * Sets the horizontal FOV, in radians
-     * @throws IllegalArgumentException if the specified value is NaN, infinite, negative or larger than Math.PI
+     * Sets the near plane distance. Must not be NaN or infinite.
      */
-    public abstract void setHorizontalFOV(float fov);
+    public abstract void setNearPlane(float zNear);
 
     /**
-     * Returns the vertical FOV, in radians
+     * Returns the distance from the camera to the far plane.
+     * Any object further than this distance to the camera will not be visible.
+     * @return the far plane distance.
      */
-    public abstract float getVerticalFOV();
+    public abstract float getFarPlane();
 
     /**
-     * Sets the horizontal FOV, in radians
-     * @throws IllegalArgumentException if the specified value is NaN, infinite, negative or larger than Math.PI
+     * Sets the far plane distance. Must not be NaN or infinite.
      */
-    public abstract void setVerticalFOV(float fov);
+    public abstract void setFarPlane(float zFar);
 
     /**
      * Sets whether or not drones are invisible on images rendered through this camera
@@ -38,7 +40,15 @@ public abstract class Camera extends WorldObject {
      */
     public abstract boolean areDronesHidden();
 
+    /**
+     * Sets whether or not the ground is visible on images rendered through this camera
+     * @param drawGround if true, the ground will be visible. If false, the ground will be invisible
+     */
     public abstract void setDrawGround(boolean drawGround);
 
+    /**
+     * Returns whether or not the ground is visible on images rendered through this camera.
+     * False by default.
+     */
     public abstract boolean isGroundDrawn();
 }

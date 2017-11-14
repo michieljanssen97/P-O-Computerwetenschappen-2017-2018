@@ -63,7 +63,7 @@ public class MainController {
 
             Drone drone = world.getFirstChildOfType(Drone.class);
 
-            Camera droneCamera = getSimulation().getTestBed().getRenderer().createCamera();
+            PerspectiveCamera droneCamera = getSimulation().getTestBed().getRenderer().createPerspectiveCamera();
             droneCamera.setHorizontalFOV((float)Math.toRadians(120));
             droneCamera.setVerticalFOV((float)Math.toRadians(120));
             droneCamera.setName(CameraViewControl.DRONE_CAMERA_ID);
@@ -71,7 +71,7 @@ public class MainController {
             droneCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 0, 0}, false));
             drone.addChild(droneCamera);
 
-            Camera chaseCamera = getSimulation().getTestBed().getRenderer().createCamera();
+            PerspectiveCamera chaseCamera = getSimulation().getTestBed().getRenderer().createPerspectiveCamera();
             chaseCamera.setHorizontalFOV((float)Math.toRadians(120));
             chaseCamera.setVerticalFOV((float)Math.toRadians(120));
             chaseCamera.setName(CameraViewControl.THIRDPERSON_CAMERA_ID);
@@ -87,7 +87,7 @@ public class MainController {
             world.addChild(chaseCamera);
 
             Box box = world.getFirstChildOfType(Box.class);
-            Camera boxCamera = getSimulation().getTestBed().getRenderer().createCamera();
+            PerspectiveCamera boxCamera = getSimulation().getTestBed().getRenderer().createPerspectiveCamera();
             boxCamera.setHorizontalFOV((float)Math.toRadians(120));
             boxCamera.setVerticalFOV((float)Math.toRadians(120));
             boxCamera.setName(CameraViewControl.BOX_CAMERA_ID);

@@ -19,7 +19,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 
 	private OpenGLRenderer renderer;
 	private FrameBuffer frameBuffer;
-	private Camera droneCamera;
+	private PerspectiveCamera droneCamera;
 	private byte[] latestCameraImage;
 
 	public VirtualTestbed(List<Box> boxes, AutopilotConfig config, RealVector initialVelocity) {
@@ -224,8 +224,8 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		}
 	}
 
-	private Camera createDroneCamera(){
-		Camera camera = getRenderer().createCamera();
+	private PerspectiveCamera createDroneCamera(){
+		PerspectiveCamera camera = getRenderer().createPerspectiveCamera();
 		camera.setHorizontalFOV((float)Math.toRadians(config.getHorizontalAngleOfView()));
 		camera.setVerticalFOV((float)Math.toRadians(config.getVerticalAngleOfView()));
 		camera.setDronesHidden(true);
