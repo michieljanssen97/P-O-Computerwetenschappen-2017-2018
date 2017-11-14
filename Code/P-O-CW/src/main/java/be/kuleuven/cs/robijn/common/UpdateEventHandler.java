@@ -34,6 +34,10 @@ public class UpdateEventHandler implements Comparable<UpdateEventHandler>{
 
     @Override
     public int compareTo(UpdateEventHandler updateEventHandler) {
-        return updateEventHandler.getPriority() - getPriority();
+        int comparison = updateEventHandler.getPriority() - getPriority();
+        if(comparison == 0){
+            comparison = Integer.compare(this.hashCode(), updateEventHandler.hashCode());
+        }
+        return comparison;
     }
 }
