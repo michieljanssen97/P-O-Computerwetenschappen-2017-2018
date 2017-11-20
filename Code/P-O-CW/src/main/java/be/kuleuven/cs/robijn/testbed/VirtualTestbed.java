@@ -76,6 +76,8 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	public boolean update(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs output){
 		Drone drone = this.getFirstChildOfType(Drone.class);
 		//Box box = this.getFirstChildOfType(Box.class);
+		//TODO aanpassen adhv wat camera terugggeeft: 1 enkele box of lijst van zichtbare boxes
+		//TODO testbed en autopilot zelfde box laten 'zien'
 		Box box = getAllBoxes().get(0);
 
 		float stopDistanceToBox = 4;
@@ -84,13 +86,12 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		
 		//Check if the drone reached a cube
 		//true if the center of mass of the drone is in a specified distance of the center of a cube
-		//System.out.println(getAllBoxes().size());
-		//System.out.println("diiiiiiiiiiiiiiiist "+drone.getWorldPosition().getDistance(box.getWorldPosition()));
 		if (drone.getWorldPosition().getDistance(box.getWorldPosition()) <= stopDistanceToCenterBox){
 			//The box should not be taken into account anymore, it is already reached
 			removeBoxFromList(box); 
+			
 			//Remove the reached box from the testbed
-			//removeChild(box);
+			removeChild(box);
 			
 			//Stop the simulation if all boxes are handled
 			if(getAllBoxes().isEmpty()) {
