@@ -17,6 +17,7 @@ public class SimulationDriver {
     private boolean simulationPaused;
     private boolean simulationFinished;
     private boolean simulationCrashed;
+    private final AutopilotConfig config;
     private AutopilotInputs latestAutopilotInputs;
     private AutopilotOutputs latestAutopilotOutputs;
 
@@ -29,6 +30,7 @@ public class SimulationDriver {
     private TreeSet<UpdateEventHandler> updateEventHandlers = new TreeSet<>();
     
     public SimulationDriver(AutopilotConfig config){
+        this.config = config;
     	RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -6.667}, false);
         testBed = new VirtualTestbed(config, initialVelocity);
         autoPilot = new Autopilot(config, initialVelocity);
@@ -80,6 +82,10 @@ public class SimulationDriver {
             pauseTime = System.currentTimeMillis();
         }
         this.simulationPaused = simulationPaused;
+    }
+
+    public AutopilotConfig getConfig() {
+        return config;
     }
 
     public boolean isSimulationPaused() {
