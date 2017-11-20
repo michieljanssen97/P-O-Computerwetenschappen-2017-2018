@@ -3,6 +3,7 @@ package be.kuleuven.cs.robijn.autopilot.image;
 import java.util.ArrayList;
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
@@ -132,12 +133,25 @@ public class ImageRecognizer {
 			float hue = cu.getHue();
 			float sat = cu.getSaturation();
 			RealVector vector = image.getXYZDistance(hue, sat);
+			
+			//Replace 0,0,0 with the roll, pitch and heading.
+			RealVector vectorWorld = transformationToWorldCoordinates(vector, 0, 0, 0);
+			
+			//Replace 0,0,0 with the position of the drone (x, y, z) in world coordinates.
+			double[] droneCoordinates = {0,0,0};
+			
+			RealVector dronePosition = new ArrayRealVector(droneCoordinates);
+			
+			double[] cubeCoordinates = {dronePosition.getEntry(0) + vectorWorld.getEntry(0), dronePosition.getEntry(1) + vectorWorld.getEntry(1), dronePosition.getEntry(2) + vectorWorld.getEntry(2)};
+			
+			RealVector cubePosition = new ArrayRealVector(cubeCoordinates);
+			
 			ImageRecognizerCube cube = getImageRecognizerCube(image, hue, sat);
 			if (image.getTotalDistance(hue, sat) <= 4)
 				ImageRecognizerCubeList.remove(cube);
 			if (cube == null){
 				float value = image.getNecessaryCubeFactor(hue, sat);
-				ImageRecognizerCube cube1 = new ImageRecognizerCube((float) vector.getEntry(0), (float) vector.getEntry(1), (float) vector.getEntry(2), hue, sat);
+				ImageRecognizerCube cube1 = new ImageRecognizerCube((float) cubePosition.getEntry(0), (float) cubePosition.getEntry(1), (float) cubePosition.getEntry(2), hue, sat);
 				cube1.setFactor(value);
 				ImageRecognizerCubeList.add(cube1);
 				break;
@@ -145,9 +159,9 @@ public class ImageRecognizer {
 				float previous_factor = cube.getFactor();
 				float new_factor = image.getNecessaryCubeFactor(hue, sat);
 				float total_factor = previous_factor + new_factor;
-				float newX = (previous_factor * cube.getX() + new_factor * (float) image.getXYZDistance(hue, sat).getEntry(0)) / total_factor;
-				float newY = (previous_factor * cube.getY() + new_factor * (float) image.getXYZDistance(hue, sat).getEntry(1)) / total_factor;
-				float newZ = (previous_factor * cube.getZ() + new_factor * (float) image.getXYZDistance(hue, sat).getEntry(2)) / total_factor;
+				float newX = (previous_factor * cube.getX() + new_factor * (float) cubePosition.getEntry(0)) / total_factor;
+				float newY = (previous_factor * cube.getY() + new_factor * (float) cubePosition.getEntry(1)) / total_factor;
+				float newZ = (previous_factor * cube.getZ() + new_factor * (float) cubePosition.getEntry(2)) / total_factor;
 				cube.setPosition(newX, newY, newZ);
 				cube.setFactor(total_factor);
 			}
@@ -165,7 +179,7 @@ public class ImageRecognizer {
 	
 	
 	
-//  -----------------      //
+ //  -----------------      //
  //                            //
  //  TRANSFORMATION MATRICES   //				DRONE TO WORLD COORDINATES
  //                            //
