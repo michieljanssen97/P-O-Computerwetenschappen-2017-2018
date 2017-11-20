@@ -11,8 +11,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import p_en_o_cw_2017.AutopilotInputs;
-import p_en_o_cw_2017.AutopilotOutputs;
+import interfaces.AutopilotInputs;
+import interfaces.AutopilotOutputs;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
