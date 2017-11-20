@@ -3,6 +3,7 @@ package be.kuleuven.cs.robijn.autopilot.image;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.junit.Test;
 
@@ -353,6 +354,16 @@ public class ImageTest {
 		float[] result = im.getPercentageXYZPixels(0.0f, 1.0f);
 		float[] expected = {0.36f, 0.31f, 0.32f};
 		assertArrayEquals(expected, result, 0.01f);
+	}
+	
+	@Test
+	public void testGetDistance1Pixel() throws Exception{
+		byte[] image = this.loadImageRGBBytes("1pixel.png");
+		Image im = new Image(image, 200, 200, 120, 120);
+		ArrayList<ImageCube> cubeList = im.getImageCubes();
+		float hue = cubeList.get(0).getHue();
+		float sat = cubeList.get(0).getSaturation();
+		System.out.println(Float.toString(im.getTotalDistance(hue, sat)));
 	}
 	
 }

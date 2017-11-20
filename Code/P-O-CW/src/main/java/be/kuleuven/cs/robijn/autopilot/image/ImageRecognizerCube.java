@@ -12,6 +12,8 @@ public class ImageRecognizerCube {
 	
 	private float saturation;
 	
+	private float factor;
+	
 	public ImageRecognizerCube(float x, float y, float z, float hue, float saturation) throws IllegalArgumentException{
 		if (!isValidCoordinate(x) || !isValidCoordinate(y) || !isValidCoordinate(z))
 			throw new IllegalArgumentException("The given position for the cube is invalid.");
@@ -22,6 +24,20 @@ public class ImageRecognizerCube {
 			throw new IllegalArgumentException("The given color for the cube is invalid.");
 		this.hue = hue;
 		this.saturation = saturation;
+	}
+	
+	public float getFactor(){
+		return this.factor;
+	}
+	
+	public boolean isValidFactor(float value){
+		return (value >= 0 && value <= 5);
+	}
+	
+	public void setFactor(float value) throws IllegalArgumentException{
+		if (!isValidFactor(value))
+			throw new IllegalArgumentException("This is not a valid factor for this cube.");
+		this.factor = value;
 	}
 	
 	public boolean isValidCoordinate(float value){

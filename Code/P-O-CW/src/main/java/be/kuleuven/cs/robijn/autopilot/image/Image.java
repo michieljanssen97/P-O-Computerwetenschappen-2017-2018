@@ -1,9 +1,10 @@
 package be.kuleuven.cs.robijn.autopilot.image;
 
-import be.kuleuven.cs.robijn.common.math.Vector3f;
-
 import java.io.IOException;
 import java.util.ArrayList;
+
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealVector;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -228,13 +229,13 @@ public class Image {
 		float minimum = (float) Math.sqrt( Math.pow(getnbRows(), 2) + Math.pow(getnbColumns(), 2) );
 		float[] centerPixel = getCubeCenterPixel(hue, sat);
 		for(Pixel p : getCubeEdgePixels(hue, sat)){
-			float distance = (float) Math.sqrt(Math.pow(p.getX()-centerPixel[0], 2) + Math.pow(p.getY()-centerPixel[1], 2));
+			float distance = (float) Math.sqrt(Math.pow(p.getX()-centerPixel[0], 2) + Math.pow(p.getY()-centerPixel[1], 2)) + 0.5f;
 			if (distance < minimum)
 				minimum = distance;
 		}
 		return minimum;
 	}
-	
+
 	/**
 	 * Return the maximum distance from the red pixels that are on the edge of the cube, to its center.
 	 * @param hue	The given hue
@@ -365,7 +366,7 @@ public class Image {
 	 * Return a vector containing the x, y and z distance from the camera to the cube with given hue and saturation.
 	 * @throws Exception	Something goes wrong while calculating the pixels with given hue and saturation
 	 */
-	public Vector3f getXYZDistance(float hue, float sat) throws Exception{
+	public RealVector getXYZDistance(float hue, float sat) throws Exception{
 		float[] cubeCenter = getCubeCenterPixel(hue, sat);
 		float[] imageCenter = getCenterPixel();
 		float angleX = (cubeCenter[0] - imageCenter[0]) * getHorizontalAngle() / getnbColumns();
@@ -373,8 +374,9 @@ public class Image {
 		float distanceX =  (float) (getTotalDistance(hue, sat)*Math.sin(degreesToRadians(angleX)));
 		float distanceY =  (float) (getTotalDistance(hue, sat)*Math.sin(degreesToRadians(angleY)));
 		float distanceZ = (float) - Math.sqrt(Math.pow(getTotalDistance(hue, sat), 2) - Math.pow(distanceX, 2) - Math.pow(distanceY, 2));
-		Vector3f ResultVector = new Vector3f(distanceX, distanceY, distanceZ);
-		return ResultVector;
+		double[] vectorDouble = {distanceX, distanceY, distanceZ};
+		RealVector realVector = new ArrayRealVector(vectorDouble);
+		return realVector;
 	}
 	
 	
@@ -586,6 +588,25 @@ public class Image {
 			}
 		}
 		return cube;
+	}
+	
+	/**
+	 * Get the factor that is necessary for the cube with given hue and saturation.
+	 * @param hue	The given hue
+	 * @param sat	The given saturation
+	 */
+	public float getNecessaryCubeFactor(float hue, float sat) throws Exception{
+		ArrayList<Pixel> cubePixels = getCubePixels(hue, sat);
+		for (Pixel p : cubePixels){
+			if (p.getX() == 0 || p.getX() == getnbColumns() -1 || p.getY() == 0 || p.getY() == getnbRows() -1)
+				return 0;
+		}
+		float maxDistanceToCenter = (float) Math.sqrt(Math.pow(getnbColumns()/2, 2) + Math.pow(getnbRows()/2, 2));
+		float[] cubeCenterPixel = getCubeCenterPixel(hue, sat);
+		float[] PixelsToCenter = getPixelsFromCenter(cubeCenterPixel[0], cubeCenterPixel[1]);
+		float distanceToCenter = (float) Math.sqrt(Math.pow(PixelsToCenter[0], 2) + Math.pow(PixelsToCenter[1], 2));
+		float factorValue = 5 * (1 - distanceToCenter / maxDistanceToCenter) * (1 - 0.01f * getTotalDistance(hue, sat));
+		return factorValue;
 	}
 }
 

@@ -1,7 +1,10 @@
 package be.kuleuven.cs.robijn.autopilot.image;
 
-import be.kuleuven.cs.robijn.common.math.Vector3f;
 import java.util.ArrayList;
+
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
 
 
 /**
@@ -53,6 +56,7 @@ public class ImageRecognizer {
 		return image.getRotationToCube(hue, sat);
 	}
 	
+	
 
 	/**
 	 * Returns the distance to cube with given hue and saturation in the given image.
@@ -70,31 +74,135 @@ public class ImageRecognizer {
 	 * @return	The vector from the camera to the center of the cube
 	 * @throws Exception There are no sides of a cube with given hue and saturation visible in this Image
 	 */
-	public Vector3f getVectorToCube(Image image, float hue, float sat) throws Exception{
+	public RealVector getVectorToCube(Image image, float hue, float sat) throws Exception{
 		return image.getXYZDistance(hue, sat);
 	}
 	
+	/**
+	 * Return the ImageRecognizerCube corresponding with the given hue and saturation on the given image.
+	 * @param image		The given image
+	 * @param hue		The given hue
+	 * @param sat		The given saturation
+	 * @return		The corresponding ImageRecognizerCube, or null if no ImageRecognizerCube in the list
+	 * 				has the given hue and saturation.
+	 * @throws Exception
+	 */
 	public ImageRecognizerCube getImageRecognizerCube(Image image, float hue, float sat) throws Exception{
 		for (ImageRecognizerCube cu : ImageRecognizerCubeList){
 			if (cu.getHue() == hue && cu.getSaturation() == sat){
-				Vector3f vector = image.getXYZDistance(hue, sat);
-				ImageRecognizerCube cube = new ImageRecognizerCube(vector.getX(), vector.getY(), vector.getZ(), hue, sat);
-				return cube;
+				return cu;
 			}
 		}
 		return null;
 	}
 	
+	
+	/**
+	 * Update the list containing the ImageRecognizerCubes. For each cube, the new position is calculated
+	 * as the weighted average of the previously calculated position and the new position. The weight of
+	 * the previously calculated position gets larger the more times the position has been calculated.
+	 * @param image		The given image
+	 * @throws Exception
+	 */
 	public void UpdateImageRecognizerCubeList(Image image) throws Exception{
 		for (ImageCube cu : image.getImageCubes()){
 			float hue = cu.getHue();
 			float sat = cu.getSaturation();
-			Vector3f vector = image.getXYZDistance(hue, sat);
+			RealVector vector = image.getXYZDistance(hue, sat);
 			ImageRecognizerCube cube = getImageRecognizerCube(image, hue, sat);
+			if (image.getTotalDistance(hue, sat) <= 4)
+				ImageRecognizerCubeList.remove(cube);
 			if (cube == null){
-				ImageRecognizerCubeList.add(new ImageRecognizerCube(vector.getX(), vector.getY(), vector.getZ(), hue, sat));
+				float value = image.getNecessaryCubeFactor(hue, sat);
+				ImageRecognizerCube cube1 = new ImageRecognizerCube((float) vector.getEntry(0), (float) vector.getEntry(1), (float) vector.getEntry(2), hue, sat);
+				cube1.setFactor(value);
+				ImageRecognizerCubeList.add(cube1);
+				break;
+			} else {
+				float previous_factor = cube.getFactor();
+				float new_factor = image.getNecessaryCubeFactor(hue, sat);
+				float total_factor = previous_factor + new_factor;
+				float newX = (previous_factor * cube.getX() + new_factor * (float) image.getXYZDistance(hue, sat).getEntry(0)) / total_factor;
+				float newY = (previous_factor * cube.getY() + new_factor * (float) image.getXYZDistance(hue, sat).getEntry(1)) / total_factor;
+				float newZ = (previous_factor * cube.getZ() + new_factor * (float) image.getXYZDistance(hue, sat).getEntry(2)) / total_factor;
+				cube.setPosition(newX, newY, newZ);
+				cube.setFactor(total_factor);
 			}
+			
 		}
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+//  -----------------      //
+ //                            //
+ //  TRANSFORMATION MATRICES   //				DRONE TO WORLD COORDINATES
+ //                            //
+ //     -----------------      //
+	/**
+	 * Transform the given vector from Drone coordinates to Heading-Pitch coordinates
+	 * @param realVector
+	 * 			The vector to transform from Drone to Heading-Pitch coordinates
+	 * @return The given vector in Heading-Pitch coordinates
+	 */
+	public RealVector inverseRollTransformation(RealVector realVector, float roll){
+		float rollAngle = roll;
+		RealMatrix inverseRollTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for inverse roll
+			{Math.cos(rollAngle),      -Math.sin(rollAngle),       0},
+			{Math.sin(rollAngle),       Math.cos(rollAngle),       0}, 
+			{0,                         0,                         1}
+			}, false);
+		return inverseRollTransformation.operate(realVector);	
+	}
+	
+	/**
+	 * Transform the given vector from Heading-Pitch coordinates to Heading coordinates
+	 * @param realVector
+	 * 			The vector to transform from Heading-Pitch to Heading coordinates
+	 * @return The given vector in Heading coordinates
+	 */
+	public RealVector inversePitchTransformation(RealVector realVector, float pitch){
+		float PitchAngle = pitch;
+		RealMatrix inversePitchTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for inverse pitch
+			{1,       0,                        0},
+			{0,       Math.cos(PitchAngle),    -Math.sin(PitchAngle)},
+			{0,       Math.sin(PitchAngle),     Math.cos(PitchAngle)}
+			}, false);
+		return inversePitchTransformation.operate(realVector);	
+	}
+	
+	/**
+	 * Transform the given vector from Heading coordinates to World coordinates
+	 * @param realVector
+	 * 			The vector to transform from Heading to World coordinates
+	 * @return The given vector in World coordinates
+	 */
+	public RealVector inverseHeadingTransformation(RealVector realVector, float heading){
+		float headingAngle = heading;
+		RealMatrix inverseHeadingTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for inverse heading
+			{Math.cos(headingAngle),     0,       Math.sin(headingAngle)}, 
+			{0,                          1,       0}, 
+			{-Math.sin(headingAngle),    0,       Math.cos(headingAngle)}
+			}, false);
+		return inverseHeadingTransformation.operate(realVector);	
+	}
+	
+	/**
+	 * Transform the given vector from Drone coordinates to World Coordinates
+	 * @param realVector
+	 * 			The vector to transform from Drone to World coordinates
+	 * @return The given vector in World Coordinates
+	 */
+	public RealVector transformationToWorldCoordinates(RealVector realVector, float roll, float pitch, float heading) {
+		return this.inverseHeadingTransformation(this.inversePitchTransformation(this.inverseRollTransformation(realVector, roll), pitch), heading);
 	}
 	
 }
