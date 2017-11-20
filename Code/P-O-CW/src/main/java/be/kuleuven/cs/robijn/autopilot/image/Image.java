@@ -225,7 +225,7 @@ public class Image {
 	 * @param sat	The given saturation
 	 * @throws Exception Something goes wrong while calculating the red pixels
 	 */
-	public float getMinimumDistanceSpherePixels(float hue, float sat) throws Exception{
+	public float getMinimumDistanceSpherePixels(float hue, float sat) throws IllegalStateException{
 		float minimum = (float) Math.sqrt( Math.pow(getnbRows(), 2) + Math.pow(getnbColumns(), 2) );
 		float[] centerPixel = getCubeCenterPixel(hue, sat);
 		for(Pixel p : getCubeEdgePixels(hue, sat)){
@@ -233,7 +233,7 @@ public class Image {
 			if (distance < minimum)
 				minimum = distance;
 		}
-		return minimum;
+		return minimum + 0.5f;
 	}
 
 	/**
@@ -242,7 +242,7 @@ public class Image {
 	 * @param sat	The given saturation
 	 * @throws Exception	Something goes wrong while calculating the red pixels
 	 */
-	public float getMaximumDistanceSpherePixels(float hue, float sat) throws Exception{
+	public float getMaximumDistanceSpherePixels(float hue, float sat) throws IllegalStateException{
 		float maximum = 0;
 		float[] centerPixel = getCubeCenterPixel(hue, sat);
 		for(Pixel p : getCubeEdgePixels(hue, sat)){
@@ -250,7 +250,7 @@ public class Image {
 			if (distance > maximum)
 				maximum = distance;
 		}
-		return maximum;
+		return maximum + 0.5f;
 	}
 	
 	/**
@@ -259,7 +259,7 @@ public class Image {
 	 * @param sat	The given saturation
 	 * @throws Exception	Something goes wrong while calculating the pixels of the cube.
 	 */
-	public int getAmountSidesVisible(float hue, float sat) throws Exception{
+	public int getAmountSidesVisible(float hue, float sat) throws IllegalStateException{
 		boolean checkX = true;
 		boolean checkY = true;
 		boolean checkZ = true;
@@ -317,7 +317,7 @@ public class Image {
 	 * @param sat	The given saturation
 	 * @throws Exception	There are no sides of a cube with given hue and saturation visible in this Image
 	 */
-	public float getTotalDistance(float hue, float sat) throws Exception{
+	public float getTotalDistance(float hue, float sat) throws IllegalStateException{
 		int sides = getAmountSidesVisible(hue, sat);
 		if (sides == 3){
 			float[] percentageXYZPixels = getPercentageXYZPixels(hue, sat);
@@ -358,7 +358,7 @@ public class Image {
 			float angle = (pixels * getHorizontalAngle()) / getnbColumns();
 			return (float) (0.5 / Math.tan(degreesToRadians(angle)) + 0.5);
 		} else
-			throw new Exception("The cube does not have the right values to be visible or no cube is present.");
+			throw new IllegalStateException("The cube does not have the right values to be visible or no cube is present.");
 	}
 	
 	
@@ -426,7 +426,7 @@ public class Image {
 	 * @throws Exception				Something goes wrong while calculating the red pixels. 		
 	 * @throws IllegalStateException	The amount of visible sides is not equal to 2.
 	 */
-	public float getRatioPixelsIfTwoPlanesVisible(float hue, float sat) throws Exception,IllegalStateException{
+	public float getRatioPixelsIfTwoPlanesVisible(float hue, float sat) throws IllegalStateException{
 		if (getAmountSidesVisible(hue, sat) != 2){
 			throw new IllegalStateException("The amount of visible sides is not equal to 2");
 		}

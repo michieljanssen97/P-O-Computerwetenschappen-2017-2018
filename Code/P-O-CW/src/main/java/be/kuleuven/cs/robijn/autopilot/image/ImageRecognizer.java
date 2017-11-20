@@ -27,7 +27,7 @@ public class ImageRecognizer {
 	 * @return	An instance of the Image class containing the given values
 	 * @throws Exception	One of the parameters is invalid or the image can't be read
 	 */
-	public Image createImage(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView) throws Exception{
+	public Image createImage(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView) throws IllegalStateException, Exception{
 		Image im = new Image(image, nbRows, nbColumns, horizontalAngleOfView, verticalAngleOfView);
 		this.UpdateImageRecognizerCubeList(im);
 		return im;
@@ -52,7 +52,7 @@ public class ImageRecognizer {
 	 * 			(an x-value and a y-value given in degrees)
 	 * @throws Exception Something goes wrong while calculating the average coordinates of the pixels with given hue and saturation
 	 */
-	public float[] getNecessaryRotation(Image image, float hue, float sat) throws Exception{
+	public float[] getNecessaryRotation(Image image, float hue, float sat) throws IllegalStateException{
 		return image.getRotationToCube(hue, sat);
 	}
 	
@@ -78,19 +78,42 @@ public class ImageRecognizer {
 		return image.getXYZDistance(hue, sat);
 	}
 	
-	/**
-	 * Return the ImageRecognizerCube corresponding with the given hue and saturation on the given image.
-	 * @param image		The given image
-	 * @param hue		The given hue
-	 * @param sat		The given saturation
-	 * @return		The corresponding ImageRecognizerCube, or null if no ImageRecognizerCube in the list
-	 * 				has the given hue and saturation.
-	 * @throws Exception
-	 */
+
+	public ImageRecognizerCube getClosestCubeInWorld(){
+		float[] curPos = {0.0f, 0.0f, 0.0f}; //replace with drone's current position
+		ImageRecognizerCube closest = null;
+		float minimum = 1000f;
+		boolean first = true;
+		for (ImageRecognizerCube c : this.ImageRecognizerCubeList){
+			if (first){
+				closest = c;
+				first = false;
+			} else {
+				float distance = (float) Math.sqrt(Math.pow(curPos[0] - c.getX(), 2) + Math.pow(curPos[1] - c.getY(), 2) + Math.pow(curPos[2] - c.getZ(), 2));
+				if (distance < minimum){
+					minimum = distance;
+					closest = c;
+				}
+			}
+		}
+		return closest;
+	}
+	
+	public ArrayList<float[]> getAllHueSatCombinations(){
+		ArrayList<float[]> combos = new ArrayList<float[]>();
+		for (ImageRecognizerCube c : this.ImageRecognizerCubeList){
+			float[] combo = {c.getHue(), c.getSaturation()};
+			combos.add(combo);
+		}
+		return combos;
+	}
+	
 	public ImageRecognizerCube getImageRecognizerCube(Image image, float hue, float sat) throws Exception{
 		for (ImageRecognizerCube cu : ImageRecognizerCubeList){
-			if (cu.getHue() == hue && cu.getSaturation() == sat){
-				return cu;
+			if (floatFuzzyEquals(hue, cu.getHue(), 0.01f) && floatFuzzyEquals(sat, cu.getSaturation(), 0.01f)){
+				RealVector vector = image.getXYZDistance(hue, sat);
+				ImageRecognizerCube cube = new ImageRecognizerCube((float) vector.getEntry(0), (float) vector.getEntry(1), (float) vector.getEntry(2), hue, sat);
+				return cube;
 			}
 		}
 		return null;
@@ -203,6 +226,10 @@ public class ImageRecognizer {
 	 */
 	public RealVector transformationToWorldCoordinates(RealVector realVector, float roll, float pitch, float heading) {
 		return this.inverseHeadingTransformation(this.inversePitchTransformation(this.inverseRollTransformation(realVector, roll), pitch), heading);
+	}
+	
+	public boolean floatFuzzyEquals(float a, float b, float delta){
+		return Math.abs(a - b) <= delta;
 	}
 	
 }
