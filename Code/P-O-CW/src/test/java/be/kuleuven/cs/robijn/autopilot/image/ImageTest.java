@@ -3,6 +3,7 @@ package be.kuleuven.cs.robijn.autopilot.image;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.junit.Test;
 
@@ -354,5 +355,67 @@ public class ImageTest {
 		float[] expected = {0.36f, 0.31f, 0.32f};
 		assertArrayEquals(expected, result, 0.01f);
 	}
+	
+	@Test
+	public void testRatioPixelsCube2() throws Exception {
+		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
+		Image im = new Image(image1, 200, 200, 120, 120);
+		float result = im.getRatioPixelsIfTwoPlanesVisible(0.0f, 1.0f);
+		float expected = 1.01f;
+		assertEquals(expected, result, 0.01f);
+	}
+	
+	@Test
+	public void testRatioPixelsCube2BiggerRatio() throws Exception {
+		byte[] image1 = this.loadImageRGBBytes("cube2side2.png");
+		Image im = new Image(image1, 200, 200, 120, 120);
+		float result = im.getRatioPixelsIfTwoPlanesVisible(0.0f, 1.0f);
+		float expected = 4.65f;
+		assertEquals(expected, result, 0.01f);
+	}
+	
+//	@Test
+//	public void testAmountCubesCube3() throws Exception {
+//		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
+//		Image im = new Image(image1, 200, 200, 120, 120);
+//		int result = im.getImageCubes().size();
+//		int expected = 1;
+//		assertEquals(expected, result);
+//	}
+//	
+//	@Test
+//	public void testAmountCubesMulti3() throws Exception {
+//		byte[] image1 = this.loadImageRGBBytes("multi3cubes.png");
+//		Image im = new Image(image1, 200, 200, 120, 120);
+//		int result = im.getImageCubes().size();
+//		int expected = 3;
+//		assertEquals(expected, result);
+//	}
+//	
+//	@Test
+//	public void testHueSatCube3() throws Exception {
+//		ImageRecognizer rec = new ImageRecognizer();
+//		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
+////		Image im = new Image(image1, 200, 200, 120, 120);
+//		Image im = rec.createImage(image1, 200, 200, 120, 120);
+//		ArrayList<float[]> result = rec.getAllHueSatCombinations();
+//		for (float[] com : result){
+//			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
+//		}
+//	}
+//	
+//	@Test
+//	public void testHueSatMulti3() throws Exception {
+//		ImageRecognizer rec = new ImageRecognizer();
+//		byte[] image1 = this.loadImageRGBBytes("multi3cubes.png");
+////		Image im = new Image(image1, 200, 200, 120, 120);
+//		Image im = rec.createImage(image1, 200, 200, 120, 120);
+//		ArrayList<float[]> result = rec.getAllHueSatCombinations();
+//		for (float[] com : result){
+//			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
+//		}
+//	}
+	
+	
 	
 }

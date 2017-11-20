@@ -84,7 +84,7 @@ public class ImageRecognizer {
 				closest = c;
 				first = false;
 			} else {
-				float distance = Math.sqrt(Math.pow(curPos[0] - c.getX(), 2) + Math.pow(curPos[1] - c.getY(), 2) + Math.pow(curPos[2] - c.getZ(), 2));
+				float distance = (float) Math.sqrt(Math.pow(curPos[0] - c.getX(), 2) + Math.pow(curPos[1] - c.getY(), 2) + Math.pow(curPos[2] - c.getZ(), 2));
 				if (distance < minimum){
 					minimum = distance;
 					closest = c;
@@ -105,7 +105,7 @@ public class ImageRecognizer {
 	
 	public ImageRecognizerCube getImageRecognizerCube(Image image, float hue, float sat) throws Exception{
 		for (ImageRecognizerCube cu : ImageRecognizerCubeList){
-			if (cu.getHue() == hue && cu.getSaturation() == sat){
+			if (floatFuzzyEquals(hue, cu.getHue(), 0.01f) && floatFuzzyEquals(sat, cu.getSaturation(), 0.01f)){
 				Vector3f vector = image.getXYZDistance(hue, sat);
 				ImageRecognizerCube cube = new ImageRecognizerCube(vector.getX(), vector.getY(), vector.getZ(), hue, sat);
 				return cube;
@@ -124,6 +124,10 @@ public class ImageRecognizer {
 				ImageRecognizerCubeList.add(new ImageRecognizerCube(vector.getX(), vector.getY(), vector.getZ(), hue, sat));
 			}
 		}
+	}
+	
+	public boolean floatFuzzyEquals(float a, float b, float delta){
+		return Math.abs(a - b) <= delta;
 	}
 	
 }

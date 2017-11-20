@@ -232,7 +232,7 @@ public class Image {
 			if (distance < minimum)
 				minimum = distance;
 		}
-		return minimum;
+		return minimum + 0.5f;
 	}
 	
 	/**
@@ -249,7 +249,7 @@ public class Image {
 			if (distance > maximum)
 				maximum = distance;
 		}
-		return maximum;
+		return maximum + 0.5f;
 	}
 	
 	/**
