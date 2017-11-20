@@ -149,25 +149,24 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		drone.setRelativePosition(position.add(velocity.mapMultiply(secondsSinceLastUpdate)).add(acceleration.mapMultiply(Math.pow(secondsSinceLastUpdate, 2)/2)));
 		drone.setVelocity(velocity.add(acceleration.mapMultiply(secondsSinceLastUpdate)));
 		
-		float epsilon = 0.0001f;
 		float newHeading = (float) ((heading + headingAngularVelocity*secondsSinceLastUpdate + headingAngularAcceleration*(Math.pow(secondsSinceLastUpdate, 2)/2)) % (2*Math.PI));
 //		float newHeading = (float) y[6];
-		if ((Math.abs(newHeading - 0) < epsilon) || (Math.abs(newHeading - 2*Math.PI) < epsilon))
-			newHeading = 0;
-		else if (newHeading < 0)
+		if (newHeading < 0)
 			newHeading += (2*Math.PI);
+		if (newHeading >= 2*Math.PI)
+			newHeading = 0;
 		float newPitch = (float) ((pitch + pitchAngularVelocity*secondsSinceLastUpdate + pitchAngularAcceleration*(Math.pow(secondsSinceLastUpdate, 2)/2)) % (2*Math.PI));
 //		float newPitch = (float) y[8];
-		if ((Math.abs(newPitch - 0) < epsilon) || (Math.abs(newPitch - 2*Math.PI) < epsilon))
-			newPitch = 0;
-		else if (newPitch < 0)
+		if (newPitch < 0)
 			newPitch += (2*Math.PI);
+		if (newPitch >= 2*Math.PI)
+			newPitch = 0;
 		float newRoll = (float) ((roll + rollAngularVelocity*secondsSinceLastUpdate + rollAngularAcceleration*(Math.pow(secondsSinceLastUpdate, 2)/2)) % (2*Math.PI));
 //		float newRoll = (float) y[10];
-		if ((Math.abs(newRoll - 0) < epsilon) || (Math.abs(newRoll - 2*Math.PI) < epsilon))
-			newRoll = 0;
-		else if (newRoll < 0)
+		if (newRoll < 0)
 			newRoll += (2*Math.PI);
+		if (newRoll >= 2*Math.PI)
+			newRoll = 0;
 		drone.setHeading(newHeading);
 		drone.setPitch(newPitch);
 		drone.setRoll(newRoll);
