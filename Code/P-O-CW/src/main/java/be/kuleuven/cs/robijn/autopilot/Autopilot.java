@@ -16,7 +16,6 @@ import interfaces.*;
  * @author Pieter Vandensande
  */
 public class Autopilot extends WorldObject implements interfaces.Autopilot {
-
 	public AutopilotConfig getConfig() {
 		return this.config;
 	}
@@ -56,7 +55,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		if (this.isFirstUpdate())
 			this.firstUpdate = false;
 		else {
-			this.moveDrone(inputs.getElapsedTime() - this.getPreviousElapsedTime(), inputs);
+			this.moveDrone(inputs.getElapsedTime(), inputs);
 		}
         this.setPreviousElapsedTime(inputs.getElapsedTime());  
         
@@ -630,8 +629,20 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		
 		RealVector newPosition = new ArrayRealVector(new double[] {inputs.getX(), inputs.getY(), inputs.getZ()}, false);
 		float newHeading = inputs.getHeading();
+		if (newHeading < 0)
+			newHeading += (2*Math.PI);
+		if (newHeading >= 2*Math.PI)
+			newHeading = 0;
 		float newPitch = inputs.getPitch();
+		if (newPitch < 0)
+			newPitch += (2*Math.PI);
+		if (newPitch >= 2*Math.PI)
+			newPitch = 0;
 		float newRoll = inputs.getRoll();
+		if (newRoll < 0)
+			newRoll += (2*Math.PI);
+		if (newRoll >= 2*Math.PI)
+			newRoll = 0;
 		
 		drone.setRelativePosition(newPosition);
 		drone.setHeading(newHeading);
