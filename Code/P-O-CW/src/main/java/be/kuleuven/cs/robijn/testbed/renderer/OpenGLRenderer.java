@@ -1,14 +1,10 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.*;
-import org.apache.commons.math3.geometry.euclidean.threed.RotationOrder;
-import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector3fc;
-import org.joml.Vector4f;
+import org.joml.*;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
@@ -69,6 +65,7 @@ public class OpenGLRenderer implements Renderer {
 
     private Model droneModel = null;
     private Model boxModel = null;
+    private Model groundModel = null;
 
     private OpenGLRenderer(long windowHandle){
         this.windowHandle = windowHandle;
@@ -97,8 +94,20 @@ public class OpenGLRenderer implements Renderer {
         }
 
         //Load cube
-        Mesh mesh = OBJLoader.loadFromResources("/models/cube/cube.obj");
-        boxModel = new Model(mesh, null, boxProgram);
+        Mesh boxMesh = OBJLoader.loadFromResources("/models/cube/cube.obj");
+        boxModel = new Model(boxMesh, null, boxProgram);
+
+        //Load shader for ground model
+        ShaderProgram groundProgram;
+        try(Shader vertexShader = Shader.compileVertexShader(Resources.loadTextResource("/shaders/ground/vertex.glsl"))){
+            try(Shader fragmentShader = Shader.compileFragmentShader(Resources.loadTextResource("/shaders/ground/fragment.glsl"))){
+                groundProgram = ShaderProgram.link(vertexShader, fragmentShader);
+            }
+        }
+
+        //Load ground model
+        Mesh groundMesh = OBJLoader.loadFromResources("/models/ground/ground.obj");
+        groundModel = new Model(groundMesh, null, groundProgram);
     }
 
     @Override
@@ -106,7 +115,7 @@ public class OpenGLRenderer implements Renderer {
         if(!(buffer instanceof OpenGLFrameBuffer)){
             throw new IllegalArgumentException("Incompatible framebuffer");
         }
-        if(!(camera instanceof OpenGLCamera)){
+        if(!(camera instanceof OpenGLPerspectiveCamera) && !(camera instanceof OpenGLOrthographicCamera)){
             throw new IllegalArgumentException("Incompatible camera");
         }
 
@@ -135,14 +144,18 @@ public class OpenGLRenderer implements Renderer {
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
         //Setup per-camera matrices
-        OpenGLCamera openglCamera = (OpenGLCamera)camera;
-        Matrix4f viewMatrix = createViewMatrix(openglCamera);
-        Matrix4f projectionMatrix = createProjectionMatrix(openglCamera.getHorizontalFOV(), openglCamera.getVerticalFOV(), 0.1f, 1000f);
+        Matrix4f viewMatrix = createViewMatrix(camera);
+        Matrix4f projectionMatrix = createProjectionMatrix(camera);
         Matrix4f viewProjectionMatrix = new Matrix4f(projectionMatrix).mul(viewMatrix);
+
+        //Render ground if needed
+        if(camera.isGroundDrawn()){
+            renderModel(groundModel, viewProjectionMatrix, MatrixUtils.createRealIdentityMatrix(4));
+        }
 
         //Render objects
         for (WorldObject child : worldRoot.getChildren()){
-            renderChildren(child, viewProjectionMatrix, !openglCamera.areDronesHidden());
+            renderChildren(child, viewProjectionMatrix, !camera.areDronesHidden());
         }
     }
 
@@ -165,9 +178,12 @@ public class OpenGLRenderer implements Renderer {
             return;
         }
 
+        renderModel(model, viewProjectionMatrix, obj.getObjectToWorldTransform());
+    }
+
+    private void renderModel(Model model, Matrix4f viewProjectionMatrix, RealMatrix objectToWorldTransform){
         //Setup per-object matrices
         model.getShader().setUniformMatrix("viewProjectionTransformation", false, viewProjectionMatrix);
-        RealMatrix objectToWorldTransform = obj.getObjectToWorldTransform();
         model.getShader().setUniformMatrix("modelTransformation", false, objectToWorldTransform);
 
         //Bind object model mesh, texture, shader, ...
@@ -188,13 +204,14 @@ public class OpenGLRenderer implements Renderer {
      * Returns a linear transformation matrix for transforming vertices from world space to camera space.
      * @return a non-null matrix
      */
-    private Matrix4f createViewMatrix(OpenGLCamera camera){
+    private Matrix4f createViewMatrix(Camera camera){
         Matrix4f viewMatrix = new Matrix4f();
         viewMatrix.identity();
-        double[] angles = camera.getWorldRotation().getAngles(RotationOrder.XYZ);
-        viewMatrix.rotate(-(float)angles[0], 1, 0, 0);
-        viewMatrix.rotate(-(float)angles[1], 0, 1, 0);
-        viewMatrix.rotate(-(float)angles[2], 0, 0, 1);
+
+        Rotation rotation = camera.getWorldRotation();
+        Quaternionfc quaternion = new Quaternionf((float)rotation.getQ1(), (float)rotation.getQ2(), (float)rotation.getQ3(), (float)rotation.getQ0());
+        viewMatrix.rotate(quaternion);
+
         viewMatrix.translate(
                 (float) -camera.getWorldPosition().getEntry(0),
                 (float) -camera.getWorldPosition().getEntry(1),
@@ -207,10 +224,28 @@ public class OpenGLRenderer implements Renderer {
      * Returns a linear transformation matrix for transforming vertices from camera space to screen space.
      * @return a non-null matrix
      */
-    private Matrix4f createProjectionMatrix(float xFOV, float yFOV, float zNear, float zFar){
+    private Matrix4f createProjectionMatrix(Camera camera){
         Matrix4f projectionMatrix = new Matrix4f();
         projectionMatrix.identity();
-        projectionMatrix.perspective(yFOV, xFOV/yFOV, zNear, zFar);
+
+        if(camera instanceof OpenGLPerspectiveCamera){
+            OpenGLPerspectiveCamera perspCam = (OpenGLPerspectiveCamera)camera;
+            projectionMatrix.perspective(
+                    perspCam.getVerticalFOV(), perspCam.getHorizontalFOV()/perspCam.getVerticalFOV(),
+                    perspCam.getNearPlane(), perspCam.getFarPlane()
+            );
+        }else if(camera instanceof OpenGLOrthographicCamera){
+            OpenGLOrthographicCamera orthoCam = (OpenGLOrthographicCamera)camera;
+            float width = orthoCam.getWidth();
+            float height = orthoCam.getHeight();
+            projectionMatrix.ortho(
+                    -width/2f, width/2f, -height/2f,height/2f,
+                    orthoCam.getNearPlane(), orthoCam.getFarPlane()
+            );
+        }else{
+            throw new RuntimeException("No projection matrix defined for camera type");
+        }
+
         //Reading the pixels from an OpenGL framebuffer results in a flipped image.
         //For example:
         //000111222      666777888
@@ -230,8 +265,13 @@ public class OpenGLRenderer implements Renderer {
     }
 
     @Override
-    public OpenGLCamera createCamera() {
-        return new OpenGLCamera();
+    public OpenGLPerspectiveCamera createPerspectiveCamera() {
+        return new OpenGLPerspectiveCamera();
+    }
+
+    @Override
+    public OrthographicCamera createOrthographicCamera() {
+        return new OpenGLOrthographicCamera();
     }
 
     @Override
