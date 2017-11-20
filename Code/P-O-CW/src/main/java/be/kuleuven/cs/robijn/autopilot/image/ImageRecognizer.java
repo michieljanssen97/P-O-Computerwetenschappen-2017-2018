@@ -74,6 +74,35 @@ public class ImageRecognizer {
 		return image.getXYZDistance(hue, sat);
 	}
 	
+	public ImageRecognizerCube getClosestCubeInWorld(){
+		float[] curPos = {0.0f, 0.0f, 0.0f}; //replace with drone's current position
+		ImageRecognizerCube closest = null;
+		float minimum = 1000f;
+		boolean first = true;
+		for (ImageRecognizerCube c : this.ImageRecognizerCubeList){
+			if (first){
+				closest = c;
+				first = false;
+			} else {
+				float distance = Math.sqrt(Math.pow(curPos[0] - c.getX(), 2) + Math.pow(curPos[1] - c.getY(), 2) + Math.pow(curPos[2] - c.getZ(), 2));
+				if (distance < minimum){
+					minimum = distance;
+					closest = c;
+				}
+			}
+		}
+		return closest;
+	}
+	
+	public ArrayList<float[]> getAllHueSatCombinations(){
+		ArrayList<float[]> combos = new ArrayList<float[]>();
+		for (ImageRecognizerCube c : this.ImageRecognizerCubeList){
+			float[] combo = {c.getHue(), c.getSaturation()};
+			combos.add(combo);
+		}
+		return combos;
+	}
+	
 	public ImageRecognizerCube getImageRecognizerCube(Image image, float hue, float sat) throws Exception{
 		for (ImageRecognizerCube cu : ImageRecognizerCubeList){
 			if (cu.getHue() == hue && cu.getSaturation() == sat){
