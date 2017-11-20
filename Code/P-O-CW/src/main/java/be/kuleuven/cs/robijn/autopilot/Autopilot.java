@@ -819,6 +819,13 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		this.previousRoll = previousRoll;
 	}
 
+	public void setPreviousRollAngularVelocity(float previousRollAngularVelocity)
+			throws IllegalArgumentException {
+		if (! isValidPreviousRollAngularVelocity(previousRollAngularVelocity))
+			throw new IllegalArgumentException();
+		this.previousRollAngularVelocity = previousRollAngularVelocity;
+	}
+
 	@Override
 	public AutopilotOutputs simulationStarted(AutopilotConfig config, AutopilotInputs inputs) {
 
