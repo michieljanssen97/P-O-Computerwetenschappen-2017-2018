@@ -55,6 +55,10 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		if (! isValidPreviousRollAngularVelocity(previousRollAngularVelocity))
 			throw new IllegalArgumentException();
 		this.previousRollAngularVelocity = previousRollAngularVelocity;
+		float initialZVelocity = (float) drone.getVelocity().getEntry(2);
+		if (! isValidInitialZVelocity(initialZVelocity))
+			throw new IllegalArgumentException();
+		this.initialZVelocity = initialZVelocity;
 	}
 	
 	public AutopilotConfig getConfig() {
@@ -125,6 +129,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		double absoluteAccuracy = 1.0e-8;
 		int maxOrder = 5;
 		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
+		float turningTime = 0.5f;
 		
 		//Case 1
 //		float maxInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)0.0, true, (float)((1.0/360.0)*2*Math.PI), drone, 1);
@@ -206,8 +211,9 @@ public class Autopilot extends WorldObject implements AutoPilot {
 //		final float thrust = thrustTemp;
 		
 		//Case 3
-		float pitchAngularAccelerationTemp = (float) ((1.0/360.0)*12*Math.PI);
 		float maxPitchAngularVelocity = (float) ((1.0/360.0)*12*Math.PI);
+		float pitchAngularVelocity = drone.getPitchAngularVelocity();
+		float pitchAngularAccelerationTemp = Math.abs(maxPitchAngularVelocity - pitchAngularVelocity)/turningTime;
 		if (imageXRotation < 0)
 			maxPitchAngularVelocity = -maxPitchAngularVelocity;
 		
@@ -227,7 +233,6 @@ public class Autopilot extends WorldObject implements AutoPilot {
 			}, false);
 		RealVector angularMomentumDroneCoordinates = inertiaMatrix.operate(totalAngularVelocityDroneCoordinates);
 		
-		double pitchAngularVelocity = drone.getPitchAngularVelocity();
 		if (pitchAngularVelocity > maxPitchAngularVelocity)
 			pitchAngularAccelerationTemp = -pitchAngularAccelerationTemp;
 		final double pitchAngularAcceleration = pitchAngularAccelerationTemp;
@@ -244,10 +249,10 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		final float horStabInclination = horStabInclinationTemp;
 		final float verStabInclination = verStabInclinationTemp;
 		
-		float yAccelerationTemp = 5.0f;
 		float maxYVelocity = (float) (-drone.getVelocity().getEntry(2)*Math.tan(drone.getPitch()+(imageXRotation/360)*2*Math.PI));
 		
 		float yVelocity = (float)drone.getVelocity().getEntry(1);
+		float yAccelerationTemp = Math.abs(maxYVelocity - yVelocity)/turningTime;
 		if (yVelocity > maxYVelocity)
 			yAccelerationTemp = -yAccelerationTemp;
 		final float yAcceleration = yAccelerationTemp;
@@ -275,6 +280,8 @@ public class Autopilot extends WorldObject implements AutoPilot {
 				+ drone.getLiftForceRightWing(rightWingInclination).getEntry(2))/Math.cos(drone.getPitch()));
 		if (thrustTemp > drone.getMaxThrust())
 			thrustTemp = drone.getMaxThrust();
+		else if (thrustTemp < 0)
+			thrustTemp = 0;
 		final float thrust = thrustTemp;
 		
 //		float bestInclinationPositive;
@@ -819,6 +826,8 @@ public class Autopilot extends WorldObject implements AutoPilot {
 	
 	private float previousRollAngularVelocity;
 	
+	private final float initialZVelocity;
+	
 	public RealVector getPreviousPosition() {
 		return this.previousPosition;
 	}
@@ -851,6 +860,10 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		return this.previousRollAngularVelocity;
 	}
 	
+	public float getInitialZVelocity() {
+		return this.initialZVelocity;
+	}
+	
 	public static boolean isValidPreviousPosition(RealVector previousPosition) {
 		return (previousPosition != null);
 	}
@@ -881,6 +894,10 @@ public class Autopilot extends WorldObject implements AutoPilot {
 	
 	public static boolean isValidPreviousRollAngularVelocity(float previousRollAngularVelocity) {
 		return ((! Float.isNaN(previousRollAngularVelocity)) & (Float.isFinite(previousRollAngularVelocity)));
+	}
+	
+	public static boolean isValidInitialZVelocity(float initialZVelocity) {
+		return ((initialZVelocity <= 0) && (Float.isFinite(initialZVelocity)));
 	}
 	
 	public void setPreviousPosition(RealVector previousPosition) 
