@@ -357,17 +357,6 @@ public class ImageTest {
 	}
 	
 	@Test
-<<<<<<< HEAD
-	public void testGetDistance1Pixel() throws Exception{
-		byte[] image = this.loadImageRGBBytes("1pixel.png");
-		Image im = new Image(image, 200, 200, 120, 120);
-		ArrayList<ImageCube> cubeList = im.getImageCubes();
-		float hue = cubeList.get(0).getHue();
-		float sat = cubeList.get(0).getSaturation();
-		System.out.println(Float.toString(im.getTotalDistance(hue, sat)));
-	}
-	
-=======
 	public void testRatioPixelsCube2() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
@@ -426,8 +415,4 @@ public class ImageTest {
 //			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
 //		}
 //	}
-	
-	
-	
->>>>>>> 93b62279e3ad1946d8c9745237d1590ee1dcad4f
 }

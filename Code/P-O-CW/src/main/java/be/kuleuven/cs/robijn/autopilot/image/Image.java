@@ -591,7 +591,7 @@ public class Image {
 	}
 	
 	/**
-	 * Get the factor that is necessary for the cube with given hue and saturation.
+	 * Get the weight factor that is necessary for the cube with given hue and saturation.
 	 * @param hue	The given hue
 	 * @param sat	The given saturation
 	 */
