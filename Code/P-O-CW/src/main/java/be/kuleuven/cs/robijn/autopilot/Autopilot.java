@@ -76,7 +76,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
         		this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView());
 		float[] necessaryRotation;
         try {
-			necessaryRotation = image.getRotationToRedCube();
+			necessaryRotation = imagerecognizer.getNecessaryRotation(image, 0.0f, 1.0f);
 		}
 		catch (IllegalStateException ex){
         	//No red cube found, just fly forward
