@@ -87,7 +87,10 @@ public class ImageRecognizer {
 	 * Return the cube in the ImageRecognizerCubeList that is closest to the current position of the drone.
 	 */
 	public ImageRecognizerCube getClosestCubeInWorld(){
-		float[] curPos = {0.0f, 0.0f, 0.0f}; //replace with drone's current position
+		
+		 //Replace with drone's current position (x, y, z) in world coordinates.
+		float[] curPos = {0.0f, 0.0f, 0.0f};
+		
 		ImageRecognizerCube closest = null;
 		float minimum = 1000f;
 		boolean first = true;

@@ -207,7 +207,7 @@ public class ImageTest {
 	public void testDistanceXToCube2() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-		float result = im.getXYZDistance(0.0f, 1.0f).getX();
+		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(0);
 		float expected = 0.0926f;
 		assertEquals(expected, result, 0.01f);
 	}
@@ -216,7 +216,7 @@ public class ImageTest {
 	public void testDistanceYToCube2() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-		float result = im.getXYZDistance(0.0f, 1.0f).getY();
+		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(1);
 		float expected = 0.0000797f;
 		assertEquals(expected, result, 0.000001f);
 	}
@@ -225,7 +225,7 @@ public class ImageTest {
 	public void testDistanceZToCube2() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-		float result = im.getXYZDistance(0.0f, 1.0f).getZ();
+		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(2);
 		float expected = -1.82666f;
 		assertEquals(expected, result, 0.01f);
 	}
@@ -243,7 +243,7 @@ public class ImageTest {
 	public void testDistanceXToCube2Small() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-		float result = im.getXYZDistance(0.0f, 1.0f).getX();
+		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(0);
 		float expected = 2.68f;
 		assertEquals(expected, result, 0.01f);
 	}
@@ -252,7 +252,7 @@ public class ImageTest {
 	public void testDistanceYToCube2Small() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-		float result = im.getXYZDistance(0.0f, 1.0f).getY();
+		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(1);
 		float expected = 2.586f;
 		assertEquals(expected, result, 0.01f);
 	}
@@ -261,7 +261,7 @@ public class ImageTest {
 	public void testDistanceZToCube2Small() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-		float result = im.getXYZDistance(0.0f, 1.0f).getZ();
+		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(2);
 		float expected = -3.389f;
 		assertEquals(expected, result, 0.01f);
 	}
@@ -279,7 +279,7 @@ public class ImageTest {
 	public void testDistanceXToCube3() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-		float result = im.getXYZDistance(0.0f, 1.0f).getX();
+		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(0);
 		float expected = 0.052f;
 		assertEquals(expected, result, 0.01f);
 	}
@@ -288,7 +288,7 @@ public class ImageTest {
 	public void testDistanceYToCube3() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-		float result = im.getXYZDistance(0.0f, 1.0f).getY();
+		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(1);
 		float expected = 0.03f;
 		assertEquals(expected, result, 0.01f);
 	}
@@ -297,7 +297,7 @@ public class ImageTest {
 	public void testDistanceZToCube3() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-		float result = im.getXYZDistance(0.0f, 1.0f).getZ();
+		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(2);
 		float expected = -1.039f;
 		assertEquals(expected, result, 0.01f);
 	}
@@ -315,7 +315,7 @@ public class ImageTest {
 	public void testDistanceXToCube3Corner() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3sidecorner.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-		float result = im.getXYZDistance(0.0f, 1.0f).getX();
+		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(0);
 		float expected = 0.32f;
 		assertEquals(expected, result, 0.01f);
 	}
@@ -324,7 +324,7 @@ public class ImageTest {
 	public void testDistanceYToCube3Corner() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3sidecorner.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-		float result = im.getXYZDistance(0.0f, 1.0f).getY();
+		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(1);
 		float expected = 0.40f;
 		assertEquals(expected, result, 0.01f);
 	}
@@ -333,7 +333,7 @@ public class ImageTest {
 	public void testDistanceZToCube3Corner() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube3sidecorner.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
-		float result = im.getXYZDistance(0.0f, 1.0f).getZ();
+		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(2);
 		float expected = -0.90f;
 		assertEquals(expected, result, 0.01f);
 	}
@@ -357,6 +357,16 @@ public class ImageTest {
 	}
 	
 	@Test
+	public void testGetDistance1Pixel() throws Exception{
+		byte[] image = this.loadImageRGBBytes("1pixel.png");
+		Image im = new Image(image, 200, 200, 120, 120);
+		ArrayList<ImageCube> cubeList = im.getImageCubes();
+		float hue = cubeList.get(0).getHue();
+		float sat = cubeList.get(0).getSaturation();
+		System.out.println(Float.toString(im.getTotalDistance(hue, sat)));
+	}
+	
+	@Test
 	public void testRatioPixelsCube2() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
@@ -374,45 +384,45 @@ public class ImageTest {
 		assertEquals(expected, result, 0.01f);
 	}
 	
-//	@Test
-//	public void testAmountCubesCube3() throws Exception {
-//		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
+	@Test
+	public void testAmountCubesCube3() throws Exception {
+		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
+		Image im = new Image(image1, 200, 200, 120, 120);
+		int result = im.getImageCubes().size();
+		int expected = 1;
+		assertEquals(expected, result);
+	}
+	
+	@Test
+	public void testAmountCubesMulti3() throws Exception {
+		byte[] image1 = this.loadImageRGBBytes("multi3cubes.png");
+		Image im = new Image(image1, 200, 200, 120, 120);
+		int result = im.getImageCubes().size();
+		int expected = 3;
+		assertEquals(expected, result);
+	}
+	
+	@Test
+	public void testHueSatCube3() throws Exception {
+		ImageRecognizer rec = new ImageRecognizer();
+		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 //		Image im = new Image(image1, 200, 200, 120, 120);
-//		int result = im.getImageCubes().size();
-//		int expected = 1;
-//		assertEquals(expected, result);
-//	}
-//	
-//	@Test
-//	public void testAmountCubesMulti3() throws Exception {
-//		byte[] image1 = this.loadImageRGBBytes("multi3cubes.png");
+		Image im = rec.createImage(image1, 200, 200, 120, 120);
+		ArrayList<float[]> result = rec.getAllHueSatCombinations();
+		for (float[] com : result){
+			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
+		}
+	}
+	
+	@Test
+	public void testHueSatMulti3() throws Exception {
+		ImageRecognizer rec = new ImageRecognizer();
+		byte[] image1 = this.loadImageRGBBytes("multi3cubes.png");
 //		Image im = new Image(image1, 200, 200, 120, 120);
-//		int result = im.getImageCubes().size();
-//		int expected = 3;
-//		assertEquals(expected, result);
-//	}
-//	
-//	@Test
-//	public void testHueSatCube3() throws Exception {
-//		ImageRecognizer rec = new ImageRecognizer();
-//		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
-////		Image im = new Image(image1, 200, 200, 120, 120);
-//		Image im = rec.createImage(image1, 200, 200, 120, 120);
-//		ArrayList<float[]> result = rec.getAllHueSatCombinations();
-//		for (float[] com : result){
-//			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
-//		}
-//	}
-//	
-//	@Test
-//	public void testHueSatMulti3() throws Exception {
-//		ImageRecognizer rec = new ImageRecognizer();
-//		byte[] image1 = this.loadImageRGBBytes("multi3cubes.png");
-////		Image im = new Image(image1, 200, 200, 120, 120);
-//		Image im = rec.createImage(image1, 200, 200, 120, 120);
-//		ArrayList<float[]> result = rec.getAllHueSatCombinations();
-//		for (float[] com : result){
-//			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
-//		}
-//	}
+		Image im = rec.createImage(image1, 200, 200, 120, 120);
+		ArrayList<float[]> result = rec.getAllHueSatCombinations();
+		for (float[] com : result){
+			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
+		}
+	}
 }
