@@ -99,6 +99,9 @@ public class SidebarControl extends VBox {
     //@FXML
     //private ProgressBar progressBar;
 
+    private String negativeValueColor = "red";
+    private String positiveValueColor = "blue";
+
     private ObjectProperty<SimulationDriver> simulationProperty = new SimpleObjectProperty<>(this, "simulation");
 
     public SidebarControl(){
@@ -145,15 +148,15 @@ public class SidebarControl extends VBox {
         positionLabel.setText(String.format("X:%6.2f  Y:%6.2f  Z:%6.2f", inputs.getX(), inputs.getY(), inputs.getZ()));
 
         //Heading
-        headingIndicator.setProgress((inputs.getHeading()+Math.PI) / (2d*Math.PI));
+        setIndicatorValue(headingIndicator, remap360to180(inputs.getHeading()), Math.PI*2d);
         headingLabel.setText(String.format("%.2f", Math.toDegrees(inputs.getHeading())));
 
         //Pitch
-        pitchIndicator.setProgress((inputs.getPitch()+Math.PI) / (2d*Math.PI));
+        setIndicatorValue(pitchIndicator, remap360to180(inputs.getPitch()), Math.PI*2d);
         pitchLabel.setText(String.format("%.2f", Math.toDegrees(inputs.getPitch())));
 
         //Roll
-        rollIndicator.setProgress((inputs.getRoll()+Math.PI) / (2d*Math.PI));
+        setIndicatorValue(rollIndicator, remap360to180(inputs.getRoll()), Math.PI*2d);
         rollLabel.setText(String.format("%.2f", Math.toDegrees(inputs.getRoll())));
 
         //Thrust
@@ -162,18 +165,31 @@ public class SidebarControl extends VBox {
         thrustLabel.setText(String.format("%15.2f", outputs.getThrust()));
 
         //Wing inclination
-        leftWingInclinationIndicator.setProgress((outputs.getLeftWingInclination()+(Math.PI/2d)) / Math.PI);
-        leftWingInclinationLabel.setText(String.format("%8.5f", outputs.getLeftWingInclination()));
+        setIndicatorValue(leftWingInclinationIndicator, outputs.getLeftWingInclination(), Math.PI/2d);
+        leftWingInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(outputs.getLeftWingInclination())));
 
-        rightWingInclinationIndicator.setProgress((outputs.getRightWingInclination()+(Math.PI/2d)) / Math.PI);
-        rightWingInclinationLabel.setText(String.format("%8.5f", outputs.getRightWingInclination()));
+        setIndicatorValue(rightWingInclinationIndicator, outputs.getRightWingInclination(), Math.PI/2d);
+        rightWingInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(outputs.getRightWingInclination())));
 
         //Stabilizer inclination
-        horStabInclinationIndicator.setProgress((outputs.getHorStabInclination()+(Math.PI/2d)) / Math.PI);
-        horStabInclinationLabel.setText(String.format("%8.5f", outputs.getHorStabInclination()));
+        setIndicatorValue(horStabInclinationIndicator, outputs.getHorStabInclination(), Math.PI/2d);
+        horStabInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(outputs.getHorStabInclination())));
 
-        verStabInclinationIndicator.setProgress((outputs.getVerStabInclination()+(Math.PI/2d)) / Math.PI);
-        verStabInclinationLabel.setText(String.format("%8.5f", outputs.getVerStabInclination()));
+        setIndicatorValue(verStabInclinationIndicator, outputs.getVerStabInclination(), Math.PI/2d);
+        verStabInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(outputs.getVerStabInclination())));
+    }
+
+    //Remaps [0;(2*PI)] to [-PI;PI]
+    private double remap360to180(double input){
+        return input < Math.PI ? input : input - (Math.PI*2d);
+    }
+
+    private void setIndicatorValue(ProgressIndicator indicator, double value, double maxValue){
+        indicator.setProgress(Math.abs(value) / maxValue);
+        StringBuilder style = new StringBuilder();
+        style.append("-fx-progress-color: ").append(value > 0 ? positiveValueColor : negativeValueColor).append("; ");
+        style.append("-fx-scale-x: ").append(value > 0 ? 1 : -1).append("; ");
+        indicator.setStyle(style.toString());
     }
 
     public void setSimulation(SimulationDriver simulationProperty) {
