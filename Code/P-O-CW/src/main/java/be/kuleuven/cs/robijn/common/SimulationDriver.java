@@ -17,7 +17,6 @@ public class SimulationDriver {
     private boolean simulationPaused;
     private boolean simulationFinished;
     private boolean simulationCrashed;
-    private final AutopilotConfig config;
     private AutopilotInputs latestAutopilotInputs;
     private AutopilotOutputs latestAutopilotOutputs;
 
@@ -38,7 +37,6 @@ public class SimulationDriver {
         testBed = new VirtualTestbed(boxes, config, initialVelocity);
         autoPilot = new Autopilot();
         latestAutopilotInputs = testBed.getInputs();
-        this.config = config;
     }
 
     /**
