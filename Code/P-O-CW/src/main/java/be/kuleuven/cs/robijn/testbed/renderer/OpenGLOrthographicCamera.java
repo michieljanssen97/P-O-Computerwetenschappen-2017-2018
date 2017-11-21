@@ -1,14 +1,18 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.OrthographicCamera;
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 public class OpenGLOrthographicCamera extends OrthographicCamera {
     private float width = 100f;
     private float height = 100f;
     private float zNear = 0.1f;
     private float zFar = 1000f;
+    private double renderIconsThresholdRatio = 0;
     private boolean areDronesHidden;
     private boolean drawGround;
+    private float iconSize = 1.0f;
+    private Vector2D iconOffset = new Vector2D(0, 0);
 
     @Override
     public float getWidth() {
@@ -34,6 +38,36 @@ public class OpenGLOrthographicCamera extends OrthographicCamera {
             throw new IllegalArgumentException("'height' must be a positive number, not NaN or infinite");
         }
         this.height = height;
+    }
+
+    @Override
+    public double getRenderIconsThresholdRatio() {
+        return renderIconsThresholdRatio;
+    }
+
+    @Override
+    public void setRenderIconsThresholdRatio(double threshold) {
+        this.renderIconsThresholdRatio = threshold;
+    }
+
+    @Override
+    public float getIconSize() {
+        return iconSize;
+    }
+
+    @Override
+    public void setIconSize(float size) {
+        iconSize = size;
+    }
+
+    @Override
+    public Vector2D getIconOffset() {
+        return iconOffset;
+    }
+
+    @Override
+    public void setIconOffset(Vector2D offset) {
+        this.iconOffset = offset;
     }
 
     @Override
