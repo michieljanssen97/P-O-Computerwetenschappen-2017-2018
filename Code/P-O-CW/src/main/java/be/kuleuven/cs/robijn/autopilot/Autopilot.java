@@ -55,6 +55,10 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		if (! isValidPreviousRollAngularVelocity(previousRollAngularVelocity))
 			throw new IllegalArgumentException();
 		this.previousRollAngularVelocity = previousRollAngularVelocity;
+		float initialZVelocity = (float) drone.getVelocity().getEntry(2);
+		if (! isValidInitialZVelocity(initialZVelocity))
+			throw new IllegalArgumentException();
+		this.initialZVelocity = initialZVelocity;
 	}
 	
 	public AutopilotConfig getConfig() {
@@ -113,8 +117,8 @@ public class Autopilot extends WorldObject implements AutoPilot {
         	//No red cube found, just fly forward
 			necessaryRotation = new float[2];
 		}
-        float imageYRotation = necessaryRotation[0];
-		float imageXRotation = necessaryRotation[1];
+        float imageYRotation = (float) ((necessaryRotation[0]/360)*2*Math.PI);
+		float imageXRotation = (float) ((necessaryRotation[1]/360)*2*Math.PI);
 		
 		float horStabInclinationTemp = 0;
 		float verStabInclinationTemp = 0;
@@ -125,6 +129,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		double absoluteAccuracy = 1.0e-8;
 		int maxOrder = 5;
 		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
+		float turningTime = 1.0f;
 		
 		//Case 1
 //		float maxInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)0.0, true, (float)((1.0/360.0)*2*Math.PI), drone, 1);
@@ -206,10 +211,11 @@ public class Autopilot extends WorldObject implements AutoPilot {
 //		final float thrust = thrustTemp;
 		
 		//Case 3
-		float pitchAngularAccelerationTemp = (float) ((1.0/360.0)*12*Math.PI);
-		float maxPitchAngularVelocity = (float) ((1.0/360.0)*12*Math.PI);
+		float targetPitchAngularVelocity = Math.abs(imageXRotation - drone.getHeading())/turningTime;
+		float pitchAngularVelocity = drone.getPitchAngularVelocity();
+		float pitchAngularAccelerationTemp = Math.abs(targetPitchAngularVelocity - pitchAngularVelocity)/turningTime;
 		if (imageXRotation < 0)
-			maxPitchAngularVelocity = -maxPitchAngularVelocity;
+			targetPitchAngularVelocity = -targetPitchAngularVelocity;
 		
 		float maxInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float)((1.0/360.0)*2*Math.PI), drone, 1);
 		float minInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float)((1.0/360.0)*2*Math.PI), drone, 1);
@@ -227,8 +233,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
 			}, false);
 		RealVector angularMomentumDroneCoordinates = inertiaMatrix.operate(totalAngularVelocityDroneCoordinates);
 		
-		double pitchAngularVelocity = drone.getPitchAngularVelocity();
-		if (pitchAngularVelocity > maxPitchAngularVelocity)
+		if (pitchAngularVelocity > targetPitchAngularVelocity)
 			pitchAngularAccelerationTemp = -pitchAngularAccelerationTemp;
 		final double pitchAngularAcceleration = pitchAngularAccelerationTemp;
 		UnivariateFunction function1 = (x)->{return drone.transformationToDroneCoordinates(drone.getLiftForceHorStab((float)x)).getEntry(1)*drone.getTailSize()
@@ -244,13 +249,16 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		final float horStabInclination = horStabInclinationTemp;
 		final float verStabInclination = verStabInclinationTemp;
 		
-		float yAccelerationTemp = 5.0f;
-		float maxYVelocity = (float) (-drone.getVelocity().getEntry(2)*Math.tan(drone.getPitch()+(imageXRotation/360)*2*Math.PI));
+		float targetYVelocity = (float) (-drone.getVelocity().getEntry(2)*Math.tan(drone.getPitch()+imageXRotation));
 		
 		float yVelocity = (float)drone.getVelocity().getEntry(1);
-		if (yVelocity > maxYVelocity)
+		float yAccelerationTemp = Math.abs(targetYVelocity - yVelocity)/turningTime;
+		if (yVelocity > targetYVelocity)
 			yAccelerationTemp = -yAccelerationTemp;
+		if (! Float.isNaN(this.getPreviousYAccelerationError()))
+			yAccelerationTemp -= this.getPreviousYAccelerationError();
 		final float yAcceleration = yAccelerationTemp;
+		
 		UnivariateFunction function2 = (x)->{return drone.getLiftForceLeftWing((float)x).getEntry(1)
 				+ drone.getLiftForceRightWing((float)x).getEntry(1)
 				+ drone.getGravitationalForceEngine().getEntry(1)
@@ -270,11 +278,23 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		final float leftWingInclination = leftWingInclinationTemp;
 		final float rightWingInclination = rightWingInclinationTemp;
 		
+		float targetZVelocity = this.getInitialZVelocity();
+		
+		float zVelocity = (float)drone.getVelocity().getEntry(2);
+		float zAccelerationTemp = Math.abs(targetZVelocity - zVelocity)/turningTime;
+		if (zVelocity > targetZVelocity)
+			zAccelerationTemp = -zAccelerationTemp;
+		final float zAcceleration = zAccelerationTemp;
+		
 		float thrustTemp = (float) ((drone.getLiftForceHorStab(horStabInclination).getEntry(2)
 				+ drone.getLiftForceLeftWing(leftWingInclination).getEntry(2)
-				+ drone.getLiftForceRightWing(rightWingInclination).getEntry(2))/Math.cos(drone.getPitch()));
+				+ drone.getLiftForceRightWing(rightWingInclination).getEntry(2)
+				- (drone.getTailMass() + drone.getEngineMass() + 2*drone.getWingMass())*zAcceleration)
+				/Math.cos(drone.getPitch()));
 		if (thrustTemp > drone.getMaxThrust())
 			thrustTemp = drone.getMaxThrust();
+		else if (thrustTemp < 0)
+			thrustTemp = 0;
 		final float thrust = thrustTemp;
 		
 //		float bestInclinationPositive;
@@ -605,6 +625,9 @@ public class Autopilot extends WorldObject implements AutoPilot {
 //			thrustTemp = drone.getMaxThrust();
 //		final float thrust = thrustTemp;
 		
+		this.setPreviousYAccelerationError(
+				((float)drone.getAcceleration(thrust, leftWingInclination, rightWingInclination, horStabInclination, verStabInclination).getEntry(1))
+				-yAcceleration);
 		AutopilotOutputs output = new AutopilotOutputs() {
 			public float getThrust() {
 				return thrust;
@@ -624,6 +647,23 @@ public class Autopilot extends WorldObject implements AutoPilot {
         };
         
         return output;
+	}
+	
+	private float previousYAccelerationError = Float.NaN;
+	
+	public float getPreviousYAccelerationError() {
+		return this.previousYAccelerationError;
+	}
+	
+	public static boolean isValidPreviousYAccelerationError(float previousYAccelerationError) {
+		return ((Float.isNaN(previousYAccelerationError)) || (! Float.isInfinite(previousYAccelerationError)));
+	}
+	
+	public void setPreviousYAccelerationError(float previousYAccelerationError) 
+			throws IllegalArgumentException {
+		if (! isValidPreviousYAccelerationError(previousYAccelerationError))
+			throw new IllegalArgumentException();
+		this.previousYAccelerationError = previousYAccelerationError;
 	}
 	
 	public float preventCrash(float inclination, boolean positive, Drone drone) {
@@ -819,6 +859,8 @@ public class Autopilot extends WorldObject implements AutoPilot {
 	
 	private float previousRollAngularVelocity;
 	
+	private final float initialZVelocity;
+	
 	public RealVector getPreviousPosition() {
 		return this.previousPosition;
 	}
@@ -851,6 +893,10 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		return this.previousRollAngularVelocity;
 	}
 	
+	public float getInitialZVelocity() {
+		return this.initialZVelocity;
+	}
+	
 	public static boolean isValidPreviousPosition(RealVector previousPosition) {
 		return (previousPosition != null);
 	}
@@ -881,6 +927,10 @@ public class Autopilot extends WorldObject implements AutoPilot {
 	
 	public static boolean isValidPreviousRollAngularVelocity(float previousRollAngularVelocity) {
 		return ((! Float.isNaN(previousRollAngularVelocity)) & (Float.isFinite(previousRollAngularVelocity)));
+	}
+	
+	public static boolean isValidInitialZVelocity(float initialZVelocity) {
+		return ((initialZVelocity <= 0) && (Float.isFinite(initialZVelocity)));
 	}
 	
 	public void setPreviousPosition(RealVector previousPosition) 
