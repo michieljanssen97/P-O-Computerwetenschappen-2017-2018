@@ -12,6 +12,8 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.AnchorPane;
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
+
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.IOException;
@@ -142,6 +144,14 @@ public class CameraViewControl extends AnchorPane {
 
         double aspect = ((double)frameBuffer.getWidth())/((double)frameBuffer.getHeight());
         setCameraAspectRatio(camera, aspect);
+
+        //If the camera is orthographic, update the icon rendering properties
+        if(camera instanceof OrthographicCamera){
+            OrthographicCamera orthoCam = (OrthographicCamera) camera;
+            orthoCam.setRenderIconsThresholdRatio(0.025);
+            orthoCam.setIconOffset(new Vector2D(0, 7));
+            orthoCam.setIconSize(8f);
+        }
 
         //Render to framebuffer, copy from framebuffer to image, convert image to javafx image, display javafx image
         renderer.render(world, frameBuffer, camera);

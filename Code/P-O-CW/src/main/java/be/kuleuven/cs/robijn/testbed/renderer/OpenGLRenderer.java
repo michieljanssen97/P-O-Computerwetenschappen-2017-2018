@@ -2,13 +2,17 @@ package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.*;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
 import org.joml.*;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
 import java.awt.*;
+import java.lang.Math;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
@@ -16,6 +20,8 @@ import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
+import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
+import static org.lwjgl.opengl.GL14.glBlendEquation;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
@@ -56,8 +62,14 @@ public class OpenGLRenderer implements Renderer {
 
         glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
 
+        //Enable texture transparancy
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendEquation(GL_FUNC_ADD);
+
         OpenGLRenderer renderer = new OpenGLRenderer(windowHandle);
         renderer.initializeModels();
+        renderer.initializeIcons();
         return renderer;
     }
 
@@ -66,6 +78,9 @@ public class OpenGLRenderer implements Renderer {
     private Model droneModel = null;
     private Model boxModel = null;
     private Model groundModel = null;
+
+    private Billboard droneIcon;
+    private Billboard boxIcon;
 
     private OpenGLRenderer(long windowHandle){
         this.windowHandle = windowHandle;
@@ -108,6 +123,14 @@ public class OpenGLRenderer implements Renderer {
         //Load ground model
         Mesh groundMesh = OBJLoader.loadFromResources("/models/ground/ground.obj");
         groundModel = new Model(groundMesh, null, groundProgram);
+    }
+
+    private void initializeIcons(){
+        Texture boxIconTexture = Texture.load(Resources.loadImageResource("/icons/cube.png"));
+        boxIcon = Billboard.create(boxIconTexture);
+
+        Texture droneIconTexture = Texture.load(Resources.loadImageResource("/icons/drone.png"));
+        droneIcon = Billboard.create(droneIconTexture);
     }
 
     @Override
@@ -155,14 +178,14 @@ public class OpenGLRenderer implements Renderer {
 
         //Render objects
         for (WorldObject child : worldRoot.getChildren()){
-            renderChildren(child, viewProjectionMatrix, !camera.areDronesHidden());
+            renderChildren(child, viewProjectionMatrix, camera);
         }
     }
 
-    private void renderChildren(WorldObject obj, Matrix4f viewProjectionMatrix, boolean renderDrones){
+    private void renderChildren(WorldObject obj, Matrix4f viewProjectionMatrix, Camera camera){
         //Recursively render children
         for (WorldObject child : obj.getChildren()){
-            renderChildren(child, viewProjectionMatrix, renderDrones);
+            renderChildren(child, viewProjectionMatrix, camera);
         }
 
         Model model = null;
@@ -172,13 +195,41 @@ public class OpenGLRenderer implements Renderer {
             float[] rgbValues = new float[3];
             boxColor.getRGBColorComponents(rgbValues);
             model.getShader().setUniformFloat("color", rgbValues);
-        }else if(obj instanceof Drone && renderDrones){
+        }else if(obj instanceof Drone && !camera.areDronesHidden()){
             model = droneModel;
         }else{
             return;
         }
 
         renderModel(model, viewProjectionMatrix, obj.getObjectToWorldTransform());
+
+        //Render icon if necessary
+        if(camera instanceof OpenGLOrthographicCamera){
+            OpenGLOrthographicCamera orthoCam = (OpenGLOrthographicCamera) camera;
+
+            Vector3D size = model.getMesh().getBoundingBox().getBoxSize();
+            double avgAxis = (size.getX() + size.getY() + size.getZ()) / 3d;
+            double minRatio = Math.min(avgAxis/orthoCam.getWidth(), avgAxis/orthoCam.getHeight());
+            if(minRatio < orthoCam.getRenderIconsThresholdRatio()){
+                //Render icon
+
+                Billboard icon = null;
+                if(obj instanceof Box){
+                    icon = boxIcon;
+                }else if(obj instanceof Drone && !camera.areDronesHidden()){
+                    icon = droneIcon;
+                }else{
+                    return;
+                }
+
+                Vector3D billboardRelPos = camera.getWorldRotation().applyTo(
+                        new Vector3D(orthoCam.getIconOffset().getX(), orthoCam.getIconOffset().getY(), 0)
+                );
+                RealVector billboardPosition = obj.getWorldPosition().add(
+                        new ArrayRealVector(new double[]{billboardRelPos.getX(), billboardRelPos.getY(), billboardRelPos.getZ()}, false));
+                renderModel(icon, viewProjectionMatrix, icon.generateModelMatrix(camera, billboardPosition, orthoCam.getIconSize()));
+            }
+        }
     }
 
     private void renderModel(Model model, Matrix4f viewProjectionMatrix, RealMatrix objectToWorldTransform){
@@ -186,6 +237,18 @@ public class OpenGLRenderer implements Renderer {
         model.getShader().setUniformMatrix("viewProjectionTransformation", false, viewProjectionMatrix);
         model.getShader().setUniformMatrix("modelTransformation", false, objectToWorldTransform);
 
+        renderModel(model);
+    }
+
+    private void renderModel(Billboard model, Matrix4f viewProjectionMatrix, Matrix4f objectToWorldTransform){
+        //Setup per-object matrices
+        model.getShader().setUniformMatrix("viewProjectionTransformation", false, viewProjectionMatrix);
+        model.getShader().setUniformMatrix("modelTransformation", false, objectToWorldTransform);
+
+        renderModel(model);
+    }
+
+    private void renderModel(Model model){
         //Bind object model mesh, texture, shader, ...
         glBindVertexArray(model.getMesh().getVertexArrayObjectId());
         glActiveTexture(GL_TEXTURE0);
