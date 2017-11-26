@@ -28,7 +28,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		this.addChild(drone);
 
 //		//Add box to world
-//		Box box = new Box();//TODO change in WorldGenerator
+//		Box box = new Box();
 //		double zDistance = 100.0;
 //		
 //		//Case 1
