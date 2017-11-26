@@ -27,29 +27,31 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		Drone drone = new Drone(config, initialVelocity);
 		this.addChild(drone);
 
-		//Add box to world
-		Box box = new Box();
-		double zDistance = 100.0;
+//		//Add box to world
+//		Box box = new Box();//TODO change in WorldGenerator
+//		double zDistance = 100.0;
+//		
+//		//Case 1
+//		//box.setRelativePosition(new ArrayRealVector(new double[] {0, 0, -zDistance}, false));
+//		
+//		//Case 2
+//		box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+//		
+//		//Case 3
+//		//box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+//		
+//		//simulatie1
+//		//box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+//		
+//		//simulatie2
+//		//box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+//		
+//		//simulatie3
+//		//box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/48.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+//		
+//		this.addChild(box);
 		
-		//Case 1
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, 0, -zDistance}, false));
-		
-		//Case 2
-		box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-		
-		//Case 3
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-		
-		//simulatie1
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-		
-		//simulatie2
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-		
-		//simulatie3
-		//box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/48.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-		
-		this.addChild(box);
+		WorldGenerator.generateBoxes(this);
 	}
 
 	public boolean update(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs output){
