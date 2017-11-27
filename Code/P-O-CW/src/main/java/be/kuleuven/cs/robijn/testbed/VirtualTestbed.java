@@ -51,6 +51,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 //		
 //		this.addChild(box);
 		
+		//TODO mag enkel indien willekeurige cuces, niet indien bestand met cubes is ingeladen
 		WorldGenerator.generateBoxes(this);
 	}
 
