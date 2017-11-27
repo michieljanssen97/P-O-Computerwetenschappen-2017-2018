@@ -460,12 +460,26 @@ public class ImageTest {
 		byte[] image = this.loadImageRGBBytes("Cube1SideLeft.png");
 		RealVector dronePos = new ArrayRealVector(new double[] {0,0,0});
 		Image im = rec.createImage(image, 200, 200, 120, 120, dronePos, 0.0f, 0.0f, 0.0f);
-//		assertEquals(rec.getImageRecognizerCubes().size(), 2);
 		for (ImageCube cube : im.getImageCubes()){
 			//System.out.println(Float.toString( (float) im.getXYZDistance(cube.getHue(), cube.getSaturation()).getEntry(0)));
 			//System.out.println(Float.toString( (float) im.getXYZDistance(cube.getHue(), cube.getSaturation()).getEntry(1)));
 			//System.out.println(Float.toString( (float) im.getXYZDistance(cube.getHue(), cube.getSaturation()).getEntry(2)));
 			}
+	}
+	
+	@Test
+	public void testImageRecognizerCubePosition() throws Exception{
+		ImageRecognizer rec = new ImageRecognizer();
+		byte[] image = this.loadImageRGBBytes("CubeInCenter.png");
+		RealVector dronePos = new ArrayRealVector(new double[] {10,0,0});
+		Image im = rec.createImage(image, 200, 200, 120, 120, dronePos, (float) Math.PI/2, 0.0f, 0.0f);
+		for (ImageRecognizerCube cube : rec.getImageRecognizerCubes()){
+			System.out.println(Float.toString(cube.getFactor()));
+			System.out.println(Float.toString(im.getTotalDistance(cube.getHue(), cube.getSaturation())));
+			System.out.println(Float.toString(cube.getPosition()[0]));
+			System.out.println(Float.toString(cube.getPosition()[1]));
+			System.out.println(Float.toString(cube.getPosition()[2]));
+		}
 	}
 	
 }
