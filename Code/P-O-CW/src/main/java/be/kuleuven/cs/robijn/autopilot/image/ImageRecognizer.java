@@ -142,6 +142,18 @@ public class ImageRecognizer {
 		return closest;
 	}
 	
+	public float getWorldDistanceToCube(ImageRecognizerCube cube){
+		float[] cubePos = cube.getPosition();
+		double[] dronePos = getDronePositionCoordinates();
+		return (float) Math.sqrt( Math.pow(cubePos[0] - (float)dronePos[0], 2) + Math.pow(cubePos[1] - (float)dronePos[1], 2) + Math.pow(cubePos[2] - (float)dronePos[2], 2) );
+	}
+	
+	public RealVector getWorldVectorToCube(ImageRecognizerCube cube){
+		float[] cubePos = cube.getPosition();
+		double[] dronePos = getDronePositionCoordinates();
+		return new ArrayRealVector(new double[] {(double)cubePos[0]-dronePos[0] , (double)cubePos[1]-dronePos[1], (double)cubePos[2]-dronePos[2]});
+	}
+	
 	/**
 	 * Return an ArrayList containing all combinations of hue and saturation that are visible in the image.
 	 */
@@ -153,6 +165,8 @@ public class ImageRecognizer {
 		}
 		return combos;
 	}
+	
+	public ge
 	
 	/**
 	 * Return the ImageRecognizerCube in the list that has the given hue and saturation as its color.

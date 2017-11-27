@@ -61,8 +61,16 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		this.previousElapsedTime = previousElapsedTime;
 	}
 	
+	private final ImageRecognizer recognizer = new ImageRecognizer();
+	
+	public ImageRecognizer getImageRecognizer() {
+		return this.recognizer;
+	}
+	
+	
+	
 	/**
-	 * Wel roll ten gevolge van verschillende snelheid van vleugels (door de rotaties).
+	 * Wel roll ten gevolge van verschillende snelheid van vleugels (door de rotaties). 
 	 */
 	public AutopilotOutputs update(AutopilotInputs inputs) {
 		if (this.getPreviousOutput() != null)
@@ -71,12 +79,13 @@ public class Autopilot extends WorldObject implements AutoPilot {
         
         Drone drone = this.getFirstChildOfType(Drone.class);
         
-        ImageRecognizer imagerecognizer = new ImageRecognizer();
-        Image image = imagerecognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
-        		this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView(), drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
-		float[] necessaryRotation;
+        ImageRecognizer recognizer = this.getImageRecognizer();
+        Image image;
+        float[] necessaryRotation;
+		image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
+				this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView(), drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
         try {
-			necessaryRotation = imagerecognizer.getNecessaryRotation(image, 0.0f, 1.0f);
+			necessaryRotation = recognizer.getNecessaryRotation(image, 0.0f, 1.0f);
 		}
 		catch (IllegalStateException ex){
         	//No red cube found, just fly forward
