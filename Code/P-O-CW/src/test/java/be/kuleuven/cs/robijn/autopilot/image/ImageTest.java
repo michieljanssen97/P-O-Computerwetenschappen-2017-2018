@@ -425,4 +425,78 @@ public class ImageTest {
 			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
 		}
 	}
+	
+	@Test
+	public void testHueSatMulti3RedCube() throws Exception {
+		ImageRecognizer rec = new ImageRecognizer();
+		byte[] image1 = this.loadImageRGBBytes("multi3cubesRedCubeTemp2.png");
+//		Image im = new Image(image1, 200, 200, 120, 120);
+		Image im = rec.createImage(image1, 200, 200, 120, 120);
+		ArrayList<float[]> result = rec.getAllHueSatCombinations();
+		for (float[] com : result){
+			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
+		}
+	}
+	
+	@Test
+	public void testHueSatEmptyImage() throws Exception {
+		ImageRecognizer rec = new ImageRecognizer();
+		byte[] image1 = this.loadImageRGBBytes("WhiteBackground.png");
+//		Image im = new Image(image1, 200, 200, 120, 120);
+		Image im = rec.createImage(image1, 200, 200, 120, 120);
+		ArrayList<float[]> result = rec.getAllHueSatCombinations();
+		for (float[] com : result){
+			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
+		}
+	}
+	
+	//___________________________________________________________________________________________________________________________
+	
+	@Test
+	public void testHueSat2Cubes1Side() throws Exception{
+		ImageRecognizer rec = new ImageRecognizer();
+		byte[] image = this.loadImageRGBBytes("2Cubes1side.png");
+		Image im = rec.createImage(image, 200, 200, 120, 120);
+		assertEquals(rec.getImageRecognizerCubes().size(), 2);
+		for (ImageRecognizerCube cube : rec.getImageRecognizerCubes()){
+			System.out.println(Float.toString(cube.getHue()));
+			System.out.println(Float.toString(cube.getSaturation()));
+			System.out.println(Float.toString(cube.getX()));
+			System.out.println(Float.toString(cube.getY()));
+			System.out.println(Float.toString(cube.getZ()));
+			System.out.println(Float.toString(cube.getFactor()));
+			System.out.println(" ");
+		}
+//		ArrayList<float[]> result = rec.getAllHueSatCombinations();
+//		int size = im.getImageCubes().size();
+//		int expected = 2;
+//		assertEquals(expected, size);
+//		assertEquals(expected, result.size());
+//		
+//		for (float[] com: result){
+//			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
+//		}
+	}
+	@Test
+	public void testAngleEdgeCube() throws Exception{
+		ImageRecognizer rec = new ImageRecognizer();
+		byte[] image = this.loadImageRGBBytes("Cube1SideLeft.png");
+		Image im = rec.createImage(image, 200, 200, 120, 120);
+//		assertEquals(rec.getImageRecognizerCubes().size(), 2);
+		for (ImageCube cube : im.getImageCubes()){
+			System.out.println(Float.toString( (float) im.getXYZDistance(cube.getHue(), cube.getSaturation()).getEntry(0)));
+			System.out.println(Float.toString( (float) im.getXYZDistance(cube.getHue(), cube.getSaturation()).getEntry(1)));
+			System.out.println(Float.toString( (float) im.getXYZDistance(cube.getHue(), cube.getSaturation()).getEntry(2)));
+			}
+//		System.out.println(Integer.toString(im.getAmountSidesVisible(0.0f, 1.0f)));
+//		ArrayList<float[]> result = rec.getAllHueSatCombinations();
+//		int size = im.getImageCubes().size();
+//		int expected = 2;
+//		assertEquals(expected, size);
+//		assertEquals(expected, result.size());
+//		
+//		for (float[] com: result){
+//			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
+//		}
+	}
 }

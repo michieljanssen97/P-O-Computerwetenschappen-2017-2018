@@ -35,6 +35,14 @@ public class ImageRecognizer {
 	}
 	
 	/**
+	 * Return the ImageRecognizerCubeList of this ImageRecognizer.
+	 * @return
+	 */
+	public ArrayList<ImageRecognizerCube> getImageRecognizerCubes(){
+		return this.ImageRecognizerCubeList;
+	}
+	
+	/**
 	 * A variable that consists of an ArrayList of all ImageRecognizerCubes that are visible in an image.
 	 */
 	public ArrayList<ImageRecognizerCube> ImageRecognizerCubeList = new ArrayList<ImageRecognizerCube>();
@@ -174,7 +182,6 @@ public class ImageRecognizer {
 				ImageRecognizerCube cube1 = new ImageRecognizerCube((float) cubePosition.getEntry(0), (float) cubePosition.getEntry(1), (float) cubePosition.getEntry(2), hue, sat);
 				cube1.setFactor(value);
 				ImageRecognizerCubeList.add(cube1);
-				break;
 			} else {
 				float previous_factor = cube.getFactor();
 				float new_factor = image.getNecessaryCubeFactor(hue, sat);
