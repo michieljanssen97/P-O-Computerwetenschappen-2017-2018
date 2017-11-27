@@ -366,7 +366,7 @@ public class Image {
 	 * Return a vector containing the x, y and z distance from the camera to the cube with given hue and saturation.
 	 * @throws Exception	Something goes wrong while calculating the pixels with given hue and saturation
 	 */
-	public RealVector getXYZDistance(float hue, float sat) throws Exception{
+	public RealVector getXYZDistance(float hue, float sat) throws IllegalStateException{
 		float[] cubeCenter = getCubeCenterPixel(hue, sat);
 		float[] imageCenter = getCenterPixel();
 		float angleX = (cubeCenter[0] - imageCenter[0]) * getHorizontalAngle() / getnbColumns();
@@ -595,7 +595,7 @@ public class Image {
 	 * @param hue	The given hue
 	 * @param sat	The given saturation
 	 */
-	public float getNecessaryCubeFactor(float hue, float sat) throws Exception{
+	public float getNecessaryCubeFactor(float hue, float sat) throws IllegalStateException{
 		ArrayList<Pixel> cubePixels = getCubePixels(hue, sat);
 		for (Pixel p : cubePixels){
 			if (p.getX() == 0 || p.getX() == getnbColumns() -1 || p.getY() == 0 || p.getY() == getnbRows() -1)

@@ -73,7 +73,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
         
         ImageRecognizer imagerecognizer = new ImageRecognizer();
         Image image = imagerecognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
-        		this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView());
+        		this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView(), drone.getWorldPosition(), drone.getWorldRotation());
 		float[] necessaryRotation;
         try {
 			necessaryRotation = imagerecognizer.getNecessaryRotation(image, 0.0f, 1.0f);

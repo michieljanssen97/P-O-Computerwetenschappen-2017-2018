@@ -2,6 +2,8 @@ package be.kuleuven.cs.robijn.autopilot.image;
 
 import java.util.ArrayList;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -28,13 +30,19 @@ public class ImageRecognizer {
 	 * @return	An instance of the Image class containing the given values
 	 * @throws Exception	One of the parameters is invalid or the image can't be read
 	 */
-	public Image createImage(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView) throws IllegalStateException, Exception{
+	public Image createImage(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView, RealVector dronePos, Rotation droneRot) throws IllegalStateException{
 		Image im = new Image(image, nbRows, nbColumns, horizontalAngleOfView, verticalAngleOfView);
 		this.UpdateImageRecognizerCubeList(im);
+		this.dronePosition = dronePos;
+		this.droneRotation = droneRot;
 		return im;
 	}
 	
 	public ArrayList<ImageRecognizerCube> ImageRecognizerCubeList = new ArrayList<ImageRecognizerCube>();
+	
+	public RealVector dronePosition = new ArrayRealVector(new double[]{0, 0, 0}, false);
+	
+	public Rotation droneRotation = new Rotation(new Vector3D(1, 0, 0), 0);
 	
 	/**
 	 * Returns the average coordinates of the pixels of the cube with given hue and saturation in the given image.
@@ -83,7 +91,7 @@ public class ImageRecognizer {
 	public ImageRecognizerCube getClosestCubeInWorld(){
 		
 		 //Replace with drone's current position (x, y, z) in world coordinates.
-		float[] curPos = {0.0f, 0.0f, 0.0f};
+		float[] curPos = {(float)dronePosition.getEntry(0), (float)dronePosition.getEntry(1), (float)dronePosition.getEntry(2)};
 		
 		ImageRecognizerCube closest = null;
 		float minimum = 1000f;
@@ -112,7 +120,7 @@ public class ImageRecognizer {
 		return combos;
 	}
 	
-	public ImageRecognizerCube getImageRecognizerCube(Image image, float hue, float sat) throws Exception{
+	public ImageRecognizerCube getImageRecognizerCube(Image image, float hue, float sat) throws IllegalStateException{
 		for (ImageRecognizerCube cu : ImageRecognizerCubeList){
 			if (floatFuzzyEquals(hue, cu.getHue(), 0.01f) && floatFuzzyEquals(sat, cu.getSaturation(), 0.01f)){
 				RealVector vector = image.getXYZDistance(hue, sat);
@@ -131,14 +139,14 @@ public class ImageRecognizer {
 	 * @param image		The given image
 	 * @throws Exception
 	 */
-	public void UpdateImageRecognizerCubeList(Image image) throws Exception{
+	public void UpdateImageRecognizerCubeList(Image image) throws IllegalStateException{
 		for (ImageCube cu : image.getImageCubes()){
 			float hue = cu.getHue();
 			float sat = cu.getSaturation();
 			RealVector vector = image.getXYZDistance(hue, sat);
 			
 			//Replace 0,0,0 with the roll, pitch and heading.
-			RealVector vectorWorld = transformationToWorldCoordinates(vector, 0, 0, 0);
+			RealVector vectorWorld = transformationToWorldCoordinates(vector, (float)dronePosition.getEntry(0), (float)dronePosition.getEntry(1), (float)dronePosition.getEntry(2));
 			
 			//Replace 0,0,0 with the position of the drone (x, y, z) in world coordinates.
 			double[] droneCoordinates = {0,0,0};
@@ -157,7 +165,6 @@ public class ImageRecognizer {
 				ImageRecognizerCube cube1 = new ImageRecognizerCube((float) cubePosition.getEntry(0), (float) cubePosition.getEntry(1), (float) cubePosition.getEntry(2), hue, sat);
 				cube1.setFactor(value);
 				ImageRecognizerCubeList.add(cube1);
-				break;
 			} else {
 				float previous_factor = cube.getFactor();
 				float new_factor = image.getNecessaryCubeFactor(hue, sat);
@@ -178,10 +185,6 @@ public class ImageRecognizer {
 	
 	
 	
-	
-	
-	
-	
  //  -----------------      //
  //                            //
  //  TRANSFORMATION MATRICES   //				DRONE TO WORLD COORDINATES
@@ -193,7 +196,7 @@ public class ImageRecognizer {
 	 * 			The vector to transform from Drone to Heading-Pitch coordinates
 	 * @return The given vector in Heading-Pitch coordinates
 	 */
-	public RealVector inverseRollTransformation(RealVector realVector, float roll){
+	private RealVector inverseRollTransformation(RealVector realVector, float roll){
 		float rollAngle = roll;
 		RealMatrix inverseRollTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for inverse roll
 			{Math.cos(rollAngle),      -Math.sin(rollAngle),       0},
@@ -209,7 +212,7 @@ public class ImageRecognizer {
 	 * 			The vector to transform from Heading-Pitch to Heading coordinates
 	 * @return The given vector in Heading coordinates
 	 */
-	public RealVector inversePitchTransformation(RealVector realVector, float pitch){
+	private RealVector inversePitchTransformation(RealVector realVector, float pitch){
 		float PitchAngle = pitch;
 		RealMatrix inversePitchTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for inverse pitch
 			{1,       0,                        0},
@@ -225,7 +228,7 @@ public class ImageRecognizer {
 	 * 			The vector to transform from Heading to World coordinates
 	 * @return The given vector in World coordinates
 	 */
-	public RealVector inverseHeadingTransformation(RealVector realVector, float heading){
+	private RealVector inverseHeadingTransformation(RealVector realVector, float heading){
 		float headingAngle = heading;
 		RealMatrix inverseHeadingTransformation = new Array2DRowRealMatrix(new double[][] { //transformation matrix for inverse heading
 			{Math.cos(headingAngle),     0,       Math.sin(headingAngle)}, 
