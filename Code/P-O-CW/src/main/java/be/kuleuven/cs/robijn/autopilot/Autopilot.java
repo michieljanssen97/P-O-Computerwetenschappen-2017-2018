@@ -55,7 +55,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		if (this.isFirstUpdate())
 			this.firstUpdate = false;
 		else {
-			this.moveDrone(inputs.getElapsedTime(), inputs);
+			this.moveDrone(inputs.getElapsedTime() - this.getPreviousElapsedTime(), inputs);
 		}
         this.setPreviousElapsedTime(inputs.getElapsedTime());  
         
