@@ -136,7 +136,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube1side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getMinimumDistanceSpherePixels(0.0f, 1.0f);
-		float expected = 39.647f;
+		float expected = 40.65f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -145,7 +145,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube1sidesquare.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getMinimumDistanceSpherePixels(0.0f, 1.0f);
-		float expected = 40.0f;
+		float expected = 41.0f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -154,7 +154,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getMinimumDistanceSpherePixels(0.0f, 1.0f);
-		float expected = 39.837f;
+		float expected = 40.84f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -163,7 +163,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getMaximumDistanceSpherePixels(0.0f, 1.0f);
-		float expected = 66.2375f;
+		float expected = 66.73f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -172,7 +172,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube3sidecorner.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getMaximumDistanceSpherePixels(0.0f, 1.0f);
-		float expected = 66.478f;
+		float expected = 66.98f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -226,8 +226,8 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(1);
-		float expected = 0.0000797f;
-		assertEquals(expected, result, 0.000001f);
+		float expected = 0.0f;
+		assertEquals(expected, result, 0.01f);
 	}
 	
 	@Test
@@ -235,7 +235,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(2);
-		float expected = -1.82666f;
+		float expected = -1.79f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -244,7 +244,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getTotalDistance(0.0f, 1.0f);
-		float expected = 1.82f;
+		float expected = 1.80f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -253,7 +253,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(0);
-		float expected = 2.68f;
+		float expected = 2.47f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -262,7 +262,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(1);
-		float expected = 2.586f;
+		float expected = 2.38f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -271,7 +271,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(2);
-		float expected = -3.389f;
+		float expected = -3.12f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -280,7 +280,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getTotalDistance(0.0f, 1.0f);
-		float expected = 5.036f;
+		float expected = 4.64f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -307,7 +307,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(2);
-		float expected = -1.039f;
+		float expected = -1.028f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -372,7 +372,7 @@ public class ImageTest {
 		ArrayList<ImageCube> cubeList = im.getImageCubes();
 		float hue = cubeList.get(0).getHue();
 		float sat = cubeList.get(0).getSaturation();
-		System.out.println(Float.toString(im.getTotalDistance(hue, sat)));
+		//System.out.println(Float.toString(im.getTotalDistance(hue, sat)));
 	}
 	
 	@Test
@@ -419,7 +419,7 @@ public class ImageTest {
 		Image im = rec.createImage(image1, 200, 200, 120, 120, dronePos, 0.0f, 0.0f, 0.0f);
 		ArrayList<float[]> result = rec.getAllHueSatCombinations();
 		for (float[] com : result){
-			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
+			//System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
 		}
 	}
 	
@@ -431,31 +431,7 @@ public class ImageTest {
 		Image im = rec.createImage(image1, 200, 200, 120, 120, dronePos, 0.0f, 0.0f, 0.0f);
 		ArrayList<float[]> result = rec.getAllHueSatCombinations();
 		for (float[] com : result){
-			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
-		}
-	}
-	
-	@Test
-	public void testHueSatMulti3RedCube() throws Exception {
-		ImageRecognizer rec = new ImageRecognizer();
-		byte[] image1 = this.loadImageRGBBytes("multi3cubesRedCubeTemp2.png");
-		RealVector dronePos = new ArrayRealVector(new double[] {0,0,0});
-		Image im = rec.createImage(image1, 200, 200, 120, 120, dronePos, 0.0f, 0.0f, 0.0f);
-		ArrayList<float[]> result = rec.getAllHueSatCombinations();
-		for (float[] com : result){
-			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
-		}
-	}
-	
-	@Test
-	public void testHueSatEmptyImage() throws Exception {
-		ImageRecognizer rec = new ImageRecognizer();
-		byte[] image1 = this.loadImageRGBBytes("WhiteBackground.png");
-		RealVector dronePos = new ArrayRealVector(new double[] {0,0,0});
-		Image im = rec.createImage(image1, 200, 200, 120, 120, dronePos, 0.0f, 0.0f, 0.0f);
-		ArrayList<float[]> result = rec.getAllHueSatCombinations();
-		for (float[] com : result){
-			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
+			//System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
 		}
 	}
 	
@@ -469,13 +445,13 @@ public class ImageTest {
 		Image im = rec.createImage(image, 200, 200, 120, 120, dronePos, 0.0f, 0.0f, 0.0f);
 		assertEquals(rec.getImageRecognizerCubes().size(), 2);
 		for (ImageRecognizerCube cube : rec.getImageRecognizerCubes()){
-			System.out.println(Float.toString(cube.getHue()));
-			System.out.println(Float.toString(cube.getSaturation()));
-			System.out.println(Float.toString(cube.getX()));
-			System.out.println(Float.toString(cube.getY()));
-			System.out.println(Float.toString(cube.getZ()));
-			System.out.println(Float.toString(cube.getFactor()));
-			System.out.println(" ");
+			//System.out.println(Float.toString(cube.getHue()));
+			//System.out.println(Float.toString(cube.getSaturation()));
+			//System.out.println(Float.toString(cube.getX()));
+			//System.out.println(Float.toString(cube.getY()));
+			//System.out.println(Float.toString(cube.getZ()));
+			//System.out.println(Float.toString(cube.getFactor()));
+			//System.out.println(" ");
 		}
 //		ArrayList<float[]> result = rec.getAllHueSatCombinations();
 //		int size = im.getImageCubes().size();
@@ -495,9 +471,9 @@ public class ImageTest {
 		Image im = rec.createImage(image, 200, 200, 120, 120, dronePos, 0.0f, 0.0f, 0.0f);
 //		assertEquals(rec.getImageRecognizerCubes().size(), 2);
 		for (ImageCube cube : im.getImageCubes()){
-			System.out.println(Float.toString( (float) im.getXYZDistance(cube.getHue(), cube.getSaturation()).getEntry(0)));
-			System.out.println(Float.toString( (float) im.getXYZDistance(cube.getHue(), cube.getSaturation()).getEntry(1)));
-			System.out.println(Float.toString( (float) im.getXYZDistance(cube.getHue(), cube.getSaturation()).getEntry(2)));
+			//System.out.println(Float.toString( (float) im.getXYZDistance(cube.getHue(), cube.getSaturation()).getEntry(0)));
+			//System.out.println(Float.toString( (float) im.getXYZDistance(cube.getHue(), cube.getSaturation()).getEntry(1)));
+			//System.out.println(Float.toString( (float) im.getXYZDistance(cube.getHue(), cube.getSaturation()).getEntry(2)));
 			}
 //		System.out.println(Integer.toString(im.getAmountSidesVisible(0.0f, 1.0f)));
 //		ArrayList<float[]> result = rec.getAllHueSatCombinations();
