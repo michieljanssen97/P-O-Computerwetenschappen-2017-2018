@@ -26,7 +26,6 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 
 	public VirtualTestbed(AutopilotConfig config, RealVector initialVelocity) {
 		this.config = config;
-
 		//Add drone to world
 		Drone drone = new Drone(config, initialVelocity);
 		this.addChild(drone);
@@ -40,10 +39,10 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		//box.setRelativePosition(new ArrayRealVector(new double[] {0, 0, -zDistance}, false));
 		
 		//Case 2
-		box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		//box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
 		
 		//Case 3
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/12.0), -zDistance}, false));
 		
 		//simulatie1
 		//box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
@@ -54,14 +53,14 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		//simulatie3
 		//box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/48.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
 
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, 100, -100}, false));
-		this.addChild(box); //add box to Virtual testbed
-		allBoxList.add(box); //add box to list of all boxes to reach
-		
+//		box.setRelativePosition(new ArrayRealVector(new double[] {0, 5, -80}, false));		
 //		Box box2 = new Box();
-//		box2.setRelativePosition(new ArrayRealVector(new double[] {0, 150, -100}, false));
+//		box2.setRelativePosition(new ArrayRealVector(new double[] {0, 0, -40}, false));
 //		this.addChild(box2);
 //		allBoxList.add(box2);
+		
+		this.addChild(box); //add box to Virtual testbed
+		allBoxList.add(box); //add box to list of all boxes to reach
 		
 	}
 	
@@ -76,9 +75,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	public boolean update(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs output){
 		Drone drone = this.getFirstChildOfType(Drone.class);
 		//Box box = this.getFirstChildOfType(Box.class);
-		//TODO aanpassen adhv wat camera terugggeeft: 1 enkele box of lijst van zichtbare boxes
-		//TODO testbed en autopilot zelfde box laten 'zien'
-		Box box = getAllBoxes().get(0);
+		Box box = getClosestBox(drone);
 
 		float stopDistanceToBox = 4;
 		float cubeRadius = (float) 0.5;
@@ -86,7 +83,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		
 		//Check if the drone reached a cube
 		//true if the center of mass of the drone is in a specified distance of the center of a cube
-		if (drone.getWorldPosition().getDistance(box.getWorldPosition()) <= stopDistanceToCenterBox){
+		if (calculateDistanceToDrone(box, drone) <= stopDistanceToCenterBox){
 			//The box should not be taken into account anymore, it is already reached
 			removeBoxFromList(box); 
 			
@@ -104,6 +101,40 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		this.renderCameraView();
 
 		return false;
+	}
+	
+	/**
+	 * Get the box closest to the current position of the drone
+	 */
+	public Box getClosestBox(Drone drone) {
+		ArrayList<Box> allBoxes = new ArrayList<>(getAllBoxes());
+		
+		Box closestBox = allBoxes.get(0);
+		double distanceClosestBoxToDrone = calculateDistanceToDrone(closestBox, drone);
+		
+		allBoxes.remove(0); //first element is set as default, so should not be checked anymore
+		for (Box b:allBoxes) {
+			double distanceCurrentBoxToDrone = calculateDistanceToDrone(b, drone);
+			if (distanceCurrentBoxToDrone < distanceClosestBoxToDrone) {
+				//set the new box as closest box
+				closestBox = b;
+				distanceClosestBoxToDrone = distanceCurrentBoxToDrone;
+			}
+		}
+		
+		return closestBox;
+	}
+	
+	/**
+	 * Calculate the distance of the given box to the current position of the drone
+	 * @param b
+	 *        The box for which to calculate the distance to the drone
+	 */
+	public double calculateDistanceToDrone(Box b, Drone drone) {
+		RealVector posBox = b.getWorldPosition();
+		RealVector posDrone = drone.getWorldPosition();
+		
+		return posBox.getDistance(posDrone);
 	}
 
 	@Override
