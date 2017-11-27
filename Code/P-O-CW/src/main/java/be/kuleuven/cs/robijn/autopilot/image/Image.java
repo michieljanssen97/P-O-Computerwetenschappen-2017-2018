@@ -51,9 +51,10 @@ public class Image {
 	 * @param nbColumns				The amount of columns.
 	 * @param horizontalAngleOfView	The horizontal angle of view.
 	 * @param verticalAngleOfView	The vertical angle of view.
+	 * @throws Exception 
 	 * @throws IOException	One of the parameters is invalid or the image cannot be read.
 	 */
-	public Image(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView) {
+	public Image(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView) throws Exception{
 		if ( (!isValidImage(image, nbRows, nbColumns)) || (!isValidAngle(horizontalAngleOfView)) || (!isValidAngle(verticalAngleOfView)) )
 			throw new IllegalArgumentException("The given byte array is invalid or does not have the right dimensions.");
 		this.nbRows = nbRows;
@@ -140,7 +141,7 @@ public class Image {
 	 * @return	An array with 3 floats indicating the hue, saturation and value of the given pixel
 	 * @throws Exception	The given coordinates are invalid
 	 */
-	public float[] getPixelHSV(int x, int y) {
+	public float[] getPixelHSV(int x, int y) throws Exception{
 		if ((!isValidXCoordinate(x)) || (!isValidYCoordinate(y))) 
 			throw new IllegalArgumentException();
 		int rgb = getImage().getRGB(x, y);
@@ -225,7 +226,7 @@ public class Image {
 	 * @param sat	The given saturation
 	 * @throws Exception Something goes wrong while calculating the red pixels
 	 */
-	public float getMinimumDistanceSpherePixels(float hue, float sat) throws IllegalStateException{
+	public float getMinimumDistanceSpherePixels(float hue, float sat) throws Exception{
 		float minimum = (float) Math.sqrt( Math.pow(getnbRows(), 2) + Math.pow(getnbColumns(), 2) );
 		float[] centerPixel = getCubeCenterPixel(hue, sat);
 		for(Pixel p : getCubeEdgePixels(hue, sat)){
@@ -242,7 +243,7 @@ public class Image {
 	 * @param sat	The given saturation
 	 * @throws Exception	Something goes wrong while calculating the red pixels
 	 */
-	public float getMaximumDistanceSpherePixels(float hue, float sat) throws IllegalStateException{
+	public float getMaximumDistanceSpherePixels(float hue, float sat) throws Exception{
 		float maximum = 0;
 		float[] centerPixel = getCubeCenterPixel(hue, sat);
 		for(Pixel p : getCubeEdgePixels(hue, sat)){
@@ -317,7 +318,7 @@ public class Image {
 	 * @param sat	The given saturation
 	 * @throws Exception	There are no sides of a cube with given hue and saturation visible in this Image
 	 */
-	public float getTotalDistance(float hue, float sat) throws IllegalStateException{
+	public float getTotalDistance(float hue, float sat) throws Exception{
 		int sides = getAmountSidesVisible(hue, sat);
 		if (sides == 3){
 			float[] percentageXYZPixels = getPercentageXYZPixels(hue, sat);
@@ -366,7 +367,7 @@ public class Image {
 	 * Return a vector containing the x, y and z distance from the camera to the cube with given hue and saturation.
 	 * @throws Exception	Something goes wrong while calculating the pixels with given hue and saturation
 	 */
-	public RealVector getXYZDistance(float hue, float sat) throws IllegalStateException{
+	public RealVector getXYZDistance(float hue, float sat) throws Exception{
 		float[] cubeCenter = getCubeCenterPixel(hue, sat);
 		float[] imageCenter = getCenterPixel();
 		float angleX = (cubeCenter[0] - imageCenter[0]) * getHorizontalAngle() / getnbColumns();
@@ -457,8 +458,9 @@ public class Image {
 	
 	/**
 	 * Return a list containing all the cubes that are visible on this image.
+	 * @throws Exception 
 	 */
-	public ArrayList<ImageCube> scanImageForCubes(){
+	public ArrayList<ImageCube> scanImageForCubes() throws Exception{
 		ArrayList<ImageCube> cubeCollection = new ArrayList<ImageCube>();
 		boolean cubeExists = false;
 		for (int y = 0; y < getnbRows(); y++){
@@ -536,8 +538,9 @@ public class Image {
 	 * Return the pixels that are on the edge of the cube with given hue and saturation.
 	 * @param hue	The given hue
 	 * @param sat	The given saturation
+	 * @throws Exception 
 	 */
-	public ArrayList<Pixel> getCubeEdgePixels(float hue, float sat){
+	public ArrayList<Pixel> getCubeEdgePixels(float hue, float sat) throws Exception{
 		ArrayList<Pixel> edge = new ArrayList<Pixel>();
 		boolean isEdge = false;
 		for (Pixel p : getCubePixels(hue, sat)){
@@ -595,7 +598,7 @@ public class Image {
 	 * @param hue	The given hue
 	 * @param sat	The given saturation
 	 */
-	public float getNecessaryCubeFactor(float hue, float sat) throws IllegalStateException{
+	public float getNecessaryCubeFactor(float hue, float sat) throws Exception{
 		ArrayList<Pixel> cubePixels = getCubePixels(hue, sat);
 		for (Pixel p : cubePixels){
 			if (p.getX() == 0 || p.getX() == getnbColumns() -1 || p.getY() == 0 || p.getY() == getnbRows() -1)
