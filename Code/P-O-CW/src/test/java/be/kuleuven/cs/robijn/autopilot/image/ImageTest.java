@@ -453,15 +453,6 @@ public class ImageTest {
 			//System.out.println(Float.toString(cube.getFactor()));
 			//System.out.println(" ");
 		}
-//		ArrayList<float[]> result = rec.getAllHueSatCombinations();
-//		int size = im.getImageCubes().size();
-//		int expected = 2;
-//		assertEquals(expected, size);
-//		assertEquals(expected, result.size());
-//		
-//		for (float[] com: result){
-//			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
-//		}
 	}
 	@Test
 	public void testAngleEdgeCube() throws Exception{
@@ -475,16 +466,6 @@ public class ImageTest {
 			//System.out.println(Float.toString( (float) im.getXYZDistance(cube.getHue(), cube.getSaturation()).getEntry(1)));
 			//System.out.println(Float.toString( (float) im.getXYZDistance(cube.getHue(), cube.getSaturation()).getEntry(2)));
 			}
-//		System.out.println(Integer.toString(im.getAmountSidesVisible(0.0f, 1.0f)));
-//		ArrayList<float[]> result = rec.getAllHueSatCombinations();
-//		int size = im.getImageCubes().size();
-//		int expected = 2;
-//		assertEquals(expected, size);
-//		assertEquals(expected, result.size());
-//		
-//		for (float[] com: result){
-//			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
-//		}
 	}
 	
 }
