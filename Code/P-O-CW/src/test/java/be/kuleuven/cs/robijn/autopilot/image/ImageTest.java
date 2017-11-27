@@ -474,7 +474,6 @@ public class ImageTest {
 		RealVector dronePos = new ArrayRealVector(new double[] {10,0,0});
 		Image im = rec.createImage(image, 200, 200, 120, 120, dronePos, (float) Math.PI/2, 0.0f, 0.0f);
 		for (ImageRecognizerCube cube : rec.getImageRecognizerCubes()){
-//			cube.setPosition(1, 0, 0);
 			System.out.println(Float.toString(cube.getFactor()));
 			System.out.println(Float.toString(im.getTotalDistance(cube.getHue(), cube.getSaturation())));
 			System.out.println(Float.toString(cube.getPosition()[0]));

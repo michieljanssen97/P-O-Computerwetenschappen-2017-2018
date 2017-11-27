@@ -166,8 +166,6 @@ public class ImageRecognizer {
 		return combos;
 	}
 	
-	public ge
-	
 	/**
 	 * Return the ImageRecognizerCube in the list that has the given hue and saturation as its color.
 	 * @param image		The given image
