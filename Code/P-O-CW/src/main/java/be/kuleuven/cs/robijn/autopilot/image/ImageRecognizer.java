@@ -30,7 +30,7 @@ public class ImageRecognizer {
 	 * @return	An instance of the Image class containing the given values
 	 * @throws Exception	One of the parameters is invalid or the image can't be read
 	 */
-	public Image createImage(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView, RealVector dronePos, Rotation droneRot) throws IllegalStateException{
+	public Image createImage(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView, RealVector dronePos, Rotation droneRot) throws Exception{
 		Image im = new Image(image, nbRows, nbColumns, horizontalAngleOfView, verticalAngleOfView);
 		this.UpdateImageRecognizerCubeList(im);
 		this.dronePosition = dronePos;
@@ -145,7 +145,7 @@ public class ImageRecognizer {
 	 * @return	The ImageRecognizerCube that corresponds to the given hue and saturation, or null if there is none such.
 	 * @throws Exception
 	 */
-	public ImageRecognizerCube getImageRecognizerCube(Image image, float hue, float sat) throws IllegalStateException{
+	public ImageRecognizerCube getImageRecognizerCube(Image image, float hue, float sat) throws Exception{
 		for (ImageRecognizerCube cu : ImageRecognizerCubeList){
 			if (floatFuzzyEquals(hue, cu.getHue(), 0.01f) && floatFuzzyEquals(sat, cu.getSaturation(), 0.01f)){
 				RealVector vector = image.getXYZDistance(hue, sat);
@@ -164,7 +164,7 @@ public class ImageRecognizer {
 	 * @param image		The given image
 	 * @throws Exception
 	 */
-	public void UpdateImageRecognizerCubeList(Image image) throws IllegalStateException{
+	public void UpdateImageRecognizerCubeList(Image image) throws Exception{
 		for (ImageCube cu : image.getImageCubes()){
 			float hue = cu.getHue();
 			float sat = cu.getSaturation();
