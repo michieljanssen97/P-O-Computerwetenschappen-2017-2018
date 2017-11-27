@@ -237,7 +237,7 @@ public class Image {
 			if (distance < minimum)
 				minimum = distance;
 		}
-		return minimum + 0.5f;
+		return minimum;
 	}
 
 	/**
