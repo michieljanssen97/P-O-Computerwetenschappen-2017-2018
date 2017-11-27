@@ -123,10 +123,7 @@ public class ImageRecognizer {
 	 * Return the cube in the ImageRecognizerCubeList that is closest to the current position of the drone.
 	 */
 	public ImageRecognizerCube getClosestCubeInWorld(){
-		
-		 //Replace with drone's current position (x, y, z) in world coordinates.
 		float[] curPos = {(float)dronePosition.getEntry(0), (float)dronePosition.getEntry(1), (float)dronePosition.getEntry(2)};
-		
 		ImageRecognizerCube closest = null;
 		float minimum = 1000f;
 		boolean first = true;
@@ -203,18 +200,12 @@ public class ImageRecognizer {
 			float hue = cu.getHue();
 			float sat = cu.getSaturation();
 			RealVector vector = image.getXYZDistance(hue, sat);
-			
 			float[] droneRotation = getRollPitchHeading();
 			RealVector vectorWorld = transformationToWorldCoordinates(vector, droneRotation[0], droneRotation[1], droneRotation[2]);
-			
 			double[] droneCoordinates = getDronePositionCoordinates();
-			
 			RealVector dronePosition = new ArrayRealVector(droneCoordinates);
-			
 			double[] cubeCoordinates = {dronePosition.getEntry(0) + vectorWorld.getEntry(0), dronePosition.getEntry(1) + vectorWorld.getEntry(1), dronePosition.getEntry(2) + vectorWorld.getEntry(2)};
-			
 			RealVector cubePosition = new ArrayRealVector(cubeCoordinates);
-			
 			ImageRecognizerCube cube = getImageRecognizerCube(image, hue, sat);
 			if (image.getTotalDistance(hue, sat) <= 4)
 				ImageRecognizerCubeList.remove(cube);
@@ -236,12 +227,6 @@ public class ImageRecognizer {
 			
 		}
 	}
-
-	
-	
-	
-	
-	
 	
  //  -----------------      //
  //                            //
