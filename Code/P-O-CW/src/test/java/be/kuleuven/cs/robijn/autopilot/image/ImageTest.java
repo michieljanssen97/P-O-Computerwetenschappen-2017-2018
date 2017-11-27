@@ -415,8 +415,8 @@ public class ImageTest {
 	public void testHueSatCube3() throws Exception {
 		ImageRecognizer rec = new ImageRecognizer();
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
-//		Image im = new Image(image1, 200, 200, 120, 120);
-		Image im = rec.createImage(image1, 200, 200, 120, 120);
+		RealVector dronePos = new ArrayRealVector(new double[] {0,0,0});
+		Image im = rec.createImage(image1, 200, 200, 120, 120, dronePos, 0.0f, 0.0f, 0.0f);
 		ArrayList<float[]> result = rec.getAllHueSatCombinations();
 		for (float[] com : result){
 			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
@@ -427,8 +427,8 @@ public class ImageTest {
 	public void testHueSatMulti3() throws Exception {
 		ImageRecognizer rec = new ImageRecognizer();
 		byte[] image1 = this.loadImageRGBBytes("multi3cubes.png");
-//		Image im = new Image(image1, 200, 200, 120, 120);
-		Image im = rec.createImage(image1, 200, 200, 120, 120);
+		RealVector dronePos = new ArrayRealVector(new double[] {0,0,0});
+		Image im = rec.createImage(image1, 200, 200, 120, 120, dronePos, 0.0f, 0.0f, 0.0f);
 		ArrayList<float[]> result = rec.getAllHueSatCombinations();
 		for (float[] com : result){
 			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
@@ -439,8 +439,8 @@ public class ImageTest {
 	public void testHueSatMulti3RedCube() throws Exception {
 		ImageRecognizer rec = new ImageRecognizer();
 		byte[] image1 = this.loadImageRGBBytes("multi3cubesRedCubeTemp2.png");
-//		Image im = new Image(image1, 200, 200, 120, 120);
-		Image im = rec.createImage(image1, 200, 200, 120, 120);
+		RealVector dronePos = new ArrayRealVector(new double[] {0,0,0});
+		Image im = rec.createImage(image1, 200, 200, 120, 120, dronePos, 0.0f, 0.0f, 0.0f);
 		ArrayList<float[]> result = rec.getAllHueSatCombinations();
 		for (float[] com : result){
 			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
@@ -451,8 +451,8 @@ public class ImageTest {
 	public void testHueSatEmptyImage() throws Exception {
 		ImageRecognizer rec = new ImageRecognizer();
 		byte[] image1 = this.loadImageRGBBytes("WhiteBackground.png");
-//		Image im = new Image(image1, 200, 200, 120, 120);
-		Image im = rec.createImage(image1, 200, 200, 120, 120);
+		RealVector dronePos = new ArrayRealVector(new double[] {0,0,0});
+		Image im = rec.createImage(image1, 200, 200, 120, 120, dronePos, 0.0f, 0.0f, 0.0f);
 		ArrayList<float[]> result = rec.getAllHueSatCombinations();
 		for (float[] com : result){
 			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
@@ -465,7 +465,8 @@ public class ImageTest {
 	public void testHueSat2Cubes1Side() throws Exception{
 		ImageRecognizer rec = new ImageRecognizer();
 		byte[] image = this.loadImageRGBBytes("2Cubes1side.png");
-		Image im = rec.createImage(image, 200, 200, 120, 120);
+		RealVector dronePos = new ArrayRealVector(new double[] {0,0,0});
+		Image im = rec.createImage(image, 200, 200, 120, 120, dronePos, 0.0f, 0.0f, 0.0f);
 		assertEquals(rec.getImageRecognizerCubes().size(), 2);
 		for (ImageRecognizerCube cube : rec.getImageRecognizerCubes()){
 			System.out.println(Float.toString(cube.getHue()));
@@ -490,7 +491,8 @@ public class ImageTest {
 	public void testAngleEdgeCube() throws Exception{
 		ImageRecognizer rec = new ImageRecognizer();
 		byte[] image = this.loadImageRGBBytes("Cube1SideLeft.png");
-		Image im = rec.createImage(image, 200, 200, 120, 120);
+		RealVector dronePos = new ArrayRealVector(new double[] {0,0,0});
+		Image im = rec.createImage(image, 200, 200, 120, 120, dronePos, 0.0f, 0.0f, 0.0f);
 //		assertEquals(rec.getImageRecognizerCubes().size(), 2);
 		for (ImageCube cube : im.getImageCubes()){
 			System.out.println(Float.toString( (float) im.getXYZDistance(cube.getHue(), cube.getSaturation()).getEntry(0)));
