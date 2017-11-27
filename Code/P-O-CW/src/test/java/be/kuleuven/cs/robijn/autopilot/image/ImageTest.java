@@ -366,6 +366,7 @@ public class ImageTest {
 		System.out.println(Float.toString(im.getTotalDistance(hue, sat)));
 	}
 	
+	@Test
 	public void testRatioPixelsCube2() throws Exception {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
@@ -424,5 +425,4 @@ public class ImageTest {
 			System.out.println("[" + Float.toString(com[0]) + ", " + Float.toString(com[1]) + "]");
 		}
 	}
-	
 }

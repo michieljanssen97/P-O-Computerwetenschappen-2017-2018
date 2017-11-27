@@ -38,6 +38,9 @@ public class ImageRecognizer {
 		return im;
 	}
 	
+	/**
+	 * A variable that consists of an ArrayList of all ImageRecognizerCubes that are visible in an image.
+	 */
 	public ArrayList<ImageRecognizerCube> ImageRecognizerCubeList = new ArrayList<ImageRecognizerCube>();
 	
 	public RealVector dronePosition = new ArrayRealVector(new double[]{0, 0, 0}, false);
@@ -88,6 +91,9 @@ public class ImageRecognizer {
 	}
 	
 
+	/**
+	 * Return the cube in the ImageRecognizerCubeList that is closest to the current position of the drone.
+	 */
 	public ImageRecognizerCube getClosestCubeInWorld(){
 		
 		 //Replace with drone's current position (x, y, z) in world coordinates.
@@ -111,6 +117,9 @@ public class ImageRecognizer {
 		return closest;
 	}
 	
+	/**
+	 * Return an ArrayList containing all combinations of hue and saturation that are visible in the image.
+	 */
 	public ArrayList<float[]> getAllHueSatCombinations(){
 		ArrayList<float[]> combos = new ArrayList<float[]>();
 		for (ImageRecognizerCube c : this.ImageRecognizerCubeList){
@@ -120,6 +129,14 @@ public class ImageRecognizer {
 		return combos;
 	}
 	
+	/**
+	 * Return the ImageRecognizerCube in the list that has the given hue and saturation as its color.
+	 * @param image		The given image
+	 * @param hue		The given hue
+	 * @param sat		The given saturation
+	 * @return	The ImageRecognizerCube that corresponds to the given hue and saturation, or null if there is none such.
+	 * @throws Exception
+	 */
 	public ImageRecognizerCube getImageRecognizerCube(Image image, float hue, float sat) throws IllegalStateException{
 		for (ImageRecognizerCube cu : ImageRecognizerCubeList){
 			if (floatFuzzyEquals(hue, cu.getHue(), 0.01f) && floatFuzzyEquals(sat, cu.getSaturation(), 0.01f)){
