@@ -190,12 +190,9 @@ public class ImageRecognizer {
 			float sat = cu.getSaturation();
 			RealVector vector = image.getXYZDistance(hue, sat);
 			
-			//Replace 0,0,0 with the roll, pitch and heading.
 			float[] droneRotation = getRollPitchHeading();
 			RealVector vectorWorld = transformationToWorldCoordinates(vector, droneRotation[0], droneRotation[1], droneRotation[2]);
 			
-			//Replace 0,0,0 with the position of the drone (x, y, z) in world coordinates.
-			//double[] droneCoordinates = {0,0,0};
 			double[] droneCoordinates = getDronePositionCoordinates();
 			
 			RealVector dronePosition = new ArrayRealVector(droneCoordinates);
