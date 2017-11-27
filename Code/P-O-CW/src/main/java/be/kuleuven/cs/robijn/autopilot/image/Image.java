@@ -42,6 +42,9 @@ public class Image {
 	 */
 	private float verticalAngleOfView;
 	
+	/**
+	 * A variable containing the list of ImageCubes that are visible in this image.
+	 */
 	private ArrayList<ImageCube> cubes;
 	
 	/**
@@ -154,7 +157,7 @@ public class Image {
 	/**
 	 * Check whether the given x coordinate is valid.
 	 * @param x	The given x coordinate
-	 * @return	True if the x coordinate is positive and lower than the number of columns minus 1
+	 * @return	True if the x coordinate is positive and lower than or equal to the number of columns of this image minus 1
 	 */
 	private boolean isValidXCoordinate(int x){
 		return (x >= 0) && (x <= getnbColumns()-1);
@@ -163,7 +166,7 @@ public class Image {
 	/**
 	 * Check whether the given y coordinate is valid.
 	 * @param y	The given y coordinate
-	 * @return	True if the given y coordinate is positive and lower than the number of rows minus 1
+	 * @return	True if the given y coordinate is positive and lower than or equal to the number of rows minus 1
 	 */
 	private boolean isValidYCoordinate(int y){
 		return (y >= 0) && (y <= getnbRows()-1);
@@ -194,7 +197,7 @@ public class Image {
 	 * @param img	The given image
 	 * @param x		The x coordinate of the given position
 	 * @param y		The y coordinate of the given position
-	 * @return	An array which contains the x-value and the y-value of the distance to the centre of the image
+	 * @return	An array which contains the x-value and the y-value of the distance to the center of the image
 	 */
 	public float[] getPixelsFromCenter(float x, float y){
 		float[] center = getCenterPixel();
