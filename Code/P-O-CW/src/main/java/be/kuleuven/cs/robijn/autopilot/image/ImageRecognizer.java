@@ -41,6 +41,14 @@ public class ImageRecognizer {
 	}
 	
 	/**
+	 * Return the ImageRecognizerCubeList of this ImageRecognizer.
+	 * @return
+	 */
+	public ArrayList<ImageRecognizerCube> getImageRecognizerCubes(){
+		return this.ImageRecognizerCubeList;
+	}
+	
+	/**
 	 * A variable that consists of an ArrayList of all ImageRecognizerCubes that are visible in an image.
 	 */
 	public ArrayList<ImageRecognizerCube> ImageRecognizerCubeList = new ArrayList<ImageRecognizerCube>();
