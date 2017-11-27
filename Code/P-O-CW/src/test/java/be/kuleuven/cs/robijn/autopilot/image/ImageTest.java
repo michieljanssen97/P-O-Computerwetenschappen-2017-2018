@@ -440,7 +440,7 @@ public class ImageTest {
 	@Test
 	public void testHueSat2Cubes1Side() throws Exception{
 		ImageRecognizer rec = new ImageRecognizer();
-		byte[] image = this.loadImageRGBBytes("2Cubes1side.png");
+		byte[] image = this.loadImageRGBBytes("2Cubes1Side.png");
 		RealVector dronePos = new ArrayRealVector(new double[] {0,0,0});
 		Image im = rec.createImage(image, 200, 200, 120, 120, dronePos, 0.0f, 0.0f, 0.0f);
 		assertEquals(rec.getImageRecognizerCubes().size(), 2);
