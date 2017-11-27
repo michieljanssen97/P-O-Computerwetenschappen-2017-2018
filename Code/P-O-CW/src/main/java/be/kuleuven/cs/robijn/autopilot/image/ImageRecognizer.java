@@ -2,8 +2,6 @@ package be.kuleuven.cs.robijn.autopilot.image;
 
 import java.util.ArrayList;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -30,30 +28,28 @@ public class ImageRecognizer {
 	 * @return	An instance of the Image class containing the given values
 	 * @throws Exception	One of the parameters is invalid or the image can't be read
 	 */
-	public Image createImage(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView, RealVector dronePos, Rotation droneRot) throws Exception{
+	public Image createImage(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView, RealVector dronePos, float heading, float pitch, float roll) throws IllegalStateException{
 		Image im = new Image(image, nbRows, nbColumns, horizontalAngleOfView, verticalAngleOfView);
-		this.UpdateImageRecognizerCubeList(im);
 		this.dronePosition = dronePos;
-		this.droneRotation = droneRot;
+		this.heading = heading;
+		this.pitch = pitch;
+		this.roll = roll;
+		this.UpdateImageRecognizerCubeList(im);
 		return im;
-	}
-	
-	/**
-	 * Return the ImageRecognizerCubeList of this ImageRecognizer.
-	 * @return
-	 */
-	public ArrayList<ImageRecognizerCube> getImageRecognizerCubes(){
-		return this.ImageRecognizerCubeList;
 	}
 	
 	/**
 	 * A variable that consists of an ArrayList of all ImageRecognizerCubes that are visible in an image.
 	 */
-	public ArrayList<ImageRecognizerCube> ImageRecognizerCubeList = new ArrayList<ImageRecognizerCube>();
+	private ArrayList<ImageRecognizerCube> ImageRecognizerCubeList = new ArrayList<ImageRecognizerCube>();
 	
-	public RealVector dronePosition = new ArrayRealVector(new double[]{0, 0, 0}, false);
+	private RealVector dronePosition = new ArrayRealVector(new double[]{0, 0, 0}, false);
 	
-	public Rotation droneRotation = new Rotation(new Vector3D(1, 0, 0), 0);
+	private float heading = 0.0f;
+	
+	private float pitch = 0.0f;
+	
+	private float roll = 0.0f;
 	
 	/**
 	 * Returns the average coordinates of the pixels of the cube with given hue and saturation in the given image.
@@ -98,6 +94,30 @@ public class ImageRecognizer {
 		return image.getXYZDistance(hue, sat);
 	}
 	
+	/**
+	 * Return a list with the stored coordinates of the drone accompanying this image recognizer.
+	 * @return
+	 */
+	private double[] getDronePositionCoordinates(){
+		RealVector pos = this.dronePosition;
+		return new double[] {pos.getEntry(0), pos.getEntry(1), pos.getEntry(2)};
+	}
+	
+	/**
+	 * Return a list with the roll, pitch and heading of the drone accompanying this image recognizer.
+	 * @return
+	 */
+	public float[] getRollPitchHeading(){
+		return new float[] {this.roll, this.pitch, this.heading};
+	}
+	
+	/**
+	 * Return the ImageRecognizerCubeList of this ImageRecognizer.
+	 * @return
+	 */
+	public ArrayList<ImageRecognizerCube> getImageRecognizerCubes(){
+		return this.ImageRecognizerCubeList;
+	}
 
 	/**
 	 * Return the cube in the ImageRecognizerCubeList that is closest to the current position of the drone.
@@ -145,7 +165,7 @@ public class ImageRecognizer {
 	 * @return	The ImageRecognizerCube that corresponds to the given hue and saturation, or null if there is none such.
 	 * @throws Exception
 	 */
-	public ImageRecognizerCube getImageRecognizerCube(Image image, float hue, float sat) throws Exception{
+	private ImageRecognizerCube getImageRecognizerCube(Image image, float hue, float sat) throws IllegalStateException{
 		for (ImageRecognizerCube cu : ImageRecognizerCubeList){
 			if (floatFuzzyEquals(hue, cu.getHue(), 0.01f) && floatFuzzyEquals(sat, cu.getSaturation(), 0.01f)){
 				RealVector vector = image.getXYZDistance(hue, sat);
@@ -164,17 +184,19 @@ public class ImageRecognizer {
 	 * @param image		The given image
 	 * @throws Exception
 	 */
-	public void UpdateImageRecognizerCubeList(Image image) throws Exception{
+	private void UpdateImageRecognizerCubeList(Image image) throws IllegalStateException{
 		for (ImageCube cu : image.getImageCubes()){
 			float hue = cu.getHue();
 			float sat = cu.getSaturation();
 			RealVector vector = image.getXYZDistance(hue, sat);
 			
 			//Replace 0,0,0 with the roll, pitch and heading.
-			RealVector vectorWorld = transformationToWorldCoordinates(vector, (float)dronePosition.getEntry(0), (float)dronePosition.getEntry(1), (float)dronePosition.getEntry(2));
+			float[] droneRotation = getRollPitchHeading();
+			RealVector vectorWorld = transformationToWorldCoordinates(vector, droneRotation[0], droneRotation[1], droneRotation[2]);
 			
 			//Replace 0,0,0 with the position of the drone (x, y, z) in world coordinates.
-			double[] droneCoordinates = {0,0,0};
+			//double[] droneCoordinates = {0,0,0};
+			double[] droneCoordinates = getDronePositionCoordinates();
 			
 			RealVector dronePosition = new ArrayRealVector(droneCoordinates);
 			
@@ -269,12 +291,14 @@ public class ImageRecognizer {
 	 * 			The vector to transform from Drone to World coordinates
 	 * @return The given vector in World Coordinates
 	 */
-	public RealVector transformationToWorldCoordinates(RealVector realVector, float roll, float pitch, float heading) {
+	private RealVector transformationToWorldCoordinates(RealVector realVector, float roll, float pitch, float heading) {
 		return this.inverseHeadingTransformation(this.inversePitchTransformation(this.inverseRollTransformation(realVector, roll), pitch), heading);
 	}
 	
-	public boolean floatFuzzyEquals(float a, float b, float delta){
+	private boolean floatFuzzyEquals(float a, float b, float delta){
 		return Math.abs(a - b) <= delta;
 	}
+	
+	
 	
 }
