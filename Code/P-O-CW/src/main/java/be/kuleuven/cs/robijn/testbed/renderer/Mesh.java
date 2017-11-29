@@ -1,5 +1,7 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
@@ -90,15 +92,40 @@ public class Mesh implements AutoCloseable {
             glDeleteBuffers(indicesBufferId);
         }
 
-        return new Mesh(vertexArrayId, faceIndices.length);
+        //Calculate bounding box
+        float minX =  Float.MAX_VALUE, minY =  Float.MAX_VALUE, minZ =  Float.MAX_VALUE;
+        float maxX = -Float.MAX_VALUE, maxY = -Float.MAX_VALUE, maxZ = -Float.MAX_VALUE;
+        for(int i = 0; i < vertexPositions.length; i += 3){
+            float x = vertexPositions[i];
+            if(x < minX){  minX = x; }
+            if(x > maxX){  maxX = x; }
+        }
+        for(int i = 1; i < vertexPositions.length; i += 3){
+            float y = vertexPositions[i];
+            if(y < minY){  minY = y; }
+            if(y > maxY){  maxY = y; }
+        }
+        for(int i = 2; i < vertexPositions.length; i += 3){
+            float z = vertexPositions[i];
+            if(z < minZ){  minZ = z; }
+            if(z > maxZ){  maxZ = z; }
+        }
+        BoundingBox boundingBox = new BoundingBox(
+                new Vector3D(minX, minY, minZ),
+                new Vector3D(maxX - minX, maxY - minY, maxZ - minZ)
+        );
+
+        return new Mesh(vertexArrayId, faceIndices.length, boundingBox);
     }
 
-    private int vertexArrayObjectId;
-    private int indexCount;
+    private final int vertexArrayObjectId;
+    private final int indexCount;
+    private final BoundingBox boundingBox;
 
-    private Mesh(int vertexArrayObjectId, int indexCount){
+    private Mesh(int vertexArrayObjectId, int indexCount, BoundingBox boundingBox){
         this.vertexArrayObjectId = vertexArrayObjectId;
         this.indexCount = indexCount;
+        this.boundingBox = boundingBox;
     }
 
     public int getVertexArrayObjectId(){
@@ -107,6 +134,10 @@ public class Mesh implements AutoCloseable {
 
     public int getIndexCount(){
         return indexCount;
+    }
+
+    public BoundingBox getBoundingBox() {
+        return boundingBox;
     }
 
     @Override
