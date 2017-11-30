@@ -211,7 +211,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
 //		final float thrust = thrustTemp;
 		
 		//Case 3
-		float targetPitchAngularVelocity = Math.abs(imageXRotation - drone.getHeading())/turningTime;
+		float targetPitchAngularVelocity = Math.abs(imageXRotation - drone.getPitch())/turningTime;
 		float pitchAngularVelocity = drone.getPitchAngularVelocity();
 		float pitchAngularAccelerationTemp = Math.abs(targetPitchAngularVelocity - pitchAngularVelocity)/turningTime;
 		if (imageXRotation < 0)
@@ -666,28 +666,6 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		this.previousYAccelerationError = previousYAccelerationError;
 	}
 	
-	public float preventCrash(float inclination, boolean positive, Drone drone) {
-		float newInclination = inclination;
-		boolean crash = true;
-		while (crash == true) {
-			crash = this.hasCrash(newInclination, drone);
-			if (crash == true) {
-				if (positive == true) {
-					newInclination -= (1.0/360.0)*2*Math.PI;
-					if (newInclination < -drone.getMaxAOA()) {
-						throw new IllegalStateException("simulation failed!");
-					}
-				}
-				if (positive == false) {
-					newInclination += (1.0/360.0)*2*Math.PI;
-					if (newInclination > drone.getMaxAOA())
-						throw new IllegalStateException("simulation failed!");
-				}
-			}
-		}
-		return newInclination;
-	}
-	
 	public float minMaxInclination(float upperBound, float lowerBound, boolean max, float accuracy, Drone drone, int airfoil) {
 		float inclination;
 		if (max == true) {
@@ -710,33 +688,6 @@ public class Autopilot extends WorldObject implements AutoPilot {
 			}
 		}
 		return inclination;
-	}
-	
-	public boolean hasCrash(float inclination, Drone drone) {
-		boolean crash = false;
-		float AOALeftWing = drone.calculateAOA(drone.getNormalHor(inclination),
-				drone.getProjectedVelocityLeftWing(), drone.getAttackVectorHor(inclination));
-		if (Float.isNaN(AOALeftWing))
-			crash = true;
-		if (crash == false) {
-			float AOARightWing = drone.calculateAOA(drone.getNormalHor(inclination),
-					drone.getProjectedVelocityRightWing(), drone.getAttackVectorHor(inclination));
-			if (Float.isNaN(AOARightWing))
-				crash = true;
-		}
-		if (crash == false) {
-			float AOAHorStab = drone.calculateAOA(drone.getNormalHor(inclination),
-					drone.getProjectedVelocityHorStab(), drone.getAttackVectorHor(inclination));
-			if (Float.isNaN(AOAHorStab))
-				crash = true;
-		}
-		if (crash == false) {
-			float AOAVerStab = drone.calculateAOA(drone.getNormalVer(inclination),
-					drone.getProjectedVelocityVerStab(), drone.getAttackVectorVer(inclination));
-			if (Float.isNaN(AOAVerStab))
-				crash = true;
-		}
-		return crash;	
 	}
 	
 	public boolean hasCrash(float inclination, Drone drone, int airfoil) {
