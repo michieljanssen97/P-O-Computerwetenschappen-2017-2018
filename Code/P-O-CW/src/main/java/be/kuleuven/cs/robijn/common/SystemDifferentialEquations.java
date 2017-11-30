@@ -1,6 +1,6 @@
 package be.kuleuven.cs.robijn.common;
 
-import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.ode.*;
 import p_en_o_cw_2017.*;
 
@@ -41,6 +41,31 @@ public class SystemDifferentialEquations implements FirstOrderDifferentialEquati
 	}
 
 	public void computeDerivatives(double t, double[] y, double[] yDot) {
+		Drone drone = this.getDrone();
+		drone.setRelativePosition(new ArrayRealVector(new double[] {y[0], y[2], y[4]}, false));
+		drone.setVelocity(new ArrayRealVector(new double[] {y[1], y[3], y[5]}, false));
+		float newHeading = (float) y[6];
+		if (newHeading < 0)
+			newHeading += (2*Math.PI);
+		if (newHeading >= 2*Math.PI)
+			newHeading = 0;
+		drone.setHeading(newHeading);
+		drone.setHeadingAngularVelocity((float) y[7]);
+		float newPitch = (float) y[8];
+		if (newPitch < 0)
+			newPitch += (2*Math.PI);
+		if (newPitch >= 2*Math.PI)
+			newPitch = 0;
+		drone.setPitch(newPitch);
+		drone.setPitchAngularVelocity((float) y[9]);
+		float newRoll = (float) y[10];
+		if (newRoll < 0)
+			newRoll += (2*Math.PI);
+		if (newRoll >= 2*Math.PI)
+			newRoll = 0;
+		drone.setRoll(newRoll);
+		drone.setRollAngularVelocity((float) y[11]);
+		
 		RealVector acceleration = this.getDrone().getAcceleration(this.getAutopilotOutputs().getThrust(),
 				this.getAutopilotOutputs().getLeftWingInclination(), this.getAutopilotOutputs().getRightWingInclination(),
 				this.getAutopilotOutputs().getHorStabInclination(), this.getAutopilotOutputs().getVerStabInclination());
