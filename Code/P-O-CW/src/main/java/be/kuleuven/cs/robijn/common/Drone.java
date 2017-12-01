@@ -971,7 +971,7 @@ public class Drone extends WorldObject {
 	public RealVector getLiftForceVerStab(float verStabInclination) throws IllegalArgumentException {
 		RealVector projectedVelocity = this.getProjectedVelocityVerStab();
 		
-		float AOA = this.calculateAOA(this.getNormalHor(verStabInclination), projectedVelocity, this.getAttackVectorHor(verStabInclination));
+		float AOA = this.calculateAOA(this.getNormalVer(verStabInclination), projectedVelocity, this.getAttackVectorVer(verStabInclination));
 		if (Float.isNaN(AOA))
 			throw new IllegalArgumentException();
 		
