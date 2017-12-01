@@ -106,9 +106,9 @@ public class Autopilot extends WorldObject implements AutoPilot {
         
         Drone drone = this.getFirstChildOfType(Drone.class);
         
-        ImageRecognizer imagerecognizer = new ImageRecognizer();
-        Image image = imagerecognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
-        		this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView());
+//        ImageRecognizer imagerecognizer = new ImageRecognizer();
+//        Image image = imagerecognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
+//        		this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView());
 //		float imageXRotation;
 //		float imageYRotation;
 //        try {
@@ -123,6 +123,20 @@ public class Autopilot extends WorldObject implements AutoPilot {
 //			imageXRotation = 0;
 //			imageYRotation = 0;
 //		}
+        
+        ImageRecognizer imagerecognizer = new ImageRecognizer();
+        Image image = imagerecognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
+        		this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView());
+		float[] necessaryRotation;
+        try {
+			necessaryRotation = image.getRotationToRedCube();
+		}
+		catch (IllegalStateException ex){
+        	//No red cube found, just fly forward
+			necessaryRotation = new float[2];
+		}
+        float imageYRotation = (float) ((necessaryRotation[0]/360)*2*Math.PI);
+      	float imageXRotation = (float) ((necessaryRotation[1]/360)*2*Math.PI);
 		
 		float horStabInclinationTemp = 0;
 		float verStabInclinationTemp = 0;
