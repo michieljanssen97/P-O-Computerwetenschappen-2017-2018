@@ -271,7 +271,7 @@ public class Image {
 	 * Return an array containing all the red pixels that are on the edge of a cube.
 	 * @throws Exception	Something goes wrong while calculating the red pixels
 	 */
-	public ArrayList<Pixel> getRedEdgePixels() throws Exception{
+	public ArrayList<Pixel> getRedEdgePixels() {
 		ArrayList<Pixel> edge = new ArrayList<Pixel>();
 		boolean isEdge = false;
 		for (Pixel p : getRedPixels()){
@@ -297,7 +297,7 @@ public class Image {
 	 * Return the minimum distance from the red pixels that are on the edge of the cube, to its center.
 	 * @throws Exception Something goes wrong while calculating the red pixels
 	 */
-	public float getMinimumDistanceSpherePixels() throws Exception{
+	public float getMinimumDistanceSpherePixels() {
 		float minimum = (float) Math.sqrt( Math.pow(getnbRows(), 2) + Math.pow(getnbColumns(), 2) );
 		int[] centerPixel = getAverageRedPixel();
 		for(Pixel p : getRedEdgePixels()){
@@ -312,7 +312,7 @@ public class Image {
 	 * Return the maximum distance from the red pixels that are on the edge of the cube, to its center.
 	 * @throws Exception	Something goes wrong while calculating the red pixels
 	 */
-	public float getMaximumDistanceSpherePixels() throws Exception{
+	public float getMaximumDistanceSpherePixels() {
 		float maximum = 0;
 		int[] centerPixel = getAverageRedPixel();
 		for(Pixel p : getRedEdgePixels()){
@@ -327,7 +327,7 @@ public class Image {
 	 * Return the amount of sides of the cube that are visible in the Image.
 	 * @throws Exception	Something goes wrong while calculating the red pixels
 	 */
-	public int getAmountSidesVisible() throws Exception{
+	public int getAmountSidesVisible() {
 		boolean checkX = true;
 		boolean checkY = true;
 		boolean checkZ = true;
@@ -383,7 +383,7 @@ public class Image {
 	 * Return the distance from the red cube to the camera along the (negative) z axis of the drone coordinate system.
 	 * @throws Exception	There are no sides of a red cube visible in this Image
 	 */
-	public float getTotalDistance() throws Exception{
+	public float getTotalDistance() throws IllegalStateException {
 		int sides = getAmountSidesVisible();
 		if (sides == 3){
 			float pixels = getMaximumDistanceSpherePixels();
@@ -394,7 +394,7 @@ public class Image {
 			float angle = (pixels * getHorizontalAngle()) / getnbColumns();
 			return (float) (0.5 / Math.tan(degreesToRadians(angle)));
 		} else
-			throw new Exception("The cube does not have the right values to be visible or no cube is present.");
+			throw new IllegalStateException("The cube does not have the right values to be visible or no cube is present.");
 	}
 	
 	
@@ -402,7 +402,7 @@ public class Image {
 	 * Return a vector containing the x, y and z distance from the camera to the cube.
 	 * @throws Exception	Something goes wrong while calculating the red pixels
 	 */
-	public RealVector getXYZDistance() throws Exception{
+	public RealVector getXYZDistance(){
 		int[] averageRed = getAverageRedPixel();
 		int[] center = getCenterPixel();
 		float angleX = (averageRed[0] - center[0]) * getHorizontalAngle() / getnbColumns();

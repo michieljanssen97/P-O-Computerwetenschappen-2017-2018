@@ -109,16 +109,20 @@ public class Autopilot extends WorldObject implements AutoPilot {
         ImageRecognizer imagerecognizer = new ImageRecognizer();
         Image image = imagerecognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
         		this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView());
-		float[] necessaryRotation;
-        try {
-			necessaryRotation = image.getRotationToRedCube();
-		}
-		catch (IllegalStateException ex){
-        	//No red cube found, just fly forward
-			necessaryRotation = new float[2];
-		}
-        float imageYRotation = (float) ((necessaryRotation[0]/360)*2*Math.PI);
-		float imageXRotation = (float) ((necessaryRotation[1]/360)*2*Math.PI);
+//		float imageXRotation;
+//		float imageYRotation;
+//        try {
+//			RealVector vectorDroneCoordinates = image.getXYZDistance();
+//			System.out.println(vectorDroneCoordinates);
+//			RealVector vectorWorldCoordinates = drone.transformationToWorldCoordinates(vectorDroneCoordinates);
+//			imageXRotation = (float) Math.atan(vectorWorldCoordinates.getEntry(1)/(-vectorWorldCoordinates.getEntry(2)));
+//			imageYRotation = (float) Math.atan(vectorWorldCoordinates.getEntry(0)/vectorWorldCoordinates.getEntry(2));
+//		}
+//		catch (IllegalStateException ex){
+//        	//No red cube found, just fly forward
+//			imageXRotation = 0;
+//			imageYRotation = 0;
+//		}
 		
 		float horStabInclinationTemp = 0;
 		float verStabInclinationTemp = 0;
