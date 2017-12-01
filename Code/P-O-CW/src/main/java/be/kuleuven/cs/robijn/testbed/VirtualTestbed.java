@@ -12,6 +12,7 @@ import p_en_o_cw_2017.*;
  */
 public class VirtualTestbed extends WorldObject implements TestBed {
 	private final AutopilotConfig config;
+	public boolean randomCubesGenerated = false;
 
 	private float elapsedTime = 0; //Time between simulation start and latest update, in seconds
 
@@ -51,8 +52,12 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 //		
 //		this.addChild(box);
 		
-		//TODO mag enkel indien willekeurige cuces, niet indien bestand met cubes is ingeladen
-		WorldGenerator.generateBoxes(this);
+
+		//WorldGenerator.generateBoxes(this); TODO moet dmv knop in GUI worden gedaan
+		if (!randomCubesGenerated) {
+			//TODO read input file with specified cubes
+		}
+		
 	}
 
 	public boolean update(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs output){

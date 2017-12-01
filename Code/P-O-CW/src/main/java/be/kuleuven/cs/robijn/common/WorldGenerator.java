@@ -40,6 +40,8 @@ public class WorldGenerator {
 			//System.out.println(box.getRelativePosition().getEntry(0)+" "+box.getRelativePosition().getEntry(1)+" "+box.getRelativePosition().getEntry(2));
 			vTestBed.addChild(box);
 		}
+		
+		vTestBed.randomCubesGenerated = true; //Notify the Testbed that there are random generated cubes, so no input file must be read
 	}
 	
 }
