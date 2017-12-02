@@ -5,8 +5,8 @@ import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
 import p_en_o_cw_2017.AutopilotConfig;
 import p_en_o_cw_2017.AutopilotInputs;
 import p_en_o_cw_2017.AutopilotOutputs;
-import java.util.ArrayList;
-import java.util.function.BiConsumer;
+import java.util.TreeSet;
+import org.apache.commons.math3.linear.*;
 
 /**
  * This class combines the testbed and autopilot into one runnable simulation.
@@ -17,6 +17,7 @@ public class SimulationDriver {
     private boolean simulationPaused;
     private boolean simulationFinished;
     private boolean simulationCrashed;
+    private final AutopilotConfig config;
     private AutopilotInputs latestAutopilotInputs;
     private AutopilotOutputs latestAutopilotOutputs;
 
@@ -26,11 +27,13 @@ public class SimulationDriver {
     private long timeSpentPausedSinceLastUpdate = 0; //total amount of time, between last update and now, that was spent paused (in ms)
 
     //List of eventhandlers that are invoked when the simulation has updated.
-    private ArrayList<BiConsumer<AutopilotInputs, AutopilotOutputs>> updateEventHandlers = new ArrayList<>();
-
+    private TreeSet<UpdateEventHandler> updateEventHandlers = new TreeSet<>();
+    
     public SimulationDriver(AutopilotConfig config){
-        testBed = new VirtualTestbed(config);
-        autoPilot = new Autopilot(config);
+        this.config = config;
+    	RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -6.667}, false);
+        testBed = new VirtualTestbed(config, initialVelocity);
+        autoPilot = new Autopilot(config, initialVelocity);
         latestAutopilotInputs = testBed.getInputs();
     }
 
@@ -63,8 +66,8 @@ public class SimulationDriver {
         }
 
         //Invokes the event handlers
-        for (BiConsumer<AutopilotInputs, AutopilotOutputs> eventHandler : updateEventHandlers) {
-            eventHandler.accept(latestAutopilotInputs, latestAutopilotOutputs);
+        for (UpdateEventHandler eventHandler : updateEventHandlers) {
+            eventHandler.getFunction().accept(latestAutopilotInputs, latestAutopilotOutputs);
         }
     }
 
@@ -79,6 +82,10 @@ public class SimulationDriver {
             pauseTime = System.currentTimeMillis();
         }
         this.simulationPaused = simulationPaused;
+    }
+
+    public AutopilotConfig getConfig() {
+        return config;
     }
 
     public boolean isSimulationPaused() {
@@ -97,11 +104,11 @@ public class SimulationDriver {
         return autoPilot;
     }
 
-    public void addOnUpdateEventHandler(BiConsumer<AutopilotInputs, AutopilotOutputs> eventHandler){
-        updateEventHandlers.add(eventHandler);
+    public void addOnUpdateEventHandler(UpdateEventHandler handler){
+        updateEventHandlers.add(handler);
     }
 
-    private void removeOnUpdateEventHandler(BiConsumer<AutopilotInputs, AutopilotOutputs> eventHandler){
-        updateEventHandlers.remove(eventHandler);
+    private void removeOnUpdateEventHandler(UpdateEventHandler handler){
+        updateEventHandlers.remove(handler);
     }
 }

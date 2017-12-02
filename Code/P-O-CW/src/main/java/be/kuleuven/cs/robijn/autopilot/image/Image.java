@@ -1,5 +1,8 @@
 package be.kuleuven.cs.robijn.autopilot.image;
 
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealVector;
+
 import java.io.IOException;
 import java.util.ArrayList;
 

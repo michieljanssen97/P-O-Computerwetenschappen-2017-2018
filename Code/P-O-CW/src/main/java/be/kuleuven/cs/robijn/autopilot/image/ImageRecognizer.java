@@ -7,7 +7,6 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
-
 /**
  * A class that can create and work with images.
  * @author Raf Hermans, Wout Mees

@@ -2,11 +2,12 @@
 
 uniform mat4 modelTransformation;
 uniform mat4 viewProjectionTransformation;
+uniform vec3 color;
 
 layout(location = 0) in vec3 vertexPosModelspace;
 layout(location = 2) in vec3 normalCoordinate;
 
-flat out vec3 color;
+flat out vec3 fragmentColor;
 
 void main()
 {
@@ -17,17 +18,17 @@ void main()
     //Could be faster by replacing this with a transformation of the normal to a 'color-vectorspace' where the axis coordinates
     //are the RGB values of the colors that is mapped to the direction the normal is facing. This will do for now though.
     if(length(fragWorldNormal - vec3(1, 0, 0)) < 1E-5) { // +X
-        color = vec3(.85f, 0, 0);
+        fragmentColor = 0.85f * color;
     } else if(length(fragWorldNormal - vec3(0, 1, 0)) < 1E-5){ // +Y
-        color = vec3(1, 0, 0);
+        fragmentColor = color;
     } else if(length(fragWorldNormal - vec3(0, 0, 1)) < 1E-5){ // +Z
-        color = vec3(.70f, 0, 0);
+        fragmentColor = 0.70f * color;
     } else if(length(fragWorldNormal - vec3(-1, 0, 0)) < 1E-5){ // -X
-        color = vec3(.30f, 0, 0);
+        fragmentColor = 0.30f * color;
     } else if(length(fragWorldNormal - vec3(0, -1, 0)) < 1E-5){ // -Y
-        color = vec3(.15f, 0, 0);
+        fragmentColor = 0.15f * color;
     } else if(length(fragWorldNormal - vec3(0, 0, -1)) < 1E-5){ // -Z
-        color = vec3(.45f, 0, 0);
+        fragmentColor = 0.45f * color;
     }
 
     //Set the position of the vertex to the input position after transformation to camera view. ('w' = 1.0 to enable translation)

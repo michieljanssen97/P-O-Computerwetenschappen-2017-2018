@@ -1,5 +1,8 @@
 package be.kuleuven.cs.robijn.autopilot.image;
 
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -10,12 +13,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 
-import org.junit.Test;
-
 import javax.imageio.ImageIO;
-
-import static org.junit.Assert.*;
-
 
 public class ImageTest {
 	
