@@ -1,10 +1,10 @@
-package be.kuleuven.cs.robijn.common;
+package be.kuleuven.cs.robijn.testbed;
 
 import java.util.Random;
 
 import org.apache.commons.math3.linear.ArrayRealVector;
-import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
 
+import be.kuleuven.cs.robijn.common.Box;
 public class WorldGenerator {
 	
 	/**
