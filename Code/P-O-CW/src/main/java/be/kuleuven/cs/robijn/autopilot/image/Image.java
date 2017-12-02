@@ -6,9 +6,6 @@ import org.apache.commons.math3.linear.RealVector;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.RealVector;
-
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -147,7 +144,7 @@ public class Image {
 	 * @return	An array with 3 floats indicating the hue, saturation and value of the given pixel
 	 * @throws Exception	The given coordinates are invalid
 	 */
-	public float[] getPixelHSV(int x, int y) throws Exception{
+	public float[] getPixelHSV(int x, int y){
 		if ((!isValidXCoordinate(x)) || (!isValidYCoordinate(y))) 
 			throw new IllegalArgumentException();
 		int rgb = getImage().getRGB(x, y);
@@ -232,7 +229,7 @@ public class Image {
 	 * @param sat	The given saturation
 	 * @throws Exception Something goes wrong while calculating the red pixels
 	 */
-	public float getMinimumDistanceSpherePixels(float hue, float sat) throws Exception{
+	public float getMinimumDistanceSpherePixels(float hue, float sat){
 		float minimum = (float) Math.sqrt( Math.pow(getnbRows(), 2) + Math.pow(getnbColumns(), 2) );
 		float[] centerPixel = getCubeCenterPixel(hue, sat);
 		for(Pixel p : getCubeEdgePixels(hue, sat)){
@@ -249,7 +246,7 @@ public class Image {
 	 * @param sat	The given saturation
 	 * @throws Exception	Something goes wrong while calculating the red pixels
 	 */
-	public float getMaximumDistanceSpherePixels(float hue, float sat) throws Exception{
+	public float getMaximumDistanceSpherePixels(float hue, float sat){
 		float maximum = 0;
 		float[] centerPixel = getCubeCenterPixel(hue, sat);
 		for(Pixel p : getCubeEdgePixels(hue, sat)){
@@ -324,7 +321,7 @@ public class Image {
 	 * @param sat	The given saturation
 	 * @throws Exception	There are no sides of a cube with given hue and saturation visible in this Image
 	 */
-	public float getTotalDistance(float hue, float sat) throws Exception{
+	public float getTotalDistance(float hue, float sat){
 		int sides = getAmountSidesVisible(hue, sat);
 		if (sides == 3){
 			float[] percentageXYZPixels = getPercentageXYZPixels(hue, sat);
@@ -373,7 +370,7 @@ public class Image {
 	 * Return a vector containing the x, y and z distance from the camera to the cube with given hue and saturation.
 	 * @throws Exception	Something goes wrong while calculating the pixels with given hue and saturation
 	 */
-	public RealVector getXYZDistance(float hue, float sat) throws Exception{
+	public RealVector getXYZDistance(float hue, float sat){
 		float[] cubeCenter = getCubeCenterPixel(hue, sat);
 		float[] imageCenter = getCenterPixel();
 		float angleX = (cubeCenter[0] - imageCenter[0]) * getHorizontalAngle() / getnbColumns();
@@ -466,7 +463,7 @@ public class Image {
 	 * Return a list containing all the cubes that are visible on this image.
 	 * @throws Exception 
 	 */
-	public ArrayList<ImageCube> scanImageForCubes() throws Exception{
+	public ArrayList<ImageCube> scanImageForCubes() {
 		ArrayList<ImageCube> cubeCollection = new ArrayList<ImageCube>();
 		boolean cubeExists = false;
 		for (int y = 0; y < getnbRows(); y++){
@@ -546,7 +543,7 @@ public class Image {
 	 * @param sat	The given saturation
 	 * @throws Exception 
 	 */
-	public ArrayList<Pixel> getCubeEdgePixels(float hue, float sat) throws Exception{
+	public ArrayList<Pixel> getCubeEdgePixels(float hue, float sat) {
 		ArrayList<Pixel> edge = new ArrayList<Pixel>();
 		boolean isEdge = false;
 		for (Pixel p : getCubePixels(hue, sat)){
@@ -584,7 +581,7 @@ public class Image {
 	 * Return the cube that is closest to the drone in this image.
 	 * @throws Exception	There are no sides of a cube visible in this image.
 	 */
-	public ImageCube getClosestCube() throws Exception{
+	public ImageCube getClosestCube() {
 		float minimum = 100;
 		ImageCube cube = null;
 		for (ImageCube cu : this.cubes){
@@ -604,7 +601,7 @@ public class Image {
 	 * @param hue	The given hue
 	 * @param sat	The given saturation
 	 */
-	public float getNecessaryCubeFactor(float hue, float sat) throws Exception{
+	public float getNecessaryCubeFactor(float hue, float sat) {
 		ArrayList<Pixel> cubePixels = getCubePixels(hue, sat);
 		for (Pixel p : cubePixels){
 			if (p.getX() == 0 || p.getX() == getnbColumns() -1 || p.getY() == 0 || p.getY() == getnbRows() -1)

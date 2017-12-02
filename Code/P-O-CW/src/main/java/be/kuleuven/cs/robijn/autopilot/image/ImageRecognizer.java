@@ -56,7 +56,7 @@ public class ImageRecognizer {
 	 * @return	A list with the x-coordinate and y-coordinate of the center of all pixels with given hue and saturation
 	 * @throws Exception	Something goes wrong while calculating the pixels with given hue and saturation.
 	 */
-	public float[] getCubeAveragePixel(Image image, float hue, float sat) throws Exception{
+	public float[] getCubeAveragePixel(Image image, float hue, float sat) {
 		return image.getCubeCenterPixel(hue, sat);
 	}
 	
@@ -79,7 +79,7 @@ public class ImageRecognizer {
 	 * @return	The distance to the cube
 	 * @throws Exception	There are no sides of a cube with given hue and saturation visible in this Image
 	 */
-	public float getDistanceToCube(Image image, float hue, float sat) throws Exception{
+	public float getDistanceToCube(Image image, float hue, float sat){
 		return image.getTotalDistance(hue, sat);
 	}
 	
@@ -89,7 +89,7 @@ public class ImageRecognizer {
 	 * @return	The vector from the camera to the center of the cube
 	 * @throws Exception There are no sides of a cube with given hue and saturation visible in this Image
 	 */
-	public RealVector getVectorToCube(Image image, float hue, float sat) throws Exception{
+	public RealVector getVectorToCube(Image image, float hue, float sat) {
 		return image.getXYZDistance(hue, sat);
 	}
 	
@@ -198,7 +198,7 @@ public class ImageRecognizer {
 	 * @return	The ImageRecognizerCube that corresponds to the given hue and saturation, or null if there is none such.
 	 * @throws Exception
 	 */
-	private ImageRecognizerCube getEquivalentImageRecognizerCube(Image image, float hue, float sat) throws Exception{
+	private ImageRecognizerCube getEquivalentImageRecognizerCube(Image image, float hue, float sat) {
 		for (ImageRecognizerCube cu : getImageRecognizerCubes()){
 			if (floatFuzzyEquals(hue, cu.getHue(), 0.01f) && floatFuzzyEquals(sat, cu.getSaturation(), 0.01f)){
 				RealVector vector = image.getXYZDistance(hue, sat);
@@ -224,7 +224,7 @@ public class ImageRecognizer {
 	 * @param image		The given image
 	 * @throws Exception
 	 */
-	private void UpdateImageRecognizerCubeList(Image image) throws Exception{
+	private void UpdateImageRecognizerCubeList(Image image) {
 		for (ImageCube cu : image.getImageCubes()){
 			float hue = cu.getHue();
 			float sat = cu.getSaturation();

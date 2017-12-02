@@ -117,29 +117,19 @@ public class Autopilot extends WorldObject implements AutoPilot {
         ImageRecognizer recognizer = this.getImageRecognizer();
         Image image;
         float[] necessaryRotation;
-        
-//		image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
-//				this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView(), drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
-//        try {
-//			necessaryRotation = recognizer.getNecessaryRotation(image, 0.0f, 1.0f);
-//		}
-//		catch (IllegalStateException ex){
-//        	//No red cube found, just fly forward
-//			necessaryRotation = new float[2];
-//		}
-        
 		ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld();
 		try{
 			image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
 					this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView(), drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
 			necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
+			System.out.println(recognizer.getWorldDistanceToCube(closestCube));
 		}
 		catch (Exception e){
 			//The closest cube isn't visible in the current image.
 			necessaryRotation = new float[2];
 		}
   
-    float imageYRotation = (float) ((necessaryRotation[0]/360)*2*Math.PI);
+		float imageYRotation = (float) ((necessaryRotation[0]/360)*2*Math.PI);
 		float imageXRotation = (float) ((necessaryRotation[1]/360)*2*Math.PI);
 		
 		float horStabInclinationTemp = 0;
