@@ -72,7 +72,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
 	/**
 	 * Wel roll ten gevolge van verschillende snelheid van vleugels (door de rotaties). 
 	 */
-	public AutopilotOutputs update(AutopilotInputs inputs) {
+	public AutopilotOutputs update(AutopilotInputs inputs){
 		if (this.getPreviousOutput() != null)
 			this.moveDrone(inputs.getElapsedTime()-this.getPreviousElapsedTime(), this.getPreviousOutput());
         this.setPreviousElapsedTime(inputs.getElapsedTime());  
@@ -82,16 +82,29 @@ public class Autopilot extends WorldObject implements AutoPilot {
         ImageRecognizer recognizer = this.getImageRecognizer();
         Image image;
         float[] necessaryRotation;
-		image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
-				this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView(), drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
-        try {
-			necessaryRotation = recognizer.getNecessaryRotation(image, 0.0f, 1.0f);
+        
+//		image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
+//				this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView(), drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
+//        try {
+//			necessaryRotation = recognizer.getNecessaryRotation(image, 0.0f, 1.0f);
+//		}
+//		catch (IllegalStateException ex){
+//        	//No red cube found, just fly forward
+//			necessaryRotation = new float[2];
+//		}
+        
+		ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld();
+		try{
+			image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
+					this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView(), drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
+			necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
 		}
-		catch (IllegalStateException ex){
-        	//No red cube found, just fly forward
+		catch (Exception e){
+			//The closest cube isn't visible in the current image.
 			necessaryRotation = new float[2];
 		}
-        float imageYRotation = necessaryRotation[0];
+		
+		float imageYRotation = necessaryRotation[0];
 		float imageXRotation = necessaryRotation[1];
 		
 		float horStabInclinationTemp = 0;
