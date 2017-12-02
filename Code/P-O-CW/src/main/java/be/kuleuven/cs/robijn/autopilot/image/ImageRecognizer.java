@@ -241,14 +241,14 @@ public class ImageRecognizer {
 			RealVector cubePosition = new ArrayRealVector(cubeCoordinates);
 			
 			ImageRecognizerCube cube = getEquivalentImageRecognizerCube(image, hue, sat);
-			if (image.getTotalDistance(hue, sat) <= 4)
-				cube.destroy();
 			if (cube == null){
 				float value = image.getNecessaryCubeFactor(hue, sat);
 				ImageRecognizerCube cube1 = new ImageRecognizerCube((float) cubePosition.getEntry(0), (float) cubePosition.getEntry(1), (float) cubePosition.getEntry(2), hue, sat);
 				cube1.setFactor(value);
 				ImageRecognizerCubeList.add(cube1);
 			} else {
+				if (image.getTotalDistance(hue, sat) <= 4)
+					cube.destroy();
 				float previous_factor = cube.getFactor();
 				float new_factor = image.getNecessaryCubeFactor(hue, sat);
 				float total_factor = previous_factor + new_factor;
