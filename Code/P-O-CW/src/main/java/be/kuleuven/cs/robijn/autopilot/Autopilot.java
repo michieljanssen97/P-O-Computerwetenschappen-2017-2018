@@ -601,6 +601,8 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			}
         };
         
+        System.out.println("help");
+        System.out.println(drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination)[1]);
         return output;
 	}
 	
@@ -795,6 +797,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		float newRollAngularVelocity = this.getPreviousRollAngularVelocity()
 				+ 2*(newAverageRollAngularVelocity - this.getPreviousRollAngularVelocity());
 		
+		System.out.println((newPitchAngularVelocity - this.getPreviousPitchAngularVelocity())/secondsSinceLastUpdate);
 		drone.setVelocity(newVelocity);
 		drone.setHeadingAngularVelocity(newHeadingAngularVelocity);
 		drone.setPitchAngularVelocity(newPitchAngularVelocity);
