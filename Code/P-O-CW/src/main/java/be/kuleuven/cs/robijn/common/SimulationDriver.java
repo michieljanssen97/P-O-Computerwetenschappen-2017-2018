@@ -5,6 +5,8 @@ import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
 import p_en_o_cw_2017.AutopilotConfig;
 import p_en_o_cw_2017.AutopilotInputs;
 import p_en_o_cw_2017.AutopilotOutputs;
+
+import java.util.List;
 import java.util.TreeSet;
 import org.apache.commons.math3.linear.*;
 
@@ -28,11 +30,11 @@ public class SimulationDriver {
 
     //List of eventhandlers that are invoked when the simulation has updated.
     private TreeSet<UpdateEventHandler> updateEventHandlers = new TreeSet<>();
-    
-    public SimulationDriver(AutopilotConfig config){
+
+    public SimulationDriver(List<Box> boxes, AutopilotConfig config){
         this.config = config;
     	RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -6.667}, false);
-        testBed = new VirtualTestbed(config, initialVelocity);
+        testBed = new VirtualTestbed(boxes, config, initialVelocity);
         autoPilot = new Autopilot(config, initialVelocity);
         latestAutopilotInputs = testBed.getInputs();
     }
