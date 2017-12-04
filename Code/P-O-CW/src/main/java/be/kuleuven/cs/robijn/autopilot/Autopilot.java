@@ -137,7 +137,6 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		}
         float imageYRotation = (float) ((necessaryRotation[0]/360)*2*Math.PI);
       	float imageXRotation = (float) ((necessaryRotation[1]/360)*2*Math.PI);
-      	System.out.println(image.getTotalDistance());
 		
 		float horStabInclinationTemp = 0;
 		float verStabInclinationTemp = 0;
@@ -148,7 +147,8 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		double absoluteAccuracy = 1.0e-8;
 		int maxOrder = 5;
 		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
-		float turningTime = 1.0f;
+		float turningTime = 0.5f;
+		float xMovementTime = 3.0f;
 		
 		//Case 1
 //		float maxInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)0.0, true, (float)((1.0/360.0)*2*Math.PI), drone, 1);
@@ -377,7 +377,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		
 		float targetXVelocity = (float) (drone.getVelocity().getEntry(2)*Math.tan(drone.getHeading()+imageYRotation));
 		float xVelocity = (float)drone.getVelocity().getEntry(0);
-		float xAcceleration = (targetXVelocity - xVelocity)/(2*turningTime);
+		float xAcceleration = (targetXVelocity - xVelocity)/xMovementTime;
 		if (! Float.isNaN(this.getPreviousXAccelerationError()))
 			xAcceleration -= this.getPreviousXAccelerationError();
 		
@@ -480,7 +480,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		
 		float targetZVelocity = this.getInitialZVelocity();
 		float zVelocity = (float)drone.getVelocity().getEntry(2);
-		final float zAcceleration = targetZVelocity - zVelocity/turningTime;
+		final float zAcceleration = (targetZVelocity - zVelocity)/turningTime;
 		
 		float thrustTemp = (float) ((drone.getLiftForceHorStab(horStabInclination).getEntry(2)
 				+ drone.getLiftForceLeftWing(leftWingInclination).getEntry(2)
