@@ -82,7 +82,6 @@ public class MainController {
                 chaseCamera.setRelativeRotation(Rotation.IDENTITY);
 
                 //Perform rotatearound of camera around drone position along y-axis with plane yaw.
-
                 chaseCamera.rotateAround(drone.getWorldPosition(), new Rotation(new Vector3D(0, 1, 0), drone.getHeading()));
             },UpdateEventHandler.HIGH_PRIORITY));
             world.addChild(chaseCamera);
@@ -162,7 +161,7 @@ public class MainController {
     private void initializeSimulationSettings(){
         simulationSettingsControl.addEventFilter(SimulationSettingsConfirmEvent.CONFIRM, e -> {
             setOverlayVisible(false);
-            setSimulation(new SimulationDriver(e.getSettings()));
+            setSimulation(new SimulationDriver(e.getBoxes(), e.getSettings()));
             startSimulation();
         });
     }
