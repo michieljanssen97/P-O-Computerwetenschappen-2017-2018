@@ -86,8 +86,12 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
         
         ImageRecognizer recognizer = this.getImageRecognizer();
         float[] necessaryRotation;
+        float horizontalAngleOfView = (float) ((this.getConfig().getHorizontalAngleOfView()/(2*Math.PI))*360);
+        float verticalAngleOfView = (float) ((this.getConfig().getVerticalAngleOfView()/(2*Math.PI))*360);
+//        float horizontalAngleOfView = this.getConfig().getHorizontalAngleOfView();
+//        float verticalAngleOfView = this.getConfig().getVerticalAngleOfView();
 		Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
-				this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView(), drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
+				horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
 		try{
 			ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld();
 			necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
@@ -107,8 +111,8 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		double absoluteAccuracy = 1.0e-8;
 		int maxOrder = 5;
 		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
-		float turningTime = 0.5f;
-		float xMovementTime = 3.0f;
+		float turningTime = 1.0f;
+		float xMovementTime = 1.0f;
 		float maxRoll = (float) ((10.0/360.0)*2*Math.PI);
 
 		float maxInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float)((1.0/360.0)*2*Math.PI), drone, 1);
@@ -117,7 +121,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		float minInclinationHorStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float)((1.0/360.0)*2*Math.PI), drone, 2);
 		float maxInclinationVerStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float)((1.0/360.0)*2*Math.PI), drone, 3);
 		float minInclinationVerStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float)((1.0/360.0)*2*Math.PI), drone, 3);
-		
 		
 		float inertiaMatrixXX = (float) (drone.getTailMass()*Math.pow(drone.getTailSize(),2) +drone.getEngineMass()*Math.pow(drone.getEngineDistance(), 2));
 		float inertiaMatrixZZ = (float) (2*(drone.getWingMass()*Math.pow(drone.getWingX(),2)));
@@ -721,7 +724,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 
 		if (! isValidConfig(config))
 			throw new IllegalArgumentException();
-		RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -6.667}, false);
+		RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -10.0}, false);
 		Drone drone = new Drone(config, initialVelocity);
 		this.addChild(drone);
 		this.config = config;
