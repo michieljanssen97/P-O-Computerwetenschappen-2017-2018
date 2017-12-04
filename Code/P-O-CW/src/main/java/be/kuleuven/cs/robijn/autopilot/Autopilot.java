@@ -363,9 +363,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			}
         };
         
-        System.out.println("help");
-        System.out.println(drone.getAcceleration(thrust, leftWingInclination, rightWingInclination, horStabInclination, verStabInclination));
-        //System.out.println((360/(2*Math.PI))*drone.calculateAOA(drone.getNormalHor(leftWingInclination), drone.getProjectedVelocityLeftWing(), drone.getAttackVectorHor(leftWingInclination)));
         return output;
 	}
 	
@@ -562,7 +559,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		float newRollAngularVelocity = this.getPreviousRollAngularVelocity()
 				+ 2*(newAverageRollAngularVelocity - this.getPreviousRollAngularVelocity());
 		
-		System.out.println(newVelocity.subtract(this.getPreviousVelocity()).mapMultiply(1/secondsSinceLastUpdate));
 		drone.setVelocity(newVelocity);
 		drone.setHeadingAngularVelocity(newHeadingAngularVelocity);
 		drone.setPitchAngularVelocity(newPitchAngularVelocity);
@@ -728,7 +724,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 
 		if (! isValidConfig(config))
 			throw new IllegalArgumentException();
-		RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -6.667}, false);
+		RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -10.0}, false);
 		Drone drone = new Drone(config, initialVelocity);
 		this.addChild(drone);
 		this.config = config;

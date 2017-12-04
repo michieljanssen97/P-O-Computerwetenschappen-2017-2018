@@ -34,7 +34,7 @@ public class SimulationDriver {
 
     public SimulationDriver(List<Box> boxes, AutopilotConfig config){
         this.config = config;
-    	RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -6.667}, false);
+    	RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -10.0}, false);
         testBed = new VirtualTestbed(boxes, config, initialVelocity);
         autoPilot = new Autopilot();
         latestAutopilotInputs = testBed.getInputs();
