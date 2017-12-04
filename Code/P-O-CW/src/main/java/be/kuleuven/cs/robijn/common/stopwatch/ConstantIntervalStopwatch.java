@@ -21,6 +21,9 @@ public class ConstantIntervalStopwatch implements Stopwatch{
     }
 
     public void setInterval(double interval){
+        if(interval <= 0 || Double.isNaN(interval) || Double.isInfinite(interval)){
+            throw new IllegalArgumentException("interval must be finite, positive and non-zero");
+        }
         this.interval = interval;
     }
 
