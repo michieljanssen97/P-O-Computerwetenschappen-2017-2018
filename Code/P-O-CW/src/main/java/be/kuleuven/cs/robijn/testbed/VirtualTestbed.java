@@ -10,6 +10,9 @@ import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
 import p_en_o_cw_2017.*;
 
+import java.util.List;
+import java.util.Optional;
+
 /**
  * A class of virtual testbeds.
  * 
@@ -25,54 +28,19 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	private PerspectiveCamera droneCamera;
 	private byte[] latestCameraImage;
 	
-	private ArrayList<Box> allBoxList = new ArrayList<Box>();
+	private ArrayList<Box> boxesToFlyTo = new ArrayList<>();
 
-	public VirtualTestbed(AutopilotConfig config, RealVector initialVelocity) {
+	public VirtualTestbed(List<Box> boxes, AutopilotConfig config, RealVector initialVelocity) {
 		this.config = config;
 		//Add drone to world
 		Drone drone = new Drone(config, initialVelocity);
 		this.addChild(drone);
 
-		//Add box to world
-		Box box = new Box();
-		
-		double zDistance = 100.0;
-		
-		//Case 1
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, 0, -zDistance}, false));
-		
-		//Case 2
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-		
-		//Case 3
-		box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/12.0), -zDistance}, false));
-		
-		//Case 4
-		box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/6.0), 0, -zDistance}, false));
-		
-		//Case 5
-		//box.setRelativePosition(new ArrayRealVector(new double[] {-zDistance*Math.tan(Math.PI/6.0), 0, -zDistance}, false));
-		
-		//Case 6
-		//box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/48.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-
-//		box.setRelativePosition(new ArrayRealVector(new double[] {0, 5, -80}, false));		
-//		Box box2 = new Box();
-//		box2.setRelativePosition(new ArrayRealVector(new double[] {0, 0, -40}, false));
-//		this.addChild(box2);
-//		allBoxList.add(box2);
-		
-		this.addChild(box); //add box to Virtual testbed
-		allBoxList.add(box); //add box to list of all boxes to reach
-		
-	}
-	
-	public ArrayList<Box> getAllBoxes(){
-		return allBoxList;
-	}
-	
-	public void removeBoxFromList(Box box) {
-		allBoxList.remove(box);
+		//Add boxes to world
+		for (Box box : boxes){
+			this.addChild(box);
+		}
+		boxesToFlyTo.addAll(boxes);
 	}
 
 	public boolean update(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs output){
@@ -88,13 +56,13 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		//true if the center of mass of the drone is in a specified distance of the center of a cube
 		if (calculateDistanceToDrone(box, drone) <= stopDistanceToCenterBox){
 			//The box should not be taken into account anymore, it is already reached
-			removeBoxFromList(box); 
+			boxesToFlyTo.remove(box);
 			
 			//Remove the reached box from the testbed
 			removeChild(box);
 			
 			//Stop the simulation if all boxes are handled
-			if(getAllBoxes().isEmpty()) {
+			if(boxesToFlyTo.isEmpty()) {
 				return true;
 			}
 		}
@@ -110,22 +78,13 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	 * Get the box closest to the current position of the drone
 	 */
 	public Box getClosestBox(Drone drone) {
-		ArrayList<Box> allBoxes = new ArrayList<>(getAllBoxes());
+		Optional<Box> closestBox = boxesToFlyTo.stream().min((boxA, boxB) -> {
+			double distanceBoxAToDrone = calculateDistanceToDrone(boxA, drone);
+			double distanceBoxBToDrone = calculateDistanceToDrone(boxB, drone);
+			return Double.compare(distanceBoxAToDrone, distanceBoxBToDrone);
+		});
 		
-		Box closestBox = allBoxes.get(0);
-		double distanceClosestBoxToDrone = calculateDistanceToDrone(closestBox, drone);
-		
-		allBoxes.remove(0); //first element is set as default, so should not be checked anymore
-		for (Box b:allBoxes) {
-			double distanceCurrentBoxToDrone = calculateDistanceToDrone(b, drone);
-			if (distanceCurrentBoxToDrone < distanceClosestBoxToDrone) {
-				//set the new box as closest box
-				closestBox = b;
-				distanceClosestBoxToDrone = distanceCurrentBoxToDrone;
-			}
-		}
-		
-		return closestBox;
+		return closestBox.orElse(null);
 	}
 	
 	/**
