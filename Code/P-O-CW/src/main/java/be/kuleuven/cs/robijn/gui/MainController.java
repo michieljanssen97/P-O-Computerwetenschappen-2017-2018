@@ -69,6 +69,7 @@ public class MainController {
             droneCamera.setName(CameraViewControl.DRONE_CAMERA_ID);
             droneCamera.setDronesHidden(true);
             droneCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 0, 0}, false));
+            droneCamera.setDrawnDebugObjects(true);
             drone.addChild(droneCamera);
 
             PerspectiveCamera chaseCamera = getSimulation().getTestBed().getRenderer().createPerspectiveCamera();
@@ -76,6 +77,7 @@ public class MainController {
             chaseCamera.setVerticalFOV((float)Math.toRadians(120));
             chaseCamera.setName(CameraViewControl.THIRDPERSON_CAMERA_ID);
             chaseCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 0d, 7}, false));
+            chaseCamera.setDrawnDebugObjects(true);
             getSimulation().addOnUpdateEventHandler(new UpdateEventHandler((inputs, outputs) -> {
                 //Put camera at rotation (0, 0, 0), at position of drone +7 on z-axis.
                 chaseCamera.setRelativePosition(drone.getRelativePosition().add(new ArrayRealVector(new double[]{0, 0, 7}, false)));
@@ -93,6 +95,7 @@ public class MainController {
             sideCamera.setRelativePosition(new ArrayRealVector(new double[]{1000, 5, -55}, false));
             sideCamera.setRelativeRotation(new Rotation(new Vector3D(0, 1, 0), Math.PI/2d));
             sideCamera.setFarPlane(100000);
+            sideCamera.setDrawnDebugObjects(true);
             world.addChild(sideCamera);
 
             OrthographicCamera topCamera = getSimulation().getTestBed().getRenderer().createOrthographicCamera();
@@ -104,6 +107,7 @@ public class MainController {
                     .applyTo(new Rotation(new Vector3D(0, 1, 0), Math.PI/2d));
             topCamera.setRelativeRotation(rot);
             topCamera.setFarPlane(100000);
+            topCamera.setDrawnDebugObjects(true);
             world.addChild(topCamera);
 
             PerspectiveCamera boxCamera = getSimulation().getTestBed().getRenderer().createPerspectiveCamera();
@@ -113,6 +117,7 @@ public class MainController {
             boxCamera.setName(CameraViewControl.BOX_CAMERA_ID);
             boxCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 0, 0}, false));
             boxCamera.setRelativeRotation(new Rotation(new Vector3D(0, 1, 0), Math.PI));
+            boxCamera.setDrawnDebugObjects(true);
             box.addChild(boxCamera);
         });
     }

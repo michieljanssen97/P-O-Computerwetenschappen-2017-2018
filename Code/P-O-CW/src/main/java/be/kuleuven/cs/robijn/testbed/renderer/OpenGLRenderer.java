@@ -22,6 +22,7 @@ import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
 import static org.lwjgl.opengl.GL14.glBlendEquation;
+import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
@@ -176,6 +177,11 @@ public class OpenGLRenderer implements Renderer {
             renderModel(groundModel, viewProjectionMatrix, MatrixUtils.createRealIdentityMatrix(4));
         }
 
+        //Render debug objects if needed
+        if(camera.areDebugObjectsDrawn()){
+            renderLines(viewProjectionMatrix);
+        }
+
         //Render objects
         for (WorldObject child : worldRoot.getChildren()){
             renderChildren(child, viewProjectionMatrix, camera);
@@ -261,6 +267,34 @@ public class OpenGLRenderer implements Renderer {
 
         //Draw object
         glDrawElements(GL_TRIANGLES, model.getMesh().getIndexCount(), GL_UNSIGNED_INT, 0);
+    }
+
+    private void renderLines(Matrix4f viewProjectionMatrix){
+        float[] vertices = new float[]{
+            0, 0, 0,
+            0, 10, -100,
+        };
+
+        int[] indices = new int[]{
+            0, 1, 0
+        };
+
+        Mesh mesh = Mesh.loadMesh(vertices, null, null, indices);
+
+        //Bind object model mesh, texture, shader, ...
+        glBindVertexArray(mesh.getVertexArrayObjectId());
+
+        ShaderProgram lineProgram;
+        try(Shader vertexShader = Shader.compileVertexShader(Resources.loadTextResource("/shaders/line/vertex.glsl"))){
+            try(Shader fragmentShader = Shader.compileFragmentShader(Resources.loadTextResource("/shaders/line/fragment.glsl"))){
+                lineProgram = ShaderProgram.link(vertexShader, fragmentShader);
+            }
+        }
+        lineProgram.setUniformMatrix("viewProjectionTransformation", false, viewProjectionMatrix);
+        glUseProgram(lineProgram.getProgramId());
+
+        //Draw object
+        glDrawElements(GL_LINES, mesh.getIndexCount(), GL_UNSIGNED_INT, 0);
     }
 
     /**
