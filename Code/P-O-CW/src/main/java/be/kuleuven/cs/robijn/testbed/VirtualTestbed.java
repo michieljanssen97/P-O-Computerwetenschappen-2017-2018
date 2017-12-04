@@ -44,13 +44,13 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		//Case 3
 		box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/12.0), -zDistance}, false));
 		
-		//simulatie1
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		//Case 4
+		box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/6.0), 0, -zDistance}, false));
 		
-		//simulatie2
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		//Case 5
+		//box.setRelativePosition(new ArrayRealVector(new double[] {-zDistance*Math.tan(Math.PI/6.0), 0, -zDistance}, false));
 		
-		//simulatie3
+		//Case 6
 		//box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/48.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
 
 //		box.setRelativePosition(new ArrayRealVector(new double[] {0, 5, -80}, false));		
