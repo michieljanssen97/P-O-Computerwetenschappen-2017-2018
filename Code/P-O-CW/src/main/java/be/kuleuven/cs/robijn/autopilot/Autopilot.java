@@ -136,8 +136,6 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		}
         float imageYRotation = (float) ((necessaryRotation[0]/360)*2*Math.PI);
       	float imageXRotation = (float) ((necessaryRotation[1]/360)*2*Math.PI);
-      	if ((! Float.isNaN(this.getPreviousThrust())) && (this.getPreviousThrust() == 0) && (Math.abs(imageYRotation) < (1/360)*2*Math.PI))
-      		imageXRotation = 0;
 		
 		float horStabInclinationTemp = 0;
 		float verStabInclinationTemp = 0;
@@ -150,6 +148,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
 		float turningTime = 0.5f;
 		float xMovementTime = 3.0f;
+		float maxRoll = (float) ((10.0/360.0)*2*Math.PI);
 
 		float maxInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float)((1.0/360.0)*2*Math.PI), drone, 1);
 		float minInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float)((1.0/360.0)*2*Math.PI), drone, 1);
@@ -271,10 +270,10 @@ public class Autopilot extends WorldObject implements AutoPilot {
         } catch (NoBracketingException exc) {
         	targetRoll = drone.getRoll();
 		}
-        if ((targetRoll > (10.0/360.0)*2*Math.PI) && (targetRoll < (180.0/360.0)*2*Math.PI))
-        	targetRoll = (float) ((10.0/360.0)*2*Math.PI);
-        if ((targetRoll > (180.0/360.0)*2*Math.PI) && (targetRoll < (350.0/360.0)*2*Math.PI))
-        	targetRoll = (float) ((350.0/360.0)*2*Math.PI);
+        if ((targetRoll > maxRoll) && (targetRoll < Math.PI))
+        	targetRoll = maxRoll;
+        else if ((targetRoll > Math.PI/2) && (targetRoll < (2*Math.PI - maxRoll)))
+        	targetRoll = (float) (2*Math.PI - maxRoll);
         
         float rollDifference = targetRoll - drone.getRoll();
 		if (rollDifference > Math.PI)
@@ -369,8 +368,6 @@ public class Autopilot extends WorldObject implements AutoPilot {
 			thrustTemp = 0;
 		final float thrust = thrustTemp;
 		
-		this.setPreviousThrust(thrust);
-		
 		this.setPreviousHeadingAngularAccelerationError(
 				drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination)[0]
 				-headingAngularAcceleration);
@@ -403,23 +400,6 @@ public class Autopilot extends WorldObject implements AutoPilot {
         };
         
         return output;
-	}
-	
-	private float previousThrust = Float.NaN;
-	
-	public float getPreviousThrust() {
-		return this.previousThrust;
-	}
-	
-	public boolean isValidPreviousThrust(float previousThrust) {
-		return ((previousThrust >=0) && (previousThrust <= this.getConfig().getMaxThrust()));
-	}
-	
-	public void setPreviousThrust(float previousThrust) 
-			throws IllegalArgumentException {
-		if (! isValidPreviousThrust(previousThrust))
-			throw new IllegalArgumentException();
-		this.previousThrust = previousThrust;
 	}
 	
 	private float previousYAccelerationError = Float.NaN;
