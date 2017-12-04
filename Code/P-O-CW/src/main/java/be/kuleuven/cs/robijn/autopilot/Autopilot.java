@@ -708,7 +708,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 	
 	private float previousRollAngularVelocity;
 	
-	private final float initialZVelocity;
+	private float initialZVelocity;
 	
 	public RealVector getPreviousPosition() {
 		return this.previousPosition;
@@ -837,13 +837,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		this.previousRollAngularVelocity = previousRollAngularVelocity;
 	}
 
-	public void setPreviousRollAngularVelocity(float previousRollAngularVelocity)
-			throws IllegalArgumentException {
-		if (! isValidPreviousRollAngularVelocity(previousRollAngularVelocity))
-			throw new IllegalArgumentException();
-		this.previousRollAngularVelocity = previousRollAngularVelocity;
-	}
-
 	@Override
 	public AutopilotOutputs simulationStarted(AutopilotConfig config, AutopilotInputs inputs) {
 
@@ -857,52 +850,38 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		if (!isValidPreviousPosition(previousPosition))
 			throw new IllegalArgumentException();
 		this.previousPosition = previousPosition;
+		RealVector previousVelocity = drone.getVelocity();
+		if (!isValidPreviousVelocity(previousVelocity))
+			throw new IllegalArgumentException();
+		this.previousVelocity = previousVelocity;
 		float previousHeading = drone.getHeading();
 		if (! isValidPreviousHeading(previousHeading))
 			throw new IllegalArgumentException();
 		this.previousHeading = previousHeading;
+		float previousHeadingAngularVelocity = drone.getHeadingAngularVelocity();
+		if (! isValidPreviousHeadingAngularVelocity(previousHeadingAngularVelocity))
+			throw new IllegalArgumentException();
+		this.previousHeadingAngularVelocity = previousHeadingAngularVelocity;
 		float previousPitch = drone.getPitch();
 		if (! isValidPreviousPitch(previousPitch))
 			throw new IllegalArgumentException();
 		this.previousPitch = previousPitch;
+		float previousPitchAngularVelocity = drone.getPitchAngularVelocity();
+		if (! isValidPreviousPitchAngularVelocity(previousPitchAngularVelocity))
+			throw new IllegalArgumentException();
+		this.previousPitchAngularVelocity = previousPitchAngularVelocity;
 		float previousRoll = drone.getRoll();
 		if (! isValidPreviousRoll(previousRoll))
 			throw new IllegalArgumentException();
 		this.previousRoll = previousRoll;
-
-		return timePassed(inputs);
-	}
-
-
-	@Override
-	public void simulationEnded() {
-
-	}
-	
-	public void setPreviousRollAngularVelocity(float previousRollAngularVelocity) 
-			throws IllegalArgumentException {
+		float previousRollAngularVelocity = drone.getRollAngularVelocity();
 		if (! isValidPreviousRollAngularVelocity(previousRollAngularVelocity))
 			throw new IllegalArgumentException();
-		RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -6.667}, false);
-		Drone drone = new Drone(config, initialVelocity);
-		this.addChild(drone);
-		this.config = config;
-		RealVector previousPosition = drone.getWorldPosition();
-		if (!isValidPreviousPosition(previousPosition))
+		this.previousRollAngularVelocity = previousRollAngularVelocity;
+		float initialZVelocity = (float) drone.getVelocity().getEntry(2);
+		if (! isValidInitialZVelocity(initialZVelocity))
 			throw new IllegalArgumentException();
-		this.previousPosition = previousPosition;
-		float previousHeading = drone.getHeading();
-		if (! isValidPreviousHeading(previousHeading))
-			throw new IllegalArgumentException();
-		this.previousHeading = previousHeading;
-		float previousPitch = drone.getPitch();
-		if (! isValidPreviousPitch(previousPitch))
-			throw new IllegalArgumentException();
-		this.previousPitch = previousPitch;
-		float previousRoll = drone.getRoll();
-		if (! isValidPreviousRoll(previousRoll))
-			throw new IllegalArgumentException();
-		this.previousRoll = previousRoll;
+		this.initialZVelocity = initialZVelocity;
 
 		return timePassed(inputs);
 	}

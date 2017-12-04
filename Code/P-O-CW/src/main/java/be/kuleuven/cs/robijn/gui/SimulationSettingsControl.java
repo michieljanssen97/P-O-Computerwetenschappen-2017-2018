@@ -21,6 +21,7 @@ import javafx.util.converter.NumberStringConverter;
 import interfaces.AutopilotConfig;
 import interfaces.AutopilotConfigReader;
 import interfaces.AutopilotConfigWriter;
+import org.apache.commons.math3.linear.ArrayRealVector;
 
 import java.awt.*;
 import java.io.*;
