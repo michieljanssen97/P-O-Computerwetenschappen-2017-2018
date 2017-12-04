@@ -76,7 +76,7 @@ public class ImageRecognizerCube {
 	 * @return		True if the value is between 0 and 5.
 	 */
 	public boolean isValidFactor(float value){
-		return (value >= 0 && value <= 5);
+		return (value >= 0 && Float.isFinite(value));
 	}
 	
 	/**

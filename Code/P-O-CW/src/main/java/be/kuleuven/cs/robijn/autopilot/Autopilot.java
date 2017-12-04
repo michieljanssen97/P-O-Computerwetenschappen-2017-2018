@@ -98,8 +98,6 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		return this.recognizer;
 	}
 	
-	
-	
 	/**
 	 * Wel roll ten gevolge van verschillende snelheid van vleugels (door de rotaties). 
 	 */
@@ -133,12 +131,12 @@ public class Autopilot extends WorldObject implements AutoPilot {
         
         ImageRecognizer recognizer = this.getImageRecognizer();
         float[] necessaryRotation;
-		ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld();
 		Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
 				this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView(), drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
 		try{
+			ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld();
 			necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
-		} catch (IllegalStateException exc){
+		} catch (NullPointerException exc2) {
 			necessaryRotation = new float[2];
 		}
 		
