@@ -48,13 +48,18 @@ public class SimulationDriver {
 
         if(!simulationPaused && !simulationFinished && !simulationCrashed){
         	try {
+        	    //Reset renderer
+                testBed.getRenderer().clearDebugObjects();
+
         		//Run the autopilot
         		latestAutopilotOutputs = autoPilot.update(latestAutopilotInputs);
+
         		//Run the testbed
                 long now = System.currentTimeMillis();
                 float secondsSinceStart = ((float)((now - simulationStart) - totalTimeSpentPaused)/1000f);
                 float secondsSinceLastUpdate = ((float)((now - lastUpdate) - timeSpentPausedSinceLastUpdate)/1000f);
                 simulationFinished = testBed.update(secondsSinceStart, secondsSinceLastUpdate, latestAutopilotOutputs);
+
                 timeSpentPausedSinceLastUpdate = 0;
                 lastUpdate = now;
                 latestAutopilotInputs = testBed.getInputs();
