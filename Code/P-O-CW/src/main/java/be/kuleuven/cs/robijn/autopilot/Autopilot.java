@@ -93,8 +93,16 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		this.previousElapsedTime = previousElapsedTime;
 	}
 	
+	private final ImageRecognizer recognizer = new ImageRecognizer();
+	
+	public ImageRecognizer getImageRecognizer() {
+		return this.recognizer;
+	}
+	
+	
+	
 	/**
-	 * Wel roll ten gevolge van verschillende snelheid van vleugels (door de rotaties).
+	 * Wel roll ten gevolge van verschillende snelheid van vleugels (door de rotaties). 
 	 */
 	public AutopilotOutputs update(AutopilotInputs inputs) throws IllegalStateException {
 		if (this.isFirstUpdate())
@@ -105,7 +113,7 @@ public class Autopilot extends WorldObject implements AutoPilot {
         this.setPreviousElapsedTime(inputs.getElapsedTime());  
         
         Drone drone = this.getFirstChildOfType(Drone.class);
-        
+
 //        ImageRecognizer imagerecognizer = new ImageRecognizer();
 //        Image image = imagerecognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
 //        		this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView());
@@ -124,19 +132,19 @@ public class Autopilot extends WorldObject implements AutoPilot {
 //			imageYRotation = 0;
 //		}
         
-        ImageRecognizer imagerecognizer = new ImageRecognizer();
-        Image image = imagerecognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
-        		this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView());
-		float[] necessaryRotation;
-        try {
-			necessaryRotation = image.getRotationToRedCube();
-		}
-		catch (IllegalStateException ex){
-        	//No red cube found, just fly forward
+        ImageRecognizer recognizer = this.getImageRecognizer();
+        float[] necessaryRotation;
+		ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld();
+		Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
+				this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView(), drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
+		try{
+			necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
+		} catch (IllegalStateException exc){
 			necessaryRotation = new float[2];
 		}
-        float imageYRotation = (float) ((necessaryRotation[0]/360)*2*Math.PI);
-      	float imageXRotation = (float) ((necessaryRotation[1]/360)*2*Math.PI);
+		
+		float imageYRotation = (float) ((necessaryRotation[0]/360)*2*Math.PI);
+		float imageXRotation = (float) ((necessaryRotation[1]/360)*2*Math.PI);
 		
 		float horStabInclinationTemp = 0;
 		float verStabInclinationTemp = 0;

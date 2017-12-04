@@ -69,4 +69,11 @@ public class Pixel {
 		return this.hsv[2];
 	}
 	
+	/**
+	 * Return the HSV of this Pixel.
+	 */
+	public float[] getHSV(){
+		return this.hsv;
+	}
+	
 }
