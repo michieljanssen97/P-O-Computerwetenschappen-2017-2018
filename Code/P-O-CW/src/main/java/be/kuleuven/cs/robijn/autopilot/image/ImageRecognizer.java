@@ -178,8 +178,12 @@ public class ImageRecognizer {
 		for (ImageRecognizerCube cu : ImageRecognizerCubeList){
 			if (floatFuzzyEquals(hue, cu.getHue(), 0.01f) && floatFuzzyEquals(sat, cu.getSaturation(), 0.01f)){
 				RealVector vector = image.getXYZDistance(hue, sat);
-				ImageRecognizerCube cube = new ImageRecognizerCube((float) vector.getEntry(0), (float) vector.getEntry(1), (float) vector.getEntry(2), hue, sat);
-				return cube;
+				float[] droneRotation = getRollPitchHeading();
+				RealVector vectorWorld = transformationToWorldCoordinates(vector, droneRotation[0], droneRotation[1], droneRotation[2]);
+				double[] droneCoordinates = getDronePositionCoordinates();
+				RealVector dronePosition = new ArrayRealVector(droneCoordinates);
+				cu.setPosition((float) vectorWorld.getEntry(0) + (float) dronePosition.getEntry(0), (float) vectorWorld.getEntry(1) + (float) dronePosition.getEntry(1), (float) vectorWorld.getEntry(2) + (float) dronePosition.getEntry(2));
+				return cu;
 			}
 		}
 		return null;
