@@ -206,7 +206,15 @@ public class ImageRecognizer {
 				RealVector dronePosition = new ArrayRealVector(droneCoordinates);
 				
 				RealVector vector = image.getXYZDistance(hue, sat);
+<<<<<<< HEAD
 				cu.setPosition((float) vector.getEntry(0) + (float) dronePosition.getEntry(0), (float) vector.getEntry(1) + (float) dronePosition.getEntry(1), (float) vector.getEntry(2) + (float) dronePosition.getEntry(2));
+=======
+				float[] droneRotation = getRollPitchHeading();
+				RealVector vectorWorld = transformationToWorldCoordinates(vector, droneRotation[0], droneRotation[1], droneRotation[2]);
+				double[] droneCoordinates = getDronePositionCoordinates();
+				RealVector dronePosition = new ArrayRealVector(droneCoordinates);
+				cu.setPosition((float) vectorWorld.getEntry(0) + (float) dronePosition.getEntry(0), (float) vectorWorld.getEntry(1) + (float) dronePosition.getEntry(1), (float) vectorWorld.getEntry(2) + (float) dronePosition.getEntry(2));
+>>>>>>> 5a649e6eea2cad907d6f06004724d5ca4456f72a
 				return cu;
 			}
 		}
