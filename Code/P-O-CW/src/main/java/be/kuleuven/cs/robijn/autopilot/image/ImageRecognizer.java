@@ -201,9 +201,13 @@ public class ImageRecognizer {
 	private ImageRecognizerCube getEquivalentImageRecognizerCube(Image image, float hue, float sat) {
 		for (ImageRecognizerCube cu : getImageRecognizerCubes()){
 			if (floatFuzzyEquals(hue, cu.getHue(), 0.01f) && floatFuzzyEquals(sat, cu.getSaturation(), 0.01f)){
+				
+				double[] droneCoordinates = getDronePositionCoordinates();
+				RealVector dronePosition = new ArrayRealVector(droneCoordinates);
+				
 				RealVector vector = image.getXYZDistance(hue, sat);
-				ImageRecognizerCube cube = new ImageRecognizerCube((float) vector.getEntry(0), (float) vector.getEntry(1), (float) vector.getEntry(2), hue, sat);
-				return cube;
+				cu.setPosition((float) vector.getEntry(0) + (float) dronePosition.getEntry(0), (float) vector.getEntry(1) + (float) dronePosition.getEntry(1), (float) vector.getEntry(2) + (float) dronePosition.getEntry(2));
+				return cu;
 			}
 		}
 		//no equivalent ImageRecognizerCube exists => create new ImageRwcognizerCube
