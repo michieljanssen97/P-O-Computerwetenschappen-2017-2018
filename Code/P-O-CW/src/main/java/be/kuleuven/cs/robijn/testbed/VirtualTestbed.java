@@ -5,8 +5,14 @@ import java.util.ArrayList;
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.ode.*;
 import org.apache.commons.math3.ode.nonstiff.*;
+import org.jfree.data.general.SeriesException;
+import org.jfree.data.time.Second;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.xy.XYDataset;
 
 import be.kuleuven.cs.robijn.common.*;
+import be.kuleuven.cs.robijn.experiments.ExpEquations;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
 import p_en_o_cw_2017.*;
 
@@ -28,6 +34,8 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	private FrameBuffer frameBuffer;
 	private PerspectiveCamera droneCamera;
 	private byte[] latestCameraImage;
+	
+	private int VTUpdatesSinceChartUpdates = 0;
 	
 	private ArrayList<Box> boxesToFlyTo = new ArrayList<>();
 
@@ -64,6 +72,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 			
 			//Stop the simulation if all boxes are handled
 			if(boxesToFlyTo.isEmpty()) {
+				ExpEquations.main(); //draw chart when simulation stops
 				return true;
 			}
 		}
@@ -71,7 +80,14 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		this.setElapsedTime(secondsSinceStart);
 		this.moveDrone(secondsSinceLastUpdate, output);
 		this.renderCameraView();
-
+		
+		VTUpdatesSinceChartUpdates++;
+		if(VTUpdatesSinceChartUpdates >= 5 ) {//Update the chart every 5 iterations of the VTestbed
+			updateSeriesForFloat(drone.getHeadingAngularVelocity());
+			//updateSeriesForVector(drone.getHeadingAngularVelocityVector());
+			VTUpdatesSinceChartUpdates = 0;
+		}
+				
 		return false;
 	}
 	
@@ -119,6 +135,42 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 			public float getRoll() { return drone.getRoll(); }
 			public float getElapsedTime() { return VirtualTestbed.this.getElapsedTime(); }
 		};
+	}
+	
+	/////////////////////////////
+	/// Experiments for Chart ///
+	/////////////////////////////
+	
+	static TimeSeries series = new TimeSeries( "timeSeries" );
+	Second current = new Second( ); 
+	
+	public static TimeSeries getDataSet() {
+		return series;
+	}
+	
+	public void updateSeriesForVector(RealVector value) {
+		try {
+			series.add(current, new Double( value.getEntry(0) ) );
+			current = ( Second ) current.next( ); 
+			
+		} catch ( SeriesException e ) {
+            System.err.println("Error adding to series");
+         }
+	}
+	
+	public void updateSeriesForFloat(float value) {
+		try {
+			series.add(current, new Double( value ) );
+			current = ( Second ) current.next( ); 
+			
+		} catch ( SeriesException e ) {
+            System.err.println("Error adding to series");
+         }
+	}
+	
+	public static XYDataset createDatasetForChart() {
+		
+		return new TimeSeriesCollection(getDataSet());
 	}
 
 	///////////////
