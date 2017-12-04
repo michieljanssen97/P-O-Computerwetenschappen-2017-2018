@@ -363,7 +363,9 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			}
         };
         
-        System.out.println(drone.calculateAOA(drone.getNormalHor(leftWingInclination), drone.getProjectedVelocityLeftWing(), drone.getAttackVectorHor(leftWingInclination)));
+        System.out.println("help");
+        System.out.println(drone.getAcceleration(thrust, leftWingInclination, rightWingInclination, horStabInclination, verStabInclination));
+        //System.out.println((360/(2*Math.PI))*drone.calculateAOA(drone.getNormalHor(leftWingInclination), drone.getProjectedVelocityLeftWing(), drone.getAttackVectorHor(leftWingInclination)));
         return output;
 	}
 	
@@ -560,6 +562,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		float newRollAngularVelocity = this.getPreviousRollAngularVelocity()
 				+ 2*(newAverageRollAngularVelocity - this.getPreviousRollAngularVelocity());
 		
+		System.out.println(newVelocity.subtract(this.getPreviousVelocity()));
 		drone.setVelocity(newVelocity);
 		drone.setHeadingAngularVelocity(newHeadingAngularVelocity);
 		drone.setPitchAngularVelocity(newPitchAngularVelocity);
