@@ -39,7 +39,7 @@ public class WorldObject {
 
         for(WorldObject child : children){
             if(child.getClass().isAssignableFrom(clazz)){
-                return (T)child;
+                return (T) child;
             }
         }
 
