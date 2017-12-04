@@ -136,6 +136,8 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		}
         float imageYRotation = (float) ((necessaryRotation[0]/360)*2*Math.PI);
       	float imageXRotation = (float) ((necessaryRotation[1]/360)*2*Math.PI);
+      	if ((! Float.isNaN(this.getPreviousThrust())) && (this.getPreviousThrust() == 0) && (Math.abs(imageYRotation) < (1/360)*2*Math.PI))
+      		imageXRotation = 0;
 		
 		float horStabInclinationTemp = 0;
 		float verStabInclinationTemp = 0;
@@ -367,6 +369,8 @@ public class Autopilot extends WorldObject implements AutoPilot {
 			thrustTemp = 0;
 		final float thrust = thrustTemp;
 		
+		this.setPreviousThrust(thrust);
+		
 		this.setPreviousHeadingAngularAccelerationError(
 				drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination)[0]
 				-headingAngularAcceleration);
@@ -399,6 +403,23 @@ public class Autopilot extends WorldObject implements AutoPilot {
         };
         
         return output;
+	}
+	
+	private float previousThrust = Float.NaN;
+	
+	public float getPreviousThrust() {
+		return this.previousThrust;
+	}
+	
+	public boolean isValidPreviousThrust(float previousThrust) {
+		return ((previousThrust >=0) && (previousThrust <= this.getConfig().getMaxThrust()));
+	}
+	
+	public void setPreviousThrust(float previousThrust) 
+			throws IllegalArgumentException {
+		if (! isValidPreviousThrust(previousThrust))
+			throw new IllegalArgumentException();
+		this.previousThrust = previousThrust;
 	}
 	
 	private float previousYAccelerationError = Float.NaN;
