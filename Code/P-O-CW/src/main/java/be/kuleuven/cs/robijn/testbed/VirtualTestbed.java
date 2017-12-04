@@ -35,35 +35,29 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		this.addChild(drone);
 
 
-//		//Add box to world
-//		Box box = new Box();
-//		double zDistance = 100.0;
-//		
-//		//Case 1
-//		//box.setRelativePosition(new ArrayRealVector(new double[] {0, 0, -zDistance}, false));
-//		
-//		//Case 2
-//		box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-//		
-//		//Case 3
-//		//box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-//		
-//		//simulatie1
-//		//box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-//		
-//		//simulatie2
-//		//box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-//		
-//		//simulatie3
-//		//box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/48.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-//		
-//		this.addChild(box);
+		//Add box to world
+		Box box = new Box();
+		double zDistance = 100.0;
 		
-
-		//WorldGenerator.generateBoxes(this); TODO moet dmv knop in GUI worden gedaan
-		if (!randomCubesGenerated) {
-			//TODO read input file with specified cubes
-		}		
+		//Case 1
+		//box.setRelativePosition(new ArrayRealVector(new double[] {0, 0, -zDistance}, false));
+		
+		//Case 2
+		box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		
+		//Case 3
+		//box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		
+		//simulatie1
+		//box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		
+		//simulatie2
+		//box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		
+		//simulatie3
+		//box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/48.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
+		
+		this.addChild(box);	
 	}
 	
 	public ArrayList<Box> getAllBoxes(){
