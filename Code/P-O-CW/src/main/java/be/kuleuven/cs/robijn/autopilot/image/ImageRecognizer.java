@@ -7,7 +7,6 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
-
 /**
  * A class that can create and work with images.
  * @author Raf Hermans, Wout Mees
@@ -57,12 +56,12 @@ public class ImageRecognizer {
 	 * @return	A list with the x-coordinate and y-coordinate of the center of all pixels with given hue and saturation
 	 * @throws Exception	Something goes wrong while calculating the pixels with given hue and saturation.
 	 */
-	public float[] getCubeAveragePixel(Image image, float hue, float sat) throws Exception{
+	public float[] getCubeAveragePixel(Image image, float hue, float sat) {
 		return image.getCubeCenterPixel(hue, sat);
 	}
 	
 	/**
-	 * 
+	 * Returns the rotations in x and y for the drone to take to the cube with given hue and saturation in the given image.
 	 * @param image	The given image
 	 * @return	The rotation necessary for the drone to turn towards the center of the cube with given hue and saturation
 	 * 			(an x-value and a y-value given in degrees)
@@ -80,7 +79,7 @@ public class ImageRecognizer {
 	 * @return	The distance to the cube
 	 * @throws Exception	There are no sides of a cube with given hue and saturation visible in this Image
 	 */
-	public float getDistanceToCube(Image image, float hue, float sat) throws Exception{
+	public float getDistanceToCube(Image image, float hue, float sat){
 		return image.getTotalDistance(hue, sat);
 	}
 	
@@ -90,7 +89,7 @@ public class ImageRecognizer {
 	 * @return	The vector from the camera to the center of the cube
 	 * @throws Exception There are no sides of a cube with given hue and saturation visible in this Image
 	 */
-	public RealVector getVectorToCube(Image image, float hue, float sat) throws Exception{
+	public RealVector getVectorToCube(Image image, float hue, float sat) {
 		return image.getXYZDistance(hue, sat);
 	}
 	
@@ -118,6 +117,19 @@ public class ImageRecognizer {
 	public ArrayList<ImageRecognizerCube> getImageRecognizerCubes(){
 		return this.ImageRecognizerCubeList;
 	}
+	
+	/**
+	 * Return a list of all ImageRecognizerCubes that are not destroyed.
+	 * @return
+	 */
+	public ArrayList<ImageRecognizerCube> getNotDestroyedImageRecognizerCubes() {
+		ArrayList<ImageRecognizerCube> cubes = new ArrayList<ImageRecognizerCube>();
+		for (ImageRecognizerCube c : getImageRecognizerCubes()){
+			if (c.isNotDestroyed())
+				cubes.add(c);
+		}
+		return cubes;
+	}
 
 	/**
 	 * Return the cube in the ImageRecognizerCubeList that is closest to the current position of the drone.
@@ -127,8 +139,10 @@ public class ImageRecognizer {
 		ImageRecognizerCube closest = null;
 		float minimum = 1000f;
 		boolean first = true;
-		for (ImageRecognizerCube c : this.ImageRecognizerCubeList){
+		for (ImageRecognizerCube c : getNotDestroyedImageRecognizerCubes()){
 			if (first){
+				float distance = (float) Math.sqrt(Math.pow(curPos[0] - c.getX(), 2) + Math.pow(curPos[1] - c.getY(), 2) + Math.pow(curPos[2] - c.getZ(), 2));
+				minimum = distance;
 				closest = c;
 				first = false;
 			} else {
@@ -142,12 +156,22 @@ public class ImageRecognizer {
 		return closest;
 	}
 	
+	/**
+	 * Get the total distance from the drone to the given cube in the world.
+	 * @param cube		The given cube.
+	 * @return			The total distance.
+	 */
 	public float getWorldDistanceToCube(ImageRecognizerCube cube){
 		float[] cubePos = cube.getPosition();
 		double[] dronePos = getDronePositionCoordinates();
 		return (float) Math.sqrt( Math.pow(cubePos[0] - (float)dronePos[0], 2) + Math.pow(cubePos[1] - (float)dronePos[1], 2) + Math.pow(cubePos[2] - (float)dronePos[2], 2) );
 	}
 	
+	/**
+	 * Get the vector from the drone to the given cube.
+	 * @param cube		The given cube.
+	 * @return			The vector from drone to cube.
+	 */
 	public RealVector getWorldVectorToCube(ImageRecognizerCube cube){
 		float[] cubePos = cube.getPosition();
 		double[] dronePos = getDronePositionCoordinates();
@@ -159,7 +183,7 @@ public class ImageRecognizer {
 	 */
 	public ArrayList<float[]> getAllHueSatCombinations(){
 		ArrayList<float[]> combos = new ArrayList<float[]>();
-		for (ImageRecognizerCube c : this.ImageRecognizerCubeList){
+		for (ImageRecognizerCube c : getImageRecognizerCubes()){
 			float[] combo = {c.getHue(), c.getSaturation()};
 			combos.add(combo);
 		}
@@ -174,8 +198,8 @@ public class ImageRecognizer {
 	 * @return	The ImageRecognizerCube that corresponds to the given hue and saturation, or null if there is none such.
 	 * @throws Exception
 	 */
-	private ImageRecognizerCube getImageRecognizerCube(Image image, float hue, float sat) throws Exception{
-		for (ImageRecognizerCube cu : ImageRecognizerCubeList){
+	private ImageRecognizerCube getEquivalentImageRecognizerCube(Image image, float hue, float sat) {
+		for (ImageRecognizerCube cu : getImageRecognizerCubes()){
 			if (floatFuzzyEquals(hue, cu.getHue(), 0.01f) && floatFuzzyEquals(sat, cu.getSaturation(), 0.01f)){
 				RealVector vector = image.getXYZDistance(hue, sat);
 				float[] droneRotation = getRollPitchHeading();
@@ -186,9 +210,16 @@ public class ImageRecognizer {
 				return cu;
 			}
 		}
+		//no equivalent ImageRecognizerCube exists => create new ImageRwcognizerCube
 		return null;
 	}
 	
+	/*
+	 * Returns whether or not the two given float numbers are equal within a given maximum error (delta). 
+	 */
+	private boolean floatFuzzyEquals(float a, float b, float delta){
+		return Math.abs(a - b) <= delta;
+	}
 	
 	/**
 	 * Update the list containing the ImageRecognizerCubes. For each cube, the new position is calculated
@@ -197,26 +228,30 @@ public class ImageRecognizer {
 	 * @param image		The given image
 	 * @throws Exception
 	 */
-	private void UpdateImageRecognizerCubeList(Image image) throws Exception{
+	private void UpdateImageRecognizerCubeList(Image image) {
 		for (ImageCube cu : image.getImageCubes()){
 			float hue = cu.getHue();
 			float sat = cu.getSaturation();
 			RealVector vector = image.getXYZDistance(hue, sat);
+			
 			float[] droneRotation = getRollPitchHeading();
 			RealVector vectorWorld = transformationToWorldCoordinates(vector, droneRotation[0], droneRotation[1], droneRotation[2]);
+			
 			double[] droneCoordinates = getDronePositionCoordinates();
 			RealVector dronePosition = new ArrayRealVector(droneCoordinates);
+			
 			double[] cubeCoordinates = {dronePosition.getEntry(0) + vectorWorld.getEntry(0), dronePosition.getEntry(1) + vectorWorld.getEntry(1), dronePosition.getEntry(2) + vectorWorld.getEntry(2)};
 			RealVector cubePosition = new ArrayRealVector(cubeCoordinates);
-			ImageRecognizerCube cube = getImageRecognizerCube(image, hue, sat);
-			if (image.getTotalDistance(hue, sat) <= 4)
-				ImageRecognizerCubeList.remove(cube);
+			
+			ImageRecognizerCube cube = getEquivalentImageRecognizerCube(image, hue, sat);
 			if (cube == null){
 				float value = image.getNecessaryCubeFactor(hue, sat);
 				ImageRecognizerCube cube1 = new ImageRecognizerCube((float) cubePosition.getEntry(0), (float) cubePosition.getEntry(1), (float) cubePosition.getEntry(2), hue, sat);
 				cube1.setFactor(value);
 				ImageRecognizerCubeList.add(cube1);
 			} else {
+				if (image.getTotalDistance(hue, sat) <= 4)
+					cube.destroy();
 				float previous_factor = cube.getFactor();
 				float new_factor = image.getNecessaryCubeFactor(hue, sat);
 				float total_factor = previous_factor + new_factor;
@@ -292,11 +327,5 @@ public class ImageRecognizer {
 	private RealVector transformationToWorldCoordinates(RealVector realVector, float roll, float pitch, float heading) {
 		return this.inverseHeadingTransformation(this.inversePitchTransformation(this.inverseRollTransformation(realVector, roll), pitch), heading);
 	}
-	
-	private boolean floatFuzzyEquals(float a, float b, float delta){
-		return Math.abs(a - b) <= delta;
-	}
-	
-	
 	
 }

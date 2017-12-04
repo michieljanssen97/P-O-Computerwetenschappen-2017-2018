@@ -12,6 +12,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.AnchorPane;
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -26,6 +27,8 @@ public class CameraViewControl extends AnchorPane {
     //The object names for the cameras that provide the different perspectives.
     public static final String DRONE_CAMERA_ID = "gui_drone_camera";
     public static final String THIRDPERSON_CAMERA_ID = "gui_thirdperson_camera";
+    public static final String SIDE_CAMERA_ID = "gui_side_camera";
+    public static final String TOPDOWN_CAMERA_ID = "gui_topdown_camera";
     public static final String BOX_CAMERA_ID = "gui_box_camera";
 
     @FXML
@@ -71,9 +74,9 @@ public class CameraViewControl extends AnchorPane {
             setupImages();
 
             //When the simulation is updated, update the displayed image
-            newValue.addOnUpdateEventHandler((inputs, outputs)->{
-                update();
-            });
+            newValue.addOnUpdateEventHandler(new UpdateEventHandler((inputs, outputs) -> {
+               update();
+            },UpdateEventHandler.LOW_PRIORITY));
         });
 
         //When the image viewport changes, resize the framebuffer and image buffers
@@ -134,24 +137,20 @@ public class CameraViewControl extends AnchorPane {
 
         //Get the active camera and set its camera FOV to match the image width to height ratio so the image isnt warped/stretched.
         String selectedCameraId = (String)perspectiveToggleGroup.getSelectedToggle().getUserData();
-        Camera camera = world.getDescendantsStream().filter(o -> Objects.equals(o.getName(), selectedCameraId)).map(o -> (Camera)o).findFirst().get();
+        Camera camera = world.getDescendantsStream()
+                .filter(o -> Objects.equals(o.getName(), selectedCameraId))
+                .map(o -> (Camera)o)
+                .findFirst().get();
 
         double aspect = ((double)frameBuffer.getWidth())/((double)frameBuffer.getHeight());
-        //TODO: pick a permanent preference and replace hotfix with real solution that stops warping and remembers target FOV
-        boolean preferNoStretchOverCorrectFOV = true;
-        if(preferNoStretchOverCorrectFOV){
-            double targetFOV = Math.toRadians(120);
-            double fovX = (float)(targetFOV*aspect);
-            double fovY = targetFOV;
-            if(fovX >= Math.PI){
-                fovX = Math.PI-0.01;
-                fovY = (float)(Math.PI/aspect);
-            }
+        setCameraAspectRatio(camera, aspect);
 
-            camera.setHorizontalFOV((float)fovX);
-            camera.setVerticalFOV((float)fovY);
-        }else{
-            camera.setHorizontalFOV((float)(2.0d * Math.atan(Math.tan(camera.getVerticalFOV()/2.0d) * aspect)));
+        //If the camera is orthographic, update the icon rendering properties
+        if(camera instanceof OrthographicCamera){
+            OrthographicCamera orthoCam = (OrthographicCamera) camera;
+            orthoCam.setRenderIconsThresholdRatio(0.025);
+            orthoCam.setIconOffset(new Vector2D(0, 7));
+            orthoCam.setIconSize(8f);
         }
 
         //Render to framebuffer, copy from framebuffer to image, convert image to javafx image, display javafx image
@@ -159,6 +158,31 @@ public class CameraViewControl extends AnchorPane {
         frameBuffer.readPixels(imageBackingBuffer);
         image = SwingFXUtils.toFXImage(awtImage, image);
         imageView.setImage(image);
+    }
+
+    private void setCameraAspectRatio(Camera camera, double aspectRatio){
+        if(camera instanceof PerspectiveCamera){
+            PerspectiveCamera perspCam = (PerspectiveCamera)camera;
+            //TODO: pick a permanent preference and replace hotfix with real solution that stops warping and remembers target FOV
+            boolean preferNoStretchOverCorrectFOV = true;
+            if(preferNoStretchOverCorrectFOV){
+                double targetFOV = Math.toRadians(120);
+                double fovX = (float)(targetFOV*aspectRatio);
+                double fovY = targetFOV;
+                if(fovX >= Math.PI){
+                    fovX = Math.PI-0.01;
+                    fovY = (float)(Math.PI/aspectRatio);
+                }
+
+                perspCam.setHorizontalFOV((float)fovX);
+                perspCam.setVerticalFOV((float)fovY);
+            }else{
+                perspCam.setHorizontalFOV((float)(2.0d * Math.atan(Math.tan(perspCam.getVerticalFOV()/2.0d) * aspectRatio)));
+            }
+        } else if(camera instanceof OrthographicCamera) {
+            OrthographicCamera orthoCam = (OrthographicCamera) camera;
+            orthoCam.setHeight(orthoCam.getWidth()/(float)aspectRatio);
+        }
     }
 
     public void setSimulation(SimulationDriver simulationProperty) {

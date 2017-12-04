@@ -189,3 +189,5 @@ Code/P-O-CW/.mvn/timing.properties
 # End of https://www.gitignore.io/api/java,maven,eclipse,intellij
 
 Code/P-O-CW/P-O-CW\.iml
+
+Code/P-O-CW/\.idea/misc\.xml

@@ -5,6 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
+<?import java.net.URL?>
 <fx:root type="VBox" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml">
     <children>
         <Label text="Simulation">
@@ -48,7 +49,7 @@
                 <Insets left="15.0" right="15.0" top="5.0" />
             </VBox.margin>
         </VBox>
-        <!--<Label text="Autopilot">
+        <Label text="Testbed">
             <font>
                 <Font size="20.0" />
             </font>
@@ -58,7 +59,80 @@
         </Label>
         <VBox prefHeight="61.0" prefWidth="192.0">
             <children>
-                <Label text="Progress">
+                <Label text="Drone position" style="-fx-font-weight: bold;">
+                    <VBox.margin>
+                        <Insets />
+                    </VBox.margin>
+                </Label>
+                <Label fx:id="positionLabel" text="">
+                    <VBox.margin>
+                        <Insets top="3"/>
+                    </VBox.margin>
+                </Label>
+                <Label text="Drone rotation" style="-fx-font-weight: bold;">
+                    <VBox.margin>
+                        <Insets top="7"/>
+                    </VBox.margin>
+                </Label>
+                <HBox>
+                    <VBox alignment="CENTER" >
+                        <Label text="Heading" />
+                        <ProgressIndicator fx:id="headingIndicator" progress="0.0" minHeight="50" minWidth="50"/>
+                        <Label fx:id="headingLabel" text="">
+                            <font>
+                                <Font name="Monospaced Regular" size="13"/>
+                            </font>
+                        </Label>
+                    </VBox>
+                    <VBox alignment="CENTER" >
+                        <Label text="Pitch" />
+                        <ProgressIndicator fx:id="pitchIndicator" progress="0.0" minHeight="50" minWidth="50"/>
+                        <Label fx:id="pitchLabel" text="">
+                            <font>
+                                <Font name="Monospaced Regular" size="13"/>
+                            </font>
+                        </Label>
+                        <HBox.margin>
+                            <Insets left="10"/>
+                        </HBox.margin>
+                    </VBox>
+                    <VBox alignment="CENTER" >
+                        <Label text="Roll" />
+                        <ProgressIndicator fx:id="rollIndicator" progress="0.0" minHeight="50" minWidth="50"/>
+                        <Label fx:id="rollLabel" text="">
+                            <font>
+                                <Font name="Monospaced Regular" size="13"/>
+                            </font>
+                        </Label>
+                        <HBox.margin>
+                            <Insets left="10"/>
+                        </HBox.margin>
+                    </VBox>
+                    <VBox.margin>
+                        <Insets top="3" left="5"/>
+                    </VBox.margin>
+                </HBox>
+                <Label fx:id="rotationLabel" text="">
+                    <VBox.margin>
+                        <Insets top="3"/>
+                    </VBox.margin>
+                </Label>
+            </children>
+            <VBox.margin>
+                <Insets left="15.0" right="15.0" top="5.0" />
+            </VBox.margin>
+        </VBox>
+        <Label text="Autopilot">
+            <font>
+                <Font size="20.0" />
+            </font>
+            <VBox.margin>
+                <Insets left="15.0" top="20.0" />
+            </VBox.margin>
+        </Label>
+        <VBox prefHeight="61.0" prefWidth="192.0">
+            <children>
+                <!--<Label text="Progress">
                     <VBox.margin>
                         <Insets />
                     </VBox.margin>
@@ -67,11 +141,91 @@
                     <VBox.margin>
                         <Insets top="3.0" />
                     </VBox.margin>
-                </ProgressBar>
+                </ProgressBar>-->
+                <Label text="Thrust" style="-fx-font-weight: bold;">
+                    <VBox.margin>
+                        <Insets />
+                    </VBox.margin>
+                </Label>
+                <ProgressBar fx:id="thrustBar" minWidth="200"/>
+                <Label fx:id="thrustLabel" text="">
+                    <font>
+                        <Font name="Monospaced Regular" size="13"/>
+                    </font>
+                </Label>
+
+
+                <Label text="Wing inclination" style="-fx-font-weight: bold;">
+                    <VBox.margin>
+                        <Insets top="7"/>
+                    </VBox.margin>
+                </Label>
+                <HBox>
+                    <VBox alignment="CENTER" >
+                        <Label text="Left" />
+                        <ProgressIndicator fx:id="leftWingInclinationIndicator" progress="0.0" minHeight="50" minWidth="50"/>
+                        <Label fx:id="leftWingInclinationLabel" text="">
+                            <font>
+                                <Font name="Monospaced Regular" size="13"/>
+                            </font>
+                        </Label>
+                    </VBox>
+                    <VBox alignment="CENTER" >
+                        <Label text="Right" />
+                        <ProgressIndicator fx:id="rightWingInclinationIndicator" progress="0.0" minHeight="50" minWidth="50"/>
+                        <Label fx:id="rightWingInclinationLabel" text="">
+                            <font>
+                                <Font name="Monospaced Regular" size="13"/>
+                            </font>
+                        </Label>
+                        <HBox.margin>
+                            <Insets left="10"/>
+                        </HBox.margin>
+                    </VBox>
+                    <VBox.margin>
+                        <Insets top="3" left="5"/>
+                    </VBox.margin>
+                </HBox>
+
+                <Label text="Stabilizer inclination" style="-fx-font-weight: bold;">
+                    <VBox.margin>
+                        <Insets top="7"/>
+                    </VBox.margin>
+                </Label>
+                <HBox>
+                    <VBox alignment="CENTER" >
+                        <Label text="Horizontal" />
+                        <ProgressIndicator fx:id="horStabInclinationIndicator" progress="0.0" minHeight="50" minWidth="50"/>
+                        <Label fx:id="horStabInclinationLabel" text="">
+                            <font>
+                                <Font name="Monospaced Regular" size="13"/>
+                            </font>
+                        </Label>
+                    </VBox>
+                    <VBox alignment="CENTER" >
+                        <Label text="Vertical" />
+                        <ProgressIndicator fx:id="verStabInclinationIndicator" progress="0.0" minHeight="50" minWidth="50"/>
+                        <Label fx:id="verStabInclinationLabel" text="">
+                            <font>
+                                <Font name="Monospaced Regular" size="13"/>
+                            </font>
+                        </Label>
+                        <HBox.margin>
+                            <Insets left="10"/>
+                        </HBox.margin>
+                    </VBox>
+                    <VBox.margin>
+                        <Insets top="3" left="5"/>
+                    </VBox.margin>
+                </HBox>
             </children>
             <VBox.margin>
                 <Insets left="15.0" right="15.0" top="5.0" />
             </VBox.margin>
-        </VBox>-->
+        </VBox>
     </children>
+
+    <stylesheets>
+        <URL value="@sidebar.css" />
+    </stylesheets>
 </fx:root>

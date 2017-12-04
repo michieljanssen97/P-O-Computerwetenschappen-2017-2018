@@ -38,6 +38,11 @@ public class ImageRecognizerCube {
 	private float factor;
 	
 	/**
+	 * A variable indicating whether or not this ImageRecognizerCube is destroyed.
+	 */
+	private boolean destroyed = false;
+	
+	/**
 	 * Initialize this ImageRecognizerCube with given x, y and z coordinate and given hue and saturation.
 	 * @param x				The given x coordinate
 	 * @param y				The given y coordinate
@@ -152,4 +157,13 @@ public class ImageRecognizerCube {
 		this.y = y;
 		this.z = z;
 	}
+	
+	public void destroy(){
+		this.destroyed = true;
+	}
+	
+	public boolean isNotDestroyed(){
+		return !this.destroyed;
+	}
+	
 }

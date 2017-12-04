@@ -1,5 +1,8 @@
 package be.kuleuven.cs.robijn.autopilot.image;
 
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -10,12 +13,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 
-import org.junit.Test;
-
 import javax.imageio.ImageIO;
-
-import static org.junit.Assert.*;
-
 
 public class ImageTest {
 	
@@ -271,7 +269,7 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(2);
-		float expected = -3.25f;
+		float expected = -3.24f;
 		assertEquals(expected, result, 0.01f);
 	}
 	
@@ -454,6 +452,7 @@ public class ImageTest {
 			//System.out.println(" ");
 		}
 	}
+	
 	@Test
 	public void testAngleEdgeCube() throws Exception{
 		ImageRecognizer rec = new ImageRecognizer();

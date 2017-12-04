@@ -1,16 +1,18 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.*;
-import org.apache.commons.math3.geometry.euclidean.threed.RotationOrder;
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector3fc;
-import org.joml.Vector4f;
+import org.joml.*;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
+
+import java.awt.*;
+import java.lang.Math;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
@@ -18,6 +20,8 @@ import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
+import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
+import static org.lwjgl.opengl.GL14.glBlendEquation;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
@@ -58,8 +62,14 @@ public class OpenGLRenderer implements Renderer {
 
         glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
 
+        //Enable texture transparancy
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendEquation(GL_FUNC_ADD);
+
         OpenGLRenderer renderer = new OpenGLRenderer(windowHandle);
         renderer.initializeModels();
+        renderer.initializeIcons();
         return renderer;
     }
 
@@ -67,6 +77,10 @@ public class OpenGLRenderer implements Renderer {
 
     private Model droneModel = null;
     private Model boxModel = null;
+    private Model groundModel = null;
+
+    private Billboard droneIcon;
+    private Billboard boxIcon;
 
     private OpenGLRenderer(long windowHandle){
         this.windowHandle = windowHandle;
@@ -95,8 +109,28 @@ public class OpenGLRenderer implements Renderer {
         }
 
         //Load cube
-        Mesh mesh = OBJLoader.loadFromResources("/models/cube/cube.obj");
-        boxModel = new Model(mesh, null, boxProgram);
+        Mesh boxMesh = OBJLoader.loadFromResources("/models/cube/cube.obj");
+        boxModel = new Model(boxMesh, null, boxProgram);
+
+        //Load shader for ground model
+        ShaderProgram groundProgram;
+        try(Shader vertexShader = Shader.compileVertexShader(Resources.loadTextResource("/shaders/ground/vertex.glsl"))){
+            try(Shader fragmentShader = Shader.compileFragmentShader(Resources.loadTextResource("/shaders/ground/fragment.glsl"))){
+                groundProgram = ShaderProgram.link(vertexShader, fragmentShader);
+            }
+        }
+
+        //Load ground model
+        Mesh groundMesh = OBJLoader.loadFromResources("/models/ground/ground.obj");
+        groundModel = new Model(groundMesh, null, groundProgram);
+    }
+
+    private void initializeIcons(){
+        Texture boxIconTexture = Texture.load(Resources.loadImageResource("/icons/cube.png"));
+        boxIcon = Billboard.create(boxIconTexture);
+
+        Texture droneIconTexture = Texture.load(Resources.loadImageResource("/icons/drone.png"));
+        droneIcon = Billboard.create(droneIconTexture);
     }
 
     @Override
@@ -104,7 +138,7 @@ public class OpenGLRenderer implements Renderer {
         if(!(buffer instanceof OpenGLFrameBuffer)){
             throw new IllegalArgumentException("Incompatible framebuffer");
         }
-        if(!(camera instanceof OpenGLCamera)){
+        if(!(camera instanceof OpenGLPerspectiveCamera) && !(camera instanceof OpenGLOrthographicCamera)){
             throw new IllegalArgumentException("Incompatible camera");
         }
 
@@ -129,41 +163,92 @@ public class OpenGLRenderer implements Renderer {
         //Otherwise face culling will cut away the front parts and leave behind only the back parts
         glFrontFace(GL_CW);
         //Replace previous frame with a blank screen
-        glClearColor(0.2f, 0.2f, 0.2f, 1f);
+        glClearColor(1f, 1f, 1f, 1f);
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
         //Setup per-camera matrices
-        OpenGLCamera openglCamera = (OpenGLCamera)camera;
-        Matrix4f viewMatrix = createViewMatrix(openglCamera);
-        Matrix4f projectionMatrix = createProjectionMatrix(openglCamera.getHorizontalFOV(), openglCamera.getVerticalFOV(), 0.1f, 1000f);
+        Matrix4f viewMatrix = createViewMatrix(camera);
+        Matrix4f projectionMatrix = createProjectionMatrix(camera);
         Matrix4f viewProjectionMatrix = new Matrix4f(projectionMatrix).mul(viewMatrix);
+
+        //Render ground if needed
+        if(camera.isGroundDrawn()){
+            renderModel(groundModel, viewProjectionMatrix, MatrixUtils.createRealIdentityMatrix(4));
+        }
 
         //Render objects
         for (WorldObject child : worldRoot.getChildren()){
-            renderChildren(child, viewProjectionMatrix, !openglCamera.areDronesHidden());
+            renderChildren(child, viewProjectionMatrix, camera);
         }
     }
 
-    private void renderChildren(WorldObject obj, Matrix4f viewProjectionMatrix, boolean renderDrones){
+    private void renderChildren(WorldObject obj, Matrix4f viewProjectionMatrix, Camera camera){
         //Recursively render children
         for (WorldObject child : obj.getChildren()){
-            renderChildren(child, viewProjectionMatrix, renderDrones);
+            renderChildren(child, viewProjectionMatrix, camera);
         }
 
         Model model = null;
         if(obj instanceof Box){
             model = boxModel;
-        }else if(obj instanceof Drone && renderDrones){
+            Color boxColor = ((Box)obj).getColor();
+            float[] rgbValues = new float[3];
+            boxColor.getRGBColorComponents(rgbValues);
+            model.getShader().setUniformFloat("color", rgbValues);
+        }else if(obj instanceof Drone && !camera.areDronesHidden()){
             model = droneModel;
         }else{
             return;
         }
 
+        renderModel(model, viewProjectionMatrix, obj.getObjectToWorldTransform());
+
+        //Render icon if necessary
+        if(camera instanceof OpenGLOrthographicCamera){
+            OpenGLOrthographicCamera orthoCam = (OpenGLOrthographicCamera) camera;
+
+            Vector3D size = model.getMesh().getBoundingBox().getBoxSize();
+            double avgAxis = (size.getX() + size.getY() + size.getZ()) / 3d;
+            double minRatio = Math.min(avgAxis/orthoCam.getWidth(), avgAxis/orthoCam.getHeight());
+            if(minRatio < orthoCam.getRenderIconsThresholdRatio()){
+                //Render icon
+
+                Billboard icon = null;
+                if(obj instanceof Box){
+                    icon = boxIcon;
+                }else if(obj instanceof Drone && !camera.areDronesHidden()){
+                    icon = droneIcon;
+                }else{
+                    return;
+                }
+
+                Vector3D billboardRelPos = camera.getWorldRotation().applyTo(
+                        new Vector3D(orthoCam.getIconOffset().getX(), orthoCam.getIconOffset().getY(), 0)
+                );
+                RealVector billboardPosition = obj.getWorldPosition().add(
+                        new ArrayRealVector(new double[]{billboardRelPos.getX(), billboardRelPos.getY(), billboardRelPos.getZ()}, false));
+                renderModel(icon, viewProjectionMatrix, icon.generateModelMatrix(camera, billboardPosition, orthoCam.getIconSize()));
+            }
+        }
+    }
+
+    private void renderModel(Model model, Matrix4f viewProjectionMatrix, RealMatrix objectToWorldTransform){
         //Setup per-object matrices
         model.getShader().setUniformMatrix("viewProjectionTransformation", false, viewProjectionMatrix);
-        RealMatrix objectToWorldTransform = obj.getObjectToWorldTransform();
         model.getShader().setUniformMatrix("modelTransformation", false, objectToWorldTransform);
 
+        renderModel(model);
+    }
+
+    private void renderModel(Billboard model, Matrix4f viewProjectionMatrix, Matrix4f objectToWorldTransform){
+        //Setup per-object matrices
+        model.getShader().setUniformMatrix("viewProjectionTransformation", false, viewProjectionMatrix);
+        model.getShader().setUniformMatrix("modelTransformation", false, objectToWorldTransform);
+
+        renderModel(model);
+    }
+
+    private void renderModel(Model model){
         //Bind object model mesh, texture, shader, ...
         glBindVertexArray(model.getMesh().getVertexArrayObjectId());
         glActiveTexture(GL_TEXTURE0);
@@ -182,13 +267,14 @@ public class OpenGLRenderer implements Renderer {
      * Returns a linear transformation matrix for transforming vertices from world space to camera space.
      * @return a non-null matrix
      */
-    private Matrix4f createViewMatrix(OpenGLCamera camera){
+    private Matrix4f createViewMatrix(Camera camera){
         Matrix4f viewMatrix = new Matrix4f();
         viewMatrix.identity();
-        double[] angles = camera.getWorldRotation().getAngles(RotationOrder.XYZ);
-        viewMatrix.rotate(-(float)angles[0], 1, 0, 0);
-        viewMatrix.rotate(-(float)angles[1], 0, 1, 0);
-        viewMatrix.rotate(-(float)angles[2], 0, 0, 1);
+
+        Rotation rotation = camera.getWorldRotation();
+        Quaternionfc quaternion = new Quaternionf((float)rotation.getQ1(), (float)rotation.getQ2(), (float)rotation.getQ3(), (float)rotation.getQ0());
+        viewMatrix.rotate(quaternion);
+
         viewMatrix.translate(
                 (float) -camera.getWorldPosition().getEntry(0),
                 (float) -camera.getWorldPosition().getEntry(1),
@@ -201,10 +287,28 @@ public class OpenGLRenderer implements Renderer {
      * Returns a linear transformation matrix for transforming vertices from camera space to screen space.
      * @return a non-null matrix
      */
-    private Matrix4f createProjectionMatrix(float xFOV, float yFOV, float zNear, float zFar){
+    private Matrix4f createProjectionMatrix(Camera camera){
         Matrix4f projectionMatrix = new Matrix4f();
         projectionMatrix.identity();
-        projectionMatrix.perspective(yFOV, xFOV/yFOV, zNear, zFar);
+
+        if(camera instanceof OpenGLPerspectiveCamera){
+            OpenGLPerspectiveCamera perspCam = (OpenGLPerspectiveCamera)camera;
+            projectionMatrix.perspective(
+                    perspCam.getVerticalFOV(), perspCam.getHorizontalFOV()/perspCam.getVerticalFOV(),
+                    perspCam.getNearPlane(), perspCam.getFarPlane()
+            );
+        }else if(camera instanceof OpenGLOrthographicCamera){
+            OpenGLOrthographicCamera orthoCam = (OpenGLOrthographicCamera)camera;
+            float width = orthoCam.getWidth();
+            float height = orthoCam.getHeight();
+            projectionMatrix.ortho(
+                    -width/2f, width/2f, -height/2f,height/2f,
+                    orthoCam.getNearPlane(), orthoCam.getFarPlane()
+            );
+        }else{
+            throw new RuntimeException("No projection matrix defined for camera type");
+        }
+
         //Reading the pixels from an OpenGL framebuffer results in a flipped image.
         //For example:
         //000111222      666777888
@@ -224,8 +328,13 @@ public class OpenGLRenderer implements Renderer {
     }
 
     @Override
-    public OpenGLCamera createCamera() {
-        return new OpenGLCamera();
+    public OpenGLPerspectiveCamera createPerspectiveCamera() {
+        return new OpenGLPerspectiveCamera();
+    }
+
+    @Override
+    public OrthographicCamera createOrthographicCamera() {
+        return new OpenGLOrthographicCamera();
     }
 
     @Override
