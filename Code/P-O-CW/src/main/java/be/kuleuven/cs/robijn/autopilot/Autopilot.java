@@ -562,7 +562,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		float newRollAngularVelocity = this.getPreviousRollAngularVelocity()
 				+ 2*(newAverageRollAngularVelocity - this.getPreviousRollAngularVelocity());
 		
-		System.out.println(newVelocity.subtract(this.getPreviousVelocity()));
+		System.out.println(newVelocity.subtract(this.getPreviousVelocity()).mapMultiply(1/secondsSinceLastUpdate));
 		drone.setVelocity(newVelocity);
 		drone.setHeadingAngularVelocity(newHeadingAngularVelocity);
 		drone.setPitchAngularVelocity(newPitchAngularVelocity);
