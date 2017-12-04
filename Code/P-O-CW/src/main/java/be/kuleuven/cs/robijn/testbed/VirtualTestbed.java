@@ -10,7 +10,6 @@ import org.jfree.data.time.Second;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
-
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.experiments.ExpEquations;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
@@ -36,6 +35,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	private byte[] latestCameraImage;
 	
 	private int VTUpdatesSinceChartUpdates = 0;
+	private boolean drawChart = true;
 	
 	private ArrayList<Box> boxesToFlyTo = new ArrayList<>();
 
@@ -72,7 +72,9 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 			
 			//Stop the simulation if all boxes are handled
 			if(boxesToFlyTo.isEmpty()) {
-				ExpEquations.main(); //draw chart when simulation stops
+				if (drawChart) {
+					ExpEquations.main(); //draw chart when simulation stops
+				}
 				return true;
 			}
 		}
@@ -81,14 +83,61 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		this.moveDrone(secondsSinceLastUpdate, output);
 		this.renderCameraView();
 		
-		VTUpdatesSinceChartUpdates++;
-		if(VTUpdatesSinceChartUpdates >= 5 ) {//Update the chart every 5 iterations of the VTestbed
-			updateSeriesForFloat(drone.getHeadingAngularVelocity());
-			//updateSeriesForVector(drone.getHeadingAngularVelocityVector());
-			VTUpdatesSinceChartUpdates = 0;
+		//only execute if there must be a chart of values in time
+		if(drawChart) {
+			VTUpdatesSinceChartUpdates++;
+			if(VTUpdatesSinceChartUpdates >= 5 ) {//Update the chart every 5 iterations of the VTestbed			
+				updateSeriesForFloat("heading", box, drone);
+				//updateSeriesForVector(drone.getHeadingAngularVelocityVector());
+				VTUpdatesSinceChartUpdates = 0;
+			}
 		}
 				
 		return false;
+	}
+	
+	/**
+	 * Get the angles from the current place of the plane to the closest cube
+	 * @param inputs
+	 * @return
+	 */
+	public RealVector getAnglesDifference(Box box, Drone drone) {        
+		RealVector droneCo = drone.getWorldPosition();
+		RealVector boxCo = box.getWorldPosition();
+		
+		RealVector distanceVector= new ArrayRealVector(new double[] {
+				Math.abs(droneCo.getEntry(0) - boxCo.getEntry(0)),
+				Math.abs(droneCo.getEntry(1) - boxCo.getEntry(1)),
+				Math.abs(droneCo.getEntry(2) - boxCo.getEntry(2))
+				},false);
+		
+		RealVector droneRotation = new ArrayRealVector(new double[] {drone.getHeading(), drone.getPitch(), drone.getRoll()},false);
+//		RealVector necessaryRotation = new ArrayRealVector(new double[] {
+//				distanceVector.cosine(droneRotation),
+//				distanceVector.cosine(drone.get),
+//				distanceVector.cosine(depthVector)
+//				},false);      	
+		
+		RealVector horVector = new ArrayRealVector(new double[] {distanceVector.getEntry(0),0,0},false);
+		RealVector verVector = new ArrayRealVector(new double[] {0,distanceVector.getEntry(1),0},false);
+		RealVector depthVector = new ArrayRealVector(new double[] {0,0,distanceVector.getEntry(2)},false);
+		
+		RealVector distanceAngularVector = new ArrayRealVector(new double[] {
+				(distanceVector.projection(horVector).getEntry(0)),
+				(distanceVector.projection(verVector).getEntry(1)),
+				(distanceVector.projection(depthVector).getEntry(2)),
+				},false);
+		
+		RealVector necessaryRotation = getAbs(droneRotation.subtract(distanceAngularVector));
+      	return necessaryRotation;
+	}
+	
+	RealVector getAbs(RealVector v) {
+		double x = Math.abs(v.getEntry(0));
+		double y = Math.abs(v.getEntry(1));
+		double z = Math.abs(v.getEntry(2));
+		
+		return new ArrayRealVector(new double[] {x,y,z},false);
 	}
 	
 	/**
@@ -158,7 +207,21 @@ public class VirtualTestbed extends WorldObject implements TestBed {
          }
 	}
 	
-	public void updateSeriesForFloat(float value) {
+	public void updateSeriesForFloat(String type, Box box, Drone drone) {
+		float value = Float.MAX_VALUE;
+		
+		if(type == "heading") {
+			value = (float) getAnglesDifference(box, drone).getEntry(0); //x-value
+		}
+		
+		else if(type == "pitch") {
+			value = (float) getAnglesDifference(box, drone).getEntry(1);
+		}
+		
+		else {
+			return; //wrong argument
+		}
+		
 		try {
 			series.add(current, new Double( value ) );
 			current = ( Second ) current.next( ); 

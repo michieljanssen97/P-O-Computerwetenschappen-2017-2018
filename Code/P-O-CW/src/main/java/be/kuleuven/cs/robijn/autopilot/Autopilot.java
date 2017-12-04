@@ -93,6 +93,25 @@ public class Autopilot extends WorldObject implements AutoPilot {
 		this.previousElapsedTime = previousElapsedTime;
 	}
 	
+	public float[] getImageRotations(AutopilotInputs inputs) {
+        ImageRecognizer imagerecognizer = new ImageRecognizer();
+        Image image = imagerecognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
+        		this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView());
+		float[] necessaryRotation;
+        try {
+			necessaryRotation = image.getRotationToRedCube();
+		}
+		catch (IllegalStateException ex){
+        	//No red cube found, just fly forward
+			necessaryRotation = new float[2];
+		}
+        
+        necessaryRotation[0] = (float) ((necessaryRotation[0]/360)*2*Math.PI);
+      	necessaryRotation[1] = (float) ((necessaryRotation[1]/360)*2*Math.PI);
+      	
+      	return necessaryRotation;
+	}
+	
 	/**
 	 * Wel roll ten gevolge van verschillende snelheid van vleugels (door de rotaties).
 	 */
@@ -123,20 +142,9 @@ public class Autopilot extends WorldObject implements AutoPilot {
 //			imageXRotation = 0;
 //			imageYRotation = 0;
 //		}
-        
-        ImageRecognizer imagerecognizer = new ImageRecognizer();
-        Image image = imagerecognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
-        		this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView());
-		float[] necessaryRotation;
-        try {
-			necessaryRotation = image.getRotationToRedCube();
-		}
-		catch (IllegalStateException ex){
-        	//No red cube found, just fly forward
-			necessaryRotation = new float[2];
-		}
-        float imageYRotation = (float) ((necessaryRotation[0]/360)*2*Math.PI);
-      	float imageXRotation = (float) ((necessaryRotation[1]/360)*2*Math.PI);
+
+        float imageYRotation = getImageRotations(inputs)[0];
+      	float imageXRotation = getImageRotations(inputs)[1];
 		
 		float horStabInclinationTemp = 0;
 		float verStabInclinationTemp = 0;
