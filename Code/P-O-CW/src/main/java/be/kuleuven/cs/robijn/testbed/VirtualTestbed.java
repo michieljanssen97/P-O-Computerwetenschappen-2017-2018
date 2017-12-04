@@ -8,7 +8,7 @@ import org.apache.commons.math3.ode.nonstiff.*;
 
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
-import p_en_o_cw_2017.*;
+import interfaces.*;
 
 import java.util.List;
 import java.util.Optional;

@@ -1,8 +1,8 @@
 package be.kuleuven.cs.robijn.common;
 
 
-import p_en_o_cw_2017.AutopilotInputs;
-import p_en_o_cw_2017.AutopilotOutputs;
+import interfaces.AutopilotInputs;
+import interfaces.AutopilotOutputs;
 
 import java.util.function.BiConsumer;
 

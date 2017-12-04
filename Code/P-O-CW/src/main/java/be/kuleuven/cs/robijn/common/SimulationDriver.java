@@ -2,9 +2,9 @@ package be.kuleuven.cs.robijn.common;
 
 import be.kuleuven.cs.robijn.autopilot.Autopilot;
 import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
-import p_en_o_cw_2017.AutopilotConfig;
-import p_en_o_cw_2017.AutopilotInputs;
-import p_en_o_cw_2017.AutopilotOutputs;
+import interfaces.AutopilotConfig;
+import interfaces.AutopilotInputs;
+import interfaces.AutopilotOutputs;
 
 import java.util.List;
 import java.util.TreeSet;
@@ -15,11 +15,10 @@ import org.apache.commons.math3.linear.*;
  */
 public class SimulationDriver {
     private TestBed testBed;
-    private AutoPilot autoPilot;
+    private Autopilot autoPilot;
     private boolean simulationPaused;
     private boolean simulationFinished;
     private boolean simulationCrashed;
-    private final AutopilotConfig config;
     private AutopilotInputs latestAutopilotInputs;
     private AutopilotOutputs latestAutopilotOutputs;
 
@@ -28,6 +27,9 @@ public class SimulationDriver {
     private long lastUpdate = -1; //timestamp of last update
     private long timeSpentPausedSinceLastUpdate = 0; //total amount of time, between last update and now, that was spent paused (in ms)
 
+    private boolean simulationStarted = false;
+    private final AutopilotConfig config;
+
     //List of eventhandlers that are invoked when the simulation has updated.
     private TreeSet<UpdateEventHandler> updateEventHandlers = new TreeSet<>();
 
@@ -35,7 +37,7 @@ public class SimulationDriver {
         this.config = config;
     	RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -6.667}, false);
         testBed = new VirtualTestbed(boxes, config, initialVelocity);
-        autoPilot = new Autopilot(config, initialVelocity);
+        autoPilot = new Autopilot();
         latestAutopilotInputs = testBed.getInputs();
     }
 
@@ -51,7 +53,13 @@ public class SimulationDriver {
         if(!simulationPaused && !simulationFinished && !simulationCrashed){
         	try {
         		//Run the autopilot
-        		latestAutopilotOutputs = autoPilot.update(latestAutopilotInputs);
+                if (simulationStarted == false ){
+                    latestAutopilotOutputs = autoPilot.simulationStarted(config,latestAutopilotInputs);
+                    simulationStarted = true;
+                }
+        		else {
+                    latestAutopilotOutputs = autoPilot.timePassed(latestAutopilotInputs);
+                }
         		//Run the testbed
                 long now = System.currentTimeMillis();
                 float secondsSinceStart = ((float)((now - simulationStart) - totalTimeSpentPaused)/1000f);
@@ -102,7 +110,7 @@ public class SimulationDriver {
         return testBed;
     }
 
-    public AutoPilot getAutoPilot(){
+    public Autopilot getAutoPilot(){
         return autoPilot;
     }
 
