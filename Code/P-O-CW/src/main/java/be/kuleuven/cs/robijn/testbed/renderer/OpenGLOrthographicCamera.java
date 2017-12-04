@@ -13,6 +13,7 @@ public class OpenGLOrthographicCamera extends OrthographicCamera {
     private boolean drawGround;
     private float iconSize = 1.0f;
     private Vector2D iconOffset = new Vector2D(0, 0);
+    private boolean drawDebugObjects;
 
     @Override
     public float getWidth() {
@@ -112,5 +113,15 @@ public class OpenGLOrthographicCamera extends OrthographicCamera {
 
     public boolean isGroundDrawn() {
         return drawGround;
+    }
+
+    @Override
+    public boolean areDebugObjectsDrawn() {
+        return drawDebugObjects;
+    }
+
+    @Override
+    public void setDrawnDebugObjects(boolean drawDebugObjects) {
+        this.drawDebugObjects = drawDebugObjects;
     }
 }

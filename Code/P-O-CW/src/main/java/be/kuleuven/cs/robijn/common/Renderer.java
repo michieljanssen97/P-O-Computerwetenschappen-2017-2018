@@ -31,4 +31,6 @@ public interface Renderer extends AutoCloseable {
      * @param camera the camera from which the world is viewed.
      */
     void render(WorldObject worldRoot, FrameBuffer frameBuffer, Camera camera);
+
+    void clearDebugObjects();
 }

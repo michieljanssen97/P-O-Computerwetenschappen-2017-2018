@@ -10,6 +10,7 @@ public class OpenGLPerspectiveCamera extends PerspectiveCamera {
 	private float zFar = 1000f;
 	private boolean areDronesHidden;
 	private boolean drawGround;
+	private boolean drawDebugObjects;
 
 	@Override
 	public float getHorizontalFOV() {
@@ -79,5 +80,15 @@ public class OpenGLPerspectiveCamera extends PerspectiveCamera {
 
 	public boolean isGroundDrawn() {
 		return drawGround;
+	}
+
+	@Override
+	public boolean areDebugObjectsDrawn() {
+		return drawDebugObjects;
+	}
+
+	@Override
+	public void setDrawnDebugObjects(boolean drawDebugObjects) {
+		this.drawDebugObjects = drawDebugObjects;
 	}
 }

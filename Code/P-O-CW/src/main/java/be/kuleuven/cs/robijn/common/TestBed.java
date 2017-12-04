@@ -1,6 +1,6 @@
 package be.kuleuven.cs.robijn.common;
 
-import p_en_o_cw_2017.*;
+import interfaces.*;
 
 /**
  * Provides a simulation environment for the drone to fly in.
