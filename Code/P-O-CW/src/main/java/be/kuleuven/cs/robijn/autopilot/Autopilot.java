@@ -72,6 +72,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
         	//No red cube found, just fly forward
 			necessaryRotation = new float[2];
 		}
+        System.out.println(necessaryRotation[1]);
         float imageYRotation = (float) ((necessaryRotation[0]/360)*2*Math.PI);
 		float imageXRotation = (float) ((necessaryRotation[1]/360)*2*Math.PI);
 		
@@ -601,8 +602,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			}
         };
         
-        System.out.println("help");
-        System.out.println(drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination)[1]);
         return output;
 	}
 	
@@ -797,7 +796,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		float newRollAngularVelocity = this.getPreviousRollAngularVelocity()
 				+ 2*(newAverageRollAngularVelocity - this.getPreviousRollAngularVelocity());
 		
-		System.out.println((newPitchAngularVelocity - this.getPreviousPitchAngularVelocity())/secondsSinceLastUpdate);
 		drone.setVelocity(newVelocity);
 		drone.setHeadingAngularVelocity(newHeadingAngularVelocity);
 		drone.setPitchAngularVelocity(newPitchAngularVelocity);
