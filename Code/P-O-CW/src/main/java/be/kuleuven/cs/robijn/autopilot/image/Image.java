@@ -57,7 +57,7 @@ public class Image {
 	 * @throws Exception 
 	 * @throws IOException	One of the parameters is invalid or the image cannot be read.
 	 */
-	public Image(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView) throws Exception{
+	public Image(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView) {
 		if ( (!isValidImage(image, nbRows, nbColumns)) || (!isValidAngle(horizontalAngleOfView)) || (!isValidAngle(verticalAngleOfView)) )
 			throw new IllegalArgumentException("The given byte array is invalid or does not have the right dimensions.");
 		this.nbRows = nbRows;

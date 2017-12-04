@@ -1,9 +1,17 @@
 package be.kuleuven.cs.robijn.testbed;
 
+import java.util.ArrayList;
+
 import org.apache.commons.math3.linear.*;
+import org.apache.commons.math3.ode.*;
+import org.apache.commons.math3.ode.nonstiff.*;
+
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
 import p_en_o_cw_2017.*;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * A class of virtual testbeds.
@@ -19,48 +27,44 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	private FrameBuffer frameBuffer;
 	private PerspectiveCamera droneCamera;
 	private byte[] latestCameraImage;
+	
+	private ArrayList<Box> boxesToFlyTo = new ArrayList<>();
 
-	public VirtualTestbed(AutopilotConfig config, RealVector initialVelocity) {
+	public VirtualTestbed(List<Box> boxes, AutopilotConfig config, RealVector initialVelocity) {
 		this.config = config;
-
 		//Add drone to world
 		Drone drone = new Drone(config, initialVelocity);
 		this.addChild(drone);
 
-		//Add box to world
-		Box box = new Box();
-		double zDistance = 100.0;
-		
-		//Case 1
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, 0, -zDistance}, false));
-		
-		//Case 2
-		box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-		
-		//Case 3
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-		
-		//simulatie1
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-		
-		//simulatie2
-		//box.setRelativePosition(new ArrayRealVector(new double[] {0, -zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-		
-		//simulatie3
-		//box.setRelativePosition(new ArrayRealVector(new double[] {zDistance*Math.tan(Math.PI/48.0), zDistance*Math.tan(Math.PI/6.0), -zDistance}, false));
-		
-		this.addChild(box);
+		//Add boxes to world
+		for (Box box : boxes){
+			this.addChild(box);
+		}
+		boxesToFlyTo.addAll(boxes);
 	}
 
 	public boolean update(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs output){
 		Drone drone = this.getFirstChildOfType(Drone.class);
-		Box box = this.getFirstChildOfType(Box.class);
+		//Box box = this.getFirstChildOfType(Box.class);
+		Box box = getClosestBox(drone);
 
-		//Check simulation finished
-		if ((drone.getRightWingPosition().getDistance(box.getWorldPosition()) < 4.5)
-				|| (drone.getLeftWingPosition().getDistance(box.getWorldPosition()) < 4.5)
-				|| (drone.getEnginePosition().getDistance(box.getWorldPosition()) < 4.5)) {
-			return true;
+		float stopDistanceToBox = 4;
+		float cubeRadius = (float) 0.5;
+		float stopDistanceToCenterBox = stopDistanceToBox + cubeRadius;
+		
+		//Check if the drone reached a cube
+		//true if the center of mass of the drone is in a specified distance of the center of a cube
+		if (calculateDistanceToDrone(box, drone) <= stopDistanceToCenterBox){
+			//The box should not be taken into account anymore, it is already reached
+			boxesToFlyTo.remove(box);
+			
+			//Remove the reached box from the testbed
+			removeChild(box);
+			
+			//Stop the simulation if all boxes are handled
+			if(boxesToFlyTo.isEmpty()) {
+				return true;
+			}
 		}
 
 		this.setElapsedTime(secondsSinceStart);
@@ -68,6 +72,31 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		this.renderCameraView();
 
 		return false;
+	}
+	
+	/**
+	 * Get the box closest to the current position of the drone
+	 */
+	public Box getClosestBox(Drone drone) {
+		Optional<Box> closestBox = boxesToFlyTo.stream().min((boxA, boxB) -> {
+			double distanceBoxAToDrone = calculateDistanceToDrone(boxA, drone);
+			double distanceBoxBToDrone = calculateDistanceToDrone(boxB, drone);
+			return Double.compare(distanceBoxAToDrone, distanceBoxBToDrone);
+		});
+		
+		return closestBox.orElse(null);
+	}
+	
+	/**
+	 * Calculate the distance of the given box to the current position of the drone
+	 * @param b
+	 *        The box for which to calculate the distance to the drone
+	 */
+	public double calculateDistanceToDrone(Box b, Drone drone) {
+		RealVector posBox = b.getWorldPosition();
+		RealVector posDrone = drone.getWorldPosition();
+		
+		return posBox.getDistance(posDrone);
 	}
 
 	@Override
@@ -117,52 +146,52 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		Drone drone = this.getFirstChildOfType(Drone.class);
 		if (drone == null)
 			throw new IllegalStateException("this virtual testbed has no drone");
-		RealVector position = drone.getWorldPosition();
-		RealVector velocity = drone.getVelocity();
-		RealVector acceleration = drone.getAcceleration(output.getThrust(),
-				output.getLeftWingInclination(), output.getRightWingInclination(), output.getHorStabInclination(), output.getVerStabInclination());
+//		RealVector position = drone.getWorldPosition();
+//		RealVector velocity = drone.getVelocity();
+//		RealVector acceleration = drone.getAcceleration(output.getThrust(),
+//				output.getLeftWingInclination(), output.getRightWingInclination(), output.getHorStabInclination(), output.getVerStabInclination());
+//		
+//		float[] angularAccelerations = drone.getAngularAccelerations(output.getLeftWingInclination(),
+//				output.getRightWingInclination(), output.getHorStabInclination(), output.getVerStabInclination());
+//		float heading = drone.getHeading();
+//		float headingAngularVelocity = drone.getHeadingAngularVelocity();
+//		float headingAngularAcceleration = angularAccelerations[0];
+//		float pitch = drone.getPitch();
+//		float pitchAngularVelocity = drone.getPitchAngularVelocity();
+//		float pitchAngularAcceleration = angularAccelerations[1];
+//		float roll = drone.getRoll();
+//		float rollAngularVelocity = drone.getRollAngularVelocity();
+//		float rollAngularAcceleration = angularAccelerations[2];
 		
-		float[] angularAccelerations = drone.getAngularAccelerations(output.getLeftWingInclination(),
-				output.getRightWingInclination(), output.getHorStabInclination(), output.getVerStabInclination());
-		float heading = drone.getHeading();
-		float headingAngularVelocity = drone.getHeadingAngularVelocity();
-		float headingAngularAcceleration = angularAccelerations[0];
-		float pitch = drone.getPitch();
-		float pitchAngularVelocity = drone.getPitchAngularVelocity();
-		float pitchAngularAcceleration = angularAccelerations[1];
-		float roll = drone.getRoll();
-		float rollAngularVelocity = drone.getRollAngularVelocity();
-		float rollAngularAcceleration = angularAccelerations[2];
+		FirstOrderIntegrator dp853 = new DormandPrince853Integrator(1.0e-8, 100.0, 1.0e-5, 1.0e-5);
+		FirstOrderDifferentialEquations ode = new SystemDifferentialEquations(drone, output);
+		double[] y = new double[] { drone.getWorldPosition().getEntry(0), drone.getVelocity().getEntry(0), 
+				drone.getWorldPosition().getEntry(1), drone.getVelocity().getEntry(1),
+				drone.getWorldPosition().getEntry(2), drone.getVelocity().getEntry(2),
+				drone.getHeading(), drone.getHeadingAngularVelocity(),
+				drone.getPitch(), drone.getPitchAngularVelocity(),
+				drone.getRoll(), drone.getRollAngularVelocity() };
+		dp853.integrate(ode, 0.0, y, secondsSinceLastUpdate, y);
 		
-//		FirstOrderIntegrator dp853 = new DormandPrince853Integrator(1.0e-8, 100.0, 1.0e-10, 1.0e-10);
-//		FirstOrderDifferentialEquations ode = new SystemDifferentialEquations(drone, output);
-//		double[] y = new double[] { drone.getWorldPosition().getEntry(0), drone.getVelocity().getEntry(0), 
-//				drone.getWorldPosition().getEntry(1), drone.getVelocity().getEntry(1),
-//				drone.getWorldPosition().getEntry(2), drone.getVelocity().getEntry(2),
-//				drone.getHeading(), drone.getHeadingAngularVelocity(),
-//				drone.getPitch(), drone.getPitchAngularVelocity(),
-//				drone.getRoll(), drone.getRollAngularVelocity() };
-//		dp853.integrate(ode, secondsSinceStart - secondsSinceLastUpdate, y, secondsSinceStart, y);
+		drone.setRelativePosition(new ArrayRealVector(new double[] {y[0], y[2], y[4]}, false));
+		drone.setVelocity(new ArrayRealVector(new double[] {y[1], y[3], y[5]}, false));
+//		drone.setRelativePosition(position.add(velocity.mapMultiply(secondsSinceLastUpdate)).add(acceleration.mapMultiply(Math.pow(secondsSinceLastUpdate, 2)/2)));
+//		drone.setVelocity(velocity.add(acceleration.mapMultiply(secondsSinceLastUpdate)));
 		
-//		drone.setRelativePosition(new ArrayRealVector(new double[] {y[0], y[2], y[4]}, false));
-//		drone.setVelocity(new ArrayRealVector(new double[] {y[1], y[3], y[5]}, false));
-		drone.setRelativePosition(position.add(velocity.mapMultiply(secondsSinceLastUpdate)).add(acceleration.mapMultiply(Math.pow(secondsSinceLastUpdate, 2)/2)));
-		drone.setVelocity(velocity.add(acceleration.mapMultiply(secondsSinceLastUpdate)));
-		
-		float newHeading = (float) ((heading + headingAngularVelocity*secondsSinceLastUpdate + headingAngularAcceleration*(Math.pow(secondsSinceLastUpdate, 2)/2)) % (2*Math.PI));
-//		float newHeading = (float) y[6];
+//		float newHeading = (float) ((heading + headingAngularVelocity*secondsSinceLastUpdate + headingAngularAcceleration*(Math.pow(secondsSinceLastUpdate, 2)/2)) % (2*Math.PI));
+		float newHeading = (float) y[6];
 		if (newHeading < 0)
 			newHeading += (2*Math.PI);
 		if (newHeading >= 2*Math.PI)
 			newHeading = 0;
-		float newPitch = (float) ((pitch + pitchAngularVelocity*secondsSinceLastUpdate + pitchAngularAcceleration*(Math.pow(secondsSinceLastUpdate, 2)/2)) % (2*Math.PI));
-//		float newPitch = (float) y[8];
+//		float newPitch = (float) ((pitch + pitchAngularVelocity*secondsSinceLastUpdate + pitchAngularAcceleration*(Math.pow(secondsSinceLastUpdate, 2)/2)) % (2*Math.PI));
+		float newPitch = (float) y[8];
 		if (newPitch < 0)
 			newPitch += (2*Math.PI);
 		if (newPitch >= 2*Math.PI)
 			newPitch = 0;
-		float newRoll = (float) ((roll + rollAngularVelocity*secondsSinceLastUpdate + rollAngularAcceleration*(Math.pow(secondsSinceLastUpdate, 2)/2)) % (2*Math.PI));
-//		float newRoll = (float) y[10];
+//		float newRoll = (float) ((roll + rollAngularVelocity*secondsSinceLastUpdate + rollAngularAcceleration*(Math.pow(secondsSinceLastUpdate, 2)/2)) % (2*Math.PI));
+		float newRoll = (float) y[10];
 		if (newRoll < 0)
 			newRoll += (2*Math.PI);
 		if (newRoll >= 2*Math.PI)
@@ -171,12 +200,12 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		drone.setPitch(newPitch);
 		drone.setRoll(newRoll);
 		
-		drone.setHeadingAngularVelocity(headingAngularVelocity + headingAngularAcceleration*secondsSinceLastUpdate);
-		drone.setPitchAngularVelocity(pitchAngularVelocity + pitchAngularAcceleration*secondsSinceLastUpdate);
-		drone.setRollAngularVelocity(rollAngularVelocity + rollAngularAcceleration*secondsSinceLastUpdate);
-//		drone.setHeadingAngularVelocity((float) y[7]);
-//		drone.setPitchAngularVelocity((float) y[9]);
-//		drone.setRollAngularVelocity((float) y[11]);
+//		drone.setHeadingAngularVelocity(headingAngularVelocity + headingAngularAcceleration*secondsSinceLastUpdate);
+//		drone.setPitchAngularVelocity(pitchAngularVelocity + pitchAngularAcceleration*secondsSinceLastUpdate);
+//		drone.setRollAngularVelocity(rollAngularVelocity + rollAngularAcceleration*secondsSinceLastUpdate);
+		drone.setHeadingAngularVelocity((float) y[7]);
+		drone.setPitchAngularVelocity((float) y[9]);
+		drone.setRollAngularVelocity((float) y[11]);
 	}
 
 	///////////////////////

@@ -27,7 +27,7 @@ public class ImageRecognizer {
 	 * @return	An instance of the Image class containing the given values
 	 * @throws Exception	One of the parameters is invalid or the image can't be read
 	 */
-	public Image createImage(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView, RealVector dronePos, float heading, float pitch, float roll) throws Exception{
+	public Image createImage(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView, RealVector dronePos, float heading, float pitch, float roll) {
 		Image im = new Image(image, nbRows, nbColumns, horizontalAngleOfView, verticalAngleOfView);
 		this.dronePosition = dronePos;
 		this.heading = heading;
@@ -202,19 +202,12 @@ public class ImageRecognizer {
 		for (ImageRecognizerCube cu : getImageRecognizerCubes()){
 			if (floatFuzzyEquals(hue, cu.getHue(), 0.01f) && floatFuzzyEquals(sat, cu.getSaturation(), 0.01f)){
 				
-				double[] droneCoordinates = getDronePositionCoordinates();
-				RealVector dronePosition = new ArrayRealVector(droneCoordinates);
-				
 				RealVector vector = image.getXYZDistance(hue, sat);
-<<<<<<< HEAD
-				cu.setPosition((float) vector.getEntry(0) + (float) dronePosition.getEntry(0), (float) vector.getEntry(1) + (float) dronePosition.getEntry(1), (float) vector.getEntry(2) + (float) dronePosition.getEntry(2));
-=======
 				float[] droneRotation = getRollPitchHeading();
 				RealVector vectorWorld = transformationToWorldCoordinates(vector, droneRotation[0], droneRotation[1], droneRotation[2]);
 				double[] droneCoordinates = getDronePositionCoordinates();
 				RealVector dronePosition = new ArrayRealVector(droneCoordinates);
 				cu.setPosition((float) vectorWorld.getEntry(0) + (float) dronePosition.getEntry(0), (float) vectorWorld.getEntry(1) + (float) dronePosition.getEntry(1), (float) vectorWorld.getEntry(2) + (float) dronePosition.getEntry(2));
->>>>>>> 5a649e6eea2cad907d6f06004724d5ca4456f72a
 				return cu;
 			}
 		}

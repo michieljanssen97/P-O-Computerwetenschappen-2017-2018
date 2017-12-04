@@ -1,5 +1,7 @@
 package be.kuleuven.cs.robijn.gui;
 
+import be.kuleuven.cs.robijn.common.Box;
+import be.kuleuven.cs.robijn.common.BoxFileLoader;
 import be.kuleuven.cs.robijn.common.Resources;
 
 import javafx.beans.binding.Bindings;
@@ -7,39 +9,70 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Alert;
+import javafx.scene.control.*;
 import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
+import javafx.util.Callback;
+import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
 
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealVector;
 import p_en_o_cw_2017.AutopilotConfig;
 import p_en_o_cw_2017.AutopilotConfigReader;
 import p_en_o_cw_2017.AutopilotConfigWriter;
 
+import java.awt.*;
 import java.io.*;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Controller for the simulation settings overlay
  */
 public class SimulationSettingsControl extends AnchorPane {
-    @FXML
-    private Button loadFileButton;
+
+    /// CONFIG
 
     @FXML
-    private Button saveFileButton;
+    private Button loadConfigFileButton;
 
     @FXML
-    private Button loadDefaultsButton;
+    private Button saveConfigFileButton;
 
     @FXML
-    private Button okButton;
+    private Button loadConfigDefaultsButton;
 
     @FXML
     private TableView propertiesTable;
+
+    /// BOXES
+
+    @FXML
+    private Button loadBoxFileButton;
+
+    @FXML
+    private Button saveBoxFileButton;
+
+    @FXML
+    private Button loadBoxDefaultsButton;
+
+    @FXML
+    private Button addBoxButton;
+
+    @FXML
+    private Button removeBoxButton;
+
+    @FXML
+    private TableView boxTable;
+
+    /// MISC
+
+    @FXML
+    private Button okButton;
 
     private ObjectProperty<ObservableAutoPilotConfig> configProperty = new SimpleObjectProperty<>(this, "config");
 
@@ -58,11 +91,31 @@ public class SimulationSettingsControl extends AnchorPane {
 
     @FXML
     private void initialize(){
+        setupConfigControls();
+        setupBoxControls();
+
+        //User can only click OK if an AutoPilotConfig is loaded.
+        okButton.disableProperty().bind(configProperty.isNull());
+        //Fire a SimulationSettingsConfirmEvent when the user clicks the OK button
+        //This event is observed in the MainController, where the overlay is hidden and the simulation is started.
+        okButton.setOnAction(e -> {
+            SimulationSettingsConfirmEvent confirmEvent = new SimulationSettingsConfirmEvent();
+            confirmEvent.setSettings(configProperty.get());
+            confirmEvent.setBoxes(getBoxes());
+            fireEvent(confirmEvent);
+        });
+
+        //Setup the simulation properties table
+        setupConfigTable();
+        setupBoxTable();
+    }
+
+    private void setupConfigControls(){
         //Load the initial, default values for the AutoPilotConfig
         loadDefaultConfig();
 
         //When the "load file" button is clicked, show a dialog and load the config file.
-        loadFileButton.setOnAction(e -> {
+        loadConfigFileButton.setOnAction(e -> {
             FileChooser chooser = new FileChooser();
             chooser.setTitle("Select the simulation settings file");
             chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("AutopilotConfig file", "bin"));
@@ -84,7 +137,7 @@ public class SimulationSettingsControl extends AnchorPane {
         });
 
         //When the "save file" button is clicked, show a dialog and save the config file.
-        saveFileButton.setOnAction(e -> {
+        saveConfigFileButton.setOnAction(e -> {
             FileChooser chooser = new FileChooser();
             chooser.setTitle("Select where to save the simulation settings file");
             chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("AutopilotConfig file", "bin"));
@@ -106,22 +159,110 @@ public class SimulationSettingsControl extends AnchorPane {
         });
 
         //When the "load default settings" button is clicked, load the default settings.
-        loadDefaultsButton.setOnAction(e -> {
+        loadConfigDefaultsButton.setOnAction(e -> {
             loadDefaultConfig();
         });
+    }
 
-        //User can only click OK if an AutoPilotConfig is loaded.
-        okButton.disableProperty().bind(configProperty.isNull());
-        //Fire a SimulationSettingsConfirmEvent when the user clicks the OK button
-        //This event is observed in the MainController, where the overlay is hidden and the simulation is started.
-        okButton.setOnAction(e -> {
-            SimulationSettingsConfirmEvent confirmEvent = new SimulationSettingsConfirmEvent();
-            confirmEvent.setSettings(configProperty.get());
-            fireEvent(confirmEvent);
+    private void setupBoxControls(){
+        //Load the initial, default box setup
+        loadDefaultBoxSetup();
+
+        //When the "load file" button is clicked, show a dialog and load the config file.
+        loadBoxFileButton.setOnAction(e -> {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Select the box setup file");
+            chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Box setup text file", "txt"));
+            File chosenFile = chooser.showOpenDialog(this.getScene().getWindow());
+            if(chosenFile == null){
+                return;
+            }
+
+            try(DataInputStream in = new DataInputStream(new FileInputStream(chosenFile))){
+                loadBoxSetup(BoxFileLoader.load(in));
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Failed to load file");
+                alert.setHeaderText("Could not load box setup file");
+                alert.setContentText("An error occured while loading the file! ("+ex.getMessage()+")");
+                alert.showAndWait();
+            }
         });
 
-        //Setup the simulation properties table
-        setupTable();
+        //When the "save file" button is clicked, show a dialog and save the config file.
+        saveBoxFileButton.setOnAction(e -> {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Select where to save the box setup file");
+            chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Box setup text file", "txt"));
+            File targetFile = chooser.showSaveDialog(this.getScene().getWindow());
+            if(targetFile == null){
+                return;
+            }
+
+            try(DataOutputStream out = new DataOutputStream(new FileOutputStream(targetFile))){
+                BoxFileLoader.write(getBoxes(), out);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Failed to save file");
+                alert.setHeaderText("Could not save box file");
+                alert.setContentText("An error occured while saving the file! ("+ex.getMessage()+")");
+                alert.showAndWait();
+            }
+        });
+
+        addBoxButton.setOnAction(e -> {
+            boxTable.getItems().add(generateNextBox());
+        });
+
+        removeBoxButton.setOnAction(e -> {
+            boxTable.getItems().remove(boxTable.getSelectionModel().getSelectedIndex());
+        });
+        removeBoxButton.disableProperty().bind(boxTable.getSelectionModel().selectedItemProperty().isNull());
+
+        //When the "load default settings" button is clicked, load the default settings.
+        loadBoxDefaultsButton.setOnAction(e -> {
+            loadDefaultBoxSetup();
+        });
+    }
+
+    private Box generateNextBox(){
+        Box newBox = new Box();
+        newBox.setColor(generateBoxColor(boxTable.getItems().size()));
+        return newBox;
+    }
+
+    private Color generateBoxColor(int i){
+        float hue = getMaximalRadianDistanceSequenceElement(i)/(2f*(float)Math.PI);
+        return Color.getHSBColor(hue, 1.0f, 1.0f);
+    }
+
+    /**
+     * Returns element i from the sequence that is constructed as follows:
+     * Given a circle, return the coordinate of the point that has a maximal distance from the n-1 previous points in this sequence.
+     * If multiple coordinates are possible, the smallest one is chosen.
+     * @param i the index in the sequence
+     * @return the coordinate of the point on the circle, in radians
+     */
+    private float getMaximalRadianDistanceSequenceElement(int i){
+        if(i == 0){
+            return 0;
+        }
+
+        int powOf2 = roundDownToPowerOfTwo(i);
+        int y = i % powOf2;
+        int x = (y * 2) + 1;
+        return (float)((double)x * Math.PI / (double)powOf2);
+    }
+
+    private int roundDownToPowerOfTwo(int value){
+        for(int i = 1 << 30; i>0; i = i >> 1){
+            if((value & i) > 0){
+                return i;
+            }
+        }
+        return 0;
     }
 
     /**
@@ -144,7 +285,7 @@ public class SimulationSettingsControl extends AnchorPane {
         }
     }
 
-    private void setupTable(){
+    private void setupConfigTable(){
         //Make table editable
         propertiesTable.setEditable(true);
 
@@ -168,5 +309,110 @@ public class SimulationSettingsControl extends AnchorPane {
                 configProperty.get().setProperty((String)propertiesTable.getItems().get(e.getTablePosition().getRow()), e.getNewValue())
         );
         propertiesTable.getColumns().add(valueColumn);
+    }
+
+    private void setupBoxTable(){
+        //Make table editable
+        boxTable.setEditable(true);
+
+        //Column 1 is box colors and is readonly
+        TableColumn<Box, Color> colorColumn = new TableColumn<>();
+        colorColumn.setText("Box color");
+        colorColumn.setCellValueFactory(cd -> Bindings.createObjectBinding(() -> cd.getValue().getColor()));
+        colorColumn.setCellFactory(x -> new TextFieldTableCell(new ColorStringConverter()){
+            @Override
+            public void updateItem(Object item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (item == null || empty) {
+                    setStyle("");
+                } else {
+                    // Format date.
+                    Color color = (Color)item;
+                    String colorHex = String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
+                    setStyle("-fx-background-color: "+colorHex);
+                }
+            }
+        });
+        colorColumn.setOnEditCommit((e) -> {
+            Box curBox = (Box)boxTable.getItems().get(e.getTablePosition().getRow());
+            Color color = e.getNewValue();
+            float[] hsv = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
+            hsv[1] = hsv[2] = 1.0f;
+            color = Color.getHSBColor(hsv[0], hsv[1], hsv[2]);
+            curBox.setColor(color);
+            boxTable.refresh();
+        });
+        boxTable.getColumns().add(colorColumn);
+
+        //Column 2 is X-coordinates and is editable
+        TableColumn<Box, Number> xColumn = new TableColumn<>();
+        xColumn.setText("X");
+        xColumn.setEditable(true);
+        xColumn.setCellFactory(TextFieldTableCell.forTableColumn(new NumberStringConverter()));
+        xColumn.setCellValueFactory(cd -> Bindings.createDoubleBinding(() -> cd.getValue().getRelativePosition().getEntry(0)));
+        xColumn.setOnEditCommit((e) -> {
+            Box curBox = (Box)boxTable.getItems().get(e.getTablePosition().getRow());
+            double newX = e.getNewValue().doubleValue();
+            double newY = curBox.getRelativePosition().getEntry(1);
+            double newZ = curBox.getRelativePosition().getEntry(2);
+            curBox.setRelativePosition(new ArrayRealVector(new double[]{newX, newY, newZ}, false));
+        });
+        boxTable.getColumns().add(xColumn);
+
+        //Column 2 is Y-coordinates and is editable
+        TableColumn<Box, Number> yColumn = new TableColumn<>();
+        yColumn.setText("Y");
+        yColumn.setEditable(true);
+        yColumn.setCellFactory(TextFieldTableCell.forTableColumn(new NumberStringConverter()));
+        yColumn.setCellValueFactory(cd -> Bindings.createDoubleBinding(() -> cd.getValue().getRelativePosition().getEntry(1)));
+        yColumn.setOnEditCommit((e) -> {
+            Box curBox = (Box)boxTable.getItems().get(e.getTablePosition().getRow());
+            double newX = curBox.getRelativePosition().getEntry(0);
+            double newY = e.getNewValue().doubleValue();
+            double newZ = curBox.getRelativePosition().getEntry(2);
+            curBox.setRelativePosition(new ArrayRealVector(new double[]{newX, newY, newZ}, false));
+        });
+        boxTable.getColumns().add(yColumn);
+
+        //Column 2 is Z-coordinates and is editable
+        TableColumn<Box, Number> zColumn = new TableColumn<>();
+        zColumn.setText("Z");
+        zColumn.setEditable(true);
+        zColumn.setCellFactory(TextFieldTableCell.forTableColumn(new NumberStringConverter()));
+        zColumn.setCellValueFactory(cd -> Bindings.createDoubleBinding(() -> cd.getValue().getRelativePosition().getEntry(2)));
+        zColumn.setOnEditCommit((e) -> {
+            Box curBox = (Box)boxTable.getItems().get(e.getTablePosition().getRow());
+            double newX = curBox.getRelativePosition().getEntry(0);
+            double newY = curBox.getRelativePosition().getEntry(1);
+            double newZ = e.getNewValue().doubleValue();
+            curBox.setRelativePosition(new ArrayRealVector(new double[]{newX, newY, newZ}, false));
+        });
+        boxTable.getColumns().add(zColumn);
+    }
+
+    private List<Box> getBoxes(){
+        Stream<Box> boxStream = boxTable.getItems().stream().map(o -> (Box)o);
+        return boxStream.collect(Collectors.toList());
+    }
+
+    /**
+     * Loads the default_autopilot_config.bin config file from the application resources
+     */
+    private void loadDefaultBoxSetup(){
+        try(DataInputStream in = new DataInputStream(Resources.getResourceStream("/default_boxes.txt"))){
+            loadBoxSetup(BoxFileLoader.load(in));
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
+        }
+    }
+
+    private void loadBoxSetup(List<Box> boxes){
+        for(int i = 0; i < boxes.size(); i++){
+            boxes.get(i).setColor(generateBoxColor(i));
+        }
+
+        boxTable.getItems().clear();
+        boxTable.getItems().addAll(boxes);
     }
 }
