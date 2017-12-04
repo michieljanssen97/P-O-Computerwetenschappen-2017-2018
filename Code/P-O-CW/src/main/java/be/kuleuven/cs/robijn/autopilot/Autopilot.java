@@ -269,6 +269,10 @@ public class Autopilot extends WorldObject implements AutoPilot {
         } catch (NoBracketingException exc) {
         	targetRoll = drone.getRoll();
 		}
+        if ((targetRoll > (10.0/360.0)*2*Math.PI) && (targetRoll < (180.0/360.0)*2*Math.PI))
+        	targetRoll = (float) ((10.0/360.0)*2*Math.PI);
+        if ((targetRoll > (180.0/360.0)*2*Math.PI) && (targetRoll < (350.0/360.0)*2*Math.PI))
+        	targetRoll = (float) ((350.0/360.0)*2*Math.PI);
         
         float rollDifference = targetRoll - drone.getRoll();
 		if (rollDifference > Math.PI)
