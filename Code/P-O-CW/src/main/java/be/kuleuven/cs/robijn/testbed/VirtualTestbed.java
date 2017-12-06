@@ -3,8 +3,6 @@ package be.kuleuven.cs.robijn.testbed;
 import java.util.ArrayList;
 
 import org.apache.commons.math3.linear.*;
-import org.apache.commons.math3.ode.*;
-import org.apache.commons.math3.ode.nonstiff.*;
 import org.jfree.data.general.SeriesException;
 import org.jfree.data.time.Second;
 import org.jfree.data.time.TimeSeries;
@@ -87,7 +85,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		//only execute if there must be a chart of values in time
 		if(drawChart) {
 			VTUpdatesSinceChartUpdates++;
-			if(VTUpdatesSinceChartUpdates >= 5 ) {//Update the chart every 5 iterations of the VTestbed			
+			if(VTUpdatesSinceChartUpdates >= 5 ) {//Update the chart every x iterations of the VTestbed			
 				updateSeriesForFloat(type, box, drone);
 				//updateSeriesForVector(drone.getHeadingAngularVelocityVector());
 				VTUpdatesSinceChartUpdates = 0;
@@ -174,6 +172,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	
 	public void updateSeriesForFloat(String type, Box box, Drone drone) {
 		float value = (float) getAnglesDifference(type,box, drone); //x-value
+		System.out.println(value);
 
 		try {
 			series.add(current, new Double( value ) );
@@ -221,6 +220,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 //		
 //		RealVector necessaryRotation = getAbs(droneRotation.subtract(distanceAngularVector));
 //      	return necessaryRotation;
+		
 		if (type == "heading") {
 			double angle = Math.atan(distanceVector.getEntry(0) / Math.abs(distanceVector.getEntry(2)));
 			double heading = drone.getHeading();

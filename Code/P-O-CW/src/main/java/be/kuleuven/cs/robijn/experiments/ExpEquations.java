@@ -1,11 +1,9 @@
 package be.kuleuven.cs.robijn.experiments;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.jfree.chart.ChartFactory; 
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.xy.XYDataset; 
 import org.jfree.ui.ApplicationFrame; 
@@ -23,7 +21,7 @@ public class ExpEquations extends ApplicationFrame{
 		final XYDataset dataset = createDataset( );         
 		final JFreeChart chart = createChart( dataset, type );         
 	    final ChartPanel chartPanel = new ChartPanel( chart );         
-	    chartPanel.setPreferredSize( new java.awt.Dimension( 560 , 315 ) );         
+	    chartPanel.setPreferredSize( new java.awt.Dimension( 560 , 315 ) ); //16 by 9 aspect ratio 
 	    chartPanel.setMouseZoomable( true , false );         
 	    setContentPane( chartPanel );
 	}
