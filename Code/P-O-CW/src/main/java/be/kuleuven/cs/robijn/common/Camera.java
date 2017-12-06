@@ -51,4 +51,15 @@ public abstract class Camera extends WorldObject {
      * False by default.
      */
     public abstract boolean isGroundDrawn();
+
+    /**
+     * Returns whether or not any objects specified using RenderDebug are drawn.
+     */
+    public abstract boolean areDebugObjectsDrawn();
+
+    /**
+     * Sets whether or not any objects specified using RenderDebug are drawn.
+     * False by default.
+     */
+    public abstract void setDrawnDebugObjects(boolean draw);
 }
