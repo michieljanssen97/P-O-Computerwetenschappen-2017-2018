@@ -619,14 +619,7 @@ public class Image {
 	}
 	
 	public boolean containsCube(float hue, float sat) {
-		float[] hsv = new float[] {hue, sat};
-		for (int y = 0; y < getnbRows(); y++) {
-			for (int x = 0; x < getnbColumns(); x++) {
-				if (isEqualHSCombination(getPixelHSV(x, y), hsv))
-					return true;
-			}
-		}
-		return false;
+		return (getCubePixels(hue, sat).size() > 0);
 	}
 	
 }
