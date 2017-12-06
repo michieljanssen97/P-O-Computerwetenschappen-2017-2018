@@ -602,6 +602,9 @@ public class Image {
 	 * @param sat	The given saturation
 	 */
 	public float getNecessaryCubeFactor(float hue, float sat) {
+		if (getTotalDistance(hue, sat) > 40) {
+			return 0.00001f;
+		}
 		ArrayList<Pixel> cubePixels = getCubePixels(hue, sat);
 		for (Pixel p : cubePixels){
 			if (p.getX() == 0 || p.getX() == getnbColumns() -1 || p.getY() == 0 || p.getY() == getnbRows() -1)
@@ -611,7 +614,7 @@ public class Image {
 		float[] cubeCenterPixel = getCubeCenterPixel(hue, sat);
 		float[] PixelsToCenter = getPixelsFromCenter(cubeCenterPixel[0], cubeCenterPixel[1]);
 		float distanceToCenter = (float) Math.sqrt(Math.pow(PixelsToCenter[0], 2) + Math.pow(PixelsToCenter[1], 2));
-		float factorValue = 5 * (1 - distanceToCenter / maxDistanceToCenter) * (1 - 0.01f * getTotalDistance(hue, sat));
+		float factorValue = 5 * (1 - distanceToCenter / maxDistanceToCenter) * (float) Math.pow((1 - 0.02249f * getTotalDistance(hue, sat)), 4);
 		return factorValue;
 	}
 	

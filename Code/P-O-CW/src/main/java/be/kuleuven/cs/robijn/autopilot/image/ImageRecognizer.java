@@ -97,7 +97,7 @@ public class ImageRecognizer {
 	 * Return a list with the stored coordinates of the drone accompanying this image recognizer.
 	 * @return
 	 */
-	private double[] getDronePositionCoordinates(){
+	public double[] getDronePositionCoordinates(){
 		RealVector pos = this.dronePosition;
 		return new double[] {pos.getEntry(0), pos.getEntry(1), pos.getEntry(2)};
 	}
@@ -194,12 +194,12 @@ public class ImageRecognizer {
 		for (ImageRecognizerCube cu : getImageRecognizerCubes()){
 			if (floatFuzzyEquals(hue, cu.getHue(), 0.01f) && floatFuzzyEquals(sat, cu.getSaturation(), 0.01f)){
 				
-				RealVector vector = image.getXYZDistance(hue, sat);
-				float[] droneRotation = getRollPitchHeading();
-				RealVector vectorWorld = transformationToWorldCoordinates(vector, droneRotation[0], droneRotation[1], droneRotation[2]);
-				double[] droneCoordinates = getDronePositionCoordinates();
-				RealVector dronePosition = new ArrayRealVector(droneCoordinates);
-				cu.setPosition((float) vectorWorld.getEntry(0) + (float) dronePosition.getEntry(0), (float) vectorWorld.getEntry(1) + (float) dronePosition.getEntry(1), (float) vectorWorld.getEntry(2) + (float) dronePosition.getEntry(2));
+//				RealVector vector = image.getXYZDistance(hue, sat);
+//				float[] droneRotation = getRollPitchHeading();
+//				RealVector vectorWorld = transformationToWorldCoordinates(vector, droneRotation[0], droneRotation[1], droneRotation[2]);
+//				double[] droneCoordinates = getDronePositionCoordinates();
+//				RealVector dronePosition = new ArrayRealVector(droneCoordinates);
+//				cu.setPosition((float) vectorWorld.getEntry(0) + (float) dronePosition.getEntry(0), (float) vectorWorld.getEntry(1) + (float) dronePosition.getEntry(1), (float) vectorWorld.getEntry(2) + (float) dronePosition.getEntry(2));
 				return cu;
 			}
 		}
@@ -241,20 +241,30 @@ public class ImageRecognizer {
 				float value = image.getNecessaryCubeFactor(hue, sat);
 				ImageRecognizerCube cube1 = new ImageRecognizerCube((float) cubePosition.getEntry(0), (float) cubePosition.getEntry(1), (float) cubePosition.getEntry(2), hue, sat);
 				cube1.setFactor(value);
-				ImageRecognizerCubeList.add(cube1);
+				this.ImageRecognizerCubeList.add(cube1);
 			} else {
+				if (image.getTotalDistance(hue, sat) > 40 && getWorldDistanceToCube(cube) > 40) {
+					cube.setPosition((float) cubePosition.getEntry(0), (float) cubePosition.getEntry(1), (float) cubePosition.getEntry(2));
+				}
+				if (image.getTotalDistance(hue, sat) > 40 && getWorldDistanceToCube(cube) < 40) {
+					cube.setPosition((float) cubePosition.getEntry(0), (float) cubePosition.getEntry(1), (float) cubePosition.getEntry(2));
+				}
+				if (image.getTotalDistance(hue, sat) < 40 && getWorldDistanceToCube(cube) > 40) {
+					cube.setPosition((float) cubePosition.getEntry(0), (float) cubePosition.getEntry(1), (float) cubePosition.getEntry(2));
+				}
 				if (image.getTotalDistance(hue, sat) <= 4)
 					cube.destroy();
-				float previous_factor = cube.getFactor();
-				float new_factor = image.getNecessaryCubeFactor(hue, sat);
-				float total_factor = previous_factor + new_factor;
-				float newX = (previous_factor * cube.getX() + new_factor * (float) cubePosition.getEntry(0)) / total_factor;
-				float newY = (previous_factor * cube.getY() + new_factor * (float) cubePosition.getEntry(1)) / total_factor;
-				float newZ = (previous_factor * cube.getZ() + new_factor * (float) cubePosition.getEntry(2)) / total_factor;
-				cube.setPosition(newX, newY, newZ);
-				cube.setFactor(total_factor);
-			}
-			
+				else {
+					float previous_factor = cube.getFactor();
+					float new_factor = image.getNecessaryCubeFactor(hue, sat);
+					float total_factor = previous_factor + new_factor;
+					float newX = (previous_factor * cube.getX() + new_factor * (float) cubePosition.getEntry(0)) / total_factor;
+					float newY = (previous_factor * cube.getY() + new_factor * (float) cubePosition.getEntry(1)) / total_factor;
+					float newZ = (previous_factor * cube.getZ() + new_factor * (float) cubePosition.getEntry(2)) / total_factor;
+					cube.setPosition(newX, newY, newZ);
+					cube.setFactor(total_factor);
+				}
+			}	
 		}
 	}
 	
