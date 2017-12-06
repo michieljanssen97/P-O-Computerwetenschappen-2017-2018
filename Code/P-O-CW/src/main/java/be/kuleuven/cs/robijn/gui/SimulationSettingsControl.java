@@ -18,11 +18,10 @@ import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
 
+import interfaces.AutopilotConfig;
+import interfaces.AutopilotConfigReader;
+import interfaces.AutopilotConfigWriter;
 import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.RealVector;
-import p_en_o_cw_2017.AutopilotConfig;
-import p_en_o_cw_2017.AutopilotConfigReader;
-import p_en_o_cw_2017.AutopilotConfigWriter;
 
 import java.awt.*;
 import java.io.*;

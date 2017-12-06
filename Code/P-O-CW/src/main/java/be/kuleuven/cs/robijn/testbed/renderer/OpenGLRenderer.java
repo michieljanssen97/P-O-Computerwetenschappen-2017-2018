@@ -13,6 +13,7 @@ import org.lwjgl.opengl.GL;
 
 import java.awt.*;
 import java.lang.Math;
+import java.util.ArrayList;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
@@ -22,6 +23,7 @@ import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
 import static org.lwjgl.opengl.GL14.glBlendEquation;
+import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
@@ -70,6 +72,10 @@ public class OpenGLRenderer implements Renderer {
         OpenGLRenderer renderer = new OpenGLRenderer(windowHandle);
         renderer.initializeModels();
         renderer.initializeIcons();
+        renderer.initializeLineModel();
+
+        RenderDebug.setRenderer(renderer);
+
         return renderer;
     }
 
@@ -79,8 +85,12 @@ public class OpenGLRenderer implements Renderer {
     private Model boxModel = null;
     private Model groundModel = null;
 
+    private Model lineModel = null;
+
     private Billboard droneIcon;
     private Billboard boxIcon;
+
+    private ArrayList<Line> linesToDraw = new ArrayList<>();
 
     private OpenGLRenderer(long windowHandle){
         this.windowHandle = windowHandle;
@@ -133,6 +143,28 @@ public class OpenGLRenderer implements Renderer {
         droneIcon = Billboard.create(droneIconTexture);
     }
 
+    private void initializeLineModel(){
+        float[] vertices = new float[]{
+                0, 0, 0,
+                0, 0, -1,
+        };
+
+        int[] indices = new int[]{
+                0, 1, 0
+        };
+
+        Mesh lineMesh = Mesh.loadMesh(vertices, null, null, indices);
+
+        ShaderProgram lineProgram;
+        try(Shader vertexShader = Shader.compileVertexShader(Resources.loadTextResource("/shaders/line/vertex.glsl"))){
+            try(Shader fragmentShader = Shader.compileFragmentShader(Resources.loadTextResource("/shaders/line/fragment.glsl"))){
+                lineProgram = ShaderProgram.link(vertexShader, fragmentShader);
+            }
+        }
+
+        lineModel = new Model(lineMesh, null, lineProgram);
+    }
+
     @Override
     public void render(WorldObject worldRoot, FrameBuffer buffer, Camera camera){
         if(!(buffer instanceof OpenGLFrameBuffer)){
@@ -174,6 +206,13 @@ public class OpenGLRenderer implements Renderer {
         //Render ground if needed
         if(camera.isGroundDrawn()){
             renderModel(groundModel, viewProjectionMatrix, MatrixUtils.createRealIdentityMatrix(4));
+        }
+
+        //Render debug objects if needed
+        if(camera.areDebugObjectsDrawn()){
+            for (Line line : linesToDraw){
+                renderLine(line, viewProjectionMatrix);
+            }
         }
 
         //Render objects
@@ -263,6 +302,27 @@ public class OpenGLRenderer implements Renderer {
         glDrawElements(GL_TRIANGLES, model.getMesh().getIndexCount(), GL_UNSIGNED_INT, 0);
     }
 
+    private void renderLine(Line line, Matrix4f viewProjectionMatrix){
+        //Bind object model mesh, texture, shader, ...
+        glBindVertexArray(lineModel.getMesh().getVertexArrayObjectId());
+
+        lineModel.getShader().setUniformMatrix("viewProjectionTransformation", false, viewProjectionMatrix);
+
+        lineModel.getShader().setUniformFloat("pointA",
+                (float)line.getPointA().getX(), (float)line.getPointA().getY(), (float)line.getPointA().getZ());
+        lineModel.getShader().setUniformFloat("pointB",
+                (float)line.getPointB().getX(), (float)line.getPointB().getY(), (float)line.getPointB().getZ());
+
+        lineModel.getShader().setUniformFloat("color",
+                (float)line.getColor().getRed()/255f,
+                (float)line.getColor().getGreen()/255f,
+                (float)line.getColor().getBlue()/255f);
+        glUseProgram(lineModel.getShader().getProgramId());
+
+        //Draw object
+        glDrawElements(GL_LINES, lineModel.getMesh().getIndexCount(), GL_UNSIGNED_INT, 0);
+    }
+
     /**
      * Returns a linear transformation matrix for transforming vertices from world space to camera space.
      * @return a non-null matrix
@@ -320,6 +380,14 @@ public class OpenGLRenderer implements Renderer {
         //Flipping the y-axis of the vertices also flips the winding order, this is fixed above in render()
         projectionMatrix.scale(1, -1 ,1);
         return projectionMatrix;
+    }
+
+    public void addLineToDraw(Line line){
+        this.linesToDraw.add(line);
+    }
+
+    public void clearDebugObjects(){
+        this.linesToDraw.clear();
     }
 
     @Override
