@@ -13,7 +13,7 @@ import org.jfree.data.xy.XYDataset;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.experiments.ExpEquations;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
-import p_en_o_cw_2017.*;
+import interfaces.*;
 
 import java.util.List;
 import java.util.Optional;

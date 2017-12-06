@@ -3,7 +3,7 @@ package be.kuleuven.cs.robijn.gui;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
-import p_en_o_cw_2017.AutopilotConfig;
+import interfaces.AutopilotConfig;
 
 /**
  * An implementation of AutopilotConfig that is driven by an ObservableMap.
