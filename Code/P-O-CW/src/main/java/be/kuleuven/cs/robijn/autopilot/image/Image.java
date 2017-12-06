@@ -614,5 +614,17 @@ public class Image {
 		float factorValue = 5 * (1 - distanceToCenter / maxDistanceToCenter) * (1 - 0.01f * getTotalDistance(hue, sat));
 		return factorValue;
 	}
+	
+	public boolean containsCube(float hue, float sat) {
+		float[] hsv = new float[] {hue, sat};
+		for (int y = 0; y < getnbRows(); y++) {
+			for (int x = 0; x < getnbColumns(); x++) {
+				if (isEqualHSCombination(getPixelHSV(x, y), hsv))
+					return true;
+			}
+		}
+		return false;
+	}
+	
 }
 
