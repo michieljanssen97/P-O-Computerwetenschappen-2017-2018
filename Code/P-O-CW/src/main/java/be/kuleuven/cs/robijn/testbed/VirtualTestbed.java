@@ -194,7 +194,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	 * @return
 	 */
 	public double getAnglesDifference(String type, Box box, Drone drone) throws IllegalArgumentException {
-		double precision = 0.01;
+		double precision = 0; //0.1 degree of difference is the minimum to draw
 		RealVector droneCo = drone.getWorldPosition();
 		RealVector boxCo = box.getWorldPosition();
 		
@@ -222,7 +222,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 //      	return necessaryRotation;
 		
 		if (type == "heading") {
-			double angle = Math.atan(distanceVector.getEntry(0) / Math.abs(distanceVector.getEntry(2)));
+			double angle = Math.atan(distanceVector.getEntry(0) / distanceVector.getEntry(2));
 			double heading = drone.getHeading();
 			if (heading > Math.PI) {
 				heading -= 2*Math.PI;
@@ -235,7 +235,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		}
 		
 		else if (type == "pitch") {
-			double angle = Math.atan(distanceVector.getEntry(1) /Math.abs( distanceVector.getEntry(2))); 
+			double angle = Math.atan(distanceVector.getEntry(1) / distanceVector.getEntry(2)); 
 			double pitch = drone.getPitch();
 			if (pitch > Math.PI) {
 				pitch -= 2*Math.PI;
