@@ -18,31 +18,31 @@ public class ExpEquations extends ApplicationFrame{
 
 	private static final long serialVersionUID = 1L; //TODO waarom????
 
-	public ExpEquations(final String title) throws IOException {
+	public ExpEquations(final String title, String type) throws IOException {
 		super(title);
 		final XYDataset dataset = createDataset( );         
-		final JFreeChart chart = createChart( dataset );         
+		final JFreeChart chart = createChart( dataset, type );         
 	    final ChartPanel chartPanel = new ChartPanel( chart );         
 	    chartPanel.setPreferredSize( new java.awt.Dimension( 560 , 315 ) );         
 	    chartPanel.setMouseZoomable( true , false );         
 	    setContentPane( chartPanel );
 	}
 
-	private JFreeChart createChart(XYDataset dataset) throws IOException {
+	private JFreeChart createChart(XYDataset dataset,String type) throws IOException {
 		JFreeChart timeChart =  ChartFactory.createTimeSeriesChart(             
-			"Convergence of Equitions from Autopilot", 
+			"Convergence of " + type + " from Autopilot", 
 	    	"Seconds",              
-	    	"Value",              
+	    	"Value of " + type,              
 	    	dataset,             
 	    	false,              
 	    	false,              
 	    	false);
 		
 		//save the image
-		int width = 560;   // Width of the image
-	    int height = 315;  // Height of the image
-	    File timeChartImage = new File( "TimeChart.jpeg" ); 
-	    ChartUtilities.saveChartAsJPEG( timeChartImage, timeChart, width, height );
+//		int width = 560;   // Width of the image
+//	    int height = 315;  // Height of the image
+//	    File timeChartImage = new File( "TimeChart.jpeg" ); 
+//	    ChartUtilities.saveChartAsJPEG( timeChartImage, timeChart, width, height );
 	    return timeChart;
 	}
 
@@ -50,11 +50,11 @@ public class ExpEquations extends ApplicationFrame{
 			return VirtualTestbed.createDatasetForChart();
 	   }
 	
-   public static void main() {
-	    final String title = "Convergence of Equitions from Autopilot";         
+   public static void drawMain(String type) {
+	    final String title = "Convergence of Equations from Autopilot";         
 	    ExpEquations demo;
 		try {
-			demo = new ExpEquations( title );
+			demo = new ExpEquations( title , type);
 		    demo.pack( );         
 		    RefineryUtilities.positionFrameRandomly( demo );         
 		    demo.setVisible( true );
