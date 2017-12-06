@@ -271,8 +271,8 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 
 	private PerspectiveCamera createDroneCamera(){
 		PerspectiveCamera camera = getRenderer().createPerspectiveCamera();
-		camera.setHorizontalFOV((float)Math.toRadians(config.getHorizontalAngleOfView()));
-		camera.setVerticalFOV((float)Math.toRadians(config.getVerticalAngleOfView()));
+		camera.setHorizontalFOV(config.getHorizontalAngleOfView());
+		camera.setVerticalFOV(config.getVerticalAngleOfView());
 		camera.setDronesHidden(true);
 		Drone drone = this.getFirstChildOfType(Drone.class);
 		drone.addChild(camera);
