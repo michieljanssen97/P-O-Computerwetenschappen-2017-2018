@@ -138,19 +138,11 @@ public class ImageRecognizer {
 		float[] curPos = {(float)dronePosition.getEntry(0), (float)dronePosition.getEntry(1), (float)dronePosition.getEntry(2)};
 		ImageRecognizerCube closest = null;
 		float minimum = 1000f;
-		boolean first = true;
 		for (ImageRecognizerCube c : getNotDestroyedImageRecognizerCubes()){
-			if (first){
-				float distance = (float) Math.sqrt(Math.pow(curPos[0] - c.getX(), 2) + Math.pow(curPos[1] - c.getY(), 2) + Math.pow(curPos[2] - c.getZ(), 2));
+			float distance = (float) Math.sqrt(Math.pow(curPos[0] - c.getX(), 2) + Math.pow(curPos[1] - c.getY(), 2) + Math.pow(curPos[2] - c.getZ(), 2));
+			if (distance < minimum){
 				minimum = distance;
 				closest = c;
-				first = false;
-			} else {
-				float distance = (float) Math.sqrt(Math.pow(curPos[0] - c.getX(), 2) + Math.pow(curPos[1] - c.getY(), 2) + Math.pow(curPos[2] - c.getZ(), 2));
-				if (distance < minimum){
-					minimum = distance;
-					closest = c;
-				}
 			}
 		}
 		return closest;

@@ -35,7 +35,7 @@ public class ImageRecognizerCube {
 	/**
 	 * A variable containing the factor of this ImageRecognizerCube.
 	 */
-	private float factor;
+	private float factor = 0.01f;
 	
 	/**
 	 * A variable indicating whether or not this ImageRecognizerCube is destroyed.
