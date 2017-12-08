@@ -1,8 +1,6 @@
 package be.kuleuven.cs.robijn.gui;
 
-import be.kuleuven.cs.robijn.common.Box;
-import be.kuleuven.cs.robijn.common.BoxFileLoader;
-import be.kuleuven.cs.robijn.common.Resources;
+import be.kuleuven.cs.robijn.common.*;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
@@ -14,6 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
@@ -65,6 +64,9 @@ public class SimulationSettingsControl extends AnchorPane {
 
     @FXML
     private Button removeBoxButton;
+
+    @FXML
+    private Button randomBoxesButton;
 
     @FXML
     private TableView boxTable;
@@ -225,44 +227,19 @@ public class SimulationSettingsControl extends AnchorPane {
         loadBoxDefaultsButton.setOnAction(e -> {
             loadDefaultBoxSetup();
         });
+
+        randomBoxesButton.setOnAction(e -> {
+            WorldGenerator.WorldGeneratorSettings settings = WorldGeneratorSettingsController.showDialog((Stage)this.addBoxButton.getScene().getWindow());
+            if(settings != null){
+                boxTable.getItems().addAll(WorldGenerator.generateBoxes(settings));
+            }
+        });
     }
 
     private Box generateNextBox(){
         Box newBox = new Box();
-        newBox.setColor(generateBoxColor(boxTable.getItems().size()));
+        newBox.setColor(ColorGenerator.sequentialEvenDistribution(boxTable.getItems().size()));
         return newBox;
-    }
-
-    private Color generateBoxColor(int i){
-        float hue = getMaximalRadianDistanceSequenceElement(i)/(2f*(float)Math.PI);
-        return Color.getHSBColor(hue, 1.0f, 1.0f);
-    }
-
-    /**
-     * Returns element i from the sequence that is constructed as follows:
-     * Given a circle, return the coordinate of the point that has a maximal distance from the n-1 previous points in this sequence.
-     * If multiple coordinates are possible, the smallest one is chosen.
-     * @param i the index in the sequence
-     * @return the coordinate of the point on the circle, in radians
-     */
-    private float getMaximalRadianDistanceSequenceElement(int i){
-        if(i == 0){
-            return 0;
-        }
-
-        int powOf2 = roundDownToPowerOfTwo(i);
-        int y = i % powOf2;
-        int x = (y * 2) + 1;
-        return (float)((double)x * Math.PI / (double)powOf2);
-    }
-
-    private int roundDownToPowerOfTwo(int value){
-        for(int i = 1 << 30; i>0; i = i >> 1){
-            if((value & i) > 0){
-                return i;
-            }
-        }
-        return 0;
     }
 
     /**
@@ -409,7 +386,7 @@ public class SimulationSettingsControl extends AnchorPane {
 
     private void loadBoxSetup(List<Box> boxes){
         for(int i = 0; i < boxes.size(); i++){
-            boxes.get(i).setColor(generateBoxColor(i));
+            boxes.get(i).setColor(ColorGenerator.sequentialEvenDistribution(i));
         }
 
         boxTable.getItems().clear();

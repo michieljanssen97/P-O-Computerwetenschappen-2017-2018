@@ -19,8 +19,8 @@ public class GUI extends Application {
         //Load layout
         Parent root = null;
         try {
-            FXMLLoader loader = new FXMLLoader();
-            root = loader.load(Resources.getResourceURL("/layouts/main_view.fxml"));
+            FXMLLoader loader = new FXMLLoader(Resources.getResourceURL("/layouts/main_view.fxml"));
+            root = loader.load();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
