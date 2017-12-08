@@ -24,7 +24,7 @@ public class SimulationDriver {
     private AutopilotInputs latestAutopilotInputs;
     private AutopilotOutputs latestAutopilotOutputs;
 
-    private Stopwatch stopwatch = new RealTimeStopwatch();
+    private Stopwatch stopwatch;
 
     private boolean simulationStarted = false;
     private final AutopilotConfig config;
@@ -33,7 +33,12 @@ public class SimulationDriver {
     private TreeSet<UpdateEventHandler> updateEventHandlers = new TreeSet<>();
 
     public SimulationDriver(List<Box> boxes, AutopilotConfig config){
+        this(boxes, config, new RealTimeStopwatch());
+    }
+
+    public SimulationDriver(List<Box> boxes, AutopilotConfig config, Stopwatch stopwatch){
         this.config = config;
+        this.stopwatch = stopwatch;
     	RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -10.0}, false);
         testBed = new VirtualTestbed(boxes, config, initialVelocity);
         autoPilot = new Autopilot();
