@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/P-O-CW.iml" filepath="$PROJECT_DIR$/P-O-CW.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/P-O-CW.iml" filepath="$PROJECT_DIR$/.idea/P-O-CW.iml" />
+      <module fileurl="file://C:\Users\royde\Documents\Unief\3e Bachelor Informatica\P&amp;O Computerwetenschappen\CloneRepo\Code\P-O-CW\P-O-CW.iml" filepath="C:\Users\royde\Documents\Unief\3e Bachelor Informatica\P&amp;O Computerwetenschappen\CloneRepo\Code\P-O-CW\P-O-CW.iml" />
     </modules>
   </component>
 </project>
