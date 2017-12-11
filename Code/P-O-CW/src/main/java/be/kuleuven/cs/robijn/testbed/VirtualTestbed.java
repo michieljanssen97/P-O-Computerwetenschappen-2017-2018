@@ -27,7 +27,6 @@ import java.util.Optional;
  */
 public class VirtualTestbed extends WorldObject implements TestBed {
 	private final AutopilotConfig config;
-	public boolean randomCubesGenerated = false;
 
 	private float elapsedTime = 0; //Time between simulation start and latest update, in seconds
 
