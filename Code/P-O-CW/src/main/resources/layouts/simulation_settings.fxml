@@ -81,6 +81,11 @@
                                        <Insets left="10.0" />
                                    </HBox.margin>
                                </Button>
+                               <Button fx:id="randomBoxesButton" mnemonicParsing="false" text="Generate random boxes">
+                                   <HBox.margin>
+                                       <Insets left="10.0" />
+                                   </HBox.margin>
+                               </Button>
                            </children>
                         </HBox>
                         <TableView fx:id="boxTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0" />
