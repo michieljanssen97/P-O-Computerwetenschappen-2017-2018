@@ -109,16 +109,6 @@ public class MainController {
             topCamera.setFarPlane(100000);
             topCamera.setDrawnDebugObjects(true);
             world.addChild(topCamera);
-
-            PerspectiveCamera boxCamera = getSimulation().getTestBed().getRenderer().createPerspectiveCamera();
-            Box box = world.getFirstChildOfType(Box.class);
-            boxCamera.setHorizontalFOV((float)Math.toRadians(120));
-            boxCamera.setVerticalFOV((float)Math.toRadians(120));
-            boxCamera.setName(CameraViewControl.BOX_CAMERA_ID);
-            boxCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 0, 0}, false));
-            boxCamera.setRelativeRotation(new Rotation(new Vector3D(0, 1, 0), Math.PI));
-            boxCamera.setDrawnDebugObjects(true);
-            box.addChild(boxCamera);
         });
     }
 
