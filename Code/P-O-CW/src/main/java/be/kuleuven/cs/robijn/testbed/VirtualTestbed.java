@@ -1,17 +1,11 @@
 package be.kuleuven.cs.robijn.testbed;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
 import org.apache.commons.math3.ode.FirstOrderIntegrator;
 import org.apache.commons.math3.ode.nonstiff.*;
-import org.jfree.data.general.SeriesException;
-import org.jfree.data.time.Second;
-import org.jfree.data.time.TimeSeries;
-import org.jfree.data.time.TimeSeriesCollection;
-import org.jfree.data.xy.XYDataset;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.experiments.ExpEquations;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
@@ -35,10 +29,9 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	private PerspectiveCamera droneCamera;
 	private byte[] latestCameraImage;
 	
-	private int VTUpdatesSinceChartUpdates = 0;
 	private boolean drawChart = true;
-	private long startTime = 0;
-	private boolean firstIterationToDraw = true;
+	private int VTUpdatesSinceChartUpdates = 0;
+	ExpEquations expequations = new ExpEquations();
 	private String type = "pitch".toLowerCase(); //heading, pitch,...       toLowerCase necessary if you accidentally write capitals
 	
 	private ArrayList<Box> boxesToFlyTo = new ArrayList<>();
@@ -77,7 +70,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 			//Stop the simulation if all boxes are handled
 			if(boxesToFlyTo.isEmpty()) {
 				if (drawChart) {
-					ExpEquations.drawMain(type); //draw chart of 'type' when simulation stops
+					expequations.drawMain(type); //draw chart of 'type' when simulation stops
 				}
 				return true;
 			}
@@ -91,7 +84,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		if(drawChart) {
 			VTUpdatesSinceChartUpdates++;
 			if(VTUpdatesSinceChartUpdates >= 5 ) {//Update the chart every x iterations of the VTestbed			
-				updateValuesToDrawForFloat(type, box, drone);
+				expequations.updateValuesToDrawForFloat(type, box, drone);
 				VTUpdatesSinceChartUpdates = 0;
 			}
 		}
@@ -151,114 +144,6 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 			public float getRoll() { return drone.getRoll(); }
 			public float getElapsedTime() { return VirtualTestbed.this.getElapsedTime(); }
 		};
-	}
-	
-	/////////////////////////////
-	/// Experiments for Chart ///
-	/////////////////////////////
-	
-//	static TimeSeries series = new TimeSeries( "timeSeries" );
-//	Second current = new Second( ); 
-//	
-//	public static TimeSeries getDataSet() {
-//		return series;
-//	}
-//	
-//	public void updateSeriesForVector(RealVector value) {
-//		try {
-//			series.add(current, new Double( value.getEntry(0) ) );
-//			current = ( Second ) current.next( ); 
-//			
-//		} catch ( SeriesException e ) {
-//            System.err.println("Error adding to series");
-//         }
-//	}
-//	
-//	public void updateSeriesForFloat(String type, Box box, Drone drone) {
-//		float value = (float) getAnglesDifference(type,box, drone); //x-value
-//		System.out.println(value);
-//
-//		try {
-//			series.add(current, new Double( value ) );
-//			current = ( Second ) current.next( ); 
-//			
-//		} catch ( SeriesException e ) {
-//            System.err.println("Error adding to series");
-//         }
-//	}
-//	
-//	public static XYDataset createDatasetForChart() {
-//		
-//		return new TimeSeriesCollection(getDataSet());
-//	}
-	
-	public void updateValuesToDrawForFloat(String type, Box box, Drone drone) {
-		float value = (float) getAnglesDifference(type,box, drone); //x-value
-	
-		
-		if (firstIterationToDraw) {
-			//delete the file of the previous run of the program
-			File invoer = new File("invoer.txt");
-			 if (invoer.exists()){
-			     invoer.delete();
-			 }  
-			 
-			startTime=System.currentTimeMillis();
-			firstIterationToDraw = false;
-		}
-		
-		long currentTime = System.currentTimeMillis();
-		double timeDiff = (currentTime - startTime);
-		Tuple point = new Tuple(timeDiff,value);
-		point.addTupleToListOfTuples();
-}
-	
-	/**
-	 * Get the angles from the current place of the plane to the closest cube
-	 * @param inputs
-	 * @return
-	 */
-	public double getAnglesDifference(String type, Box box, Drone drone) throws IllegalArgumentException {
-		double precision = 0; //minimum difference in degrees to be significant
-		RealVector droneCo = drone.getWorldPosition();
-		RealVector boxCo = box.getWorldPosition();
-		
-		//Vector containing the differences in x-,y- and z-coordinate between the drone and the cube
-		RealVector distanceVector= new ArrayRealVector(new double[] {
-				Math.abs(droneCo.getEntry(0) - boxCo.getEntry(0)),
-				Math.abs(droneCo.getEntry(1) - boxCo.getEntry(1)),
-				Math.abs(droneCo.getEntry(2) - boxCo.getEntry(2))
-				},false);
-		
-		if (type == "heading") {
-			double angle = Math.atan(distanceVector.getEntry(0) / Math.abs(distanceVector.getEntry(2)));
-			double heading = drone.getHeading();
-			if (heading > Math.PI) {
-				heading -= 2*Math.PI;
-			}
-			double diffAngle = angle - heading;
-//			if (diffAngle <= precision) {
-//				return 0;
-//			}
-			return diffAngle;
-		}
-		
-		else if (type == "pitch") {
-			double angle = Math.atan(distanceVector.getEntry(1) / Math.abs(distanceVector.getEntry(2))); 
-			double pitch = drone.getPitch();
-			if (pitch > Math.PI) {
-				pitch -= 2*Math.PI;
-			}
-			double diffAngle =  angle - pitch;
-//			if (diffAngle <= precision) {
-//				return 0;
-//			}
-			return diffAngle;
-		}
-		
-		//else:
-		throw new IllegalArgumentException();
-
 	}
 	
 
