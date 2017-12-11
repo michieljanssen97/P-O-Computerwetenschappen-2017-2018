@@ -608,7 +608,7 @@ public class Image {
 		ArrayList<Pixel> cubePixels = getCubePixels(hue, sat);
 		for (Pixel p : cubePixels){
 			if (p.getX() == 0 || p.getX() == getnbColumns() -1 || p.getY() == 0 || p.getY() == getnbRows() -1)
-				return 0;
+				return 0.00001f;
 		}
 		float maxDistanceToCenter = (float) Math.sqrt(Math.pow(getnbColumns()/2, 2) + Math.pow(getnbRows()/2, 2));
 		float[] cubeCenterPixel = getCubeCenterPixel(hue, sat);
