@@ -3,6 +3,8 @@ package be.kuleuven.cs.robijn.common;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.DoubleStream;
+
 import org.apache.commons.math3.linear.ArrayRealVector;
 
 public class WorldGenerator {
@@ -16,11 +18,10 @@ public class WorldGenerator {
 		for(int i = 1; i <= settings.getBoxCount(); i++) {
 			Box box = new Box();
 
-			double radius = 10.0; //given in the assignment
-
-			double x = rand.nextDouble() * radius;
+			double radius = 10.0; //radius around z-axis in which cubes can be generated
+			double x = ((rand.nextDouble() * 2.0) - 1.0) * radius;
 			double maxY = Math.sqrt(Math.pow(radius, 2) - Math.pow(x, 2));
-			double y = rand.nextDouble() * maxY;
+			double y = ((rand.nextDouble() * 2.0) - 1.0) * maxY;
 			double z = i * -40; //given in the assignment
 
 			box.setRelativePosition(new ArrayRealVector(new double[] {x, y, z}, false));
