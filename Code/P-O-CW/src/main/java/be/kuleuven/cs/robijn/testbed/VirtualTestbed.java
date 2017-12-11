@@ -8,6 +8,7 @@ import org.apache.commons.math3.ode.FirstOrderIntegrator;
 import org.apache.commons.math3.ode.nonstiff.*;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.experiments.ExpEquations;
+import be.kuleuven.cs.robijn.experiments.ExpPosition;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
 import interfaces.*;
 
@@ -29,7 +30,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	private PerspectiveCamera droneCamera;
 	private byte[] latestCameraImage;
 	
-	private boolean drawChart = true;
+	private boolean drawChartEquations = false;
 	private int VTUpdatesSinceChartUpdates = 0;
 	ExpEquations expequations = new ExpEquations();
 	private String type = "pitch".toLowerCase(); //heading, pitch,...       toLowerCase necessary if you accidentally write capitals
@@ -69,8 +70,11 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 			
 			//Stop the simulation if all boxes are handled
 			if(boxesToFlyTo.isEmpty()) {
-				if (drawChart) {
+				if (drawChartEquations) {
 					expequations.drawMain(type); //draw chart of 'type' when simulation stops
+				}
+				else if (Autopilot.isPositionDrawn()) {
+					ExpPosition.drawMain();
 				}
 				return true;
 			}
@@ -81,9 +85,9 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		this.renderCameraView();
 		
 		//only execute if there must be a chart of values in time
-		if(drawChart) {
+		if(drawChartEquations) {
 			VTUpdatesSinceChartUpdates++;
-			if(VTUpdatesSinceChartUpdates >= 5 ) {//Update the chart every x iterations of the VTestbed			
+			if(VTUpdatesSinceChartUpdates >= 5 ) {//Update the chart every x iterations of the VTestbed	
 				expequations.updateValuesToDrawForFloat(type, box, drone);
 				VTUpdatesSinceChartUpdates = 0;
 			}

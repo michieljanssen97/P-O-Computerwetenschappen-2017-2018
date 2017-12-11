@@ -7,6 +7,7 @@ import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.autopilot.image.*;
 import be.kuleuven.cs.robijn.common.math.*;
+import be.kuleuven.cs.robijn.experiments.ExpPosition;
 import interfaces.*;
 
 /**
@@ -15,6 +16,10 @@ import interfaces.*;
  * @author Pieter Vandensande
  */
 public class Autopilot extends WorldObject implements interfaces.Autopilot {
+	private boolean drawChartPositions = true;
+	ExpPosition exppos = new ExpPosition();
+	private int VTUpdatesSinceChartUpdates = 0;
+	
 	public AutopilotConfig getConfig() {
 		return this.config;
 	}
@@ -483,6 +488,9 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		return crash;	
 	}
 	
+    public boolean isPositionDrawn() {
+    	return drawChartPositions;
+    }
 	/**
 	 * Method to move the drone of this autopilot,
 	 * the position, velocity and acceleration get updated,
@@ -568,6 +576,14 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		this.setPreviousPitchAngularVelocity(newPitchAngularVelocity);
 		this.setPreviousRoll(newRoll);
 		this.setPreviousRollAngularVelocity(newRollAngularVelocity);
+		
+		if(drawChartPositions) {
+			VTUpdatesSinceChartUpdates++;
+			if(VTUpdatesSinceChartUpdates >= 5 ) {//Update the chart every x iterations of the VTestbed	
+				exppos.updateValuesToDrawForFloat(drone);
+				VTUpdatesSinceChartUpdates = 0;
+			}
+		}
 	}
 	
 	private RealVector previousPosition;
@@ -767,6 +783,8 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 
 	@Override
 	public void simulationEnded() {
-
+		if (drawChartPositions) {
+			exppos.drawMain();
+		}
 	}
 }
