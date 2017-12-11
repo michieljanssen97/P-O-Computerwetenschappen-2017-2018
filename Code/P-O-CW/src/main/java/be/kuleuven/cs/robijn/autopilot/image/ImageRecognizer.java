@@ -72,8 +72,8 @@ public class ImageRecognizer {
 	public float[] getNecessaryRotation(Image image, float hue, float sat) throws IllegalStateException{
 		try {
 			return image.getRotationToCube(hue, sat);
-		//TODO Calculate rotation if cube not in given image
 		} catch (IllegalArgumentException exc) {
+			//default rotation
 			RealVector vec = getWorldVectorToCube(getEquivalentImageRecognizerCube(hue, sat));
 			double[] dronePos = getDronePositionCoordinates();
 			float x,y;
@@ -82,9 +82,9 @@ public class ImageRecognizer {
 			else
 				x = image.getHorizontalAngle()/6f;
 			if (vec.getEntry(1) > (float)dronePos[1])
-				y = image.getVerticalAngle()/6f;
-			else
 				y = -image.getVerticalAngle()/6f;
+			else
+				y = image.getVerticalAngle()/6f;
 			return new float[] {x,y};
 		}
 	}
