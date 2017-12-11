@@ -89,13 +89,25 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
 				horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
 		try{
+<<<<<<< HEAD
 			ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld();
 			necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
 //			ImageRecognizerCube targetCube = recognizer.getTargetCube();
 //			necessaryRotation = recognizer.getNecessaryRotation(image, targetCube.getHue(), targetCube.getSaturation());
 		} catch (NullPointerException exc) {
+=======
+//			ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
+//			necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
+//			System.out.println(closestCube.getFactor());
+			ImageRecognizerCube targetCube = recognizer.getTargetCube();
+			necessaryRotation = recognizer.getNecessaryRotation(image, targetCube.getHue(), targetCube.getSaturation());
+//			System.out.println(recognizer.getWorldDistanceToCube(targetCube));
+		} catch (NullPointerException exc2) {
+>>>>>>> 583a6c1ec2c568a46a509c116d31750cb22ba687
 			necessaryRotation = new float[2];
 		}
+		
+//		System.out.println(necessaryRotation[0] + " , " + necessaryRotation[1]);
 		
 		float imageYRotation = (float) Math.toRadians(necessaryRotation[0]);
 		RealVector yRotationDroneCoordinates = new ArrayRealVector(new double[] {0, imageYRotation, 0}, false);
