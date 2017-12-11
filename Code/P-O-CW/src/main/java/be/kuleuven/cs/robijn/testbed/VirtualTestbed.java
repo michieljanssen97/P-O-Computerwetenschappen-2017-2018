@@ -284,7 +284,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	 *         drone == null
 	 */
 	public void moveDrone(float secondsSinceLastUpdate, AutopilotOutputs output) throws IllegalArgumentException, IllegalStateException {
-		boolean useDiffEquations = false;
+		boolean useDiffEquations = true;
 		
 		if (secondsSinceLastUpdate < 0)
 			throw new IllegalArgumentException();
@@ -309,8 +309,8 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		float rollAngularAcceleration = angularAccelerations[2];
 		
 		if (useDiffEquations){
-//			FirstOrderIntegrator dp853 = new DormandPrince853Integrator(1.0e-8, 100.0, 1.0e-10, 1.0e-10);
-			FirstOrderIntegrator rk4 = new ClassicalRungeKuttaIntegrator(1.0e-8);
+			FirstOrderIntegrator dp853 = new DormandPrince853Integrator(1.0e-8, 100.0, 1.0e-5, 1.0e-5);
+			FirstOrderIntegrator rk4 = new ClassicalRungeKuttaIntegrator(secondsSinceLastUpdate/10);
 			FirstOrderDifferentialEquations ode = new SystemDifferentialEquations(drone, output);
 			double[] y = new double[] { drone.getWorldPosition().getEntry(0), drone.getVelocity().getEntry(0), 
 					drone.getWorldPosition().getEntry(1), drone.getVelocity().getEntry(1),
