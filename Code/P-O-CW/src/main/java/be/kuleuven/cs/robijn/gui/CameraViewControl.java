@@ -11,8 +11,13 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealVector;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -46,6 +51,10 @@ public class CameraViewControl extends AnchorPane {
     private BufferedImage awtImage;
     private byte[] imageBackingBuffer;
     private WritableImage image;
+    private Camera activeCamera;
+
+    private DragHelper dragHelper;
+    private double dragSensitivity = 0.1;
 
     public CameraViewControl(){
         //Load the layout associated with this GUI control
@@ -67,6 +76,18 @@ public class CameraViewControl extends AnchorPane {
         imageViewHost.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         imageView.fitWidthProperty().bind(this.widthProperty());
         imageView.fitHeightProperty().bind(this.heightProperty());
+
+        dragHelper = new DragHelper(imageView);
+        dragHelper.addOnDragEventHandler(e -> {
+            if(activeCamera instanceof OrthographicCamera){
+                OrthographicCamera ortho = (OrthographicCamera)activeCamera;
+                Rotation camRot = ortho.getRelativeRotation();
+                Vector3D right = camRot.applyTo(new Vector3D(1, 0, 0));
+                Vector3D up = camRot.applyTo(new Vector3D(0, 1, 0));
+                Vector3D delta = right.scalarMultiply(-e.getDeltaX()*dragSensitivity).add(up.scalarMultiply(e.getDeltaY()*dragSensitivity));
+                ortho.setRelativePosition(ortho.getRelativePosition().add(new ArrayRealVector(new double[]{delta.getX(), delta.getY(), delta.getZ()}, false)));
+            }
+        });
 
         //When the simulation starts, setup the rendering
         simulationProperty.addListener((observable, oldValue, newValue) -> {
@@ -137,24 +158,24 @@ public class CameraViewControl extends AnchorPane {
 
         //Get the active camera and set its camera FOV to match the image width to height ratio so the image isnt warped/stretched.
         String selectedCameraId = (String)perspectiveToggleGroup.getSelectedToggle().getUserData();
-        Camera camera = world.getDescendantsStream()
+        activeCamera = world.getDescendantsStream()
                 .filter(o -> Objects.equals(o.getName(), selectedCameraId))
                 .map(o -> (Camera)o)
                 .findFirst().get();
 
         double aspect = ((double)frameBuffer.getWidth())/((double)frameBuffer.getHeight());
-        setCameraAspectRatio(camera, aspect);
+        setCameraAspectRatio(activeCamera, aspect);
 
         //If the camera is orthographic, update the icon rendering properties
-        if(camera instanceof OrthographicCamera){
-            OrthographicCamera orthoCam = (OrthographicCamera) camera;
+        if(activeCamera instanceof OrthographicCamera){
+            OrthographicCamera orthoCam = (OrthographicCamera) activeCamera;
             orthoCam.setRenderIconsThresholdRatio(0.025);
             orthoCam.setIconOffset(new Vector2D(0, 7));
             orthoCam.setIconSize(8f);
         }
 
         //Render to framebuffer, copy from framebuffer to image, convert image to javafx image, display javafx image
-        renderer.render(world, frameBuffer, camera);
+        renderer.render(world, frameBuffer, activeCamera);
         frameBuffer.readPixels(imageBackingBuffer);
         image = SwingFXUtils.toFXImage(awtImage, image);
         imageView.setImage(image);

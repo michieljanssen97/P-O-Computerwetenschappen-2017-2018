@@ -86,10 +86,8 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
         
         ImageRecognizer recognizer = this.getImageRecognizer();
         float[] necessaryRotation;
-        float horizontalAngleOfView = (float) ((this.getConfig().getHorizontalAngleOfView()/(2*Math.PI))*360);
-        float verticalAngleOfView = (float) ((this.getConfig().getVerticalAngleOfView()/(2*Math.PI))*360);
-//        float horizontalAngleOfView = this.getConfig().getHorizontalAngleOfView();
-//        float verticalAngleOfView = this.getConfig().getVerticalAngleOfView();
+        float horizontalAngleOfView = (float) Math.toDegrees(this.getConfig().getHorizontalAngleOfView());
+        float verticalAngleOfView = (float) Math.toDegrees(this.getConfig().getVerticalAngleOfView());
 		Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
 				horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
 		try{
@@ -101,8 +99,8 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			necessaryRotation = new float[2];
 		}
 		
-		float imageYRotation = (float) ((necessaryRotation[0]/360)*2*Math.PI);
-		float imageXRotation = (float) ((necessaryRotation[1]/360)*2*Math.PI);
+		float imageYRotation = (float) Math.toRadians(necessaryRotation[0]);
+		float imageXRotation = (float) Math.toRadians(necessaryRotation[1]);
 		
 		float horStabInclinationTemp = 0;
 		float verStabInclinationTemp = 0;
@@ -115,14 +113,14 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
 		float turningTime = 1.0f;
 		float xMovementTime = 1.0f;
-		float maxRoll = (float) ((10.0/360.0)*2*Math.PI);
+		float maxRoll = (float) Math.toRadians(10.0);
 
-		float maxInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float)((1.0/360.0)*2*Math.PI), drone, 1);
-		float minInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float)((1.0/360.0)*2*Math.PI), drone, 1);
-		float maxInclinationHorStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float)((1.0/360.0)*2*Math.PI), drone, 2);
-		float minInclinationHorStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float)((1.0/360.0)*2*Math.PI), drone, 2);
-		float maxInclinationVerStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float)((1.0/360.0)*2*Math.PI), drone, 3);
-		float minInclinationVerStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float)((1.0/360.0)*2*Math.PI), drone, 3);
+		float maxInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float) Math.toRadians(1.0), drone, 1);
+		float minInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float) Math.toRadians(1.0), drone, 1);
+		float maxInclinationHorStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float) Math.toRadians(1.0), drone, 2);
+		float minInclinationHorStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float) Math.toRadians(1.0), drone, 2);
+		float maxInclinationVerStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float) Math.toRadians(1.0), drone, 3);
+		float minInclinationVerStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float) Math.toRadians(1.0), drone, 3);
 		
 		float inertiaMatrixXX = (float) (drone.getTailMass()*Math.pow(drone.getTailSize(),2) +drone.getEngineMass()*Math.pow(drone.getEngineDistance(), 2));
 		float inertiaMatrixZZ = (float) (2*(drone.getWingMass()*Math.pow(drone.getWingX(),2)));
@@ -452,7 +450,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 				}
 			}
 			else {
-				inclination += (1.0/360.0)*2*Math.PI;
+				inclination += (float) Math.toRadians(1.0);
 				if (inclination > upperBound)
 					throw new IllegalStateException("simulation failed!");
 			}
