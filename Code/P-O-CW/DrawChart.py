@@ -23,7 +23,7 @@ def displayPoints(type):
 
     plt.title(type)
     plt.xlabel("Time [milliseconds].")
-    plt.ylabel("Difference in optimal " + type + " and actual " + type +" [degrees].")
+    plt.ylabel("$\Delta$ " + type + " [radians].")
     plt.plot(timeList,valueList,'pb-',xZeroList,yZeroList, '-')
 
     maximum = max(valueList)
@@ -43,6 +43,7 @@ def displayPoints(type):
     axes.annotate(minLabel, xy=(timeMin, minimum), xytext=(timeMin, minimum - maximum/5),
                 arrowprops=dict(facecolor='black', shrink=0.05),
                 )
+
 
     intersection = getIntersectionBetweenThe2Curves()
     if (intersection != None):
@@ -67,8 +68,8 @@ def getIntersectionBetweenThe2Curves():
     for i in range(1,len(valueList) - 1):
         if (np.sign(valueList[i-1]) != np.sign(valueList[i+1])):
             minimum = min(abs(valueList[i]), abs(valueList[i-1]))
-            return (findTimeWithValue(minimum),minimum)
-
+            if(minimum in valueList):
+                return (findTimeWithValue(minimum),minimum)
     return None
 
 def main():

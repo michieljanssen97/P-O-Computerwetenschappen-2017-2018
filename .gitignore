@@ -191,3 +191,6 @@ Code/P-O-CW/.mvn/timing.properties
 Code/P-O-CW/P-O-CW\.iml
 
 Code/P-O-CW/\.idea/misc\.xml
+
+Code/**/*.iml
+Code/**/*.xml
