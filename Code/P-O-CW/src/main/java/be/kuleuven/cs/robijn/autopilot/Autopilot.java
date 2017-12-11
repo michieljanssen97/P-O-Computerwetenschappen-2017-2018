@@ -97,8 +97,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			necessaryRotation = new float[2];
 		}
 		
-//		System.out.println(necessaryRotation[0] + " , " + necessaryRotation[1]);
-		
 		float imageYRotation = (float) Math.toRadians(necessaryRotation[0]);
 		RealVector yRotationDroneCoordinates = new ArrayRealVector(new double[] {0, imageYRotation, 0}, false);
 		RealVector yRotationWorldCoordinates = drone.transformationToWorldCoordinates(yRotationDroneCoordinates);
