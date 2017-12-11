@@ -35,8 +35,8 @@ Code/P-O-CW/tmp/
 *~.nib
 Code/P-O-CW/local.properties
 Code/P-O-CW/.settings/
-Code/P-O-CW/.loadpath
-Code/P-O-CW/.recommenders
+Code/**/.loadpath
+Code/**/.recommenders
 
 # External tool builders
 Code/P-O-CW/.externalToolBuilders/
@@ -63,53 +63,53 @@ Code/P-O-CW/.target
 Code/P-O-CW/.tern-project
 
 # TeXlipse plugin
-Code/P-O-CW/.texlipse
+Code/**/.texlipse
 
 # STS (Spring Tool Suite)
-Code/P-O-CW/.springBeans
+Code/**/.springBeans
 
 # Code Recommenders
 Code/P-O-CW/.recommenders/
 
 # Scala IDE specific (Scala & Java development for Eclipse)
-Code/P-O-CW/.cache-main
-Code/P-O-CW/.scala_dependencies
-Code/P-O-CW/.worksheet
+Code/**/.cache-main
+Code/**/.scala_dependencies
+Code/**/.worksheet
 
 ### Eclipse Patch ###
 # Eclipse Core		
 Code/P-O-CW/.project
 
 # JDT-specific (Eclipse Java Development Tools)		
-Code/P-O-CW/.classpath
+Code/**/.classpath
 
 ### Intellij ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and Webstorm
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 # User-specific stuff:
-Code/P-O-CW/.idea/**/workspace.xml
-Code/P-O-CW/.idea/**/tasks.xml
-Code/P-O-CW/.idea/dictionaries
+Code/**/.idea/**/workspace.xml
+Code/**/.idea/**/tasks.xml
+Code/**/.idea/dictionaries
 
 # Sensitive or high-churn files:
-Code/P-O-CW/.idea/**/dataSources/
-Code/P-O-CW/.idea/**/dataSources.ids
-Code/P-O-CW/.idea/**/dataSources.xml
-Code/P-O-CW/.idea/**/dataSources.local.xml
-Code/P-O-CW/.idea/**/sqlDataSources.xml
-Code/P-O-CW/.idea/**/dynamic.xml
-Code/P-O-CW/.idea/**/uiDesigner.xml
+Code/**/.idea/**/dataSources/
+Code/**/.idea/**/dataSources.ids
+Code/**/.idea/**/dataSources.xml
+Code/**/.idea/**/dataSources.local.xml
+Code/**/.idea/**/sqlDataSources.xml
+Code/**/.idea/**/dynamic.xml
+Code/**/.idea/**/uiDesigner.xml
 
 # Gradle:
-Code/P-O-CW/.idea/**/gradle.xml
-Code/P-O-CW/.idea/**/libraries
+Code/**/.idea/**/gradle.xml
+Code/**/.idea/**/libraries
 
 # CMake
-Code/P-O-CW/cmake-build-debug/
+Code/**/cmake-build-debug/
 
 # Mongo Explorer plugin:
-Code/P-O-CW/.idea/**/mongoSettings.xml
+Code/**/.idea/**/mongoSettings.xml
 
 ## File-based project format:
 *.iws
@@ -120,22 +120,22 @@ Code/P-O-CW/.idea/**/mongoSettings.xml
 Code/P-O-CW/out/
 
 # mpeltonen/sbt-idea plugin
-Code/P-O-CW/.idea_modules/
+Code/**/.idea_modules/
 
 # JIRA plugin
-Code/P-O-CW/atlassian-ide-plugin.xml
+Code/**/atlassian-ide-plugin.xml
 
 # Cursive Clojure plugin
-Code/P-O-CW/.idea/replstate.xml
+Code/**/.idea/replstate.xml
 
 # Ruby plugin and RubyMine
-Code/P-O-CW/.rakeTasks
+Code/**/.rakeTasks
 
 # Crashlytics plugin (for Android Studio and IntelliJ)
-Code/P-O-CW/com_crashlytics_export_strings.xml
-Code/P-O-CW/crashlytics.properties
-Code/P-O-CW/crashlytics-build.properties
-Code/P-O-CW/fabric.properties
+Code/**/com_crashlytics_export_strings.xml
+Code/**/crashlytics.properties
+Code/**/crashlytics-build.properties
+Code/**/fabric.properties
 
 ### Intellij Patch ###
 # Comment Reason: https://github.com/joeblau/gitignore.io/issues/186#issuecomment-215987721
@@ -146,7 +146,7 @@ Code/P-O-CW/fabric.properties
 # *.ipr
 
 # Sonarlint plugin
-Code/P-O-CW/.idea/sonarlint
+Code/**/.idea/sonarlint
 
 ### Java ###
 # Compiled class file
@@ -159,7 +159,7 @@ Code/P-O-CW/.idea/sonarlint
 *.ctxt
 
 # Mobile Tools for Java (J2ME)
-Code/P-O-CW/.mtj.tmp/
+Code/**/.mtj.tmp/
 
 # Package Files #
 *.jar
@@ -170,24 +170,24 @@ Code/P-O-CW/.mtj.tmp/
 *.rar
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-Code/P-O-CW/hs_err_pid*
+Code/**/hs_err_pid*
 
 ### Maven ###
 Code/P-O-CW/target/
-Code/P-O-CW/pom.xml.tag
-Code/P-O-CW/pom.xml.releaseBackup
-Code/P-O-CW/pom.xml.versionsBackup
-Code/P-O-CW/pom.xml.next
-Code/P-O-CW/release.properties
-Code/P-O-CW/dependency-reduced-pom.xml
-Code/P-O-CW/buildNumber.properties
-Code/P-O-CW/.mvn/timing.properties
+Code/**/pom.xml.tag
+Code/**/pom.xml.releaseBackup
+Code/**/pom.xml.versionsBackup
+Code/**/pom.xml.next
+Code/**/release.properties
+Code/**/dependency-reduced-pom.xml
+Code/**/buildNumber.properties
+Code/**/.mvn/timing.properties
 
 # Avoid ignoring Maven wrapper jar file (.jar files are usually ignored)
 !/.mvn/wrapper/maven-wrapper.jar
 
 # End of https://www.gitignore.io/api/java,maven,eclipse,intellij
 
-Code/P-O-CW/P-O-CW\.iml
-
-Code/P-O-CW/\.idea/misc\.xml
+Code/**/*.iml
+Code/**/.idea/
+Code/P-O-CW/invoer.txt

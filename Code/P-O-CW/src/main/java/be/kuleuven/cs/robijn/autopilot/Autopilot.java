@@ -46,7 +46,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			throw new IllegalArgumentException();
 		this.previousElapsedTime = previousElapsedTime;
 	}
-	
 	private final ImageRecognizer recognizer = new ImageRecognizer();
 	
 	public ImageRecognizer getImageRecognizer() {
@@ -83,7 +82,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 //			imageXRotation = 0;
 //			imageYRotation = 0;
 //		}
-        
         ImageRecognizer recognizer = this.getImageRecognizer();
         float[] necessaryRotation;
         float horizontalAngleOfView = (float) Math.toDegrees(this.getConfig().getHorizontalAngleOfView());
@@ -91,16 +89,24 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
 				horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
 		try{
-			ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld();
+			ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
 			necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
 //			ImageRecognizerCube targetCube = recognizer.getTargetCube();
 //			necessaryRotation = recognizer.getNecessaryRotation(image, targetCube.getHue(), targetCube.getSaturation());
-		} catch (NullPointerException exc2) {
+		} catch (NullPointerException exc) {
 			necessaryRotation = new float[2];
 		}
 		
+//		System.out.println(necessaryRotation[0] + " , " + necessaryRotation[1]);
+		
 		float imageYRotation = (float) Math.toRadians(necessaryRotation[0]);
+		RealVector yRotationDroneCoordinates = new ArrayRealVector(new double[] {0, imageYRotation, 0}, false);
+		RealVector yRotationWorldCoordinates = drone.transformationToWorldCoordinates(yRotationDroneCoordinates);
+		imageYRotation = (float) yRotationWorldCoordinates.getEntry(1);
 		float imageXRotation = (float) Math.toRadians(necessaryRotation[1]);
+		RealVector xRotationDroneCoordinates = new ArrayRealVector(new double[] {imageXRotation, 0, 0}, false);
+		RealVector xRotationWorldCoordinates = drone.transformationToWorldCoordinates(xRotationDroneCoordinates);
+		imageXRotation = (float) xRotationWorldCoordinates.getEntry(0);
 		
 		float horStabInclinationTemp = 0;
 		float verStabInclinationTemp = 0;
@@ -111,9 +117,9 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		double absoluteAccuracy = 1.0e-8;
 		int maxOrder = 5;
 		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
-		float turningTime = 1.0f;
+		float turningTime = 0.5f;
 		float xMovementTime = 1.0f;
-		float maxRoll = (float) Math.toRadians(10.0);
+		float maxRoll = (float) Math.toRadians(20.0);
 
 		float maxInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float) Math.toRadians(1.0), drone, 1);
 		float minInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float) Math.toRadians(1.0), drone, 1);

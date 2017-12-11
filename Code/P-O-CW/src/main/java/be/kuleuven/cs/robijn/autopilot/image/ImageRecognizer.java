@@ -35,7 +35,7 @@ public class ImageRecognizer {
 		this.roll = roll;
 		this.UpdateImageRecognizerCubeList(im);
 		if (!this.hasTarget())
-			getClosestCubeInWorld().makeTarget();
+			getClosestCubeInWorld(im).makeTarget();
 		return im;
 	}
 	
@@ -70,8 +70,23 @@ public class ImageRecognizer {
 	 * @throws Exception Something goes wrong while calculating the average coordinates of the pixels with given hue and saturation
 	 */
 	public float[] getNecessaryRotation(Image image, float hue, float sat) throws IllegalStateException{
-		return image.getRotationToCube(hue, sat);
+		try {
+			return image.getRotationToCube(hue, sat);
 		//TODO Calculate rotation if cube not in given image
+		} catch (IllegalArgumentException exc) {
+			RealVector vec = getWorldVectorToCube(getEquivalentImageRecognizerCube(hue, sat));
+			double[] dronePos = getDronePositionCoordinates();
+			float x,y;
+			if (vec.getEntry(0) > (float)dronePos[0])
+				x = -image.getHorizontalAngle()/6f;
+			else
+				x = image.getHorizontalAngle()/6f;
+			if (vec.getEntry(1) > (float)dronePos[1])
+				y = image.getVerticalAngle()/6f;
+			else
+				y = -image.getVerticalAngle()/6f;
+			return new float[] {x,y};
+		}
 	}
 	
 	
@@ -133,15 +148,26 @@ public class ImageRecognizer {
 		}
 		return cubes;
 	}
+	
+	public ArrayList<ImageRecognizerCube> getImageRecognizerCubesFromImage(Image im){
+		ArrayList<ImageRecognizerCube> cubes = new ArrayList<ImageRecognizerCube>();
+		for (ImageCube c : im.getImageCubes()) {
+			float hue = c.getHue();
+			float sat = c.getSaturation();
+			cubes.add(getEquivalentImageRecognizerCube(hue, sat));
+		}
+		return cubes;
+	}
 
 	/**
 	 * Return the cube in the ImageRecognizerCubeList that is closest to the current position of the drone.
 	 */
-	public ImageRecognizerCube getClosestCubeInWorld(){
+	public ImageRecognizerCube getClosestCubeInWorld(Image im){
 		float[] curPos = {(float)dronePosition.getEntry(0), (float)dronePosition.getEntry(1), (float)dronePosition.getEntry(2)};
 		ImageRecognizerCube closest = null;
 		float minimum = 1000f;
-		for (ImageRecognizerCube c : getNotDestroyedImageRecognizerCubes()){
+//		for (ImageRecognizerCube c : getNotDestroyedImageRecognizerCubes()){
+		for (ImageRecognizerCube c : getImageRecognizerCubesFromImage(im)) {
 			float distance = (float) Math.sqrt(Math.pow(curPos[0] - c.getX(), 2) + Math.pow(curPos[1] - c.getY(), 2) + Math.pow(curPos[2] - c.getZ(), 2));
 			if (distance < minimum){
 				minimum = distance;

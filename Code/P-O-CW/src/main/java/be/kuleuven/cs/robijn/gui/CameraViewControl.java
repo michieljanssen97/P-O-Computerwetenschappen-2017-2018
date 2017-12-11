@@ -34,7 +34,6 @@ public class CameraViewControl extends AnchorPane {
     public static final String THIRDPERSON_CAMERA_ID = "gui_thirdperson_camera";
     public static final String SIDE_CAMERA_ID = "gui_side_camera";
     public static final String TOPDOWN_CAMERA_ID = "gui_topdown_camera";
-    public static final String BOX_CAMERA_ID = "gui_box_camera";
 
     @FXML
     private ScrollPane imageViewHost;
