@@ -46,7 +46,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			throw new IllegalArgumentException();
 		this.previousElapsedTime = previousElapsedTime;
 	}
-	
 	private final ImageRecognizer recognizer = new ImageRecognizer();
 	
 	public ImageRecognizer getImageRecognizer() {
@@ -83,7 +82,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 //			imageXRotation = 0;
 //			imageYRotation = 0;
 //		}
-        
         ImageRecognizer recognizer = this.getImageRecognizer();
         float[] necessaryRotation;
         float horizontalAngleOfView = (float) Math.toDegrees(this.getConfig().getHorizontalAngleOfView());
@@ -109,9 +107,9 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		double absoluteAccuracy = 1.0e-8;
 		int maxOrder = 5;
 		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
-		float turningTime = 1.0f;
+		float turningTime = 0.5f;
 		float xMovementTime = 1.0f;
-		float maxRoll = (float) Math.toRadians(10.0);
+		float maxRoll = (float) Math.toRadians(20.0);
 
 		float maxInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float) Math.toRadians(1.0), drone, 1);
 		float minInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float) Math.toRadians(1.0), drone, 1);
