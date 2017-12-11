@@ -254,14 +254,11 @@ public class ImageRecognizer {
 				cube1.setFactor(value);
 				this.ImageRecognizerCubeList.add(cube1);
 			} else {
-				if (image.getTotalDistance(hue, sat) > 40 && getWorldDistanceToCube(cube) > 40) {
+				if (getWorldDistanceToCube(cube) > 40) {
 					cube.setPosition((float) cubePosition.getEntry(0), (float) cubePosition.getEntry(1), (float) cubePosition.getEntry(2));
 				}
 				if (image.getTotalDistance(hue, sat) > 40 && getWorldDistanceToCube(cube) <= 40) {
-					cube.setPosition((float) cubePosition.getEntry(0), (float) cubePosition.getEntry(1), (float) cubePosition.getEntry(2));
-				}
-				if (image.getTotalDistance(hue, sat) <= 40 && getWorldDistanceToCube(cube) > 40) {
-					cube.setPosition((float) cubePosition.getEntry(0), (float) cubePosition.getEntry(1), (float) cubePosition.getEntry(2));
+					cube.setPosition(cube.getPosition()[0], cube.getPosition()[1], cube.getPosition()[2]);
 				}
 //				if (image.getTotalDistance(hue, sat) <= 4)
 //					cube.destroy();
