@@ -72,8 +72,8 @@ public class ImageRecognizer {
 	public float[] getNecessaryRotation(Image image, float hue, float sat) throws IllegalStateException{
 		try {
 			return image.getRotationToCube(hue, sat);
-		//TODO Calculate rotation if cube not in given image
 		} catch (IllegalArgumentException exc) {
+			//default rotation
 			RealVector vec = getWorldVectorToCube(getEquivalentImageRecognizerCube(hue, sat));
 			double[] dronePos = getDronePositionCoordinates();
 			float x,y;
@@ -82,9 +82,9 @@ public class ImageRecognizer {
 			else
 				x = image.getHorizontalAngle()/6f;
 			if (vec.getEntry(1) > (float)dronePos[1])
-				y = image.getVerticalAngle()/6f;
-			else
 				y = -image.getVerticalAngle()/6f;
+			else
+				y = image.getVerticalAngle()/6f;
 			return new float[] {x,y};
 		}
 	}
@@ -280,10 +280,10 @@ public class ImageRecognizer {
 				cube1.setFactor(value);
 				this.ImageRecognizerCubeList.add(cube1);
 			} else {
-				if (getWorldDistanceToCube(cube) > 40) {
+				if (getWorldDistanceToCube(cube) > 60) {
 					cube.setPosition((float) cubePosition.getEntry(0), (float) cubePosition.getEntry(1), (float) cubePosition.getEntry(2));
 				}
-				if (image.getTotalDistance(hue, sat) > 40 && getWorldDistanceToCube(cube) <= 40) {
+				if (image.getTotalDistance(hue, sat) > 60 && getWorldDistanceToCube(cube) <= 60) {
 					cube.setPosition(cube.getPosition()[0], cube.getPosition()[1], cube.getPosition()[2]);
 				}
 //				if (image.getTotalDistance(hue, sat) <= 4)

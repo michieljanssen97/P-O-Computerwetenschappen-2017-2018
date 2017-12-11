@@ -64,24 +64,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
         this.setPreviousElapsedTime(inputs.getElapsedTime());  
         
         Drone drone = this.getFirstChildOfType(Drone.class);
-
-//        ImageRecognizer imagerecognizer = new ImageRecognizer();
-//        Image image = imagerecognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
-//        		this.getConfig().getHorizontalAngleOfView(), this.getConfig().getVerticalAngleOfView());
-//		float imageXRotation;
-//		float imageYRotation;
-//        try {
-//			RealVector vectorDroneCoordinates = image.getXYZDistance();
-//			System.out.println(vectorDroneCoordinates);
-//			RealVector vectorWorldCoordinates = drone.transformationToWorldCoordinates(vectorDroneCoordinates);
-//			imageXRotation = (float) Math.atan(vectorWorldCoordinates.getEntry(1)/(-vectorWorldCoordinates.getEntry(2)));
-//			imageYRotation = (float) Math.atan(vectorWorldCoordinates.getEntry(0)/vectorWorldCoordinates.getEntry(2));
-//		}
-//		catch (IllegalStateException ex){
-//        	//No red cube found, just fly forward
-//			imageXRotation = 0;
-//			imageYRotation = 0;
-//		}
+        
         ImageRecognizer recognizer = this.getImageRecognizer();
         float[] necessaryRotation;
         float horizontalAngleOfView = (float) Math.toDegrees(this.getConfig().getHorizontalAngleOfView());
