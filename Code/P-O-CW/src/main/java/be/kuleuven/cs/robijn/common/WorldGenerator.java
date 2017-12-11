@@ -19,7 +19,8 @@ public class WorldGenerator {
 			double radius = 10.0; //given in the assignment
 
 			double x = rand.nextDouble() * radius;
-			double y = Math.sqrt(Math.pow(radius, 2) - Math.pow(x, 2));
+			double maxY = Math.sqrt(Math.pow(radius, 2) - Math.pow(x, 2));
+			double y = rand.nextDouble() * maxY;
 			double z = i * -40; //given in the assignment
 
 			box.setRelativePosition(new ArrayRealVector(new double[] {x, y, z}, false));
