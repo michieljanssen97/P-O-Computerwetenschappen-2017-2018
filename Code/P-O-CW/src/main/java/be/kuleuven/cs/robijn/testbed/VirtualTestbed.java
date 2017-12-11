@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
 import org.apache.commons.math3.ode.FirstOrderIntegrator;
-import org.apache.commons.math3.ode.nonstiff.DormandPrince853Integrator;
+import org.apache.commons.math3.ode.nonstiff.*;
 import org.jfree.data.general.SeriesException;
 import org.jfree.data.time.Second;
 import org.jfree.data.time.TimeSeries;
@@ -284,7 +284,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	 *         drone == null
 	 */
 	public void moveDrone(float secondsSinceLastUpdate, AutopilotOutputs output) throws IllegalArgumentException, IllegalStateException {
-		boolean useDiffEquations = true;
+		boolean useDiffEquations = false;
 		
 		if (secondsSinceLastUpdate < 0)
 			throw new IllegalArgumentException();
@@ -309,7 +309,8 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		float rollAngularAcceleration = angularAccelerations[2];
 		
 		if (useDiffEquations){
-			FirstOrderIntegrator dp853 = new DormandPrince853Integrator(1.0e-8, 100.0, 1.0e-5, 1.0e-5);
+//			FirstOrderIntegrator dp853 = new DormandPrince853Integrator(1.0e-8, 100.0, 1.0e-10, 1.0e-10);
+			FirstOrderIntegrator rk4 = new ClassicalRungeKuttaIntegrator(1.0e-8);
 			FirstOrderDifferentialEquations ode = new SystemDifferentialEquations(drone, output);
 			double[] y = new double[] { drone.getWorldPosition().getEntry(0), drone.getVelocity().getEntry(0), 
 					drone.getWorldPosition().getEntry(1), drone.getVelocity().getEntry(1),
@@ -317,7 +318,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 					drone.getHeading(), drone.getHeadingAngularVelocity(),
 					drone.getPitch(), drone.getPitchAngularVelocity(),
 					drone.getRoll(), drone.getRollAngularVelocity() };
-			dp853.integrate(ode, 0.0, y, secondsSinceLastUpdate, y);
+			rk4.integrate(ode, 0.0, y, secondsSinceLastUpdate, y);
 			
 			drone.setRelativePosition(new ArrayRealVector(new double[] {y[0], y[2], y[4]}, false));
 			drone.setVelocity(new ArrayRealVector(new double[] {y[1], y[3], y[5]}, false));
