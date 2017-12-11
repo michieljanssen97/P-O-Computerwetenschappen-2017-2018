@@ -33,15 +33,22 @@ public class ReliabilityTest {
         settings.setRandomizeColors(true);
         settings.setBoxCount(2);
 
+        int successes = 0;
         for (int i = 0; i < timesToRunTest; i++){
             List<Box> boxes = WorldGenerator.generateBoxes(settings);
             try{
                 TestResult result = runTest(boxes, config, maxSimulationRuntimeInSeconds, updatesPerSecond);
-                System.out.printf("%d/%d: %s\n", i, timesToRunTest, result.toString());
+                if(result == TestResult.SUCCESS){
+                    successes++;
+                }
+                System.out.printf("%d/%d: %s\n", i+1, timesToRunTest, result.toString());
             }catch (Exception ex){
-                System.err.printf("%d/%d: CRITICAL_FAILURE\n", i, timesToRunTest);
+                System.err.printf("%d/%d: CRITICAL_FAILURE (%s)\n", i+1, timesToRunTest, ex.getMessage());
             }
         }
+
+        System.out.println("Test finished");
+        System.out.printf("%d/%d runs were successful\n", successes, timesToRunTest);
     }
 
     private static TestResult runTest(List<Box> boxes, AutopilotConfig config, int maxSimulationRuntimeInSeconds, int updatesPerSecond){
