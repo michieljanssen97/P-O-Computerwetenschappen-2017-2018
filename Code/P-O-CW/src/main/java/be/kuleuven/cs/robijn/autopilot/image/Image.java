@@ -343,12 +343,12 @@ public class Image {
 				}
 				float angleCos = (float) Math.sqrt(1 / (1 + Math.pow(ratio, 2)));
 				float planeAngle = (float) Math.acos(angleCos);
-				return (float) (0.5/Math.tan(degreesToRadians(angle)) + 0.5 / Math.sin(planeAngle));
+				return 1.32279f * (float) (0.5/Math.tan(degreesToRadians(angle)) + 0.5 / Math.sin(planeAngle));
 			}
 			else{
 				float pixels = getMaximumDistanceSpherePixels(hue, sat);
 				float angle = (pixels * getHorizontalAngle()) / getnbColumns();
-				return (float) (Math.sqrt(0.75) / Math.tan((degreesToRadians(angle))));
+				return 1.32279f * (float) (Math.sqrt(0.75) / Math.tan((degreesToRadians(angle))));
 			}
 		} else if (sides == 2) {
 			float pixels = getMinimumDistanceSpherePixels(hue, sat);
@@ -356,11 +356,11 @@ public class Image {
 			float ratio = getRatioPixelsIfTwoPlanesVisible(hue, sat);
 			float angleCos = (float) Math.sqrt(1 / (1 + Math.pow(ratio, 2)));
 			float planeAngle = (float) Math.acos(angleCos);
-			return (float) (0.5/Math.tan(degreesToRadians(angle)) + 0.5 / Math.sin(planeAngle));
+			return 1.32279f * (float) (0.5/Math.tan(degreesToRadians(angle)) + 0.5 / Math.sin(planeAngle));
 		} else if (sides == 1){
 			float pixels = getMinimumDistanceSpherePixels(hue, sat);
 			float angle = (pixels * getHorizontalAngle()) / getnbColumns();
-			return (float) (0.5 / Math.tan(degreesToRadians(angle)) + 0.5);
+			return 1.32279f * (float) (0.5 / Math.tan(degreesToRadians(angle)) + 0.5);
 		} else
 			throw new IllegalStateException("The cube does not have the right values to be visible or no cube is present.");
 	}
@@ -602,7 +602,7 @@ public class Image {
 	 * @param sat	The given saturation
 	 */
 	public float getNecessaryCubeFactor(float hue, float sat) {
-		if (getTotalDistance(hue, sat) > 40) {
+		if (getTotalDistance(hue, sat) > 60) {
 			return 0.00001f;
 		}
 		ArrayList<Pixel> cubePixels = getCubePixels(hue, sat);
@@ -614,7 +614,7 @@ public class Image {
 		float[] cubeCenterPixel = getCubeCenterPixel(hue, sat);
 		float[] PixelsToCenter = getPixelsFromCenter(cubeCenterPixel[0], cubeCenterPixel[1]);
 		float distanceToCenter = (float) Math.sqrt(Math.pow(PixelsToCenter[0], 2) + Math.pow(PixelsToCenter[1], 2));
-		float factorValue = 5 * (1 - distanceToCenter / maxDistanceToCenter) * (float) Math.pow((1 - 0.02249f * getTotalDistance(hue, sat)), 4);
+		float factorValue = 5 * (1 - distanceToCenter / maxDistanceToCenter) * (float) Math.pow((1 - 0.015f * getTotalDistance(hue, sat)), 4);
 		return factorValue;
 	}
 	
