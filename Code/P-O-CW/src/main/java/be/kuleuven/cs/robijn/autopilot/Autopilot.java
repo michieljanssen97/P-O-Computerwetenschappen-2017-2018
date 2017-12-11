@@ -91,13 +91,17 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
 				horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
 		try{
-			ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld();
-			necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
-//			ImageRecognizerCube targetCube = recognizer.getTargetCube();
-//			necessaryRotation = recognizer.getNecessaryRotation(image, targetCube.getHue(), targetCube.getSaturation());
+//			ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
+//			necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
+//			System.out.println(closestCube.getFactor());
+			ImageRecognizerCube targetCube = recognizer.getTargetCube();
+			necessaryRotation = recognizer.getNecessaryRotation(image, targetCube.getHue(), targetCube.getSaturation());
+//			System.out.println(recognizer.getWorldDistanceToCube(targetCube));
 		} catch (NullPointerException exc2) {
 			necessaryRotation = new float[2];
 		}
+		
+//		System.out.println(necessaryRotation[0] + " , " + necessaryRotation[1]);
 		
 		float imageYRotation = (float) Math.toRadians(necessaryRotation[0]);
 		float imageXRotation = (float) Math.toRadians(necessaryRotation[1]);
