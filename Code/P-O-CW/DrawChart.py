@@ -4,18 +4,48 @@ import numpy as np
 timeList = []
 valueList = []
 
+timeListOur = []
+timeListProvided = []
+
+xValueListOur = []
+yValueListOur = []
+zValueListOur = []
+
+xValueListProvided = []
+yValueListProvided = []
+zValueListProvided = []
+
 # Read the data from the input file
-def getInfo(data):
+def getInfoHP(data):
     for i in range(1, len(data)-10): #last values are mostly 'incorrect'
-        items = ((data[i].rstrip()).split())  # split the lines to get the coordinates and radius
+        items = ((data[i].rstrip()).split())
         #Point(float(items[0]), float(items[1])) # time, value
         timeList.append(float(items[0]))
         valueList.append(float(items[1]))
     return 0
 
-def displayPoints(type):
+def getInfoPos(data, ours = True):
+    if (ours):
+        for i in range(1, len(data)-1):
+            items = ((data[i].rstrip()).split())
+            timeListOur.append(float(items[0]))
+            xValueListOur.append(float(items[1]))
+            yValueListOur.append(float(items[2]))
+            zValueListOur.append(float(items[3]))
+    else:
+        for i in range(1, len(data)-10): #last values are mostly 'incorrect'
+            items = ((data[i].rstrip()).split())
+            timeListProvided.append(float(items[0]))
+            xValueListProvided.append(float(items[1]))
+            yValueListProvided.append(float(items[2]))
+            zValueListProvided.append(float(items[3]))
+
+    return 0
+
+
+def displayPointsHP(type):
     if(len(timeList) != len(valueList)):
-        print ('error in displayPoints')
+        print ('error in displayPointsHP')
         return
     n = int(round(max(timeList)))
     xZeroList = list(range(0,n))
@@ -56,6 +86,69 @@ def displayPoints(type):
 
     plt.show()
 
+def displayPointsPos(type):
+    global timeListOur
+    global timeListProvided
+    global xValueListOur
+    global xValueListProvided
+    global yValueListOur
+    global yValueListProvided
+    global zValueListOur
+    global zValueListProvided
+
+    if(len(timeListOur) != len(xValueListOur) or len(timeListOur) != len(yValueListOur) or len(timeListOur) != len(zValueListOur)):
+        print ('error in displayPointsPos our')
+        return
+    if(len(timeListProvided) != len(xValueListProvided) or len(timeListProvided) != len(yValueListProvided) or len(timeListProvided) != len(zValueListProvided)):
+        print ('error in displayPointsPos provided')
+        return
+
+    nbElements = min(len(timeListProvided), len(timeListOur))
+    #make sure all list have the same length
+    timeListOur = timeListOur[:nbElements]
+    timeListProvided = timeListProvided[:nbElements]
+    xValueListOur = xValueListOur[:nbElements]
+    xValueListProvided = xValueListProvided[:nbElements]
+    yValueListOur = yValueListOur[:nbElements]
+    yValueListProvided = yValueListProvided[:nbElements]
+    zValueListOur = zValueListOur[:nbElements]
+    zValueListProvided = zValueListProvided[:nbElements]
+
+    n = int(round(max(timeListOur)))
+    xZeroList = list(range(0,n))
+    yZeroList = [0]*n
+
+    plt.title("Position Of The Drone")
+    plt.figure(1)
+
+    # x-value
+    plt.subplot(221)
+    plt.title("X-Values")
+    plt.plot(timeListOur, xValueListOur, 'pb-', timeListProvided, xValueListProvided, 'pr-')
+
+    #y-value
+    plt.subplot(222)
+    plt.title("Y-Values")
+    plt.plot(timeListOur, yValueListOur, 'pb-', timeListProvided, yValueListProvided, 'pr-')
+
+    plt.subplot(223)
+    plt.title("Z-Values")
+    plt.plot(timeListOur, zValueListOur, 'pb-', timeListProvided, zValueListProvided, 'pr-')
+
+    plt.show()
+
+def findTimeWithxValue(value):
+    index = xValueList.index(value)
+    return timeList[index]
+
+def findTimeWithyValue(value):
+    index = yValueList.index(value)
+    return timeList[index]
+
+def findTimeWithzValue(value):
+    index = zValueList.index(value)
+    return timeList[index]
+
 def findTimeWithValue(value):
     index = valueList.index(value)
     return timeList[index]
@@ -64,6 +157,19 @@ def findValueWithTime(time):
     index = timeList.index(time)
     return valueList[index]
 
+def findXValueWithTime(time):
+    index = timeList.index(time)
+    return xValueList[index]
+
+def findYValueWithTime(time):
+    index = timeList.index(time)
+    return yValueList[index]
+
+def findZValueWithTime(time):
+    index = timeList.index(time)
+    return zValueList[index]
+
+#TODO verander voor position
 def getIntersectionBetweenThe2Curves():
     for i in range(1,len(valueList) - 1):
         if (np.sign(valueList[i-1]) != np.sign(valueList[i+1])):
@@ -78,9 +184,17 @@ def main():
     input.close()
 
     type = str(data[0])
-    getInfo(data)  # Get the coordinates and radius of every circle
+    if type == "heading" or type == "pitch":
+        getInfoHP(data)
+        displayPointsHP(type)
+    else:
+        input2 = open("invoerProvidedTB.txt", "r")
+        dataProvided = input2.readlines()  # format input file to list
+        input2.close()
 
-    displayPoints(type)  # show all the intersections between circles
+        getInfoPos(data)
+        getInfoPos(dataProvided, False)
+        displayPointsPos(type)
 
 #start the execution
 main()

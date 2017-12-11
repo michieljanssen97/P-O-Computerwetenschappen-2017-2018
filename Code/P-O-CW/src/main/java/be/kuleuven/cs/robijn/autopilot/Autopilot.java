@@ -16,8 +16,8 @@ import interfaces.*;
  * @author Pieter Vandensande
  */
 public class Autopilot extends WorldObject implements interfaces.Autopilot {
-	private boolean drawChartPositions = true;
-	ExpPosition exppos = new ExpPosition();
+	private static boolean drawChartPositions = true;
+	public static ExpPosition exppos = new ExpPosition();
 	private int VTUpdatesSinceChartUpdates = 0;
 	
 	public AutopilotConfig getConfig() {
@@ -494,9 +494,10 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		return crash;	
 	}
 	
-    public boolean isPositionDrawn() {
+    public static boolean isPositionDrawn() {
     	return drawChartPositions;
     }
+    
 	/**
 	 * Method to move the drone of this autopilot,
 	 * the position, velocity and acceleration get updated,
@@ -790,7 +791,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 	@Override
 	public void simulationEnded() {
 		if (drawChartPositions) {
-			exppos.drawMain();
+			exppos.drawMain("Provided");
 		}
 	}
 }

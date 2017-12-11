@@ -14,10 +14,15 @@ public class ExpPosition {
 	private long startTime = 0;
 	private boolean firstIterationToDraw = true;
 	
-	public void drawMain() {
-		String type = "Position";
-		File output = new File("invoerOurTB.txt");
+	public void drawMain(String type) {
+		File output = null;
 		String enc = null;
+		if (type == "Our") {
+			output = new File("invoer.txt");
+		}
+		else if (type == "Provided") {
+			output = new File("invoerProvidedTB.txt");
+		}
 		
 		//write the tile to the output file
 		try {

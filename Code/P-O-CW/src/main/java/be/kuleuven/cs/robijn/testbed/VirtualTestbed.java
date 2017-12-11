@@ -12,6 +12,8 @@ import be.kuleuven.cs.robijn.experiments.ExpPosition;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
 import interfaces.*;
 
+import be.kuleuven.cs.robijn.autopilot.Autopilot;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -74,7 +76,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 					expequations.drawMain(type); //draw chart of 'type' when simulation stops
 				}
 				else if (Autopilot.isPositionDrawn()) {
-					ExpPosition.drawMain();
+					Autopilot.exppos.drawMain("Our");
 				}
 				return true;
 			}
