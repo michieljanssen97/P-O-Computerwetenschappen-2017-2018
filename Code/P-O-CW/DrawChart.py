@@ -117,7 +117,7 @@ def displayPointsPos(type):
     pylab.legend(loc='upper left')
     pylab.title("X-Values")
     pylab.xlabel("Time [milliseconds]")
-    pylab.ylabel("Place [World Coordinates]")
+    pylab.ylabel("Position [World Coordinates]")
     #plt.plot(timeListOur, xValueListOur, 'pb-', timeListProvided, xValueListProvided, 'pr-')
 
     #y-value
@@ -127,7 +127,7 @@ def displayPointsPos(type):
     pylab.legend(loc='upper right')
     pylab.title("Y-Values")
     pylab.xlabel("Time [milliseconds]")
-    pylab.ylabel("Place [World Coordinates]")
+    pylab.ylabel("Position [World Coordinates]")
     #plt.plot(timeListOur, yValueListOur, 'pb-', timeListProvided, yValueListProvided, 'pr-')
 
     plt.subplot(223)
@@ -136,7 +136,7 @@ def displayPointsPos(type):
     pylab.legend(loc='upper right')
     pylab.title("Z-Values")
     pylab.xlabel("Time [milliseconds]")
-    pylab.ylabel("Place [World Coordinates]")
+    pylab.ylabel("Position [World Coordinates]")
     #plt.plot(timeListOur, zValueListOur, 'pb-', timeListProvided, zValueListProvided, 'pr-')
 
     plt.show()

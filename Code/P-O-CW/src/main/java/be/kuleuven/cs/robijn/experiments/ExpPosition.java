@@ -67,6 +67,7 @@ public class ExpPosition {
 		long currentTime = System.currentTimeMillis();
 		double timeDiff = (currentTime - startTime);
 		RealVector position = drone.getWorldPosition();
+		//RealVector speed = drone.getVelocity();
 		DataPointsForPosition point = new DataPointsForPosition(timeDiff, position.getEntry(0), position.getEntry(1), position.getEntry(2));
 		addPointToListOfDataPoints(point);
 	}
