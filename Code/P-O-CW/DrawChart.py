@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import pylab
 import numpy as np
 
 timeList = []
@@ -33,7 +34,7 @@ def getInfoPos(data, ours = True):
             yValueListOur.append(float(items[2]))
             zValueListOur.append(float(items[3]))
     else:
-        for i in range(1, len(data)-10): #last values are mostly 'incorrect'
+        for i in range(1, len(data)-1):
             items = ((data[i].rstrip()).split())
             timeListProvided.append(float(items[0]))
             xValueListProvided.append(float(items[1]))
@@ -103,51 +104,43 @@ def displayPointsPos(type):
         print ('error in displayPointsPos provided')
         return
 
-    nbElements = min(len(timeListProvided), len(timeListOur))
-    #make sure all list have the same length
-    timeListOur = timeListOur[:nbElements]
-    timeListProvided = timeListProvided[:nbElements]
-    xValueListOur = xValueListOur[:nbElements]
-    xValueListProvided = xValueListProvided[:nbElements]
-    yValueListOur = yValueListOur[:nbElements]
-    yValueListProvided = yValueListProvided[:nbElements]
-    zValueListOur = zValueListOur[:nbElements]
-    zValueListProvided = zValueListProvided[:nbElements]
 
-    n = int(round(max(timeListOur)))
-    xZeroList = list(range(0,n))
-    yZeroList = [0]*n
+    n = int(round(max(max(timeListOur), max(timeListProvided))))
 
     plt.title("Position Of The Drone")
     plt.figure(1)
 
     # x-value
     plt.subplot(221)
-    plt.title("X-Values")
-    plt.plot(timeListOur, xValueListOur, 'pb-', timeListProvided, xValueListProvided, 'pr-')
+    pylab.plot(timeListOur, xValueListOur, 'pb-', label = 'Our TB')
+    pylab.plot(timeListProvided, xValueListProvided, 'pr-', label = 'Provided TB')
+    pylab.legend(loc='upper left')
+    pylab.title("X-Values")
+    pylab.xlabel("Time [milliseconds]")
+    pylab.ylabel("Place [World Coordinates]")
+    #plt.plot(timeListOur, xValueListOur, 'pb-', timeListProvided, xValueListProvided, 'pr-')
 
     #y-value
     plt.subplot(222)
-    plt.title("Y-Values")
-    plt.plot(timeListOur, yValueListOur, 'pb-', timeListProvided, yValueListProvided, 'pr-')
+    pylab.plot(timeListOur, yValueListOur, 'pb-', label='Our TB')
+    pylab.plot(timeListProvided, yValueListProvided, 'pr-', label='Provided TB')
+    pylab.legend(loc='upper right')
+    pylab.title("Y-Values")
+    pylab.xlabel("Time [milliseconds]")
+    pylab.ylabel("Place [World Coordinates]")
+    #plt.plot(timeListOur, yValueListOur, 'pb-', timeListProvided, yValueListProvided, 'pr-')
 
     plt.subplot(223)
-    plt.title("Z-Values")
-    plt.plot(timeListOur, zValueListOur, 'pb-', timeListProvided, zValueListProvided, 'pr-')
+    pylab.plot(timeListOur, zValueListOur, 'pb-', label='Our TB')
+    pylab.plot(timeListProvided, zValueListProvided, 'pr-', label='Provided TB')
+    pylab.legend(loc='upper right')
+    pylab.title("Z-Values")
+    pylab.xlabel("Time [milliseconds]")
+    pylab.ylabel("Place [World Coordinates]")
+    #plt.plot(timeListOur, zValueListOur, 'pb-', timeListProvided, zValueListProvided, 'pr-')
 
     plt.show()
 
-def findTimeWithxValue(value):
-    index = xValueList.index(value)
-    return timeList[index]
-
-def findTimeWithyValue(value):
-    index = yValueList.index(value)
-    return timeList[index]
-
-def findTimeWithzValue(value):
-    index = zValueList.index(value)
-    return timeList[index]
 
 def findTimeWithValue(value):
     index = valueList.index(value)
@@ -157,19 +150,6 @@ def findValueWithTime(time):
     index = timeList.index(time)
     return valueList[index]
 
-def findXValueWithTime(time):
-    index = timeList.index(time)
-    return xValueList[index]
-
-def findYValueWithTime(time):
-    index = timeList.index(time)
-    return yValueList[index]
-
-def findZValueWithTime(time):
-    index = timeList.index(time)
-    return zValueList[index]
-
-#TODO verander voor position
 def getIntersectionBetweenThe2Curves():
     for i in range(1,len(valueList) - 1):
         if (np.sign(valueList[i-1]) != np.sign(valueList[i+1])):

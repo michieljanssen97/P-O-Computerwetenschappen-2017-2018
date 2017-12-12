@@ -585,11 +585,11 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		this.setPreviousRollAngularVelocity(newRollAngularVelocity);
 		
 		if(drawChartPositions) {
-			VTUpdatesSinceChartUpdates++;
-			if(VTUpdatesSinceChartUpdates >= 5 ) {//Update the chart every x iterations of the VTestbed	
+			//VTUpdatesSinceChartUpdates++;
+			//if(VTUpdatesSinceChartUpdates >= 5 ) {//Update the chart every x iterations of the VTestbed	
 				exppos.updateValuesToDrawForFloat(drone);
-				VTUpdatesSinceChartUpdates = 0;
-			}
+				//VTUpdatesSinceChartUpdates = 0;
+			//}
 		}
 	}
 	
