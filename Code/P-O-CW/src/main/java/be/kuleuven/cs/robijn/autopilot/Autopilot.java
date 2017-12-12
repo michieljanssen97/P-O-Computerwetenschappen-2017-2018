@@ -81,13 +81,27 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		}
 		
 		float imageYRotation = (float) Math.toRadians(necessaryRotation[0]);
-		RealVector yRotationDroneCoordinates = new ArrayRealVector(new double[] {0, imageYRotation, 0}, false);
-		RealVector yRotationWorldCoordinates = drone.transformationToWorldCoordinates(yRotationDroneCoordinates);
-		imageYRotation = (float) yRotationWorldCoordinates.getEntry(1);
 		float imageXRotation = (float) Math.toRadians(necessaryRotation[1]);
-		RealVector xRotationDroneCoordinates = new ArrayRealVector(new double[] {imageXRotation, 0, 0}, false);
-		RealVector xRotationWorldCoordinates = drone.transformationToWorldCoordinates(xRotationDroneCoordinates);
-		imageXRotation = (float) xRotationWorldCoordinates.getEntry(0);
+		
+		float angleXYPlane;
+		if ((imageYRotation == 0.0) && (imageXRotation >= 0.0))
+			angleXYPlane = (float) (Math.PI/2);
+		else if ((imageYRotation == 0.0) && (imageXRotation < 0.0))
+			angleXYPlane = (float) (-Math.PI/2);
+		else {
+			angleXYPlane = (float) Math.atan(Math.tan(imageXRotation)/Math.tan(imageYRotation));
+		}
+		float lengthXYPlane = (float) Math.sqrt(Math.pow(Math.tan(imageXRotation),2) + Math.pow(Math.tan(imageYRotation), 2));
+		float newImageYRotation = (float) Math.atan(lengthXYPlane * Math.cos(angleXYPlane - drone.getRoll()));
+		float newImageXRotation = (float) Math.atan(lengthXYPlane * Math.sin(angleXYPlane - drone.getRoll()));
+		if (imageYRotation >= 0.0) {
+			imageYRotation = newImageYRotation;
+			imageXRotation = newImageXRotation;
+		}
+		else {
+			imageYRotation = -newImageYRotation;
+			imageXRotation = -newImageXRotation;
+		}
 		
 		float horStabInclinationTemp = 0;
 		float verStabInclinationTemp = 0;
@@ -100,7 +114,8 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
 		float turningTime = 0.5f;
 		float xMovementTime = 1.0f;
-		float maxRoll = (float) Math.toRadians(20.0);
+		float maxRoll = (float) Math.toRadians(45.0);
+		float maxHeadingAngularAcceleration = 1.5f;
 
 		float maxInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float) Math.toRadians(1.0), drone, 1);
 		float minInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float) Math.toRadians(1.0), drone, 1);
@@ -126,8 +141,12 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		float headingAngularAccelerationTemp = (targetHeadingAngularVelocity - headingAngularVelocity)/turningTime;
 		if (! Float.isNaN(this.getPreviousHeadingAngularAccelerationError()))
 			headingAngularAccelerationTemp -= this.getPreviousHeadingAngularAccelerationError();
+		if (headingAngularAccelerationTemp > maxHeadingAngularAcceleration)
+			headingAngularAccelerationTemp = maxHeadingAngularAcceleration;
+		else if (headingAngularAccelerationTemp < -maxHeadingAngularAcceleration)
+			headingAngularAccelerationTemp = -maxHeadingAngularAcceleration;
 		final float headingAngularAcceleration = headingAngularAccelerationTemp;
-		
+
 		float targetPitchAngularVelocity = imageXRotation/turningTime;
 		float pitchAngularVelocity = drone.getPitchAngularVelocity();
 		float pitchAngularAccelerationTemp = (targetPitchAngularVelocity - pitchAngularVelocity)/turningTime;
@@ -223,7 +242,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		}
         if ((targetRoll > maxRoll) && (targetRoll < Math.PI))
         	targetRoll = maxRoll;
-        else if ((targetRoll > Math.PI/2) && (targetRoll < (2*Math.PI - maxRoll)))
+        else if ((targetRoll > Math.PI) && (targetRoll < (2*Math.PI - maxRoll)))
         	targetRoll = (float) (2*Math.PI - maxRoll);
         
         float rollDifference = targetRoll - drone.getRoll();
