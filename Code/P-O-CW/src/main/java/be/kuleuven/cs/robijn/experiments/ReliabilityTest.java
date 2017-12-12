@@ -61,6 +61,10 @@ public class ReliabilityTest {
             driver.runUpdate();
         }
 
+        try {
+            driver.getTestBed().getRenderer().close();
+        } catch (Exception e) {}
+
         if(driver.hasSimulationCrashed()){
             return TestResult.CRASH;
         }

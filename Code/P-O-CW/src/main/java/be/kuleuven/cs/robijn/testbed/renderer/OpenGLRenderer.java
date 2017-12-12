@@ -91,6 +91,7 @@ public class OpenGLRenderer implements Renderer {
     private Billboard boxIcon;
 
     private ArrayList<Line> linesToDraw = new ArrayList<>();
+    private ArrayList<OpenGLFrameBuffer> frameBuffers = new ArrayList<>();
 
     private OpenGLRenderer(long windowHandle){
         this.windowHandle = windowHandle;
@@ -392,7 +393,9 @@ public class OpenGLRenderer implements Renderer {
 
     @Override
     public FrameBuffer createFrameBuffer(int width, int height) {
-        return OpenGLFrameBuffer.create(width, height);
+        OpenGLFrameBuffer frameBuffer = OpenGLFrameBuffer.create(width, height);
+        frameBuffers.add(frameBuffer);
+        return frameBuffer;
     }
 
     @Override
@@ -408,13 +411,28 @@ public class OpenGLRenderer implements Renderer {
     @Override
     public void close() {
         //Destroy model resources
-        boxModel.getTexture().close();
-        boxModel.getMesh().close();
-        boxModel.getShader().close();
-
         droneModel.getTexture().close();
         droneModel.getMesh().close();
         droneModel.getShader().close();
+
+        boxModel.getMesh().close();
+        boxModel.getShader().close();
+
+        groundModel.getMesh().close();
+        groundModel.getShader().close();
+
+        lineModel.getMesh().close();
+        lineModel.getShader().close();
+
+        //Destroy icons
+        droneIcon.getTexture().close();
+        boxIcon.getTexture().close();
+
+        //Destroy framebuffers
+        for(OpenGLFrameBuffer frameBuffer : frameBuffers){
+            frameBuffer.close();
+        }
+        frameBuffers.clear();
 
         //Destroy LWJGL resources
         glfwDestroyWindow(windowHandle);
