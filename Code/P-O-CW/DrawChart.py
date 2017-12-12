@@ -87,7 +87,7 @@ def displayPointsHP(type):
 
     plt.show()
 
-def displayPointsPos(type):
+def displayPointsPos():
     global timeListOur
     global timeListProvided
     global xValueListOur
@@ -141,6 +141,61 @@ def displayPointsPos(type):
 
     plt.show()
 
+#Namen kloppen niet, is copy paste van displayPointsPos, enkel labels aangepast
+def displayPointsPosDiff():
+    global timeListOur
+    global timeListProvided
+    global xValueListOur
+    global xValueListProvided
+    global yValueListOur
+    global yValueListProvided
+    global zValueListOur
+    global zValueListProvided
+
+    if(len(timeListOur) != len(xValueListOur) or len(timeListOur) != len(yValueListOur) or len(timeListOur) != len(zValueListOur)):
+        print ('error in displayPointsPos our')
+        return
+    if(len(timeListProvided) != len(xValueListProvided) or len(timeListProvided) != len(yValueListProvided) or len(timeListProvided) != len(zValueListProvided)):
+        print ('error in displayPointsPos provided')
+        return
+
+
+    n = int(round(max(max(timeListOur), max(timeListProvided))))
+
+    plt.title("Position Of The Drone")
+    plt.figure(1)
+
+    # x-value
+    plt.subplot(221)
+    pylab.plot(timeListOur, xValueListOur, 'pb-', label = 'Without diff Equations')
+    pylab.plot(timeListProvided, xValueListProvided, 'pr-', label = 'With diff Equations')
+    pylab.legend(loc='upper left')
+    pylab.title("X-Values")
+    pylab.xlabel("Time [milliseconds]")
+    pylab.ylabel("Position [World Coordinates]")
+    #plt.plot(timeListOur, xValueListOur, 'pb-', timeListProvided, xValueListProvided, 'pr-')
+
+    #y-value
+    plt.subplot(222)
+    pylab.plot(timeListOur, yValueListOur, 'pb-', label = 'Without diff Equations')
+    pylab.plot(timeListProvided, yValueListProvided, 'pr-', label = 'With diff Equations')
+    pylab.legend(loc='upper right')
+    pylab.title("Y-Values")
+    pylab.xlabel("Time [milliseconds]")
+    pylab.ylabel("Position [World Coordinates]")
+    #plt.plot(timeListOur, yValueListOur, 'pb-', timeListProvided, yValueListProvided, 'pr-')
+
+    plt.subplot(223)
+    pylab.plot(timeListOur, zValueListOur, 'pb-', label = 'Without diff Equations')
+    pylab.plot(timeListProvided, zValueListProvided, 'pr-', label = 'With diff Equations')
+    pylab.legend(loc='upper right')
+    pylab.title("Z-Values")
+    pylab.xlabel("Time [milliseconds]")
+    pylab.ylabel("Position [World Coordinates]")
+    #plt.plot(timeListOur, zValueListOur, 'pb-', timeListProvided, zValueListProvided, 'pr-')
+
+    plt.show()
+
 
 def findTimeWithValue(value):
     index = valueList.index(value)
@@ -167,14 +222,22 @@ def main():
     if type == "heading" or type == "pitch":
         getInfoHP(data)
         displayPointsHP(type)
-    else:
+    elif type == "Our":
         input2 = open("invoerProvidedTB.txt", "r")
         dataProvided = input2.readlines()  # format input file to list
         input2.close()
 
         getInfoPos(data)
         getInfoPos(dataProvided, False)
-        displayPointsPos(type)
+        displayPointsPos()
+    else:
+        input2 = open("invoerMetDiff.txt", "r")
+        dataDiff = input2.readlines()  # format input file to list
+        input2.close()
+
+        getInfoPos(data)
+        getInfoPos(dataDiff, False)
+        displayPointsPosDiff()
 
 #start the execution
 main()

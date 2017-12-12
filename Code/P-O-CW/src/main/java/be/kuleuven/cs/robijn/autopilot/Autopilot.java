@@ -18,7 +18,7 @@ import interfaces.*;
 public class Autopilot extends WorldObject implements interfaces.Autopilot {
 	private static boolean drawChartPositions = true;
 	public static ExpPosition exppos = new ExpPosition();
-	private int VTUpdatesSinceChartUpdates = 0;
+	//private int VTUpdatesSinceChartUpdates = 0;
 	
 	public AutopilotConfig getConfig() {
 		return this.config;
@@ -790,8 +790,5 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 
 	@Override
 	public void simulationEnded() {
-		if (drawChartPositions) {
-			exppos.drawMain("Provided");
-		}
 	}
 }

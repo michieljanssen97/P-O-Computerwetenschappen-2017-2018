@@ -26,7 +26,8 @@ public class ExpPosition {
 		
 		//write the tile to the output file
 		try {
-			FileUtils.writeStringToFile(output, type + System.lineSeparator(), enc, true);
+			//FileUtils.writeStringToFile(output, type + System.lineSeparator(), enc, true);
+			FileUtils.writeStringToFile(output, "zonder diff" + System.lineSeparator(), enc, true);
 		} catch (IOException e) {
 			System.out.println("Error in drawMain()");
 		}
@@ -55,7 +56,7 @@ public class ExpPosition {
 	public void updateValuesToDrawForFloat(Drone drone) {		
 		if (firstIterationToDraw) {
 			//delete the file of the previous run of the program
-			File invoer = new File("invoerOurTB.txt");
+			File invoer = new File("invoer.txt");
 			 if (invoer.exists()){
 			     invoer.delete();
 			 }  
