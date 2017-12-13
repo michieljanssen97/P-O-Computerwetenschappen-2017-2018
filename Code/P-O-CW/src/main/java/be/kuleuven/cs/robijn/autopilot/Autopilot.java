@@ -104,14 +104,14 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		float lengthXYPlane = (float) Math.sqrt(Math.pow(Math.tan(imageXRotation),2) + Math.pow(Math.tan(imageYRotation), 2));
 		float newImageYRotation = (float) Math.atan(lengthXYPlane * Math.cos(angleXYPlane - drone.getRoll()));
 		float newImageXRotation = (float) Math.atan(lengthXYPlane * Math.sin(angleXYPlane - drone.getRoll()));
-//		if (imageYRotation >= 0.0) {
-//			imageYRotation = newImageYRotation;
-//			imageXRotation = newImageXRotation;
-//		}
-//		else {
-//			imageYRotation = -newImageYRotation;
-//			imageXRotation = -newImageXRotation;
-//		}
+		if (imageYRotation >= 0.0) {
+			imageYRotation = newImageYRotation;
+			imageXRotation = newImageXRotation;
+		}
+		else {
+			imageYRotation = -newImageYRotation;
+			imageXRotation = -newImageXRotation;
+		}
 		System.out.println("help2");
 		System.out.println(Math.toDegrees(imageYRotation));
 		System.out.println(Math.toDegrees(imageXRotation));
