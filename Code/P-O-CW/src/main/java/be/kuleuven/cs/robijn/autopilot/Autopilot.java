@@ -94,9 +94,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		float imageYRotation = (float) Math.toRadians(necessaryRotation[0]);
 		float imageXRotation = (float) Math.toRadians(necessaryRotation[1]);
 		
-		System.out.println("help");
-		System.out.println(Math.toDegrees(imageYRotation));
-		System.out.println(Math.toDegrees(imageXRotation));
 		float angleXYPlane;
 		if ((imageYRotation == 0.0) && (imageXRotation >= 0.0))
 			angleXYPlane = (float) (Math.PI/2);
@@ -116,9 +113,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			imageYRotation = -newImageYRotation;
 			imageXRotation = -newImageXRotation;
 		}
-		System.out.println("help2");
-		System.out.println(Math.toDegrees(imageYRotation));
-		System.out.println(Math.toDegrees(imageXRotation));
 		
 		float horStabInclinationTemp = 0;
 		float verStabInclinationTemp = 0;
