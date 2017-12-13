@@ -71,6 +71,8 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
         float verticalAngleOfView = (float) Math.toDegrees(this.getConfig().getVerticalAngleOfView());
 		Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
 				horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
+
+
 		try{
 			ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
 			necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
@@ -79,7 +81,12 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		} catch (NullPointerException exc) {
 			necessaryRotation = new float[2];
 		}
-		
+
+		ImageRecognizerCube closestCube2 = recognizer.getClosestCubeInWorld(image);
+
+		if (closestCube2 == null)
+			simulationEnded();
+
 		float imageYRotation = (float) Math.toRadians(necessaryRotation[0]);
 		float imageXRotation = (float) Math.toRadians(necessaryRotation[1]);
 		
@@ -777,6 +784,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 
 	@Override
 	public void simulationEnded() {
-
+			throw new IllegalArgumentException("Simulation Ended");
 	}
 }
