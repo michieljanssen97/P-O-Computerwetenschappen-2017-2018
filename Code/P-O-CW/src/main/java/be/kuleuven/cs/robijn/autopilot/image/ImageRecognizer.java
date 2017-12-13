@@ -70,23 +70,7 @@ public class ImageRecognizer {
 	 * @throws Exception Something goes wrong while calculating the average coordinates of the pixels with given hue and saturation
 	 */
 	public float[] getNecessaryRotation(Image image, float hue, float sat) throws IllegalStateException{
-		try {
-			return image.getRotationToCube(hue, sat);
-		} catch (IllegalArgumentException exc) {
-			//default rotation
-			RealVector vec = getWorldVectorToCube(getEquivalentImageRecognizerCube(hue, sat));
-			double[] dronePos = getDronePositionCoordinates();
-			float x,y;
-			if (vec.getEntry(0) > (float)dronePos[0])
-				x = -image.getHorizontalAngle()/6f;
-			else
-				x = image.getHorizontalAngle()/6f;
-			if (vec.getEntry(1) > (float)dronePos[1])
-				y = -image.getVerticalAngle()/6f;
-			else
-				y = image.getVerticalAngle()/6f;
-			return new float[] {x,y};
-		}
+		return image.getRotationToCube(hue, sat);
 	}
 	
 	

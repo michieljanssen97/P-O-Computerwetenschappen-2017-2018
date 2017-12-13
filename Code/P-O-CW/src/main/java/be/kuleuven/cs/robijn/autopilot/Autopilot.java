@@ -74,12 +74,17 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 
 
 		try{
-			ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
-			necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
-//			ImageRecognizerCube targetCube = recognizer.getTargetCube();
-//			necessaryRotation = recognizer.getNecessaryRotation(image, targetCube.getHue(), targetCube.getSaturation());
-		} catch (NullPointerException exc) {
+			ImageRecognizerCube targetCube = recognizer.getTargetCube();
+			necessaryRotation = recognizer.getNecessaryRotation(image, targetCube.getHue(), targetCube.getSaturation());
+		} catch (NullPointerException exc1) {
 			necessaryRotation = new float[2];
+		} catch (IllegalArgumentException exc2) {
+			try {
+				ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
+				necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
+			} catch (NullPointerException exc1) {
+				necessaryRotation = new float[2];
+			}
 		}
 
 		ImageRecognizerCube closestCube2 = recognizer.getClosestCubeInWorld(image);
