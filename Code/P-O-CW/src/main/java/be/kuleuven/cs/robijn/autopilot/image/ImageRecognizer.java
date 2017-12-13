@@ -90,17 +90,6 @@ public class ImageRecognizer {
 	}
 	
 	/**
-	 * Returns the rotations in x and y for the drone to take to the cube with given hue and saturation in the given image.
-	 * @param image	The given image
-	 * @return	The rotation necessary for the drone to turn towards the center of the cube with given hue and saturation
-	 * 			(an x-value and a y-value given in degrees)
-	 * @throws Exception Something goes wrong while calculating the average coordinates of the pixels with given hue and saturation
-	 */
-	public float[] getNecessaryRotationWithoutCatch(Image image, float hue, float sat) throws IllegalStateException{
-		return image.getRotationToCube(hue, sat);
-	}
-	
-	/**
 	 * Returns the distance to cube with given hue and saturation in the given image.
 	 * @param image	The given image
 	 * @return	The distance to the cube
