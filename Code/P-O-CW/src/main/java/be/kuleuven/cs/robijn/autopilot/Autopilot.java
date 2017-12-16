@@ -16,9 +16,8 @@ import interfaces.*;
  * @author Pieter Vandensande
  */
 public class Autopilot extends WorldObject implements interfaces.Autopilot {
-	private static boolean drawChartPositions = true;
+	private static boolean drawChartPositions = false;
 	public static ExpPosition exppos = new ExpPosition();
-	//private int VTUpdatesSinceChartUpdates = 0;
 	
 	public AutopilotConfig getConfig() {
 		return this.config;
@@ -584,12 +583,8 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		this.setPreviousRoll(newRoll);
 		this.setPreviousRollAngularVelocity(newRollAngularVelocity);
 		
-		if(drawChartPositions) {
-			//VTUpdatesSinceChartUpdates++;
-			//if(VTUpdatesSinceChartUpdates >= 5 ) {//Update the chart every x iterations of the VTestbed	
-				exppos.updateValuesToDrawForFloat(drone);
-				//VTUpdatesSinceChartUpdates = 0;
-			//}
+		if(isPositionDrawn()) {
+			exppos.updateValuesToDrawForFloat(drone);
 		}
 	}
 	

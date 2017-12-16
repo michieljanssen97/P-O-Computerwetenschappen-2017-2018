@@ -5,22 +5,21 @@ import numpy as np
 timeList = []
 valueList = []
 
-timeListOur = []
-timeListProvided = []
+timeList1 = []
+timeList2 = []
 
-xValueListOur = []
-yValueListOur = []
-zValueListOur = []
+xValueList1 = []
+yValueList1 = []
+zValueList1 = []
 
-xValueListProvided = []
-yValueListProvided = []
-zValueListProvided = []
+xValueList2 = []
+yValueList2 = []
+zValueList2 = []
 
 # Read the data from the input file
 def getInfoHP(data):
     for i in range(1, len(data)-10): #last values are mostly 'incorrect'
         items = ((data[i].rstrip()).split())
-        #Point(float(items[0]), float(items[1])) # time, value
         timeList.append(float(items[0]))
         valueList.append(float(items[1]))
     return 0
@@ -29,17 +28,18 @@ def getInfoPos(data, ours = True):
     if (ours):
         for i in range(1, len(data)-1):
             items = ((data[i].rstrip()).split())
-            timeListOur.append(float(items[0]))
-            xValueListOur.append(float(items[1]))
-            yValueListOur.append(float(items[2]))
-            zValueListOur.append(float(items[3]))
-    else:
+            timeList1.append(float(items[0]))
+            xValueList1.append(float(items[1]))
+            yValueList1.append(float(items[2]))
+            zValueList1.append(float(items[3]))
+
+    else: #provided Testbed
         for i in range(1, len(data)-1):
             items = ((data[i].rstrip()).split())
-            timeListProvided.append(float(items[0]))
-            xValueListProvided.append(float(items[1]))
-            yValueListProvided.append(float(items[2]))
-            zValueListProvided.append(float(items[3]))
+            timeList2.append(float(items[0]))
+            xValueList2.append(float(items[1]))
+            yValueList2.append(float(items[2]))
+            zValueList2.append(float(items[3]))
 
     return 0
 
@@ -88,111 +88,106 @@ def displayPointsHP(type):
     plt.show()
 
 def displayPointsPos():
-    global timeListOur
-    global timeListProvided
-    global xValueListOur
-    global xValueListProvided
-    global yValueListOur
-    global yValueListProvided
-    global zValueListOur
-    global zValueListProvided
+    global timeList1
+    global timeList2
+    global xValueList1
+    global xValueList2
+    global yValueList1
+    global yValueList2
+    global zValueList1
+    global zValueList2
 
-    if(len(timeListOur) != len(xValueListOur) or len(timeListOur) != len(yValueListOur) or len(timeListOur) != len(zValueListOur)):
+    if(len(timeList1) != len(xValueList1) or len(timeList1) != len(yValueList1) or len(timeList1) != len(zValueList1)):
         print ('error in displayPointsPos our')
         return
-    if(len(timeListProvided) != len(xValueListProvided) or len(timeListProvided) != len(yValueListProvided) or len(timeListProvided) != len(zValueListProvided)):
+    if(len(timeList2) != len(xValueList2) or len(timeList2) != len(yValueList2) or len(timeList2) != len(zValueList2)):
         print ('error in displayPointsPos provided')
         return
 
 
-    n = int(round(max(max(timeListOur), max(timeListProvided))))
+    n = int(round(max(max(timeList1), max(timeList2))))
 
     plt.title("Position Of The Drone")
     plt.figure(1)
 
     # x-value
     plt.subplot(221)
-    pylab.plot(timeListOur, xValueListOur, 'pb-', label = 'Our TB')
-    pylab.plot(timeListProvided, xValueListProvided, 'pr-', label = 'Provided TB')
+    pylab.plot(timeList1, xValueList1, 'pb-', label = 'Our TB')
+    pylab.plot(timeList2, xValueList2, 'pr-', label = 'Provided TB')
     pylab.legend(loc='upper left')
     pylab.title("X-Values")
     pylab.xlabel("Time [milliseconds]")
     pylab.ylabel("Position [World Coordinates]")
-    #plt.plot(timeListOur, xValueListOur, 'pb-', timeListProvided, xValueListProvided, 'pr-')
 
     #y-value
     plt.subplot(222)
-    pylab.plot(timeListOur, yValueListOur, 'pb-', label='Our TB')
-    pylab.plot(timeListProvided, yValueListProvided, 'pr-', label='Provided TB')
+    pylab.plot(timeList1, yValueList1, 'pb-', label='Our TB')
+    pylab.plot(timeList2, yValueList2, 'pr-', label='Provided TB')
     pylab.legend(loc='upper right')
     pylab.title("Y-Values")
     pylab.xlabel("Time [milliseconds]")
     pylab.ylabel("Position [World Coordinates]")
-    #plt.plot(timeListOur, yValueListOur, 'pb-', timeListProvided, yValueListProvided, 'pr-')
 
     plt.subplot(223)
-    pylab.plot(timeListOur, zValueListOur, 'pb-', label='Our TB')
-    pylab.plot(timeListProvided, zValueListProvided, 'pr-', label='Provided TB')
+    pylab.plot(timeList1, zValueList1, 'pb-', label='Our TB')
+    pylab.plot(timeList2, zValueList2, 'pr-', label='Provided TB')
     pylab.legend(loc='upper right')
     pylab.title("Z-Values")
     pylab.xlabel("Time [milliseconds]")
     pylab.ylabel("Position [World Coordinates]")
-    #plt.plot(timeListOur, zValueListOur, 'pb-', timeListProvided, zValueListProvided, 'pr-')
 
     plt.show()
 
 #Namen kloppen niet, is copy paste van displayPointsPos, enkel labels aangepast
 def displayPointsPosDiff():
-    global timeListOur
-    global timeListProvided
-    global xValueListOur
-    global xValueListProvided
-    global yValueListOur
-    global yValueListProvided
-    global zValueListOur
-    global zValueListProvided
+    global timeList1
+    global timeList2
+    global xValueList1
+    global xValueList2
+    global yValueList1
+    global yValueList2
+    global zValueList1
+    global zValueList2
 
-    if(len(timeListOur) != len(xValueListOur) or len(timeListOur) != len(yValueListOur) or len(timeListOur) != len(zValueListOur)):
+    if(len(timeList1) != len(xValueList1) or len(timeList1) != len(yValueList1) or len(timeList1) != len(zValueList1)):
         print ('error in displayPointsPos our')
         return
-    if(len(timeListProvided) != len(xValueListProvided) or len(timeListProvided) != len(yValueListProvided) or len(timeListProvided) != len(zValueListProvided)):
+    if(len(timeList2) != len(xValueList2) or len(timeList2) != len(yValueList2) or len(timeList2) != len(zValueList2)):
         print ('error in displayPointsPos provided')
         return
 
 
-    n = int(round(max(max(timeListOur), max(timeListProvided))))
+    n = int(round(max(max(timeList1), max(timeList2))))
 
     plt.title("Position Of The Drone")
     plt.figure(1)
 
     # x-value
     plt.subplot(221)
-    pylab.plot(timeListOur, xValueListOur, 'pb-', label = 'Without diff Equations')
-    pylab.plot(timeListProvided, xValueListProvided, 'pr-', label = 'With diff Equations')
+    pylab.plot(timeList1, xValueList1, 'pb-', label = 'Without diff Equations')
+    pylab.plot(timeList2, xValueList2, 'pr-', label = 'With diff Equations')
     pylab.legend(loc='upper left')
     pylab.title("X-Values")
     pylab.xlabel("Time [milliseconds]")
     pylab.ylabel("Position [World Coordinates]")
-    #plt.plot(timeListOur, xValueListOur, 'pb-', timeListProvided, xValueListProvided, 'pr-')
 
     #y-value
     plt.subplot(222)
-    pylab.plot(timeListOur, yValueListOur, 'pb-', label = 'Without diff Equations')
-    pylab.plot(timeListProvided, yValueListProvided, 'pr-', label = 'With diff Equations')
+    pylab.plot(timeList1, yValueList1, 'pb-', label = 'Without diff Equations')
+    pylab.plot(timeList2, yValueList2, 'pr-', label = 'With diff Equations')
     pylab.legend(loc='upper right')
     pylab.title("Y-Values")
     pylab.xlabel("Time [milliseconds]")
     pylab.ylabel("Position [World Coordinates]")
-    #plt.plot(timeListOur, yValueListOur, 'pb-', timeListProvided, yValueListProvided, 'pr-')
 
+    #z-value
     plt.subplot(223)
-    pylab.plot(timeListOur, zValueListOur, 'pb-', label = 'Without diff Equations')
-    pylab.plot(timeListProvided, zValueListProvided, 'pr-', label = 'With diff Equations')
+    pylab.plot(timeList1, zValueList1, 'pb-', label = 'Without diff Equations')
+    pylab.plot(timeList2, zValueList2, 'pr-', label = 'With diff Equations')
     pylab.legend(loc='upper right')
     pylab.title("Z-Values")
     pylab.xlabel("Time [milliseconds]")
     pylab.ylabel("Position [World Coordinates]")
-    #plt.plot(timeListOur, zValueListOur, 'pb-', timeListProvided, zValueListProvided, 'pr-')
 
     plt.show()
 
