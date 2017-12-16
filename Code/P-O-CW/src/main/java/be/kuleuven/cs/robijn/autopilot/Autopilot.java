@@ -269,7 +269,10 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		
 		float targetRollAngularVelocity = rollDifference/turningTime;
 		float rollAngularVelocity = drone.getRollAngularVelocity();
-		final float rollAngularAcceleration = (targetRollAngularVelocity - rollAngularVelocity)/turningTime;
+		float rollAngularAccelerationTemp = (targetRollAngularVelocity - rollAngularVelocity)/turningTime;
+		if (! Float.isNaN(this.getPreviousRollAngularAccelerationError()))
+			rollAngularAccelerationTemp -= this.getPreviousRollAngularAccelerationError();
+		final float rollAngularAcceleration = rollAngularAccelerationTemp;
 		
 		float rollInclinationTemp = 0;
 		UnivariateFunction function4 = (x)->{return 
@@ -376,6 +379,9 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		this.setPreviousPitchAngularAccelerationError(
 				drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination)[1]
 				-pitchAngularAcceleration);
+		this.setPreviousRollAngularAccelerationError(
+				drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination)[2]
+				-rollAngularAcceleration);
 		this.setPreviousYAccelerationError(
 				((float)drone.getAcceleration(thrust, leftWingInclination, rightWingInclination, horStabInclination, verStabInclination).getEntry(1))
 				-yAcceleration);
@@ -491,6 +497,23 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		if (! isValidPreviousPitchAngularAccelerationError(previousPitchAngularAccelerationError))
 			throw new IllegalArgumentException();
 		this.previousPitchAngularAccelerationError = previousPitchAngularAccelerationError;
+	}
+	
+	private float previousRollAngularAccelerationError = Float.NaN;
+	
+	public float getPreviousRollAngularAccelerationError() {
+		return this.previousRollAngularAccelerationError;
+	}
+	
+	public static boolean isValidPreviousRollAngularAccelerationError(float previousRollAngularAccelerationError) {
+		return ((Float.isNaN(previousRollAngularAccelerationError)) || (! Float.isInfinite(previousRollAngularAccelerationError)));
+	}
+	
+	public void setPreviousRollAngularAccelerationError(float previousRollAngularAccelerationError) 
+			throws IllegalArgumentException {
+		if (! isValidPreviousRollAngularAccelerationError(previousRollAngularAccelerationError))
+			throw new IllegalArgumentException();
+		this.previousRollAngularAccelerationError = previousRollAngularAccelerationError;
 	}
 	
 	public float minMaxInclination(float upperBound, float lowerBound, boolean max, float accuracy, Drone drone, int airfoil) {
