@@ -133,7 +133,7 @@ public class ImageTest {
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getMinimumDistanceSpherePixels(0.0f, 1.0f);
 		float expected = 40.15f;
-		assertEquals(expected, result, 0.01f);
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -142,7 +142,7 @@ public class ImageTest {
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getMinimumDistanceSpherePixels(0.0f, 1.0f);
 		float expected = 40.5f;
-		assertEquals(expected, result, 0.01f);
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -151,7 +151,7 @@ public class ImageTest {
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getMinimumDistanceSpherePixels(0.0f, 1.0f);
 		float expected = 40.34f;
-		assertEquals(expected, result, 0.01f);
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -160,7 +160,7 @@ public class ImageTest {
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getMaximumDistanceSpherePixels(0.0f, 1.0f);
 		float expected = 66.73f;
-		assertEquals(expected, result, 0.01f);
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -169,7 +169,7 @@ public class ImageTest {
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getMaximumDistanceSpherePixels(0.0f, 1.0f);
 		float expected = 66.98f;
-		assertEquals(expected, result, 0.01f);
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -213,8 +213,8 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(0);
-		float expected = 0.0926f;
-		assertEquals(expected, result, 0.01f);
+		float expected = 0.12f;
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -223,7 +223,7 @@ public class ImageTest {
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(1);
 		float expected = 0.0f;
-		assertEquals(expected, result, 0.01f);
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -231,8 +231,8 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(2);
-		float expected = -1.81f;
-		assertEquals(expected, result, 0.01f);
+		float expected = -2.39f;
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -240,8 +240,8 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getTotalDistance(0.0f, 1.0f);
-		float expected = 1.81f;
-		assertEquals(expected, result, 0.01f);
+		float expected = 2.39f;
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -249,8 +249,8 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(0);
-		float expected = 2.57f;
-		assertEquals(expected, result, 0.01f);
+		float expected = 3.4f;
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -258,8 +258,8 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(1);
-		float expected = 2.48f;
-		assertEquals(expected, result, 0.01f);
+		float expected = 3.27f;
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -267,8 +267,8 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(2);
-		float expected = -3.24f;
-		assertEquals(expected, result, 0.01f);
+		float expected = -4.3f;
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -276,8 +276,8 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube2sidesmall.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getTotalDistance(0.0f, 1.0f);
-		float expected = 4.83f;
-		assertEquals(expected, result, 0.01f);
+		float expected = 6.38f;
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -285,8 +285,8 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(0);
-		float expected = 0.052f;
-		assertEquals(expected, result, 0.01f);
+		float expected = 0.07f;
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -294,8 +294,8 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(1);
-		float expected = 0.03f;
-		assertEquals(expected, result, 0.01f);
+		float expected = 0.04f;
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -303,8 +303,8 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(2);
-		float expected = -1.028f;
-		assertEquals(expected, result, 0.01f);
+		float expected = -1.35f;
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -312,8 +312,8 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube3side.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getTotalDistance(0.0f, 1.0f);
-		float expected = 1.04f;
-		assertEquals(expected, result, 0.01f);
+		float expected = 1.35f;
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -321,8 +321,8 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube3sidecorner.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(0);
-		float expected = 0.32f;
-		assertEquals(expected, result, 0.01f);
+		float expected = 0.43f;
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -330,8 +330,8 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube3sidecorner.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(1);
-		float expected = 0.40f;
-		assertEquals(expected, result, 0.01f);
+		float expected = 0.5f;
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -339,8 +339,8 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube3sidecorner.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = (float) im.getXYZDistance(0.0f, 1.0f).getEntry(2);
-		float expected = -0.90f;
-		assertEquals(expected, result, 0.01f);
+		float expected = -1.2f;
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -348,8 +348,8 @@ public class ImageTest {
 		byte[] image1 = this.loadImageRGBBytes("cube3sidecorner.png");
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getTotalDistance(0.0f, 1.0f);
-		float expected = 1.03f;
-		assertEquals(expected, result, 0.01f);
+		float expected = 1.35f;
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -358,7 +358,7 @@ public class ImageTest {
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float[] result = im.getPercentageXYZPixels(0.0f, 1.0f);
 		float[] expected = {0.36f, 0.31f, 0.32f};
-		assertArrayEquals(expected, result, 0.01f);
+		assertArrayEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -377,7 +377,7 @@ public class ImageTest {
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getRatioPixelsIfTwoPlanesVisible(0.0f, 1.0f);
 		float expected = 1.01f;
-		assertEquals(expected, result, 0.01f);
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test
@@ -386,7 +386,7 @@ public class ImageTest {
 		Image im = new Image(image1, 200, 200, 120, 120);
 		float result = im.getRatioPixelsIfTwoPlanesVisible(0.0f, 1.0f);
 		float expected = 4.65f;
-		assertEquals(expected, result, 0.01f);
+		assertEquals(expected, result, 1f);
 	}
 	
 	@Test

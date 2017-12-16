@@ -42,6 +42,8 @@ public class ImageRecognizerCube {
 	 */
 	private boolean destroyed = false;
 	
+	private boolean isTarget = false;
+	
 	/**
 	 * Initialize this ImageRecognizerCube with given x, y and z coordinate and given hue and saturation.
 	 * @param x				The given x coordinate
@@ -160,10 +162,19 @@ public class ImageRecognizerCube {
 	
 	public void destroy(){
 		this.destroyed = true;
+		this.isTarget = false;
 	}
 	
 	public boolean isNotDestroyed(){
 		return !this.destroyed;
+	}
+	
+	public void makeTarget() {
+		this.isTarget = true;
+	}
+	
+	public boolean isTarget() {
+		return this.isTarget;
 	}
 	
 }

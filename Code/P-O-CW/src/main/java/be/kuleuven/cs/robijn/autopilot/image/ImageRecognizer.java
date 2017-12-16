@@ -34,6 +34,8 @@ public class ImageRecognizer {
 		this.pitch = pitch;
 		this.roll = roll;
 		this.UpdateImageRecognizerCubeList(im);
+		if (!this.hasTarget())
+			getClosestCubeInWorld(im).makeTarget();
 		return im;
 	}
 	
@@ -68,11 +70,25 @@ public class ImageRecognizer {
 	 * @throws Exception Something goes wrong while calculating the average coordinates of the pixels with given hue and saturation
 	 */
 	public float[] getNecessaryRotation(Image image, float hue, float sat) throws IllegalStateException{
-		return image.getRotationToCube(hue, sat);
+		try {
+			return image.getRotationToCube(hue, sat);
+		} catch (IllegalArgumentException exc) {
+			//default rotation
+			RealVector vec = getWorldVectorToCube(getEquivalentImageRecognizerCube(hue, sat));
+			double[] dronePos = getDronePositionCoordinates();
+			float x,y;
+			if (vec.getEntry(0) > (float)dronePos[0])
+				x = -image.getHorizontalAngle()/6f;
+			else
+				x = image.getHorizontalAngle()/6f;
+			if (vec.getEntry(1) > (float)dronePos[1])
+				y = -image.getVerticalAngle()/6f;
+			else
+				y = image.getVerticalAngle()/6f;
+			return new float[] {x,y};
+		}
 	}
 	
-	
-
 	/**
 	 * Returns the distance to cube with given hue and saturation in the given image.
 	 * @param image	The given image
@@ -130,15 +146,26 @@ public class ImageRecognizer {
 		}
 		return cubes;
 	}
+	
+	public ArrayList<ImageRecognizerCube> getImageRecognizerCubesFromImage(Image im){
+		ArrayList<ImageRecognizerCube> cubes = new ArrayList<ImageRecognizerCube>();
+		for (ImageCube c : im.getImageCubes()) {
+			float hue = c.getHue();
+			float sat = c.getSaturation();
+			cubes.add(getEquivalentImageRecognizerCube(hue, sat));
+		}
+		return cubes;
+	}
 
 	/**
 	 * Return the cube in the ImageRecognizerCubeList that is closest to the current position of the drone.
 	 */
-	public ImageRecognizerCube getClosestCubeInWorld(){
+	public ImageRecognizerCube getClosestCubeInWorld(Image im){
 		float[] curPos = {(float)dronePosition.getEntry(0), (float)dronePosition.getEntry(1), (float)dronePosition.getEntry(2)};
 		ImageRecognizerCube closest = null;
 		float minimum = 1000f;
-		for (ImageRecognizerCube c : getNotDestroyedImageRecognizerCubes()){
+//		for (ImageRecognizerCube c : getNotDestroyedImageRecognizerCubes()){
+		for (ImageRecognizerCube c : getImageRecognizerCubesFromImage(im)) {
 			float distance = (float) Math.sqrt(Math.pow(curPos[0] - c.getX(), 2) + Math.pow(curPos[1] - c.getY(), 2) + Math.pow(curPos[2] - c.getZ(), 2));
 			if (distance < minimum){
 				minimum = distance;
@@ -182,28 +209,36 @@ public class ImageRecognizer {
 		return combos;
 	}
 	
+	public ImageRecognizerCube getTargetCube() {
+		for (ImageRecognizerCube cu : getImageRecognizerCubes()) {
+			if (cu.isTarget())
+				return cu;
+		}
+		return null;
+	}
+	
+	public boolean hasTarget() {
+		for (ImageRecognizerCube cu : getImageRecognizerCubes()) {
+			if (cu.isTarget())
+				return true;
+		}
+		return false;
+	}
+	
 	/**
 	 * Return the ImageRecognizerCube in the list that has the given hue and saturation as its color.
-	 * @param image		The given image
 	 * @param hue		The given hue
 	 * @param sat		The given saturation
 	 * @return	The ImageRecognizerCube that corresponds to the given hue and saturation, or null if there is none such.
 	 * @throws Exception
 	 */
-	private ImageRecognizerCube getEquivalentImageRecognizerCube(Image image, float hue, float sat) {
+	private ImageRecognizerCube getEquivalentImageRecognizerCube(float hue, float sat) {
 		for (ImageRecognizerCube cu : getImageRecognizerCubes()){
 			if (floatFuzzyEquals(hue, cu.getHue(), 0.01f) && floatFuzzyEquals(sat, cu.getSaturation(), 0.01f)){
-				
-//				RealVector vector = image.getXYZDistance(hue, sat);
-//				float[] droneRotation = getRollPitchHeading();
-//				RealVector vectorWorld = transformationToWorldCoordinates(vector, droneRotation[0], droneRotation[1], droneRotation[2]);
-//				double[] droneCoordinates = getDronePositionCoordinates();
-//				RealVector dronePosition = new ArrayRealVector(droneCoordinates);
-//				cu.setPosition((float) vectorWorld.getEntry(0) + (float) dronePosition.getEntry(0), (float) vectorWorld.getEntry(1) + (float) dronePosition.getEntry(1), (float) vectorWorld.getEntry(2) + (float) dronePosition.getEntry(2));
 				return cu;
 			}
 		}
-		//no equivalent ImageRecognizerCube exists => create new ImageRwcognizerCube
+		//no equivalent ImageRecognizerCube exists => create new ImageRecognizerCube
 		return null;
 	}
 	
@@ -236,25 +271,22 @@ public class ImageRecognizer {
 			double[] cubeCoordinates = {dronePosition.getEntry(0) + vectorWorld.getEntry(0), dronePosition.getEntry(1) + vectorWorld.getEntry(1), dronePosition.getEntry(2) + vectorWorld.getEntry(2)};
 			RealVector cubePosition = new ArrayRealVector(cubeCoordinates);
 			
-			ImageRecognizerCube cube = getEquivalentImageRecognizerCube(image, hue, sat);
+			ImageRecognizerCube cube = getEquivalentImageRecognizerCube(hue, sat);
 			if (cube == null){
 				float value = image.getNecessaryCubeFactor(hue, sat);
 				ImageRecognizerCube cube1 = new ImageRecognizerCube((float) cubePosition.getEntry(0), (float) cubePosition.getEntry(1), (float) cubePosition.getEntry(2), hue, sat);
 				cube1.setFactor(value);
 				this.ImageRecognizerCubeList.add(cube1);
 			} else {
-				if (image.getTotalDistance(hue, sat) > 40 && getWorldDistanceToCube(cube) > 40) {
+				if (getWorldDistanceToCube(cube) > 60) {
 					cube.setPosition((float) cubePosition.getEntry(0), (float) cubePosition.getEntry(1), (float) cubePosition.getEntry(2));
 				}
-				if (image.getTotalDistance(hue, sat) > 40 && getWorldDistanceToCube(cube) < 40) {
-					cube.setPosition((float) cubePosition.getEntry(0), (float) cubePosition.getEntry(1), (float) cubePosition.getEntry(2));
+				if (image.getTotalDistance(hue, sat) > 60 && getWorldDistanceToCube(cube) <= 60) {
+					cube.setPosition(cube.getPosition()[0], cube.getPosition()[1], cube.getPosition()[2]);
 				}
-				if (image.getTotalDistance(hue, sat) < 40 && getWorldDistanceToCube(cube) > 40) {
-					cube.setPosition((float) cubePosition.getEntry(0), (float) cubePosition.getEntry(1), (float) cubePosition.getEntry(2));
-				}
-				if (image.getTotalDistance(hue, sat) <= 4)
-					cube.destroy();
-				else {
+//				if (image.getTotalDistance(hue, sat) <= 4)
+//					cube.destroy();
+//				else {
 					float previous_factor = cube.getFactor();
 					float new_factor = image.getNecessaryCubeFactor(hue, sat);
 					float total_factor = previous_factor + new_factor;
@@ -263,7 +295,9 @@ public class ImageRecognizer {
 					float newZ = (previous_factor * cube.getZ() + new_factor * (float) cubePosition.getEntry(2)) / total_factor;
 					cube.setPosition(newX, newY, newZ);
 					cube.setFactor(total_factor);
-				}
+//				}
+				if (getWorldDistanceToCube(cube) <= 4)
+					cube.destroy();
 			}	
 		}
 	}
