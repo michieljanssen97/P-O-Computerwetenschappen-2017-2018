@@ -7,6 +7,7 @@ import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.autopilot.image.*;
 import be.kuleuven.cs.robijn.common.math.*;
+import be.kuleuven.cs.robijn.experiments.ExpPosition;
 import interfaces.*;
 
 /**
@@ -15,6 +16,9 @@ import interfaces.*;
  * @author Pieter Vandensande
  */
 public class Autopilot extends WorldObject implements interfaces.Autopilot {
+	private static boolean drawChartPositions = false;
+	public static ExpPosition exppos = new ExpPosition();
+	
 	public AutopilotConfig getConfig() {
 		return this.config;
 	}
@@ -542,6 +546,10 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		return crash;	
 	}
 	
+    public static boolean isPositionDrawn() {
+    	return drawChartPositions;
+    }
+    
 	/**
 	 * Method to move the drone of this autopilot,
 	 * the position, velocity and acceleration get updated,
@@ -627,6 +635,10 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		this.setPreviousPitchAngularVelocity(newPitchAngularVelocity);
 		this.setPreviousRoll(newRoll);
 		this.setPreviousRollAngularVelocity(newRollAngularVelocity);
+		
+		if(isPositionDrawn()) {
+			exppos.updateValuesToDrawForFloat(drone);
+		}
 	}
 	
 	private RealVector previousPosition;
@@ -826,6 +838,5 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 
 	@Override
 	public void simulationEnded() {
-		
 	}
 }
