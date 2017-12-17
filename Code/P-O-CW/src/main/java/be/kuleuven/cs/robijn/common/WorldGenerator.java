@@ -14,7 +14,7 @@ public class WorldGenerator {
 	 */
 	public static List<Box> generateBoxes(WorldGeneratorSettings settings) {
 		ArrayList<Box> boxes = new ArrayList<>(settings.getBoxCount());
-        NormalDistribution dist = new NormalDistribution(0, 1d/2.575829303d); //99% in [-1; 1]
+        NormalDistribution dist = new NormalDistribution(0, 0.5); //99% in [-1; 1]
 
 		for(int i = 1; i <= settings.getBoxCount(); i++) {
 			Box box = new Box();

@@ -31,7 +31,7 @@ public class ReliabilityTest {
         int updatesPerSecond = 30;
         WorldGenerator.WorldGeneratorSettings settings = new WorldGenerator.WorldGeneratorSettings();
         settings.setRandomizeColors(true);
-        settings.setBoxCount(2);
+        settings.setBoxCount(5);
 
         int successes = 0;
         for (int i = 0; i < timesToRunTest; i++){
@@ -53,9 +53,11 @@ public class ReliabilityTest {
 
     private static TestResult runTest(List<Box> boxes, AutopilotConfig config, int maxSimulationRuntimeInSeconds, int updatesPerSecond){
         //Run simulation
-        SimulationDriver driver = new SimulationDriver(boxes, config, new ConstantIntervalStopwatch(1d/((double)updatesPerSecond)));
+//        SimulationDriver driver = new SimulationDriver(boxes, config, new ConstantIntervalStopwatch(1d/((double)updatesPerSecond)));
+    	SimulationDriver driver = new SimulationDriver(boxes, config);
 
-        int maxUpdates = maxSimulationRuntimeInSeconds * updatesPerSecond;
+//        int maxUpdates = maxSimulationRuntimeInSeconds * updatesPerSecond;
+    	int maxUpdates = Integer.MAX_VALUE;
         int updateI = 0;
         for(; updateI < maxUpdates && !driver.hasSimulationFinished() && !driver.hasSimulationCrashed(); updateI++){
             driver.runUpdate();
