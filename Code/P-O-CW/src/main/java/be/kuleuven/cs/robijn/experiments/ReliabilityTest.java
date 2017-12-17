@@ -25,7 +25,7 @@ public class ReliabilityTest {
 
     public void runTests(){
         //Config
-        int timesToRunTest = 100;
+        int timesToRunTest = 50;
         AutopilotConfig config = getDefaultConfig();
         int maxSimulationRuntimeInSeconds = 30;
         int updatesPerSecond = 30;

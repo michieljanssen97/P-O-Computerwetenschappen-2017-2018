@@ -287,14 +287,14 @@ public class ImageRecognizer {
 //				if (image.getTotalDistance(hue, sat) <= 4)
 //					cube.destroy();
 //				else {
-					float previous_factor = cube.getFactor();
-					float new_factor = image.getNecessaryCubeFactor(hue, sat);
-					float total_factor = previous_factor + new_factor;
-					float newX = (previous_factor * cube.getX() + new_factor * (float) cubePosition.getEntry(0)) / total_factor;
-					float newY = (previous_factor * cube.getY() + new_factor * (float) cubePosition.getEntry(1)) / total_factor;
-					float newZ = (previous_factor * cube.getZ() + new_factor * (float) cubePosition.getEntry(2)) / total_factor;
-					cube.setPosition(newX, newY, newZ);
-					cube.setFactor(total_factor);
+				float previous_factor = cube.getFactor();
+				float new_factor = image.getNecessaryCubeFactor(hue, sat);
+				float total_factor = previous_factor + new_factor;
+				float newX = (previous_factor * cube.getX() + new_factor * (float) cubePosition.getEntry(0)) / total_factor;
+				float newY = (previous_factor * cube.getY() + new_factor * (float) cubePosition.getEntry(1)) / total_factor;
+				float newZ = (previous_factor * cube.getZ() + new_factor * (float) cubePosition.getEntry(2)) / total_factor;
+				cube.setPosition(newX, newY, newZ);
+				cube.setFactor(total_factor);
 //				}
 				if (getDistanceToCube(image, cu.getHue(), cu.getSaturation()) <= 4)
 					cube.destroy();
