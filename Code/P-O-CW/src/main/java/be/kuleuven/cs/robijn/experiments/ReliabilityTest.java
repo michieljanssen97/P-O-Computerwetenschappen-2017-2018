@@ -25,7 +25,7 @@ public class ReliabilityTest {
 
     public void runTests(){
         //Config
-        int timesToRunTest = 50;
+        int timesToRunTest = 100;
         AutopilotConfig config = getDefaultConfig();
         int maxSimulationRuntimeInSeconds = 30;
         int updatesPerSecond = 30;
@@ -53,11 +53,11 @@ public class ReliabilityTest {
 
     private static TestResult runTest(List<Box> boxes, AutopilotConfig config, int maxSimulationRuntimeInSeconds, int updatesPerSecond){
         //Run simulation
-//        SimulationDriver driver = new SimulationDriver(boxes, config, new ConstantIntervalStopwatch(1d/((double)updatesPerSecond)));
-    	SimulationDriver driver = new SimulationDriver(boxes, config);
+        SimulationDriver driver = new SimulationDriver(boxes, config, new ConstantIntervalStopwatch(1d/((double)updatesPerSecond)));
+//    	SimulationDriver driver = new SimulationDriver(boxes, config);
 
-//        int maxUpdates = maxSimulationRuntimeInSeconds * updatesPerSecond;
-    	int maxUpdates = Integer.MAX_VALUE;
+        int maxUpdates = maxSimulationRuntimeInSeconds * updatesPerSecond;
+//    	int maxUpdates = Integer.MAX_VALUE;
         int updateI = 0;
         for(; updateI < maxUpdates && !driver.hasSimulationFinished() && !driver.hasSimulationCrashed(); updateI++){
             driver.runUpdate();
