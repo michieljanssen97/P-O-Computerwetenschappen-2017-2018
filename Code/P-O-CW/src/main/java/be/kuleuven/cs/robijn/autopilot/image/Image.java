@@ -323,6 +323,7 @@ public class Image {
 	 */
 	public float getTotalDistance(float hue, float sat){
 		int sides = getAmountSidesVisible(hue, sat);
+		float result;
 		if (sides == 3){
 			float[] percentageXYZPixels = getPercentageXYZPixels(hue, sat);
 			if (percentageXYZPixels[0] < 0.1 || percentageXYZPixels[1] < 0.1 || percentageXYZPixels[2] < 0.1){
@@ -343,12 +344,20 @@ public class Image {
 				}
 				float angleCos = (float) Math.sqrt(1 / (1 + Math.pow(ratio, 2)));
 				float planeAngle = (float) Math.acos(angleCos);
-				return 1.32279f * (float) (0.5/Math.tan(degreesToRadians(angle)) + 0.5 / Math.sin(planeAngle));
+				result = 1.32279f * (float) (0.5/Math.tan(degreesToRadians(angle)) + 0.5 / Math.sin(planeAngle));
+				if (!Double.isFinite(result))
+					return 100;
+				else
+					return result;
 			}
 			else{
 				float pixels = getMaximumDistanceSpherePixels(hue, sat);
 				float angle = (pixels * getHorizontalAngle()) / getnbColumns();
-				return 1.32279f * (float) (Math.sqrt(0.75) / Math.tan((degreesToRadians(angle))));
+				result = 1.32279f * (float) (Math.sqrt(0.75) / Math.tan((degreesToRadians(angle))));
+				if (!Double.isFinite(result))
+					return 100;
+				else
+					return result;
 			}
 		} else if (sides == 2) {
 			float pixels = getMinimumDistanceSpherePixels(hue, sat);
@@ -356,11 +365,19 @@ public class Image {
 			float ratio = getRatioPixelsIfTwoPlanesVisible(hue, sat);
 			float angleCos = (float) Math.sqrt(1 / (1 + Math.pow(ratio, 2)));
 			float planeAngle = (float) Math.acos(angleCos);
-			return 1.32279f * (float) (0.5/Math.tan(degreesToRadians(angle)) + 0.5 / Math.sin(planeAngle));
+			result = 1.32279f * (float) (0.5/Math.tan(degreesToRadians(angle)) + 0.5 / Math.sin(planeAngle));
+			if (!Double.isFinite(result))
+				return 100;
+			else
+				return result;
 		} else if (sides == 1){
 			float pixels = getMinimumDistanceSpherePixels(hue, sat);
 			float angle = (pixels * getHorizontalAngle()) / getnbColumns();
-			return 1.32279f * (float) (0.5 / Math.tan(degreesToRadians(angle)) + 0.5);
+			result = 1.32279f * (float) (0.5 / Math.tan(degreesToRadians(angle)) + 0.5);
+			if (!Double.isFinite(result))
+				return 100;
+			else
+				return result;
 		} else
 			throw new IllegalStateException("The cube does not have the right values to be visible or no cube is present.");
 	}
