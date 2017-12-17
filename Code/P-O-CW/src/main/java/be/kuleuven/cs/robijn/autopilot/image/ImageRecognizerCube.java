@@ -78,7 +78,7 @@ public class ImageRecognizerCube {
 	 * @return		True if the value is between 0 and 5.
 	 */
 	public boolean isValidFactor(float value){
-		return (value >= 0 && Float.isFinite(value));
+		return (value > 0 && Float.isFinite(value));
 	}
 	
 	/**
@@ -98,7 +98,7 @@ public class ImageRecognizerCube {
 	 * @return		True if the given value is finite.
 	 */
 	public boolean isValidCoordinate(float value){
-		return (Double.isFinite(value));
+		return (Float.isFinite(value));
 	}
 	
 	/**

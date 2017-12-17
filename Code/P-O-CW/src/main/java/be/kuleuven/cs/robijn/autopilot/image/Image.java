@@ -377,7 +377,7 @@ public class Image {
 		float angleY = (imageCenter[1] - cubeCenter[1]) * getVerticalAngle() / getnbRows();
 		float distanceX =  (float) (getTotalDistance(hue, sat)*Math.sin(degreesToRadians(angleX)));
 		float distanceY =  (float) (getTotalDistance(hue, sat)*Math.sin(degreesToRadians(angleY)));
-		float distanceZ = (float) - Math.sqrt(Math.pow(getTotalDistance(hue, sat), 2) - Math.pow(distanceX, 2) - Math.pow(distanceY, 2));
+		float distanceZ = (float) (- Math.sqrt(Math.pow(getTotalDistance(hue, sat), 2) - Math.pow(distanceX, 2) - Math.pow(distanceY, 2)));
 		double[] vectorDouble = {distanceX, distanceY, distanceZ};
 		RealVector realVector = new ArrayRealVector(vectorDouble);
 		return realVector;
@@ -615,6 +615,8 @@ public class Image {
 		float[] PixelsToCenter = getPixelsFromCenter(cubeCenterPixel[0], cubeCenterPixel[1]);
 		float distanceToCenter = (float) Math.sqrt(Math.pow(PixelsToCenter[0], 2) + Math.pow(PixelsToCenter[1], 2));
 		float factorValue = 5 * (1 - distanceToCenter / maxDistanceToCenter) * (float) Math.pow((1 - 0.015f * getTotalDistance(hue, sat)), 4);
+		if (factorValue <= 0f)
+			return 0.00001f;
 		return factorValue;
 	}
 	

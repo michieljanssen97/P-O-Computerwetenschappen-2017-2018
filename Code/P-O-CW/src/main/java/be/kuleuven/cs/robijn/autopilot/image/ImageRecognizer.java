@@ -296,7 +296,7 @@ public class ImageRecognizer {
 					cube.setPosition(newX, newY, newZ);
 					cube.setFactor(total_factor);
 //				}
-				if (getWorldDistanceToCube(cube) <= 4)
+				if (getDistanceToCube(image, cu.getHue(), cu.getSaturation()) <= 4)
 					cube.destroy();
 			}	
 		}
