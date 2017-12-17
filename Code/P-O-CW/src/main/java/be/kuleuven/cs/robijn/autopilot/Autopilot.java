@@ -7,6 +7,7 @@ import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.autopilot.image.*;
 import be.kuleuven.cs.robijn.common.math.*;
+import be.kuleuven.cs.robijn.experiments.ExpPosition;
 import interfaces.*;
 
 /**
@@ -15,6 +16,9 @@ import interfaces.*;
  * @author Pieter Vandensande
  */
 public class Autopilot extends WorldObject implements interfaces.Autopilot {
+	private static boolean drawChartPositions = false;
+	public static ExpPosition exppos = new ExpPosition();
+	
 	public AutopilotConfig getConfig() {
 		return this.config;
 	}
@@ -65,20 +69,38 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
         
         Drone drone = this.getFirstChildOfType(Drone.class);
         
+        double relativeAccuracy = 1.0e-12;
+		double absoluteAccuracy = 1.0e-8;
+		int maxOrder = 5;
+		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
+		float turningTime = 0.5f;
+		float xMovementTime = 1.0f;
+		float maxRoll = (float) Math.toRadians(45.0);
+		float maxHeadingAngularAcceleration = 2.0f;
+		float correctionFactor = 3.0f;
+		float correctionDistance = 30.0f;
+		
         ImageRecognizer recognizer = this.getImageRecognizer();
         float[] necessaryRotation;
         float horizontalAngleOfView = (float) Math.toDegrees(this.getConfig().getHorizontalAngleOfView());
         float verticalAngleOfView = (float) Math.toDegrees(this.getConfig().getVerticalAngleOfView());
 		Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
 				horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
-
+		
+		float distanceToCube;
 		try{
 			ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
 			if (closestCube == null)
 				this.simulationEnded();
 			necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
+			distanceToCube = recognizer.getDistanceToCube(image, closestCube.getHue(), closestCube.getSaturation());
 		} catch (NullPointerException exc1) {
 			necessaryRotation = new float[2];
+			distanceToCube = 0;
+		} catch (IllegalArgumentException exc2) {
+			ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
+			necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
+			distanceToCube = 0;
 		}
 
 		float imageYRotation = (float) Math.toRadians(necessaryRotation[0]);
@@ -103,21 +125,21 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			imageYRotation = -newImageYRotation;
 			imageXRotation = -newImageXRotation;
 		}
+		float pitch = drone.getPitch();
+		if (pitch > Math.PI)
+			pitch -= 2*Math.PI;
+		float heading = drone.getHeading();
+		if (heading > Math.PI)
+			heading -= 2*Math.PI;
+		if ((distanceToCube*Math.cos(heading + imageYRotation)*Math.cos(pitch + imageXRotation)) > correctionDistance) {
+			imageXRotation = (float) ((3.0/2.0)*imageXRotation + (1.0/2.0)*pitch);
+			imageYRotation = (float) ((5.0/4.0)*imageYRotation + (1.0/4.0)*heading);
+		}
 		
 		float horStabInclinationTemp = 0;
 		float verStabInclinationTemp = 0;
 		float leftWingInclinationTemp = 0;
 		float rightWingInclinationTemp = 0;
-		
-		double relativeAccuracy = 1.0e-12;
-		double absoluteAccuracy = 1.0e-8;
-		int maxOrder = 5;
-		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
-		float turningTime = 0.5f;
-		float xMovementTime = 1.0f;
-		float maxRoll = (float) Math.toRadians(45.0);
-		float maxHeadingAngularAcceleration = 2.0f;
-		float correctionFactor = 3.0f;
 
 		float maxInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float) Math.toRadians(1.0), drone, 1);
 		float minInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float) Math.toRadians(1.0), drone, 1);
@@ -265,7 +287,10 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		
 		float targetRollAngularVelocity = rollDifference/turningTime;
 		float rollAngularVelocity = drone.getRollAngularVelocity();
-		final float rollAngularAcceleration = (targetRollAngularVelocity - rollAngularVelocity)/turningTime;
+		float rollAngularAccelerationTemp = (targetRollAngularVelocity - rollAngularVelocity)/turningTime;
+		if (! Float.isNaN(this.getPreviousRollAngularAccelerationError()))
+			rollAngularAccelerationTemp -= this.getPreviousRollAngularAccelerationError();
+		final float rollAngularAcceleration = rollAngularAccelerationTemp;
 		
 		float rollInclinationTemp = 0;
 		UnivariateFunction function4 = (x)->{return 
@@ -372,6 +397,9 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		this.setPreviousPitchAngularAccelerationError(
 				drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination)[1]
 				-pitchAngularAcceleration);
+		this.setPreviousRollAngularAccelerationError(
+				drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination)[2]
+				-rollAngularAcceleration);
 		this.setPreviousYAccelerationError(
 				((float)drone.getAcceleration(thrust, leftWingInclination, rightWingInclination, horStabInclination, verStabInclination).getEntry(1))
 				-yAcceleration);
@@ -489,6 +517,23 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		this.previousPitchAngularAccelerationError = previousPitchAngularAccelerationError;
 	}
 	
+	private float previousRollAngularAccelerationError = Float.NaN;
+	
+	public float getPreviousRollAngularAccelerationError() {
+		return this.previousRollAngularAccelerationError;
+	}
+	
+	public static boolean isValidPreviousRollAngularAccelerationError(float previousRollAngularAccelerationError) {
+		return ((Float.isNaN(previousRollAngularAccelerationError)) || (! Float.isInfinite(previousRollAngularAccelerationError)));
+	}
+	
+	public void setPreviousRollAngularAccelerationError(float previousRollAngularAccelerationError) 
+			throws IllegalArgumentException {
+		if (! isValidPreviousRollAngularAccelerationError(previousRollAngularAccelerationError))
+			throw new IllegalArgumentException();
+		this.previousRollAngularAccelerationError = previousRollAngularAccelerationError;
+	}
+	
 	public float minMaxInclination(float upperBound, float lowerBound, boolean max, float accuracy, Drone drone, int airfoil) {
 		float inclination;
 		if (max == true) {
@@ -542,6 +587,10 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		return crash;	
 	}
 	
+    public static boolean isPositionDrawn() {
+    	return drawChartPositions;
+    }
+    
 	/**
 	 * Method to move the drone of this autopilot,
 	 * the position, velocity and acceleration get updated,
@@ -627,6 +676,10 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		this.setPreviousPitchAngularVelocity(newPitchAngularVelocity);
 		this.setPreviousRoll(newRoll);
 		this.setPreviousRollAngularVelocity(newRollAngularVelocity);
+		
+		if(isPositionDrawn()) {
+			exppos.updateValuesToDrawForFloat(drone);
+		}
 	}
 	
 	private RealVector previousPosition;
@@ -826,6 +879,5 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 
 	@Override
 	public void simulationEnded() {
-		
 	}
 }
