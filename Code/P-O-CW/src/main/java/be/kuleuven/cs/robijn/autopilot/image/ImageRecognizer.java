@@ -261,6 +261,8 @@ public class ImageRecognizer {
 			float hue = cu.getHue();
 			float sat = cu.getSaturation();
 			RealVector vector = image.getXYZDistance(hue, sat);
+			if (Double.isNaN(vector.getEntry(0)) || (Double.isNaN(vector.getEntry(1))) || (Double.isNaN(vector.getEntry(2))))
+				vector = new ArrayRealVector(new double[] {0, 0, -100}, false);
 			
 			float[] droneRotation = getRollPitchHeading();
 			RealVector vectorWorld = transformationToWorldCoordinates(vector, droneRotation[0], droneRotation[1], droneRotation[2]);
@@ -281,12 +283,12 @@ public class ImageRecognizer {
 				if (getWorldDistanceToCube(cube) > 60) {
 					cube.setPosition((float) cubePosition.getEntry(0), (float) cubePosition.getEntry(1), (float) cubePosition.getEntry(2));
 				}
-				if (image.getTotalDistance(hue, sat) > 60 && getWorldDistanceToCube(cube) <= 60) {
+				else if (image.getTotalDistance(hue, sat) > 60 && getWorldDistanceToCube(cube) <= 60) {
 					cube.setPosition(cube.getPosition()[0], cube.getPosition()[1], cube.getPosition()[2]);
 				}
 //				if (image.getTotalDistance(hue, sat) <= 4)
 //					cube.destroy();
-//				else {
+				else {
 					float previous_factor = cube.getFactor();
 					float new_factor = image.getNecessaryCubeFactor(hue, sat);
 					float total_factor = previous_factor + new_factor;
@@ -295,7 +297,7 @@ public class ImageRecognizer {
 					float newZ = (previous_factor * cube.getZ() + new_factor * (float) cubePosition.getEntry(2)) / total_factor;
 					cube.setPosition(newX, newY, newZ);
 					cube.setFactor(total_factor);
-//				}
+				}
 				if (getWorldDistanceToCube(cube) <= 4)
 					cube.destroy();
 			}	
