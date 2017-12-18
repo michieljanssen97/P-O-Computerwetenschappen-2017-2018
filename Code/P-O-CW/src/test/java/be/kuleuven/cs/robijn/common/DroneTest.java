@@ -2,15 +2,17 @@ package be.kuleuven.cs.robijn.common;
 
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.math.*;
-import junit.framework.*;
-import p_en_o_cw_2017.*;
+import org.junit.jupiter.api.Test;
+import interfaces.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * A class with tests for the class Drone.
  * 
  * @author Pieter Vandensande en Roy De Prins
  */
-public class DroneTest extends TestCase {
+public class DroneTest {
 	
 	private static final double EPSILON = 0.0001;
 	
@@ -47,7 +49,8 @@ public class DroneTest extends TestCase {
         public int getNbRows() { return nbRows; }
     };
 	private static Drone drone = new Drone(config, velocity);
-	
+
+	@Test
 	public final void testExtendedConstructor_LegalCase() throws Exception {
 		float wingX = 4;
 		float tailSize = 6;
@@ -95,89 +98,68 @@ public class DroneTest extends TestCase {
 		assertEquals(verStabLiftSlope, drone1.getVerStabLiftSlope(), 0.00001);
 		assertTrue(VectorMath.fuzzyEquals(velocity, drone1.getVelocity()));
 	}
-	
+
+	@Test
 	public final void testSetHeading_LegalCase_IllegalCase() {
 		float heading = (float) Math.PI; //Valid value
 		drone.setHeading(heading);
 		assertEquals(heading, drone.getHeading(), EPSILON);
 		
 		float heading2 = (float) (3*Math.PI); //Invalid value
-		boolean thrown = false;
-		try{
+		assertThrows(IllegalArgumentException.class, ()->{
 			drone.setHeading(heading2);
-		}
-		catch (IllegalArgumentException e) {
-			thrown=true;
-		}
-		assertTrue(thrown);
+		});
 	}
-	
-	
+
+	@Test
 	public final void testSetPitch_LegalCase_IllegalCase() {
 		float pitch = (float) Math.PI; //Valid value
 		drone.setPitch(pitch);
 		assertEquals(pitch, drone.getPitch(), EPSILON);
 		
 		float pitch2 = (float) (3*Math.PI); //Invalid value
-		boolean thrown = false;
-		try{
+		assertThrows(IllegalArgumentException.class, ()->{
 			drone.setPitch(pitch2);
-		}
-		catch (IllegalArgumentException e) {
-			thrown=true;
-		}
-		assertTrue(thrown);
+		});
 	}
-	
-	
+
+	@Test
 	public final void testSetRoll_LegalCase_IllegalCase() {
 		float roll = (float) Math.PI; //Valid value
 		drone.setRoll(roll);
 		assertEquals(roll, drone.getRoll(), 0.00001);
 		
 		float roll2 = (float) (3*Math.PI); //Invalid value
-		boolean thrown = false;
-		try{
+		assertThrows(IllegalArgumentException.class, ()->{
 			drone.setRoll(roll2);
-		}
-		catch (IllegalArgumentException e) {
-			thrown=true;
-		}
-		assertTrue(thrown);
+		});
 	}
-	
+
+	@Test
 	public final void testSetPosition_LegalCase_IllegalCase() {
 		RealVector pos = new ArrayRealVector(new double[] {4,7,5},false); //Valid value
 		drone.setRelativePosition(pos);
 		assertTrue(VectorMath.fuzzyEquals(pos, drone.getWorldPosition()));
 		
 		RealVector pos2 = null; //Invalid value
-		boolean thrown = false;
-		try {
+		assertThrows(IllegalArgumentException.class, ()->{
 			drone.setRelativePosition(pos2);
-		}
-		catch(IllegalArgumentException e) {
-			thrown=true;
-		}
-		assertTrue(thrown);
+		});
 	}
-	
+
+	@Test
 	public final void testSetVelocity_LegalCase_IllegalCase() {
 		RealVector velocity =  new ArrayRealVector(new double[] {5,8,6}, false); //Valid value
 		drone.setVelocity(velocity);
 		assertTrue(VectorMath.fuzzyEquals(velocity, drone.getVelocity()));
 		
 		RealVector velocity2 = null; //Invalid value
-		boolean thrown = false;
-		try {
+		assertThrows(IllegalArgumentException.class, ()->{
 			drone.setVelocity(velocity2);
-		}
-		catch(IllegalArgumentException e) {
-			thrown=true;
-		}
-		assertTrue(thrown);
+		});
 	}
-	
+
+	@Test
 	public final void testTransformationToWorldCoordinates_SingleCase() {
 		drone.setRoll(0);
 		drone.setHeading(0);
@@ -186,7 +168,8 @@ public class DroneTest extends TestCase {
 		assertTrue(VectorMath.fuzzyEquals(new ArrayRealVector(new double[] {-2.6337,-0.47158,-1.2795}, false),
 				drone.transformationToWorldCoordinates(positionDroneCoordinates)));
 	}
-	
+
+	@Test
     public final void testTransformationToDroneCoordinates_SingleCase() {
 		drone.setRoll((float) Math.PI/3);
 		drone.setHeading((float) Math.PI/4);

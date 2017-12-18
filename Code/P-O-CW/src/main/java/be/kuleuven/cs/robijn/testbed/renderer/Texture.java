@@ -4,29 +4,25 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL12;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL12.GL_BGRA;
+import static org.lwjgl.opengl.GL12.GL_UNSIGNED_INT_8_8_8_8_REV;
 
 public class Texture implements AutoCloseable {
-    private final int textureId;
+    private final int textureId, width, height;
 
     public static Texture load(BufferedImage img){
         //Copy pixel values to array of integers
         int[] pixels = new int[img.getWidth() * img.getHeight()];
         img.getRGB(0, 0, img.getWidth(), img.getHeight(), pixels, 0, img.getWidth());
 
-        //Create native buffer and load the pixel values into the buffer.
-        ByteBuffer buffer = BufferUtils.createByteBuffer(img.getWidth() * img.getHeight() * 3); //3 because RGB
-        for(int x = 0; x < img.getWidth(); x++){
-            for(int y = 0; y < img.getHeight(); y++){
-                int pixel = pixels[y * img.getWidth() + x];
-                //Get RGB values and append to buffer
-                buffer.put((byte) ((pixel >> 16) & 0xFF));
-                buffer.put((byte) ((pixel >> 8) & 0xFF));
-                buffer.put((byte) (pixel & 0xFF));
-            }
-        }
-        buffer.flip();
+        //Copy pixels to native buffer
+        IntBuffer buffer = BufferUtils.createIntBuffer(img.getWidth() * img.getHeight());
+        buffer.rewind();
+        buffer.put(pixels);
+        buffer.rewind();
 
         //Create new OpenGL texture
         int textureId = glGenTextures();
@@ -36,17 +32,27 @@ public class Texture implements AutoCloseable {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         //Load image data into texture
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, img.getWidth(), img.getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, img.getWidth(), img.getHeight(), 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer);
 
-        return new Texture(textureId);
+        return new Texture(textureId, img.getWidth(), img.getHeight());
     }
 
-    private Texture(int textureId){
+    private Texture(int textureId, int width, int height){
         this.textureId = textureId;
+        this.width = width;
+        this.height = height;
     }
 
     public int getTextureId(){
         return this.textureId;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
     }
 
     @Override

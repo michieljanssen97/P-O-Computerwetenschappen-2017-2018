@@ -29,9 +29,17 @@
                   <Insets left="5.0" />
                </HBox.margin>
             </ToggleButton>
-            <ToggleButton toggleGroup="$perspectiveToggleGroup" mnemonicParsing="false" text="Box camera">
+            <ToggleButton toggleGroup="$perspectiveToggleGroup" mnemonicParsing="false" text="Side camera">
                <userData>
-                  <CameraViewControl fx:constant="BOX_CAMERA_ID"/>
+                  <CameraViewControl fx:constant="SIDE_CAMERA_ID"/>
+               </userData>
+               <HBox.margin>
+                  <Insets left="5.0" />
+               </HBox.margin>
+            </ToggleButton>
+            <ToggleButton toggleGroup="$perspectiveToggleGroup" mnemonicParsing="false" text="Topdown camera">
+               <userData>
+                  <CameraViewControl fx:constant="TOPDOWN_CAMERA_ID"/>
                </userData>
                <HBox.margin>
                   <Insets left="5.0" />

@@ -3,7 +3,7 @@ package be.kuleuven.cs.robijn.common;
 import org.apache.commons.math3.geometry.euclidean.threed.*;
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
-import p_en_o_cw_2017.*;
+import interfaces.*;
 
 /**
  * A class of drones.
@@ -65,6 +65,7 @@ public class Drone extends WorldObject {
 		if (! isValidVelocity(velocity))
 			throw new IllegalArgumentException();
 		this.velocity = velocity;
+		this.initialVelocity = velocity;
 	}
 	
     //     -----------------     //
@@ -358,6 +359,8 @@ public class Drone extends WorldObject {
 	 */
 	private RealVector velocity;
 	
+	private final RealVector initialVelocity;
+	
 	/**
 	 * Variable registering the angular velocity of the heading of this drone.
 	 */
@@ -379,6 +382,10 @@ public class Drone extends WorldObject {
 	 */
 	public RealVector getVelocity() {
 		return this.velocity;
+	}
+	
+	public RealVector getInitialVelocity() {
+		return this.initialVelocity;
 	}
 	
 	/**
@@ -857,13 +864,11 @@ public class Drone extends WorldObject {
 	 * @param attackVector
 	 * 			The attack vector of the airfoil.
 	 * @return	The Angle Of Attack of the airfoil.
-	 * @throws IllegalArgumentException
-	 * 			The calculated Angle Of Attack is not a valid Angle Of Attack
 	 */
 	public float calculateAOA(RealVector normal, RealVector projectedVelocity, RealVector attackVector) throws IllegalArgumentException {
 		float AOA = (float) -Math.atan2(normal.dotProduct(projectedVelocity), attackVector.dotProduct(projectedVelocity));
 		if ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA())) {
-			throw new IllegalArgumentException();
+			AOA = Float.NaN;
 		}
 		return AOA;
 	}
@@ -884,10 +889,12 @@ public class Drone extends WorldObject {
 	 * 			The current Inclination of the left wing.
 	 * @return The Lift Force on the Left Wing of this drone.
 	 */
-	public RealVector getLiftForceLeftWing(float leftWingInclination){
+	public RealVector getLiftForceLeftWing(float leftWingInclination) throws IllegalArgumentException {
 		RealVector projectedVelocity = this.getProjectedVelocityLeftWing();
 		
 		float AOA = this.calculateAOA(this.getNormalHor(leftWingInclination), projectedVelocity, this.getAttackVectorHor(leftWingInclination));
+		if (Float.isNaN(AOA))
+			throw new IllegalArgumentException();
 		
 		float liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		return this.getNormalHor(leftWingInclination).mapMultiply(liftForce);
@@ -909,10 +916,12 @@ public class Drone extends WorldObject {
 	 * 			The current Inclination of the Right wing.
 	 * @return The Lift Force on the Right Wing of this drone.
 	 */
-	public RealVector getLiftForceRightWing(float rightWingInclination){
+	public RealVector getLiftForceRightWing(float rightWingInclination) throws IllegalArgumentException {
 		RealVector projectedVelocity = this.getProjectedVelocityRightWing();
 		
 		float AOA = this.calculateAOA(this.getNormalHor(rightWingInclination), projectedVelocity, this.getAttackVectorHor(rightWingInclination));
+		if (Float.isNaN(AOA))
+			throw new IllegalArgumentException();
 		
 		float liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		return this.getNormalHor(rightWingInclination).mapMultiply(liftForce);
@@ -933,10 +942,12 @@ public class Drone extends WorldObject {
 	 * 			The current Inclination of the Horizontal Stabilizer.
 	 * @return The Lift Force on the Horizontal Stabilizer of this drone.
 	 */
-	public RealVector getLiftForceHorStab(float horStabInclination){
+	public RealVector getLiftForceHorStab(float horStabInclination) throws IllegalArgumentException {
 		RealVector projectedVelocity = this.getProjectedVelocityHorStab();
 		
 		float AOA = this.calculateAOA(this.getNormalHor(horStabInclination), projectedVelocity, this.getAttackVectorHor(horStabInclination));
+		if (Float.isNaN(AOA))
+			throw new IllegalArgumentException();
 		
 		float liftForce = (float) (AOA * this.getHorStabLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		return this.getNormalHor(horStabInclination).mapMultiply(liftForce);
@@ -957,10 +968,12 @@ public class Drone extends WorldObject {
 	 * 			The current Inclination of the Vertical Stabilizer.
 	 * @return The Lift Force on the Vertical Stabilizer of the drone.
 	 */
-	public RealVector getLiftForceVerStab(float verStabInclination){
+	public RealVector getLiftForceVerStab(float verStabInclination) throws IllegalArgumentException {
 		RealVector projectedVelocity = this.getProjectedVelocityVerStab();
 		
-		float AOA = this.calculateAOA(this.getNormalHor(verStabInclination), projectedVelocity, this.getAttackVectorHor(verStabInclination));
+		float AOA = this.calculateAOA(this.getNormalVer(verStabInclination), projectedVelocity, this.getAttackVectorVer(verStabInclination));
+		if (Float.isNaN(AOA))
+			throw new IllegalArgumentException();
 		
 		float liftForce = (float) (AOA * this.getVerStabLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		return this.getNormalVer(verStabInclination).mapMultiply(liftForce);

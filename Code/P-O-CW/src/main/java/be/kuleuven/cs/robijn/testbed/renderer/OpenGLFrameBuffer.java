@@ -50,6 +50,8 @@ public class OpenGLFrameBuffer implements FrameBuffer {
     private int bytesPerPixel;
     private ByteBuffer buf;
 
+    private boolean isClosed = false;
+
     private OpenGLFrameBuffer(int frameBufferId, int renderBufferId, int width, int height, int bytesPerPixel, ByteBuffer buffer){
         if(buffer.capacity() < width*height*bytesPerPixel){
             throw new IllegalArgumentException("buffer is too small");
@@ -77,6 +79,10 @@ public class OpenGLFrameBuffer implements FrameBuffer {
 
     @Override
     public void readPixels(byte[] data) {
+        if(this.isClosed){
+            throw new IllegalStateException("Cannot read pixels from a closed framebuffer!");
+        }
+
         if(data.length < width*height*bytesPerPixel){
             throw new IllegalArgumentException("target buffer is too small");
         }
@@ -110,8 +116,15 @@ public class OpenGLFrameBuffer implements FrameBuffer {
 
     @Override
     public void close() {
+        if(this.isClosed){
+            return;
+        }
+
         //Cleanup LWJGL resources
         glDeleteRenderbuffers(frameBufferId);
         glDeleteFramebuffers(renderBufferId);
+
+        this.buf = null;
+        this.isClosed = true;
     }
 }

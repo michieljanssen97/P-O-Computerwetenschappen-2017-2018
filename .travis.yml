@@ -2,4 +2,4 @@ language: java
 sudo: false
 script:
   - cd Code/P-O-CW
-  - mvn -Dcheckstyle.errorOnBadStyle=true clean verify
+  - mvn -Pno-opengl -Dcheckstyle.errorOnBadStyle=true clean verify

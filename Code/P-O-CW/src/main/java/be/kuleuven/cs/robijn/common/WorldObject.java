@@ -1,18 +1,12 @@
 package be.kuleuven.cs.robijn.common;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Stream;
 
+import be.kuleuven.cs.robijn.common.math.VectorMath;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.RotationOrder;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.linear.*;
 
 public class WorldObject {
     private WorldObject parent;
@@ -45,7 +39,7 @@ public class WorldObject {
 
         for(WorldObject child : children){
             if(child.getClass().isAssignableFrom(clazz)){
-                return (T)child;
+                return (T) child;
             }
         }
 
@@ -225,7 +219,8 @@ public class WorldObject {
         //Get object to world transform
         RealMatrix transform = getObjectToWorldTransform();
         //Return the world coordinates of the local origin
-        return new ArrayRealVector(transform.operate(new double[]{0, 0, 0, 1}), 0, 3);
+        RealVector origin = new ArrayRealVector(new double[]{0, 0, 0, 1}, false);
+        return VectorMath.homogeneousToCartesian(transform.operate(origin));
     }
 
     /**
@@ -239,6 +234,51 @@ public class WorldObject {
         RealMatrix rotationMatrix = transform.getSubMatrix(0, 2, 0, 2);
         //Convert to rotation
         return new Rotation(rotationMatrix.getData(), 0.0001d);
+    }
+
+    public void rotateAround(RealVector rotationOrigin, Rotation rotation){
+        //Take the local vector 0,0,0 to 0,0,-1 and convert it to worldspace
+        RealVector localPosition = new ArrayRealVector(new double[]{0, 0, 0, 1}, false);
+        RealVector localOrientation = new ArrayRealVector(new double[]{0, 0, -1, 1}, false);
+
+        //Transformation matrices for converting between object and world vector space
+        RealMatrix objectToWorldMatrix = getObjectToWorldTransform();
+        RealMatrix worldToObjectMatrix = new LUDecomposition(objectToWorldMatrix).getSolver().getInverse();
+
+        //Get world-space coordinates of position and orientation
+        RealVector worldPosition = objectToWorldMatrix.operate(localPosition);
+        RealVector worldOrientation = objectToWorldMatrix.operate(localOrientation);
+
+        //Apply translation so rotationOrigin is origin of the world.
+        Vector3D rotationCenteredPosition = realVectorTo3DVector(worldPosition).subtract(realVectorTo3DVector(rotationOrigin));
+        Vector3D rotationCenteredOrientation = realVectorTo3DVector(worldOrientation).subtract(realVectorTo3DVector(rotationOrigin));
+
+        //Rotate vectors using rotation
+        Vector3D rotationCenteredRotatedPosition = rotation.applyTo(rotationCenteredPosition);
+        Vector3D rotationCenteredRotatedOrientation = rotation.applyTo(rotationCenteredOrientation);
+
+        //Revert translation
+        Vector3D worldRotationPosition = rotationCenteredRotatedPosition.add(realVectorTo3DVector(rotationOrigin));
+        Vector3D worldRotationOrientation = rotationCenteredRotatedOrientation.add(realVectorTo3DVector(rotationOrigin));
+
+        //New position in object space (delta vector relative to old position)
+        RealVector localRotatedPosition = worldToObjectMatrix.operate(vector3DToRealVector(worldRotationPosition));
+        RealVector localRotatedOrientation = worldToObjectMatrix.operate(vector3DToRealVector(worldRotationOrientation));
+
+        //Use transformed 0,0,0 as new position and (transformed 0,0,-1 minus transformed 0,0,0) as new direction
+        this.setRelativePosition(VectorMath.homogeneousToCartesian(localRotatedPosition).add(this.getRelativePosition()));
+        Vector3D newDirection = realVectorTo3DVector(localRotatedOrientation.subtract(localRotatedPosition));
+
+        //Calculate and apply new local rotation as change from 0,0,-1 to new direction
+        this.setRelativeRotation(new Rotation(new Vector3D(0, 0, -1), newDirection));
+    }
+
+    private Vector3D realVectorTo3DVector(RealVector vector){
+        return new Vector3D(vector.getEntry(0), vector.getEntry(1), vector.getEntry(2));
+    }
+
+    private RealVector vector3DToRealVector(Vector3D vector){
+        return new ArrayRealVector(new double[]{vector.getX(), vector.getY(), vector.getZ(), 1});
     }
 }
 

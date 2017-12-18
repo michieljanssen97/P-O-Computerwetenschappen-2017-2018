@@ -16,7 +16,13 @@ public interface Renderer extends AutoCloseable {
      * Creates a new camera associated with this renderer.
      * @return the new camera.
      */
-    Camera createCamera();
+    PerspectiveCamera createPerspectiveCamera();
+
+    /**
+     * Creates a new camera associated with this renderer.
+     * @return the new camera.
+     */
+    OrthographicCamera createOrthographicCamera();
 
     /**
      * Renders a new image of the world in its current state to the framebuffer, as viewed through the camera.
@@ -25,4 +31,6 @@ public interface Renderer extends AutoCloseable {
      * @param camera the camera from which the world is viewed.
      */
     void render(WorldObject worldRoot, FrameBuffer frameBuffer, Camera camera);
+
+    void clearDebugObjects();
 }
