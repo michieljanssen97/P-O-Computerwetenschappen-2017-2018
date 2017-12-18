@@ -1,7 +1,7 @@
 package be.kuleuven.cs.robijn.gui;
 
 import be.kuleuven.cs.robijn.common.*;
-
+import be.kuleuven.cs.robijn.common.stopwatch.ConstantIntervalStopwatch;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.BooleanProperty;
@@ -156,7 +156,7 @@ public class MainController {
     private void initializeSimulationSettings(){
         simulationSettingsControl.addEventFilter(SimulationSettingsConfirmEvent.CONFIRM, e -> {
             setOverlayVisible(false);
-            setSimulation(new SimulationDriver(e.getBoxes(), e.getSettings()));
+            setSimulation(new SimulationDriver(e.getBoxes(), e.getSettings(), new ConstantIntervalStopwatch(1.0/40.0)));
             startSimulation();
         });
     }

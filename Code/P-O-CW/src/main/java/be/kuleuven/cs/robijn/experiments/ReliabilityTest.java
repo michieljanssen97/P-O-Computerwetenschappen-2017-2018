@@ -27,7 +27,7 @@ public class ReliabilityTest {
         //Config
         int timesToRunTest = 100;
         AutopilotConfig config = getDefaultConfig();
-        int maxSimulationRuntimeInSeconds = 30;
+        int maxSimulationRuntimeInSeconds = 50;
         int updatesPerSecond = 30;
         WorldGenerator.WorldGeneratorSettings settings = new WorldGenerator.WorldGeneratorSettings();
         settings.setRandomizeColors(true);

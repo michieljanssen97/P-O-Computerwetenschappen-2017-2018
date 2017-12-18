@@ -879,5 +879,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 
 	@Override
 	public void simulationEnded() {
+		throw new IllegalArgumentException();
 	}
 }

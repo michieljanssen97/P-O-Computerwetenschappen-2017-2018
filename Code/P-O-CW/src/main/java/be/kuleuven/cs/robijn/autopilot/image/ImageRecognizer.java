@@ -261,6 +261,8 @@ public class ImageRecognizer {
 			float hue = cu.getHue();
 			float sat = cu.getSaturation();
 			RealVector vector = image.getXYZDistance(hue, sat);
+			if (Double.isNaN(vector.getEntry(0)) || (Double.isNaN(vector.getEntry(1))) || (Double.isNaN(vector.getEntry(2))))
+				vector = new ArrayRealVector(new double[] {0, 0, -100}, false);
 			
 			float[] droneRotation = getRollPitchHeading();
 			RealVector vectorWorld = transformationToWorldCoordinates(vector, droneRotation[0], droneRotation[1], droneRotation[2]);
