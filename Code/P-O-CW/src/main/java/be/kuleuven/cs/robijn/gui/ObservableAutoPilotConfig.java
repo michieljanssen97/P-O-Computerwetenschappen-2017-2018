@@ -14,6 +14,15 @@ public class ObservableAutoPilotConfig implements AutopilotConfig {
     public static final String GRAVITY_KEY = "GRAVITY";
     public static final String WING_X_KEY = "WING_X";
     public static final String TAIL_SIZE_KEY = "TAIL_SIZE";
+    public static final String WHEEL_Y_KEY = "WHEEL_Y";
+    public static final String FRONT_WHEEL_Z_KEY = "FRONT_WHEEL_Z";
+    public static final String REAR_WHEEL_Z_KEY = "REAR_WHEEL_Z";
+    public static final String REAR_WHEEL_X_KEY = "REAR_WHEEL_X";
+    public static final String TYRE_SLOPE_KEY = "TYRE_SLOPE";
+    public static final String DAMP_SLOPE_KEY = "DAMP_SLOPE";
+    public static final String TYRE_RADIUS_KEY = "TYRE_RADIUS";
+    public static final String R_MAX_KEY = "R_MAX";
+    public static final String FC_MAX_KEY = "FC_MAX";
     public static final String ENGINE_MASS_KEY = "ENGINE_MASS";
     public static final String WING_MASS_KEY = "WING_MASS";
     public static final String TAIL_MASS_KEY = "TAIL_MASS";
@@ -30,9 +39,19 @@ public class ObservableAutoPilotConfig implements AutopilotConfig {
     private ObservableMap<String, Number> properties = FXCollections.observableHashMap();
 
     public ObservableAutoPilotConfig(AutopilotConfig sourceConfig){
+        droneId = sourceConfig.getDroneID();
         properties.put(GRAVITY_KEY, sourceConfig.getGravity());
         properties.put(WING_X_KEY, sourceConfig.getWingX());
         properties.put(TAIL_SIZE_KEY, sourceConfig.getTailSize());
+        properties.put(WHEEL_Y_KEY, sourceConfig.getWheelY());
+        properties.put(FRONT_WHEEL_Z_KEY, sourceConfig.getFrontWheelZ());
+        properties.put(REAR_WHEEL_Z_KEY, sourceConfig.getRearWheelZ());
+        properties.put(REAR_WHEEL_X_KEY, sourceConfig.getRearWheelX());
+        properties.put(TYRE_SLOPE_KEY, sourceConfig.getTyreSlope());
+        properties.put(DAMP_SLOPE_KEY, sourceConfig.getDampSlope());
+        properties.put(TYRE_RADIUS_KEY, sourceConfig.getTyreRadius());
+        properties.put(R_MAX_KEY, sourceConfig.getRMax());
+        properties.put(FC_MAX_KEY, sourceConfig.getFcMax());
         properties.put(ENGINE_MASS_KEY, sourceConfig.getEngineMass());
         properties.put(WING_MASS_KEY, sourceConfig.getWingMass());
         properties.put(TAIL_MASS_KEY, sourceConfig.getTailMass());
@@ -81,6 +100,12 @@ public class ObservableAutoPilotConfig implements AutopilotConfig {
         }
     }
 
+    private String droneId;
+    @Override
+    public String getDroneID() {
+        return droneId;
+    }
+
     @Override
     public float getGravity() {
         return (float)properties.get(GRAVITY_KEY);
@@ -94,6 +119,51 @@ public class ObservableAutoPilotConfig implements AutopilotConfig {
     @Override
     public float getTailSize() {
         return (float)properties.get(TAIL_SIZE_KEY);
+    }
+
+    @Override
+    public float getWheelY() {
+        return (float)properties.get(WHEEL_Y_KEY);
+    }
+
+    @Override
+    public float getFrontWheelZ() {
+        return (float)properties.get(FRONT_WHEEL_Z_KEY);
+    }
+
+    @Override
+    public float getRearWheelZ() {
+        return (float)properties.get(REAR_WHEEL_Z_KEY);
+    }
+
+    @Override
+    public float getRearWheelX() {
+        return (float)properties.get(REAR_WHEEL_X_KEY);
+    }
+
+    @Override
+    public float getTyreSlope() {
+        return (float)properties.get(TYRE_SLOPE_KEY);
+    }
+
+    @Override
+    public float getDampSlope() {
+        return (float)properties.get(DAMP_SLOPE_KEY);
+    }
+
+    @Override
+    public float getTyreRadius() {
+        return (float)properties.get(TYRE_RADIUS_KEY);
+    }
+
+    @Override
+    public float getRMax() {
+        return (float)properties.get(R_MAX_KEY);
+    }
+
+    @Override
+    public float getFcMax() {
+        return (float)properties.get(FC_MAX_KEY);
     }
 
     @Override

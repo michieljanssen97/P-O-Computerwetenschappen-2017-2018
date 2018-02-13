@@ -3,6 +3,7 @@ package be.kuleuven.cs.robijn.gui;
 import be.kuleuven.cs.robijn.common.Resources;
 import be.kuleuven.cs.robijn.common.SimulationDriver;
 import be.kuleuven.cs.robijn.common.UpdateEventHandler;
+import interfaces.AutopilotInputs;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -11,7 +12,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 
 import java.io.IOException;

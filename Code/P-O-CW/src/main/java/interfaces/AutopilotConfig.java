@@ -1,10 +1,19 @@
 package interfaces;
 
 public interface AutopilotConfig {
-	
-	float getGravity();
+    String getDroneID();
+    float getGravity();
     float getWingX();
     float getTailSize();
+    float getWheelY();
+    float getFrontWheelZ();
+    float getRearWheelZ();
+    float getRearWheelX();
+    float getTyreSlope();
+    float getDampSlope();
+    float getTyreRadius();
+    float getRMax();
+    float getFcMax();
     float getEngineMass();
     float getWingMass();
     float getTailMass();
@@ -17,5 +26,4 @@ public interface AutopilotConfig {
     float getVerticalAngleOfView();
     int getNbColumns();
     int getNbRows();
-
 }

@@ -424,7 +424,25 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			public float getVerStabInclination() {
 				return verStabInclination;
 			}
-        };
+
+			@Override
+			public float getFrontBrakeForce() {
+				//TODO: implement
+				throw new RuntimeException("Not implemented");
+			}
+
+			@Override
+			public float getLeftBrakeForce() {
+				//TODO: implement
+				throw new RuntimeException("Not implemented");
+			}
+
+			@Override
+			public float getRightBrakeForce() {
+				//TODO: implement
+				throw new RuntimeException("Not implemented");
+			}
+		};
         
         return output;
 	}
@@ -876,6 +894,12 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		return timePassed(inputs);
 	}
 
+
+	@Override
+	public void setPath(Path path) {
+		//TODO
+		throw new RuntimeException("Not implemented");
+	}
 
 	@Override
 	public void simulationEnded() {
