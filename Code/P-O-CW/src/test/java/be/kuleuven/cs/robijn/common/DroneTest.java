@@ -32,10 +32,71 @@ public class DroneTest {
 	private static int nbColumns = 120;
 	private static int nbRows = 120;
 	private static AutopilotConfig config = new AutopilotConfig() {
-        public float getGravity() { return (float) 9.81; }
+		@Override
+		public String getDroneID() {
+			//TODO: implement
+			throw new RuntimeException("Not implemented");
+		}
+
+		public float getGravity() { return (float) 9.81; }
         public float getWingX() { return wingX; }
         public float getTailSize() { return tailSize; }
-        public float getEngineMass() { return engineMass; }
+
+		@Override
+		public float getWheelY() {
+			//TODO: implement
+			throw new RuntimeException("Not implemented");
+		}
+
+		@Override
+		public float getFrontWheelZ() {
+			//TODO: implement
+			throw new RuntimeException("Not implemented");
+		}
+
+		@Override
+		public float getRearWheelZ() {
+			//TODO: implement
+			throw new RuntimeException("Not implemented");
+		}
+
+		@Override
+		public float getRearWheelX() {
+			//TODO: implement
+			throw new RuntimeException("Not implemented");
+		}
+
+		@Override
+		public float getTyreSlope() {
+			//TODO: implement
+			throw new RuntimeException("Not implemented");
+		}
+
+		@Override
+		public float getDampSlope() {
+			//TODO: implement
+			throw new RuntimeException("Not implemented");
+		}
+
+		@Override
+		public float getTyreRadius() {
+			//TODO: implement
+			throw new RuntimeException("Not implemented");
+		}
+
+		@Override
+		public float getRMax() {
+			//TODO: implement
+			throw new RuntimeException("Not implemented");
+		}
+
+		@Override
+		public float getFcMax() {
+			//TODO: implement
+			throw new RuntimeException("Not implemented");
+		}
+
+		public float getEngineMass() { return engineMass; }
         public float getWingMass() { return wingMass; }
         public float getTailMass() { return tailMass; }
         public float getMaxThrust() { return maxThrust; }
@@ -68,10 +129,71 @@ public class DroneTest {
 		int nbColumns = 120;
 		int nbRows = 120;
 		AutopilotConfig config = new AutopilotConfig() {
-	        public float getGravity() { return (float) 9.81; }
+			@Override
+			public String getDroneID() {
+				//TODO: implement
+				throw new RuntimeException("Not implemented");
+			}
+
+			public float getGravity() { return (float) 9.81; }
 	        public float getWingX() { return wingX; }
 	        public float getTailSize() { return tailSize; }
-	        public float getEngineMass() { return engineMass; }
+
+			@Override
+			public float getWheelY() {
+				//TODO: implement
+				throw new RuntimeException("Not implemented");
+			}
+
+			@Override
+			public float getFrontWheelZ() {
+				//TODO: implement
+				throw new RuntimeException("Not implemented");
+			}
+
+			@Override
+			public float getRearWheelZ() {
+				//TODO: implement
+				throw new RuntimeException("Not implemented");
+			}
+
+			@Override
+			public float getRearWheelX() {
+				//TODO: implement
+				throw new RuntimeException("Not implemented");
+			}
+
+			@Override
+			public float getTyreSlope() {
+				//TODO: implement
+				throw new RuntimeException("Not implemented");
+			}
+
+			@Override
+			public float getDampSlope() {
+				//TODO: implement
+				throw new RuntimeException("Not implemented");
+			}
+
+			@Override
+			public float getTyreRadius() {
+				//TODO: implement
+				throw new RuntimeException("Not implemented");
+			}
+
+			@Override
+			public float getRMax() {
+				//TODO: implement
+				throw new RuntimeException("Not implemented");
+			}
+
+			@Override
+			public float getFcMax() {
+				//TODO: implement
+				throw new RuntimeException("Not implemented");
+			}
+
+			public float getEngineMass() { return engineMass; }
 	        public float getWingMass() { return wingMass; }
 	        public float getTailMass() { return tailMass; }
 	        public float getMaxThrust() { return maxThrust; }
