@@ -11,6 +11,8 @@ import interfaces.AutopilotConfig;
  */
 public class ObservableAutoPilotConfig implements AutopilotConfig {
     //Keys of the various settings in the ObservableMap
+    public static final String DRONE_ID_KEY = "DRONE_ID";
+
     public static final String GRAVITY_KEY = "GRAVITY";
     public static final String WING_X_KEY = "WING_X";
     public static final String TAIL_SIZE_KEY = "TAIL_SIZE";
@@ -36,41 +38,43 @@ public class ObservableAutoPilotConfig implements AutopilotConfig {
     public static final String NB_COLUMNS_KEY = "NB_COLUMNS";
     public static final String NB_ROWS_KEY = "NB_ROWS";
 
-    private ObservableMap<String, Number> properties = FXCollections.observableHashMap();
+    private ObservableMap<String, String> stringProperties = FXCollections.observableHashMap();
+    private ObservableMap<String, Number> numberProperties = FXCollections.observableHashMap();
 
     public ObservableAutoPilotConfig(AutopilotConfig sourceConfig){
-        droneId = sourceConfig.getDroneID();
-        properties.put(GRAVITY_KEY, sourceConfig.getGravity());
-        properties.put(WING_X_KEY, sourceConfig.getWingX());
-        properties.put(TAIL_SIZE_KEY, sourceConfig.getTailSize());
-        properties.put(WHEEL_Y_KEY, sourceConfig.getWheelY());
-        properties.put(FRONT_WHEEL_Z_KEY, sourceConfig.getFrontWheelZ());
-        properties.put(REAR_WHEEL_Z_KEY, sourceConfig.getRearWheelZ());
-        properties.put(REAR_WHEEL_X_KEY, sourceConfig.getRearWheelX());
-        properties.put(TYRE_SLOPE_KEY, sourceConfig.getTyreSlope());
-        properties.put(DAMP_SLOPE_KEY, sourceConfig.getDampSlope());
-        properties.put(TYRE_RADIUS_KEY, sourceConfig.getTyreRadius());
-        properties.put(R_MAX_KEY, sourceConfig.getRMax());
-        properties.put(FC_MAX_KEY, sourceConfig.getFcMax());
-        properties.put(ENGINE_MASS_KEY, sourceConfig.getEngineMass());
-        properties.put(WING_MASS_KEY, sourceConfig.getWingMass());
-        properties.put(TAIL_MASS_KEY, sourceConfig.getTailMass());
-        properties.put(MAX_THRUST_KEY, sourceConfig.getMaxThrust());
-        properties.put(MAX_AOA_KEY, sourceConfig.getMaxAOA());
-        properties.put(WING_LIFT_SLOPE_KEY, sourceConfig.getWingLiftSlope());
-        properties.put(HOR_STAB_LIFT_SLOPE_KEY, sourceConfig.getHorStabLiftSlope());
-        properties.put(VER_STAB_LIFT_SLOPE_KEY, sourceConfig.getVerStabLiftSlope());
-        properties.put(HORIZONTAL_ANGLE_OF_VIEW_KEY, sourceConfig.getHorizontalAngleOfView());
-        properties.put(VERTICAL_ANGLE_OF_VIEW_KEY, sourceConfig.getVerticalAngleOfView());
-        properties.put(NB_COLUMNS_KEY, sourceConfig.getNbColumns());
-        properties.put(NB_ROWS_KEY, sourceConfig.getNbRows());
+        stringProperties.put(DRONE_ID_KEY, sourceConfig.getDroneID());
+
+        numberProperties.put(GRAVITY_KEY, sourceConfig.getGravity());
+        numberProperties.put(WING_X_KEY, sourceConfig.getWingX());
+        numberProperties.put(TAIL_SIZE_KEY, sourceConfig.getTailSize());
+        numberProperties.put(WHEEL_Y_KEY, sourceConfig.getWheelY());
+        numberProperties.put(FRONT_WHEEL_Z_KEY, sourceConfig.getFrontWheelZ());
+        numberProperties.put(REAR_WHEEL_Z_KEY, sourceConfig.getRearWheelZ());
+        numberProperties.put(REAR_WHEEL_X_KEY, sourceConfig.getRearWheelX());
+        numberProperties.put(TYRE_SLOPE_KEY, sourceConfig.getTyreSlope());
+        numberProperties.put(DAMP_SLOPE_KEY, sourceConfig.getDampSlope());
+        numberProperties.put(TYRE_RADIUS_KEY, sourceConfig.getTyreRadius());
+        numberProperties.put(R_MAX_KEY, sourceConfig.getRMax());
+        numberProperties.put(FC_MAX_KEY, sourceConfig.getFcMax());
+        numberProperties.put(ENGINE_MASS_KEY, sourceConfig.getEngineMass());
+        numberProperties.put(WING_MASS_KEY, sourceConfig.getWingMass());
+        numberProperties.put(TAIL_MASS_KEY, sourceConfig.getTailMass());
+        numberProperties.put(MAX_THRUST_KEY, sourceConfig.getMaxThrust());
+        numberProperties.put(MAX_AOA_KEY, sourceConfig.getMaxAOA());
+        numberProperties.put(WING_LIFT_SLOPE_KEY, sourceConfig.getWingLiftSlope());
+        numberProperties.put(HOR_STAB_LIFT_SLOPE_KEY, sourceConfig.getHorStabLiftSlope());
+        numberProperties.put(VER_STAB_LIFT_SLOPE_KEY, sourceConfig.getVerStabLiftSlope());
+        numberProperties.put(HORIZONTAL_ANGLE_OF_VIEW_KEY, sourceConfig.getHorizontalAngleOfView());
+        numberProperties.put(VERTICAL_ANGLE_OF_VIEW_KEY, sourceConfig.getVerticalAngleOfView());
+        numberProperties.put(NB_COLUMNS_KEY, sourceConfig.getNbColumns());
+        numberProperties.put(NB_ROWS_KEY, sourceConfig.getNbRows());
     }
 
     /**
      * Returns the ObservableMap that contains the values of this object.
      */
-    public ObservableMap<String, Number> getProperties() {
-        return properties;
+    public ObservableMap<String, Number> getNumberProperties() {
+        return numberProperties;
     }
 
     /**
@@ -78,8 +82,8 @@ public class ObservableAutoPilotConfig implements AutopilotConfig {
      * @param key the key of the property to retrieve the value of. (ex. GRAVITY_KEY)
      * @return the current numeric value of specified property
      */
-    public Number getProperty(String key){
-        return properties.get(key);
+    public Number getNumberProperty(String key){
+        return numberProperties.get(key);
     }
 
     /**
@@ -92,137 +96,162 @@ public class ObservableAutoPilotConfig implements AutopilotConfig {
         switch (key){
             case NB_COLUMNS_KEY:
             case NB_ROWS_KEY:
-                properties.put(key, value.intValue());
+                numberProperties.put(key, value.intValue());
                 break;
             default:
-                properties.put(key, value.floatValue());
+                numberProperties.put(key, value.floatValue());
                 break;
         }
     }
 
-    private String droneId;
+    /**
+     * Returns the ObservableMap that contains the values of this object.
+     */
+    public ObservableMap<String, String> getStringProperties() {
+        return stringProperties;
+    }
+
+    /**
+     * Returns the value of the specified property.
+     * @param key the key of the property to retrieve the value of. (ex. DRONE_ID_KEY)
+     * @return the current string value of this property
+     */
+    public String getStringProperty(String key){
+        return stringProperties.get(key);
+    }
+
+    /**
+     * Assigns the specified value to the specified property.
+     * @param key the key of the property to set the value of. (ex. GRAVITY_KEY)
+     * @param value the value to assign to this property.
+     */
+    public void setProperty(String key, String value){
+        stringProperties.put(key, value);
+    }
+
+
     @Override
     public String getDroneID() {
-        return droneId;
+        return stringProperties.get(DRONE_ID_KEY);
     }
 
     @Override
     public float getGravity() {
-        return (float)properties.get(GRAVITY_KEY);
+        return (float) numberProperties.get(GRAVITY_KEY);
     }
 
     @Override
     public float getWingX() {
-        return (float)properties.get(WING_X_KEY);
+        return (float) numberProperties.get(WING_X_KEY);
     }
 
     @Override
     public float getTailSize() {
-        return (float)properties.get(TAIL_SIZE_KEY);
+        return (float) numberProperties.get(TAIL_SIZE_KEY);
     }
 
     @Override
     public float getWheelY() {
-        return (float)properties.get(WHEEL_Y_KEY);
+        return (float) numberProperties.get(WHEEL_Y_KEY);
     }
 
     @Override
     public float getFrontWheelZ() {
-        return (float)properties.get(FRONT_WHEEL_Z_KEY);
+        return (float) numberProperties.get(FRONT_WHEEL_Z_KEY);
     }
 
     @Override
     public float getRearWheelZ() {
-        return (float)properties.get(REAR_WHEEL_Z_KEY);
+        return (float) numberProperties.get(REAR_WHEEL_Z_KEY);
     }
 
     @Override
     public float getRearWheelX() {
-        return (float)properties.get(REAR_WHEEL_X_KEY);
+        return (float) numberProperties.get(REAR_WHEEL_X_KEY);
     }
 
     @Override
     public float getTyreSlope() {
-        return (float)properties.get(TYRE_SLOPE_KEY);
+        return (float) numberProperties.get(TYRE_SLOPE_KEY);
     }
 
     @Override
     public float getDampSlope() {
-        return (float)properties.get(DAMP_SLOPE_KEY);
+        return (float) numberProperties.get(DAMP_SLOPE_KEY);
     }
 
     @Override
     public float getTyreRadius() {
-        return (float)properties.get(TYRE_RADIUS_KEY);
+        return (float) numberProperties.get(TYRE_RADIUS_KEY);
     }
 
     @Override
     public float getRMax() {
-        return (float)properties.get(R_MAX_KEY);
+        return (float) numberProperties.get(R_MAX_KEY);
     }
 
     @Override
     public float getFcMax() {
-        return (float)properties.get(FC_MAX_KEY);
+        return (float) numberProperties.get(FC_MAX_KEY);
     }
 
     @Override
     public float getEngineMass() {
-        return (float)properties.get(ENGINE_MASS_KEY);
+        return (float) numberProperties.get(ENGINE_MASS_KEY);
     }
 
     @Override
     public float getWingMass() {
-        return (float)properties.get(WING_MASS_KEY);
+        return (float) numberProperties.get(WING_MASS_KEY);
     }
 
     @Override
     public float getTailMass() {
-        return (float)properties.get(TAIL_MASS_KEY);
+        return (float) numberProperties.get(TAIL_MASS_KEY);
     }
 
     @Override
     public float getMaxThrust() {
-        return (float)properties.get(MAX_THRUST_KEY);
+        return (float) numberProperties.get(MAX_THRUST_KEY);
     }
 
     @Override
     public float getMaxAOA() {
-        return (float)properties.get(MAX_AOA_KEY);
+        return (float) numberProperties.get(MAX_AOA_KEY);
     }
 
     @Override
     public float getWingLiftSlope() {
-        return (float)properties.get(WING_LIFT_SLOPE_KEY);
+        return (float) numberProperties.get(WING_LIFT_SLOPE_KEY);
     }
 
     @Override
     public float getHorStabLiftSlope() {
-        return (float)properties.get(HOR_STAB_LIFT_SLOPE_KEY);
+        return (float) numberProperties.get(HOR_STAB_LIFT_SLOPE_KEY);
     }
 
     @Override
     public float getVerStabLiftSlope() {
-        return (float)properties.get(VER_STAB_LIFT_SLOPE_KEY);
+        return (float) numberProperties.get(VER_STAB_LIFT_SLOPE_KEY);
     }
 
     @Override
     public float getHorizontalAngleOfView() {
-        return (float)properties.get(HORIZONTAL_ANGLE_OF_VIEW_KEY);
+        return (float) numberProperties.get(HORIZONTAL_ANGLE_OF_VIEW_KEY);
     }
 
     @Override
     public float getVerticalAngleOfView() {
-        return (float)properties.get(VERTICAL_ANGLE_OF_VIEW_KEY);
+        return (float) numberProperties.get(VERTICAL_ANGLE_OF_VIEW_KEY);
     }
 
     @Override
     public int getNbColumns() {
-        return (int)properties.get(NB_COLUMNS_KEY);
+        return (int) numberProperties.get(NB_COLUMNS_KEY);
     }
 
     @Override
     public int getNbRows() {
-        return (int)properties.get(NB_ROWS_KEY);
+        return (int) numberProperties.get(NB_ROWS_KEY);
     }
 }
