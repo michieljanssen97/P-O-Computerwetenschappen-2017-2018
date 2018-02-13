@@ -10,7 +10,7 @@ public class OpenGLOrthographicCamera extends OrthographicCamera {
     private float zFar = 1000f;
     private double renderIconsThresholdRatio = 0;
     private boolean areDronesHidden;
-    private boolean drawGround;
+    private boolean drawGround = true;
     private float iconSize = 1.0f;
     private Vector2D iconOffset = new Vector2D(0, 0);
     private boolean drawDebugObjects;

@@ -9,7 +9,7 @@ public class OpenGLPerspectiveCamera extends PerspectiveCamera {
 	private float zNear = 0.1f;
 	private float zFar = 1000f;
 	private boolean areDronesHidden;
-	private boolean drawGround;
+	private boolean drawGround = true;
 	private boolean drawDebugObjects;
 
 	@Override
