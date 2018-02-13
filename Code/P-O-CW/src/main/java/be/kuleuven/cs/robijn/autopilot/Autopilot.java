@@ -84,11 +84,11 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
         float[] necessaryRotation;
         float horizontalAngleOfView = (float) Math.toDegrees(this.getConfig().getHorizontalAngleOfView());
         float verticalAngleOfView = (float) Math.toDegrees(this.getConfig().getVerticalAngleOfView());
-		Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
-				horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
 		
 		float distanceToCube;
 		try{
+			Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
+					horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
 			ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
 			if (closestCube == null)
 				this.simulationEnded();
@@ -98,6 +98,8 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			necessaryRotation = new float[2];
 			distanceToCube = 0;
 		} catch (IllegalArgumentException exc2) {
+			Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
+					horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
 			ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
 			necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
 			distanceToCube = 0;
@@ -850,7 +852,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 
 		if (! isValidConfig(config))
 			throw new IllegalArgumentException();
-		RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -10.0}, false);
+		RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -56.0}, false);
 		Drone drone = new Drone(config, initialVelocity);
 		this.addChild(drone);
 		this.config = config;
