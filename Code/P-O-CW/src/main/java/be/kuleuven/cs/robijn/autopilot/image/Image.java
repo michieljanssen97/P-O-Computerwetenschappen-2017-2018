@@ -46,6 +46,8 @@ public class Image {
 	 * A variable containing the list of ImageCubes that are visible in this image.
 	 */
 	private ArrayList<ImageCube> cubes;
+
+	private float groundHue = 0.16f;
 	
 	/**
 	 * Initiate this Image with a given byte array (represents the image), number of rows, number of columns and horizontal and vertical angle of view.
@@ -230,6 +232,8 @@ public class Image {
 	 * @throws Exception Something goes wrong while calculating the red pixels
 	 */
 	public float getMinimumDistanceSpherePixels(float hue, float sat){
+		if (Math.abs(hue - groundHue) < 0.01)
+			throw new IllegalArgumentException("The given hue belongs to the groundpixels.");
 		float minimum = (float) Math.sqrt( Math.pow(getnbRows(), 2) + Math.pow(getnbColumns(), 2) );
 		float[] centerPixel = getCubeCenterPixel(hue, sat);
 		for(Pixel p : getCubeEdgePixels(hue, sat)){
@@ -247,6 +251,8 @@ public class Image {
 	 * @throws Exception	Something goes wrong while calculating the red pixels
 	 */
 	public float getMaximumDistanceSpherePixels(float hue, float sat){
+		if (Math.abs(hue - groundHue) < 0.01)
+			throw new IllegalArgumentException("The given hue belongs to the groundpixels.");
 		float maximum = 0;
 		float[] centerPixel = getCubeCenterPixel(hue, sat);
 		for(Pixel p : getCubeEdgePixels(hue, sat)){
@@ -264,6 +270,8 @@ public class Image {
 	 * @throws Exception	Something goes wrong while calculating the pixels of the cube.
 	 */
 	public int getAmountSidesVisible(float hue, float sat) throws IllegalStateException{
+		if (Math.abs(hue - groundHue) < 0.01)
+			throw new IllegalArgumentException("The given hue belongs to the groundpixels.");
 		boolean checkX = true;
 		boolean checkY = true;
 		boolean checkZ = true;
@@ -314,7 +322,7 @@ public class Image {
 		float v = p.getValue();
 		return ( (v >= 0.65 && v <= 0.75) || (v >= 0.4 && v <= 0.5) );
 	}
-	
+
 	/**
 	 * Return the distance from the cube with given hue and saturation to the camera along the (negative) z axis of the drone coordinate system.
 	 * @param hue	The given hue
@@ -322,6 +330,8 @@ public class Image {
 	 * @throws Exception	There are no sides of a cube with given hue and saturation visible in this Image
 	 */
 	public float getTotalDistance(float hue, float sat){
+		if (Math.abs(hue - groundHue) < 0.01)
+			throw new IllegalArgumentException("The given hue belongs to the groundpixels.");
 		int sides = getAmountSidesVisible(hue, sat);
 		float result;
 		if (sides == 3){
@@ -388,6 +398,8 @@ public class Image {
 	 * @throws Exception	Something goes wrong while calculating the pixels with given hue and saturation
 	 */
 	public RealVector getXYZDistance(float hue, float sat){
+		if (Math.abs(hue - groundHue) < 0.01)
+			throw new IllegalArgumentException("The given hue belongs to the groundpixels.");
 		float[] cubeCenter = getCubeCenterPixel(hue, sat);
 		float[] imageCenter = getCenterPixel();
 		float angleX = (cubeCenter[0] - imageCenter[0]) * getHorizontalAngle() / getnbColumns();
@@ -418,24 +430,24 @@ public class Image {
 	 */
 	public float[] getPercentageXYZPixels(float hue, float sat) throws IllegalStateException{
 		ArrayList<Pixel> redPixels = getCubePixels(hue, sat);
-		float TotalRedPixels = getCubePixels(hue, sat).size();
-		float redXPixels = 0;
-		float redYPixels = 0;
-		float redZPixels = 0;
+		float TotalCubePixels = getCubePixels(hue, sat).size();
+		float CubeXPixels = 0;
+		float CubeYPixels = 0;
+		float CubeZPixels = 0;
 		if (redPixels.size() == 0)
-			throw new IllegalStateException("there is no red cube on the camera image");
+			throw new IllegalStateException("there is no cube with given hue and saturation on the camera image");
 		for (Pixel p : redPixels){
 			if (isXPixel(p)){
-				redXPixels += 1;
+				CubeXPixels += 1;
 			} else if (isYPixel(p)){
-				redYPixels += 1;
+				CubeYPixels += 1;
 			} else if (isZPixel(p)){
-				redZPixels += 1;
+				CubeZPixels += 1;
 			}
 		}
-		float percentageXPixels = redXPixels / TotalRedPixels;
-		float percentageYPixels = redYPixels / TotalRedPixels;
-		float percentageZPixels = redZPixels / TotalRedPixels;
+		float percentageXPixels = CubeXPixels / TotalCubePixels;
+		float percentageYPixels = CubeYPixels / TotalCubePixels;
+		float percentageZPixels = CubeZPixels / TotalCubePixels;
 		float[] percentageXYZPixels = new float[] {percentageXPixels, percentageYPixels, percentageZPixels};
 		return percentageXYZPixels;
 	}
@@ -476,6 +488,17 @@ public class Image {
 		return (hsv[1] == 0.0f) && (hsv[2] == 1.0f);
 	}
 	
+	
+	/**
+	 * Check whether the given pixel is part of the ground texture.
+	 * @param p	The given pixel
+	 * @return	True if the hue of the pixel is between 0.16 and 0.17.
+	 */
+	private boolean isGroundPixelHSV(float[] hsv){
+		if (!isValidHSV(hsv)) {throw new IllegalArgumentException();}
+		return Math.abs(hsv[0] - groundHue) < 0.01;
+	}
+	
 	/**
 	 * Return a list containing all the cubes that are visible on this image.
 	 * @throws Exception 
@@ -486,7 +509,7 @@ public class Image {
 		for (int y = 0; y < getnbRows(); y++){
 			for (int x = 0; x < getnbColumns(); x++){
 				float[] hsv = getPixelHSV(x, y);
-				if (!isWhiteHSV(hsv)){
+				if (!isWhiteHSV(hsv) && !isGroundPixelHSV(hsv)){
 					for (ImageCube c : cubeCollection){
 						if ((hsv[0] == c.getHue()) && (hsv[1] == c.getSaturation())){
 							c.addPixel(new Pixel(x, y, hsv));
@@ -513,6 +536,8 @@ public class Image {
 	 * @param sat	The given saturation
 	 */
 	public ArrayList<Pixel> getCubePixels(float hue, float sat){
+		if (Math.abs(hue - groundHue) < 0.01)
+			throw new IllegalArgumentException("The given hue belongs to the groundpixels.");
 		ImageCube cube = null;
 		for (ImageCube c : getImageCubes()){
 			if ( (hue == c.getHue()) && (sat == c.getSaturation()) )
@@ -530,6 +555,8 @@ public class Image {
 	 * @param sat	The given saturation
 	 */
 	public float[] getCubeCenterPixel(float hue, float sat){
+		if (Math.abs(hue - groundHue) < 0.01)
+			throw new IllegalArgumentException("The given hue belongs to the groundpixels.");
 		ArrayList<Pixel> cubePixels = getCubePixels(hue, sat);
 		if (cubePixels.size() == 0)
 			throw new IllegalStateException("There is no cube on the camera image with the given hue and saturation.");
@@ -549,6 +576,8 @@ public class Image {
 	 * @param sat	The given saturation
 	 */
 	public float[] getRotationToCube(float hue, float sat) {
+		if (Math.abs(hue - groundHue) < 0.01)
+			throw new IllegalArgumentException("The given hue belongs to the groundpixels.");
 		float[] average = getCubeCenterPixel(hue, sat);
 		float[] pixelsToCube = getPixelsFromCenter(average[0], average[1]);
 		return getNecessaryRotation(getHorizontalAngle(), getVerticalAngle(), pixelsToCube[0], pixelsToCube[1]);
@@ -561,6 +590,8 @@ public class Image {
 	 * @throws Exception 
 	 */
 	public ArrayList<Pixel> getCubeEdgePixels(float hue, float sat) {
+		if (Math.abs(hue - groundHue) < 0.01)
+			throw new IllegalArgumentException("The given hue belongs to the groundpixels.");
 		ArrayList<Pixel> edge = new ArrayList<Pixel>();
 		boolean isEdge = false;
 		for (Pixel p : getCubePixels(hue, sat)){
@@ -619,6 +650,8 @@ public class Image {
 	 * @param sat	The given saturation
 	 */
 	public float getNecessaryCubeFactor(float hue, float sat) {
+		if (Math.abs(hue - groundHue) < 0.01)
+			throw new IllegalArgumentException("The given hue belongs to the groundpixels.");
 		if (getTotalDistance(hue, sat) > 60) {
 			return 0.00001f;
 		}
