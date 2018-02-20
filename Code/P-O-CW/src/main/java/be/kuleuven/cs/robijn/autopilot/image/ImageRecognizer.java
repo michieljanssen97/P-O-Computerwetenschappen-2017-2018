@@ -371,10 +371,80 @@ public class ImageRecognizer {
 	
 	public void setPath(CubePath path) {
 		this.path = path;
+		setPathTarget(getClosestPathXYZ());
 	}
 	
 	public float[] getClosestPathXYZ() {
 		return this.path.getClosestXYZTo(getDronePositionCoordinates());
+	}
+	
+	private float[] currentPathTarget;
+	
+	private boolean followingPath = true;
+	
+	public double[] getCurrentPathTarget() {
+		float[] path = this.currentPathTarget;
+		double[] drone = getDronePositionCoordinates();
+		float distanceToPath = (float) Math.sqrt(Math.pow(path[0] - drone[0], 2) + Math.pow(path[1] - drone[1], 2) + Math.pow(path[2] - drone[2], 2));
+		if (distanceToPath < 20) //20 should probably be changed in the future
+			followExactCoordinates();
+		
+		double[] pathD = new double[3];
+		pathD[0] = (double) path[0];
+		pathD[1] = (double) path[1];
+		pathD[2] = (double) path[2];
+		return pathD;
+	}
+	
+	public void setPathTarget(float[] target) {
+		this.currentPathTarget = target;
+	}
+	
+	public boolean isFollowingPathCoordinates() {
+		return this.followingPath;
+	}
+	
+	public void followExactCoordinates() {
+		this.followingPath = false;
+	}
+	
+	public void followNewPathCoordinates() {
+		this.followingPath = true;
+		this.path.removeCoordinate(this.currentPathTarget);
+		setPathTarget(getClosestPathXYZ());
+	}
+	
+	//Returns the coordinates of the cube close to the coordinates of the current path (5 meter).
+	//Currently the same method as getClosestCubeInWorld(Image im). Needs to change.
+	public double[] searchForCubeInPathArea(Image im) {
+		float[] curPos = {(float)dronePosition.getEntry(0), (float)dronePosition.getEntry(1), (float)dronePosition.getEntry(2)};
+		float minimum = Float.POSITIVE_INFINITY;
+		ImageRecognizerCube closest = null;
+		for (ImageRecognizerCube c : getImageRecognizerCubesFromImage(im)) {
+			float distance = (float) Math.sqrt(Math.pow(curPos[0] - c.getX(), 2) + Math.pow(curPos[1] - c.getY(), 2) + Math.pow(curPos[2] - c.getZ(), 2));
+			if (distance < minimum){
+				minimum = distance;
+				closest = c;
+			}
+		}
+		
+		float[] co = new float[] {closest.getX(), closest.getY(), closest.getZ()};
+		float[] pathCo = this.currentPathTarget;
+		float pathDistance = (float) Math.sqrt(Math.pow(co[0] - pathCo[0], 2) + Math.pow(co[1] - pathCo[1], 2) + Math.pow(co[2] - pathCo[2], 2));
+		if (pathDistance > 5)
+			throw new IllegalStateException("No cube found within 5m of the path coordinates.");
+		
+		if (minimum < 3) {
+			//cube is touched
+			closest.destroy();
+			followNewPathCoordinates();
+		}
+
+		double[] coD = new double[3];
+		coD[0] = (double) co[0];
+		coD[1] = (double) co[1];
+		coD[2] = (double) co[2];
+		return coD;
 	}
 	
 }

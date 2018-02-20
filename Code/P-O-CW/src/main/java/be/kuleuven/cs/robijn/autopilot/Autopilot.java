@@ -136,6 +136,13 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			imageYRotation = (float) ((5.0/4.0)*imageYRotation + (1.0/4.0)*heading);
 		}
 		
+		//TODO
+		if (recognizer.isFollowingPathCoordinates()) {
+			RealVector target = new ArrayRealVector(recognizer.getCurrentPathTarget(), false);
+		} else {
+			RealVector target = new ArrayRealVector(recognizer.searchForCubeInPathArea(image), false);
+		}
+		
 		float horStabInclinationTemp = 0;
 		float verStabInclinationTemp = 0;
 		float leftWingInclinationTemp = 0;

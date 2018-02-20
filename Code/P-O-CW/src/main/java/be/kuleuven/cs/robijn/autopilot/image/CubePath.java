@@ -75,8 +75,8 @@ public class CubePath implements interfaces.Path {
 		return result;
 	}
 	
-	public void removeCoordinate(int index) {
-		coordinatesList.remove(index);
+	public void removeCoordinate(float[] path) {
+		coordinatesList.remove(path);
 	}
 	
 }
