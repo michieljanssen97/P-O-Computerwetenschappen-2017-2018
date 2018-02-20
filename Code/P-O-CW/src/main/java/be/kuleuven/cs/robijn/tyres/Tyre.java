@@ -1,6 +1,14 @@
-package be.kuleuven.cs.robijn.common;
+package be.kuleuven.cs.robijn.tyres;
 
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
+import org.apache.commons.math3.ode.FirstOrderIntegrator;
+import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
+
+import be.kuleuven.cs.robijn.common.*;
 import interfaces.AutopilotConfig;
+import interfaces.AutopilotOutputs;
 
 public abstract class Tyre extends WorldObject {
 	
@@ -10,7 +18,6 @@ public abstract class Tyre extends WorldObject {
     //                      //
     //  -----------------   //
 	public Tyre(AutopilotConfig config) throws IllegalArgumentException{
-		this.droneID = config.getDroneID();
 		if (! isValidWheelY(config.getWheelY())) {
 			throw new IllegalArgumentException();
 		}
@@ -40,6 +47,12 @@ public abstract class Tyre extends WorldObject {
 			throw new IllegalArgumentException();
 		}
 		this.FcMax = config.getFcMax();
+		
+		float d = (config.getEngineMass() + config.getTailMass() + 2*config.getWingMass())*(config.getGravity()/config.getTyreSlope());
+		if (! isValidD(d, config.getTyreRadius())) {
+			throw new IllegalArgumentException();
+		}
+		this.d = d;
 	}
 
 	//     -----------------     //
@@ -47,7 +60,6 @@ public abstract class Tyre extends WorldObject {
     //      TYRE ATTRIBUTES      //
     //                           //
     //     -----------------     //
-    protected String droneID;
     protected float wheelX;
 	private final float wheelY;
 	protected float wheelZ;
@@ -56,6 +68,7 @@ public abstract class Tyre extends WorldObject {
 	private final float tyreRadius;
 	private final float RMax;
 	private final float FcMax;
+	private float d;
 	
 	
 	public float getWheelY() {
@@ -78,7 +91,7 @@ public abstract class Tyre extends WorldObject {
 		return this.wheelX;
 	}
 	
-	public abstract boolean isValidWheelX(float rearWheelX);
+	public abstract boolean isValidWheelX(float rearWheelX, float wingX);
 	
 	public float getTyreSlope() {
 		return this.tyreSlope;
@@ -119,6 +132,20 @@ public abstract class Tyre extends WorldObject {
 	public boolean isValidFcMax(float FcMax) {
 		return (FcMax > 0) && (FcMax <= 1);
 	}
+	
+	public float getD() {
+		return this.d;
+	}
+	
+	public boolean isValidD(float d, float tyreRadius) {
+		return (d >= 0) && (d < tyreRadius);
+	}
+	
+	public void setD(float d) throws IllegalArgumentException {
+		if (! isValidD(d, this.getTyreRadius()))
+			throw new IllegalArgumentException();
+		this.d = d;
+	}
 
     //     -----------------     //
     //                           //
@@ -126,26 +153,35 @@ public abstract class Tyre extends WorldObject {
     //                           //
     //     -----------------     //
 	
+	public RealVector getPosition(Drone drone) {
+		return drone.getWorldPosition().add(drone.transformationToWorldCoordinates(
+				new ArrayRealVector(new double[] {this.getWheelX(), this.getWheelY(), this.getWheelZ()}, false)));
+	}
+	
 	public float getDistanceCenterTyreAndGround(float D) {
 		return this.getTyreRadius() - D;
 	}
 	
-	/**
-	 * Calculate the Total Force in the radial direction of the tyre
-	 * @param   D
-	 * 			De ingedrukte afstand van de band
-	 * @return
-	 * 			The total force in the radial distance
-	 */
-	public float forceN(float D) {
-		float derivatieveD = (Float) null; //TODO
+	public boolean updateD(float secondsSinceLastUpdate, Drone drone, AutopilotOutputs output) {
+		if (this.getPosition(drone).getEntry(1) > (this.getWheelY() + this.getTyreRadius())) {
+			this.setD(0);
+			return false;
+		}
 		
-		float minValue = 0;
-		float totalForce = this.getTyreSlope() * D + this.getDampSlope() * derivatieveD;
-		
-		return Math.max(minValue, totalForce);
-		
+		int amount = drone.amountWheelsOnGround();
+		FirstOrderIntegrator rk4 = new ClassicalRungeKuttaIntegrator(secondsSinceLastUpdate/10);
+		FirstOrderDifferentialEquations ode = new SystemDifferentialEquations2(drone, output, amount);
+		double[] y = new double[] {d};
+		rk4.integrate(ode, 0.0, y, secondsSinceLastUpdate, y);
+		float d = (float) y[0];
+		try {
+			this.setD(d);
+		} catch (IllegalArgumentException exc) {
+			return true;
+		}
+		return false;
 	}
+	
 	
 	
 	

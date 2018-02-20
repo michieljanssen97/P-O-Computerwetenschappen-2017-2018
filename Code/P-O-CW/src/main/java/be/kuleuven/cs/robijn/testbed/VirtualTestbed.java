@@ -8,7 +8,6 @@ import org.apache.commons.math3.ode.FirstOrderIntegrator;
 import org.apache.commons.math3.ode.nonstiff.*;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.experiments.ExpEquations;
-import be.kuleuven.cs.robijn.experiments.ExpPosition;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
 import interfaces.*;
 
@@ -43,6 +42,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		this.config = config;
 		//Add drone to world
 		Drone drone = new Drone(config, initialVelocity);
+		drone.setRelativePosition(new ArrayRealVector(new double[] {0, -config.getWheelY(), 0}, false));
 		this.addChild(drone);
 
 		//Add boxes to world
@@ -201,7 +201,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		if (useDiffEquations){
 //			FirstOrderIntegrator dp853 = new DormandPrince853Integrator(1.0e-8, 100.0, 1.0e-5, 1.0e-5);
 			FirstOrderIntegrator rk4 = new ClassicalRungeKuttaIntegrator(secondsSinceLastUpdate/10);
-			FirstOrderDifferentialEquations ode = new SystemDifferentialEquations(drone, output);
+			FirstOrderDifferentialEquations ode = new SystemDifferentialEquations1(drone, output);
 			double[] y = new double[] { drone.getWorldPosition().getEntry(0), drone.getVelocity().getEntry(0), 
 					drone.getWorldPosition().getEntry(1), drone.getVelocity().getEntry(1),
 					drone.getWorldPosition().getEntry(2), drone.getVelocity().getEntry(2),
@@ -264,6 +264,10 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 			drone.setPitchAngularVelocity(pitchAngularVelocity + pitchAngularAcceleration*secondsSinceLastUpdate);
 			drone.setRollAngularVelocity(rollAngularVelocity + rollAngularAcceleration*secondsSinceLastUpdate);
 		}
+		
+		boolean crash = drone.crash(secondsSinceLastUpdate, output);
+		if (crash == true)
+			throw new IllegalStateException("The plane crashed!");
 	}
 
 	///////////////////////

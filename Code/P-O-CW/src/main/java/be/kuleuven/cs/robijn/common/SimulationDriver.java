@@ -69,10 +69,18 @@ public class SimulationDriver {
                         (float)stopwatch.getSecondsSinceLastUpdate(), latestAutopilotOutputs);
 
                 latestAutopilotInputs = testBed.getInputs();
-        	} catch (IllegalStateException exc){
+        	} catch (IllegalStateException exc1){
                 simulationCrashed = true;
-                System.err.println("Simulation failed!");
-        		exc.printStackTrace();
+                System.err.println("Plane crashed!");
+        		exc1.printStackTrace();
+        	} catch (IllegalArgumentException exc2) {
+        		simulationCrashed = true;
+        		System.err.println("Autopilot failed!");
+        		exc2.printStackTrace();
+        	} catch (NullPointerException exc3) {
+        		simulationCrashed = true;
+        		System.err.println("Autopilot failed!");
+        		exc3.printStackTrace();
         	}
         }
 

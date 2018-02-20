@@ -1,4 +1,4 @@
-package be.kuleuven.cs.robijn.common;
+package be.kuleuven.cs.robijn.tyres;
 
 import interfaces.AutopilotConfig;
 
@@ -16,7 +16,7 @@ public class FrontWheel extends Tyre{
 	}
 
 	@Override
-	public boolean isValidWheelX(float wheelX) {
+	public boolean isValidWheelX(float wheelX, float wingX) {
 		return wheelX == 0; //Zie opgave
 	}
 

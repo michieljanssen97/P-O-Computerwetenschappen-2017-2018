@@ -11,9 +11,9 @@ import interfaces.*;
  * @author Pieter Vandensande
  *
  */
-public class SystemDifferentialEquations implements FirstOrderDifferentialEquations {
+public class SystemDifferentialEquations1 implements FirstOrderDifferentialEquations {
 	
-	public SystemDifferentialEquations(Drone drone, AutopilotOutputs autopilotOutputs) throws IllegalArgumentException {
+	public SystemDifferentialEquations1(Drone drone, AutopilotOutputs autopilotOutputs) throws IllegalArgumentException {
 		if (! isValidDrone(drone))
 			throw new IllegalArgumentException();
 		this.drone = drone;

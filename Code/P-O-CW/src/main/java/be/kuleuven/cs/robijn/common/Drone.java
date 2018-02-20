@@ -3,6 +3,7 @@ package be.kuleuven.cs.robijn.common;
 import org.apache.commons.math3.geometry.euclidean.threed.*;
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
+import be.kuleuven.cs.robijn.tyres.*;
 import interfaces.*;
 
 /**
@@ -67,6 +68,14 @@ public class Drone extends WorldObject {
 			throw new IllegalArgumentException();
 		this.velocity = velocity;
 		this.initialVelocity = velocity;
+		
+		FrontWheel frontWheel = new FrontWheel(config);
+		RightRearWheel rightRearWheel = new RightRearWheel(config);
+		LeftRearWheel leftRearWheel = new LeftRearWheel(config);
+		this.addChild(frontWheel);
+		this.addChild(rightRearWheel);
+		this.addChild(leftRearWheel);
+		
 	}
 	
     //     -----------------     //
@@ -1101,5 +1110,39 @@ public class Drone extends WorldObject {
 		RealVector solution = solver.solve(constants);
 		
 		return new float[] {(float)solution.getEntry(0), (float)solution.getEntry(1), (float)solution.getEntry(2)};
-	}	
+	}
+	
+	public int amountWheelsOnGround() {
+		int amount = 0;
+		for (WorldObject tyres: this.getChildren()) {
+			if (tyres instanceof Tyre) {
+				if (((Tyre) tyres).getD() != 0)
+					amount += 1;
+			}
+		}
+		return amount;
+	}
+	
+	public boolean crash(float secondsSinceLastUpdate, AutopilotOutputs output) {
+		if (this.getLeftWingPosition().getEntry(1) <= 0)
+			return true;
+		if (this.getRightWingPosition().getEntry(1) <= 0)
+			return true;
+		if (this.getEnginePosition().getEntry(1) <= 0)
+			return true;
+		if (this.getTailPosition().getEntry(1) <= 0)
+			return true;
+		
+		for (WorldObject tyres: this.getChildren()) {
+			if (tyres instanceof Tyre) {
+				if (((Tyre) tyres).updateD(secondsSinceLastUpdate, this, output))
+					return true;
+			}
+		}
+		return false;
+	}
+	
+	
+	
+	
 }
