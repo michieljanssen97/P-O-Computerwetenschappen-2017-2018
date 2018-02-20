@@ -130,24 +130,5 @@ public abstract class Tyre extends WorldObject {
 		return this.getTyreRadius() - D;
 	}
 	
-	/**
-	 * Calculate the Total Force in the radial direction of the tyre
-	 * @param   D
-	 * 			De ingedrukte afstand van de band
-	 * @return
-	 * 			The total force in the radial distance
-	 */
-	public float forceN(float D) {
-		float derivatieveD = (Float) null; //TODO
-		
-		float minValue = 0;
-		float totalForce = this.getTyreSlope() * D + this.getDampSlope() * derivatieveD;
-		
-		return Math.max(minValue, totalForce);
-		
-	}
-	
-	
-	
 }
 
