@@ -486,13 +486,7 @@ public class ImageTest {
 		byte[] image = this.loadImageRGBBytes("backgroundcolor.png");
 		RealVector dronePos = new ArrayRealVector(new double[] {10,0,0});
 		Image im = rec.createImage(image, 200, 200, 120, 120, dronePos, (float) Math.PI/2, 0.0f, 0.0f);
-		for (ImageRecognizerCube cube : rec.getImageRecognizerCubes()){
-			System.out.println(Float.toString(cube.getHue()));
-//			System.out.println(Float.toString(im.getTotalDistance(cube.getHue(), cube.getSaturation())));
-//			System.out.println(Float.toString(cube.getPosition()[0]));
-//			System.out.println(Float.toString(cube.getPosition()[1]));
-//			System.out.println(Float.toString(cube.getPosition()[2]));
-		}
+		assertTrue(rec.getImageRecognizerCubes().size() == 0);
 	}
 	
 	@Test
