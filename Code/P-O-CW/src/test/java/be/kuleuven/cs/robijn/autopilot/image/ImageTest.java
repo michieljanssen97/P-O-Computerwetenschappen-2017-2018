@@ -471,7 +471,23 @@ public class ImageTest {
 		RealVector dronePos = new ArrayRealVector(new double[] {10,0,0});
 		Image im = rec.createImage(image, 200, 200, 120, 120, dronePos, (float) Math.PI/2, 0.0f, 0.0f);
 		for (ImageRecognizerCube cube : rec.getImageRecognizerCubes()){
-//			System.out.println(Float.toString(cube.getFactor()));
+			System.out.println(Float.toString(cube.getFactor()));
+//			System.out.println(Float.toString(im.getTotalDistance(cube.getHue(), cube.getSaturation())));
+//			System.out.println(Float.toString(cube.getPosition()[0]));
+//			System.out.println(Float.toString(cube.getPosition()[1]));
+//			System.out.println(Float.toString(cube.getPosition()[2]));
+		}
+	}
+	
+	
+	@Test
+	public void testBackGroundH() throws Exception{
+		ImageRecognizer rec = new ImageRecognizer();
+		byte[] image = this.loadImageRGBBytes("backgroundcolor.png");
+		RealVector dronePos = new ArrayRealVector(new double[] {10,0,0});
+		Image im = rec.createImage(image, 200, 200, 120, 120, dronePos, (float) Math.PI/2, 0.0f, 0.0f);
+		for (ImageRecognizerCube cube : rec.getImageRecognizerCubes()){
+			System.out.println(Float.toString(cube.getHue()));
 //			System.out.println(Float.toString(im.getTotalDistance(cube.getHue(), cube.getSaturation())));
 //			System.out.println(Float.toString(cube.getPosition()[0]));
 //			System.out.println(Float.toString(cube.getPosition()[1]));
@@ -493,6 +509,19 @@ public class ImageTest {
 //			System.out.println(Float.toString(im.getMinimumDistanceSpherePixels(cube.getHue(), cube.getSaturation())));
 		}
 	}
+	
+	
+//	@Test
+//	public void testBackGroundHSV() throws Exception{
+//		ImageRecognizer rec = new ImageRecognizer();
+//		byte[] image = this.loadImageRGBBytes("texture.png");
+//		RealVector dronePos = new ArrayRealVector(new double[] {10,0,0});
+//		Image im = rec.createImage(image, 200, 200, 120, 120, dronePos, (float) Math.PI/2, 0.0f, 0.0f);
+//		for (ImageRecognizerCube cube : rec.getImageRecognizerCubes()){
+//			System.out.println(Float.toString(cube.getHue()));
+//			System.out.println(Float.toString(cube.getSaturation()));
+//		}
+//	}
 	
 //	@Test
 //	public void testImageRecognizerCubeFactorRip() throws Exception{
