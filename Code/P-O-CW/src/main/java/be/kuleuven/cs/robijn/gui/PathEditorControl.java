@@ -99,26 +99,24 @@ public class PathEditorControl {
         deleteButton.disableProperty().bind(pathTable.getSelectionModel().selectedIndexProperty().isEqualTo(-1));
         
         loadButton.setOnAction(e -> {
-            Platform.runLater(() -> {
-                FileChooser chooser = new FileChooser();
-                chooser.setTitle("Select the path file");
-                chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Path file", "bin"));
-                File chosenFile = chooser.showOpenDialog(dialog.getOwner());
-                if(chosenFile == null){
-                    return;
-                }
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Select the path file");
+            chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Path file", "bin"));
+            File chosenFile = chooser.showOpenDialog(dialog.getOwner());
+            if(chosenFile == null){
+                return;
+            }
 
-                try(DataInputStream in = new DataInputStream(new FileInputStream(chosenFile))){
-                    loadPath(PathReader.read(in));
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Failed to load file");
-                    alert.setHeaderText("Could not load path file");
-                    alert.setContentText("An error occured while loading the file! ("+ex.getMessage()+")");
-                    alert.showAndWait();
-                }
-            });
+            try(DataInputStream in = new DataInputStream(new FileInputStream(chosenFile))){
+                loadPath(PathReader.read(in));
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Failed to load file");
+                alert.setHeaderText("Could not load path file");
+                alert.setContentText("An error occured while loading the file! ("+ex.getMessage()+")");
+                alert.showAndWait();
+            }
         });
 
         saveButton.setOnAction(e -> {
@@ -193,6 +191,7 @@ public class PathEditorControl {
         for(int i = 0; i < rows.length; i++){
             rows[i] = FXCollections.observableFloatArray(path.getX()[i], path.getY()[i], path.getZ()[i]);
         }
+        pathTable.getItems().addAll(rows);
     }
 
     private void setupDialogButtons() {
