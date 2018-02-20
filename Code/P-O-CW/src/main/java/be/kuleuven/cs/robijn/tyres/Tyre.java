@@ -181,9 +181,5 @@ public abstract class Tyre extends WorldObject {
 		}
 		return false;
 	}
-	
-	
-	
-	
 }
 
