@@ -898,7 +898,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 	@Override
 	public void setPath(Path path) {
 		//TODO
-		throw new RuntimeException("Not implemented");
+		this.getImageRecognizer().setPath(new CubePath(path.getX(), path.getY(), path.getZ()));
 	}
 
 	@Override

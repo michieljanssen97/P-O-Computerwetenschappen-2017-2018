@@ -52,6 +52,8 @@ public class ImageRecognizer {
 	
 	private float roll = 0.0f;
 	
+	private CubePath path = null;
+	
 	/**
 	 * Returns the average coordinates of the pixels of the cube with given hue and saturation in the given image.
 	 * @param image	The given image
@@ -365,6 +367,10 @@ public class ImageRecognizer {
 	 */
 	private RealVector transformationToWorldCoordinates(RealVector realVector, float roll, float pitch, float heading) {
 		return this.inverseHeadingTransformation(this.inversePitchTransformation(this.inverseRollTransformation(realVector, roll), pitch), heading);
+	}
+	
+	public void setPath(CubePath path) {
+		this.path = path;
 	}
 	
 }

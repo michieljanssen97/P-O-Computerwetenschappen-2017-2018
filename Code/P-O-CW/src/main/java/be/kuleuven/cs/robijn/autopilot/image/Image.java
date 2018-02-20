@@ -292,7 +292,7 @@ public class Image {
 	 */
 	private boolean isXPixel(Pixel p){
 		float v = p.getValue();
-		return ( (v >= 0.8 && v <= 0.9) || (v >= 0.25 && v <= 0.35) );
+		return ( floatFuzzyEquals(v, 0.4f, defaultEpsilon) || floatFuzzyEquals(v, 0.25f, defaultEpsilon) );
 	}
 	
 	/**
@@ -302,7 +302,7 @@ public class Image {
 	 */
 	private boolean isYPixel(Pixel p){
 		float v = p.getValue();
-		return ( (v >= 0.95) || (v >= 0.1 && v <= 0.2) );
+		return ( floatFuzzyEquals(v, 0.45f, defaultEpsilon) || floatFuzzyEquals(v, 0.2f, defaultEpsilon) );
 	}
 	
 	/**
@@ -312,8 +312,14 @@ public class Image {
 	 */
 	private boolean isZPixel(Pixel p){
 		float v = p.getValue();
-		return ( (v >= 0.65 && v <= 0.75) || (v >= 0.4 && v <= 0.5) );
+		return ( floatFuzzyEquals(v, 0.35f, defaultEpsilon) || floatFuzzyEquals(v, 0.3f, defaultEpsilon) );
 	}
+	
+	private boolean floatFuzzyEquals(float input, float expected, float epsilon) {
+		return (Math.abs(input - expected) <= epsilon);
+	}
+	
+	private float defaultEpsilon = 0.01f;
 	
 	/**
 	 * Return the distance from the cube with given hue and saturation to the camera along the (negative) z axis of the drone coordinate system.
