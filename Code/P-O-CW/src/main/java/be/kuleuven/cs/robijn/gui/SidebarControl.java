@@ -3,7 +3,9 @@ package be.kuleuven.cs.robijn.gui;
 import be.kuleuven.cs.robijn.common.Resources;
 import be.kuleuven.cs.robijn.common.SimulationDriver;
 import be.kuleuven.cs.robijn.common.UpdateEventHandler;
+import be.kuleuven.cs.robijn.common.WorldGenerator;
 import interfaces.AutopilotInputs;
+import interfaces.Path;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -13,6 +15,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import interfaces.AutopilotOutputs;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -62,6 +65,10 @@ public class SidebarControl extends VBox {
     private Label rollLabel;
 
     /// AUTOPILOT INFO
+
+    //Path
+    @FXML
+    private Button editPathButton;
 
     //Thrust
     @FXML
@@ -142,6 +149,13 @@ public class SidebarControl extends VBox {
 
         simulationErrorLabel.visibleProperty().bind(simulationErrorProperty);
         simulationErrorLabel.managedProperty().bind(simulationErrorProperty);
+
+        editPathButton.setOnMouseClicked(e -> {
+            Path newPath = PathEditorControl.showDialog((Stage)this.editPathButton.getScene().getWindow());
+            if(newPath != null){
+                this.getSimulation().getAutoPilot().setPath(newPath);
+            }
+        });
     }
 
     private void updateLabels(AutopilotInputs inputs, AutopilotOutputs outputs){
