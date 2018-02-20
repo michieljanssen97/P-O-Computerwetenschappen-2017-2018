@@ -7,7 +7,7 @@ public class OpenGLOrthographicCamera extends OrthographicCamera {
     private float width = 100f;
     private float height = 100f;
     private float zNear = 0.1f;
-    private float zFar = 1000f;
+    private float zFar = 100000f;
     private double renderIconsThresholdRatio = 0;
     private boolean areDronesHidden;
     private boolean drawGround = true;
