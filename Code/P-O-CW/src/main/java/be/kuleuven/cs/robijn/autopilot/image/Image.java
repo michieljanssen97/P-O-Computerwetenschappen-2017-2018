@@ -292,7 +292,7 @@ public class Image {
 	 */
 	private boolean isXPixel(Pixel p){
 		float v = p.getValue();
-		return ( (v >= 0.8 && v <= 0.9) || (v >= 0.25 && v <= 0.35) );
+		return ( (v >= 0.225 && v < 0.275) || (v >= 0.375 && v < 0.425) );
 	}
 	
 	/**
@@ -302,7 +302,7 @@ public class Image {
 	 */
 	private boolean isYPixel(Pixel p){
 		float v = p.getValue();
-		return ( (v >= 0.95) || (v >= 0.1 && v <= 0.2) );
+		return ( (v >= 0.175 && v < 0.225) || (v >= 0.425 && v < 0.475) );
 	}
 	
 	/**
@@ -312,7 +312,7 @@ public class Image {
 	 */
 	private boolean isZPixel(Pixel p){
 		float v = p.getValue();
-		return ( (v >= 0.65 && v <= 0.75) || (v >= 0.4 && v <= 0.5) );
+		return (v >= 0.275 && v < 0.375);
 	}
 
 	/**
