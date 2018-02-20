@@ -373,4 +373,8 @@ public class ImageRecognizer {
 		this.path = path;
 	}
 	
+	public float[] getClosestPathXYZ() {
+		return this.path.getClosestXYZTo(getDronePositionCoordinates());
+	}
+	
 }
