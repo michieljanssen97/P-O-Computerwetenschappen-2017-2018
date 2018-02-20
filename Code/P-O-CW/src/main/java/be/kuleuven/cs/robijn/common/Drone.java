@@ -32,6 +32,7 @@ public class Drone extends WorldObject {
  */
 	public Drone(AutopilotConfig config, RealVector velocity) 
 					throws IllegalArgumentException {
+		this.droneID = config.getDroneID();
 		if (! isValidWingX(config.getWingX()))
 			throw new IllegalArgumentException();
 		this.wingX = config.getWingX();
@@ -95,6 +96,7 @@ public class Drone extends WorldObject {
 	
 	private final float tailMass;
 	
+	private final String droneID;
 	
 	public float getGravity() {
 		return this.gravity;
@@ -182,6 +184,10 @@ public class Drone extends WorldObject {
 
 	public float getEngineDistance() {
 		return ((this.getTailMass() * this.getTailSize()) / this.getEngineMass());
+	}
+	
+	public String getDroneID() {
+		return this.droneID;
 	}
 	
     //  -----------------   //

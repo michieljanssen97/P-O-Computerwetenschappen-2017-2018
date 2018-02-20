@@ -2,33 +2,19 @@ package be.kuleuven.cs.robijn.common;
 
 import interfaces.AutopilotConfig;
 
-public class Tyre extends WorldObject {
+public abstract class Tyre extends WorldObject {
 	
     //  -----------------   //
     //                      //
-    //   INITIALISE Tyre    //
+    //   INITIALISE TYRE    //
     //                      //
     //  -----------------   //
 	public Tyre(AutopilotConfig config) throws IllegalArgumentException{
+		this.droneID = config.getDroneID();
 		if (! isValidWheelY(config.getWheelY())) {
 			throw new IllegalArgumentException();
 		}
 		this.wheelY = config.getWheelY();
-		
-		if (! isValidFrontWheelZ(config.getFrontWheelZ())) {
-			throw new IllegalArgumentException();
-		}
-		this.frontWheelZ = config.getFrontWheelZ();
-		
-		if(! isValidRearWheelZ(config.getRearWheelZ())) {
-			throw new IllegalArgumentException();
-		}
-		this.rearWheelZ = config.getRearWheelZ();
-		
-		if(! isValidRearWheelX(config.getRearWheelX())) {
-			throw new IllegalArgumentException();
-		}
-		this.rearWheelX = config.getRearWheelX();
 		
 		if(! isValidTyreSlope(config.getTyreSlope())) {
 			throw new IllegalArgumentException();
@@ -55,17 +41,16 @@ public class Tyre extends WorldObject {
 		}
 		this.FcMax = config.getFcMax();
 	}
-	
-	
-    //     -----------------     //
+
+	//     -----------------     //
     //                           //
-    //      Tyre ATTRIBUTES      //
+    //      TYRE ATTRIBUTES      //
     //                           //
     //     -----------------     //
+    protected String droneID;
+    protected float wheelX;
 	private final float wheelY;
-	private final float frontWheelZ;
-	private final float rearWheelZ;
-	private final float rearWheelX;
+	protected float wheelZ;
 	private float tyreSlope;
 	private float dampSlope;
 	private final float tyreRadius;
@@ -81,29 +66,19 @@ public class Tyre extends WorldObject {
 		return (wheelY > 0) && (wheelY <= Float.MAX_VALUE);
 	}
 	
-	public float getFrontWheelZ() {
-		return this.frontWheelZ;
+	public float getWheelZ() {
+		return this.wheelZ;
 	}
 	
-	public boolean isValidFrontWheelZ(float frontWheelZ) {
-		return (frontWheelZ > 0) && (frontWheelZ <= Float.MAX_VALUE);
+	public boolean isValidWheelZ(float wheelZ) {
+		return (wheelZ > 0) && (wheelZ <= Float.MAX_VALUE);
 	}
 	
-	public float getRearWheelZ() {
-		return this.rearWheelZ;
+	public float getWheelX() {
+		return this.wheelX;
 	}
 	
-	public boolean isValidRearWheelZ(float rearWheelZ) {
-		return (rearWheelZ < 0) && (rearWheelZ >= - Float.MAX_VALUE);  // Is negatief, want ten opzichte van middelpunt Drone naar achter gelegen
-	}
-	
-	public float getRearWheelX() {
-		return this.rearWheelX;
-	}
-	
-	public boolean isValidRearWheelX(float rearWheelX) {
-		return (rearWheelX > 0) && (rearWheelX <= Float.MAX_VALUE);
-	}
+	public abstract boolean isValidWheelX(float rearWheelX);
 	
 	public float getTyreSlope() {
 		return this.tyreSlope;
@@ -144,4 +119,35 @@ public class Tyre extends WorldObject {
 	public boolean isValidFcMax(float FcMax) {
 		return (FcMax > 0) && (FcMax <= 1);
 	}
+
+    //     -----------------     //
+    //                           //
+    //       Other Methods       //
+    //                           //
+    //     -----------------     //
+	
+	public float getDistanceCenterTyreAndGround(float D) {
+		return this.getTyreRadius() - D;
+	}
+	
+	/**
+	 * Calculate the Total Force in the radial direction of the tyre
+	 * @param   D
+	 * 			De ingedrukte afstand van de band
+	 * @return
+	 * 			The total force in the radial distance
+	 */
+	public float forceN(float D) {
+		float derivatieveD = (Float) null; //TODO
+		
+		float minValue = 0;
+		float totalForce = this.getTyreSlope() * D + this.getDampSlope() * derivatieveD;
+		
+		return Math.max(minValue, totalForce);
+		
+	}
+	
+	
+	
 }
+
