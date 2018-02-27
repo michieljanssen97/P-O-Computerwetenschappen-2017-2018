@@ -7,6 +7,7 @@ import org.apache.commons.math3.ode.FirstOrderIntegrator;
 import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
 
 import be.kuleuven.cs.robijn.common.*;
+import be.kuleuven.cs.robijn.common.math.VectorMath;
 import interfaces.AutopilotConfig;
 import interfaces.AutopilotOutputs;
 
@@ -47,12 +48,6 @@ public abstract class Tyre extends WorldObject {
 			throw new IllegalArgumentException();
 		}
 		this.FcMax = config.getFcMax();
-		
-		float d = (config.getEngineMass() + config.getTailMass() + 2*config.getWingMass())*(config.getGravity()/config.getTyreSlope());
-		if (! isValidD(d, config.getTyreRadius())) {
-			throw new IllegalArgumentException();
-		}
-		this.d = d;
 	}
 
 	//     -----------------     //
@@ -68,7 +63,6 @@ public abstract class Tyre extends WorldObject {
 	private final float tyreRadius;
 	private final float RMax;
 	private final float FcMax;
-	private float d;
 	
 	
 	public float getWheelY() {
@@ -132,20 +126,6 @@ public abstract class Tyre extends WorldObject {
 	public boolean isValidFcMax(float FcMax) {
 		return (FcMax > 0) && (FcMax <= 1);
 	}
-	
-	public float getD() {
-		return this.d;
-	}
-	
-	public boolean isValidD(float d, float tyreRadius) {
-		return (d >= 0) && (d < tyreRadius);
-	}
-	
-	public void setD(float d) throws IllegalArgumentException {
-		if (! isValidD(d, this.getTyreRadius()))
-			throw new IllegalArgumentException();
-		this.d = d;
-	}
 
     //     -----------------     //
     //                           //
@@ -153,14 +133,52 @@ public abstract class Tyre extends WorldObject {
     //                           //
     //     -----------------     //
 	
+	public RealVector getRelativePosition(Drone drone) {
+		return drone.transformationToWorldCoordinates(
+				new ArrayRealVector(new double[] {this.getWheelX(), this.getWheelY(), this.getWheelZ()}, false));
+	}
+	
+	public RealVector getRelativePositionTyreGround(Drone drone) {
+		RealVector vector = new ArrayRealVector(new double[] {0, -this.getDistanceCenterTyreAndGround(this.getD(drone)), 0}, false);
+		vector = drone.transformationToWorldCoordinates(vector);
+		return this.getRelativePosition(drone).add(vector);
+	}
+	
 	public RealVector getPosition(Drone drone) {
-		return drone.getWorldPosition().add(drone.transformationToWorldCoordinates(
-				new ArrayRealVector(new double[] {this.getWheelX(), this.getWheelY(), this.getWheelZ()}, false)));
+		return drone.getWorldPosition().add(this.getRelativePosition(drone));
 	}
 	
 	public float getDistanceCenterTyreAndGround(float D) {
 		return this.getTyreRadius() - D;
 	}
+	
+	public float getD(Drone drone) throws IllegalArgumentException {
+		if (this.getPosition(drone).getEntry(1) < this.getTyreRadius())
+			throw new IllegalArgumentException();
+		float d = (float) (this.getTyreRadius() - this.getPosition(drone).getEntry(1));
+		if (d < 0)
+			d = 0;
+		return d;
+	}
+	
+	public RealVector getVelocityTyre(Drone drone) {
+		return drone.getVelocity().add(
+				VectorMath.crossProduct(
+						drone.getHeadingAngularVelocityVector()
+						.add(drone.getPitchAngularVelocityVector())
+						.add(drone.getRollAngularVelocityVector())
+						, this.getRelativePositionTyreGround(drone)));
+		
+	}
+	public float getVelocityD(Drone drone) {
+		return (float) -drone.transformationToDroneCoordinates(this.getVelocityTyre(drone)).getEntry(1);
+	}
+	
+	public float getLateralVelocity(Drone drone) {
+		return (float) this.getVelocityTyre(drone).getEntry(0);
+	}
+	
+	public abstract RealVector getTyreForce(Drone drone, float frontBrakeForce, float leftBrakeForce, float rightBrakeForce);
 	
 	public boolean updateD(float secondsSinceLastUpdate, Drone drone, AutopilotOutputs output) {
 		if (this.getPosition(drone).getEntry(1) > (this.getWheelY() + this.getTyreRadius())) {

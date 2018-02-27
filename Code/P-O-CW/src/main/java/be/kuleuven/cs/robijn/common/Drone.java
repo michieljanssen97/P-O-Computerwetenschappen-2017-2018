@@ -1013,7 +1013,8 @@ public class Drone extends WorldObject {
 	 * 			The given thrust is not a valid thrust for any drone.
 	 * 		  | thrust > this.maxThrust()
 	 */
-	public RealVector getAcceleration(float thrust, float leftWingInclination, float rightWingInclination, float horStabInclination, float verStabInclination)
+	public RealVector getAcceleration(float thrust, float leftWingInclination, float rightWingInclination, float horStabInclination, float verStabInclination
+			, float frontBrakeForce, float leftBrakeForce, float rightBrakeForce)
 			throws IllegalArgumentException {
 		if (thrust > this.getMaxThrust())
 			throw new IllegalArgumentException();
@@ -1026,6 +1027,12 @@ public class Drone extends WorldObject {
 								.add(this.getLiftForceHorStab(horStabInclination))
 								.add(this.getLiftForceVerStab(verStabInclination))
 								.add(this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, -thrust}, false)));
+		
+		for (WorldObject tyres: this.getChildren()) {
+			if (tyres instanceof Tyre) {
+				totalForce.add(((Tyre) tyres).getTyreForce(this, frontBrakeForce, leftBrakeForce, rightBrakeForce));
+			}
+		}
 		
 		float totalMass = this.getEngineMass() + (2*this.getWingMass()) + this.getTailMass();
 		
@@ -1093,6 +1100,8 @@ public class Drone extends WorldObject {
 							   new ArrayRealVector(new double[] {0, 0, this.getTailSize()}, false), //distance
 							   this.transformationToDroneCoordinates(this.getLiftForceHorStab(horStabInclination).add(this.getLiftForceVerStab(verStabInclination))) //forces
 							   );
+		
+		RealVector momentOnFrontWheel = VectorMath.
 		
 		RealVector constants =  momentOnLeftWing
 								.add(momentOnRightWing)

@@ -2,14 +2,9 @@ package be.kuleuven.cs.robijn.tyres;
 
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
-import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
-import org.apache.commons.math3.ode.FirstOrderIntegrator;
-import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
 
 import be.kuleuven.cs.robijn.common.Drone;
-import be.kuleuven.cs.robijn.common.SystemDifferentialEquations2;
 import interfaces.AutopilotConfig;
-import interfaces.AutopilotOutputs;
 
 public class RightRearWheel extends Tyre{
 
@@ -30,5 +25,30 @@ public class RightRearWheel extends Tyre{
 	@Override
 	public boolean isValidWheelX(float wheelX, float wingX) {
 		return (wheelX > 0) && (wheelX <= wingX);
+	}
+	
+	public RealVector getTyreForce(Drone drone, float frontBrakeForce, float leftBrakeForce, float rightBrakeForce) {
+		RealVector totalForce = new ArrayRealVector(new double[] {0, 0, 0}, false);
+		
+		if (this.getD(drone) != 0)  {
+			RealVector forceTyre = drone.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 
+					this.getTyreSlope()*this.getD(drone)
+					+ this.getDampSlope()*this.getVelocityD(drone), 0}, false));
+			totalForce.add(forceTyre);
+			
+			RealVector frictionForce = new ArrayRealVector(new double[] {
+					-this.getFcMax() * forceTyre.getEntry(1) * this.getLateralVelocity(drone),
+					0, 0}, false);
+			totalForce.add(frictionForce);
+			
+			RealVector brakeForce = new ArrayRealVector(new double[] {this.getVelocityTyre(drone).getEntry(0), 
+					0, this.getVelocityTyre(drone).getEntry(2)}, false);
+			brakeForce = brakeForce.mapMultiply(-(1/brakeForce.getNorm()));
+			brakeForce = brakeForce.mapMultiply(rightBrakeForce);
+			
+			totalForce.add(brakeForce);
+		}
+		
+		return totalForce;
 	}
 }
