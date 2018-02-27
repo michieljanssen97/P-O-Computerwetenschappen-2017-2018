@@ -1074,7 +1074,6 @@ public class Drone extends WorldObject {
 				.add(this.getLiftForceRightWing(rightWingInclination))
 				.add(this.getLiftForceHorStab(horStabInclination))
 				.add(this.getLiftForceVerStab(verStabInclination));
-		
 		if (liftForce.getNorm() >= 50) {
 			@SuppressWarnings("unused")
 			RealVector liftForceLeftWing = this.getLiftForceLeftWingCheck(leftWingInclination);
@@ -1091,7 +1090,7 @@ public class Drone extends WorldObject {
 								.add(this.getGravitationalForceWing().mapMultiply(2)) 
 								.add(liftForce)
 								.add(this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, -thrust}, false)));
-
+		
 		for (WorldObject tyres: this.getChildren()) {
 			if (tyres instanceof Tyre) {
 				totalForce = totalForce.add(((Tyre) tyres).getTyreForce(this, frontBrakeForce, leftBrakeForce, rightBrakeForce));

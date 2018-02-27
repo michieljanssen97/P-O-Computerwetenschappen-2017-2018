@@ -150,7 +150,7 @@ public abstract class Tyre extends WorldObject {
 	public float getD(Drone drone) throws CrashException {
 		if (this.getPosition(drone).getEntry(1) <=0)
 			throw new CrashException();
-		float d = (float) (this.getTyreRadius() - this.getPosition(drone).getEntry(1));
+		float d = (float) (this.getTyreRadius() - this.getPosition(drone).getEntry(1)*Math.cos(drone.getRoll()));
 		if (d < 0)
 			d = 0;
 		return d;
