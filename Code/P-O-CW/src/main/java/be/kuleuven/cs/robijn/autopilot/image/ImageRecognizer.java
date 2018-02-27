@@ -369,19 +369,40 @@ public class ImageRecognizer {
 		return this.inverseHeadingTransformation(this.inversePitchTransformation(this.inverseRollTransformation(realVector, roll), pitch), heading);
 	}
 	
+	/**
+	 * Initialize the path (containing approximate cube coordinates). 
+	 * @param path
+	 * 		The path to initialize.
+	 */
 	public void setPath(CubePath path) {
 		this.path = path;
 		setPathTarget(getClosestPathXYZ());
 	}
 	
+	/**
+	 * Returns the path coordinates of the cube closest to the drone.
+	 */
 	public float[] getClosestPathXYZ() {
 		return this.path.getClosestXYZTo(getDronePositionCoordinates());
 	}
 	
+	/**
+	 * The path coordinate that the drone is currently travelling to.
+	 */
 	private float[] currentPathTarget;
 	
+	/**
+	 * Indicates the travelling pattern of the drone. True means it is travelling towards an 
+	 * approximate path coordinate. False means it is travelling towards an exact position of 
+	 * a cube, using image recognition to determine that position.
+	 */
 	private boolean followingPath = true;
 	
+	/**
+	 * Returns the path coordinates the drone is currently travelling to.
+	 * If the drone gets within a certain distance of the path coordinates, it will switch to 
+	 * "exact" mode, meaning it will use image recognition to determine the exact coordinate of the cube.
+	 */
 	public double[] getCurrentPathTarget() {
 		float[] path = this.currentPathTarget;
 		double[] drone = getDronePositionCoordinates();
@@ -404,19 +425,31 @@ public class ImageRecognizer {
 		return this.followingPath;
 	}
 	
+	/**
+	 * Switch the drone's travelling pattern to "exact" mode. The drone will now try to 
+	 * determine the cube's exact position with image recognition.
+	 */
 	public void followExactCoordinates() {
 		this.followingPath = false;
 	}
 	
+	/**
+	 * Switch the drone to "path" mode. The closest remaining path coordinate is determined and set as 
+	 * the drone's current destination, while the previous path coordinate is removed.
+	 */
 	public void followNewPathCoordinates() {
 		this.followingPath = true;
 		this.path.removeCoordinate(this.currentPathTarget);
 		setPathTarget(getClosestPathXYZ());
 	}
 	
-	//Returns the coordinates of the cube close to the coordinates of the current path (5 meter).
-	//Currently the same method as getClosestCubeInWorld(Image im). Needs to change.
+	/**
+	 * Returns the coordinates of the cube close to the coordinates of the current path (5 meter).
+	 * @param im
+	 * 		The current image.
+	 */
 	public double[] searchForCubeInPathArea(Image im) {
+		//Currently the same method as getClosestCubeInWorld(Image im). Needs to change.
 		float[] curPos = {(float)dronePosition.getEntry(0), (float)dronePosition.getEntry(1), (float)dronePosition.getEntry(2)};
 		float minimum = Float.POSITIVE_INFINITY;
 		ImageRecognizerCube closest = null;

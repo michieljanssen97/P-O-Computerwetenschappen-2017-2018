@@ -2,36 +2,24 @@ package be.kuleuven.cs.robijn.autopilot.image;
 
 import java.util.ArrayList;
 
-public class CubePath implements interfaces.Path {
+public class CubePath {
 	
 	public CubePath(float[] x, float[] y, float[] z) {
 		if (!isValidPath(x, y, z))
 			throw new IllegalArgumentException("The given path is invalid.");
-		this.x = x;
-		this.y = y;
-		this.z = z;
-		this.coordinatesList = getAllCubesXYZ();
+		ArrayList<float[]> co = new ArrayList<float[]>();
+		int l = x.length;
+		for (int i=0; i<l; i++) {
+			float[] a = new float[] {x[i], y[i], z[i]};
+			co.add(a);
+		}
+		this.coordinatesList = co;
 	}
 	
-	private float[] x;
-	
-	private float[] y;
-	
-	private float[] z;
-	
+	/**
+	 * List that stores the path coordinates of the cubes.
+	 */
 	private ArrayList<float[]> coordinatesList;
-	
-	public float[] getX() {
-		return this.x;
-	}
-	
-	public float[] getY() {
-		return this.y;
-	}
-	
-	public float[] getZ() {
-		return this.z;
-	}
 	
 	private boolean isValidPath(float[] x, float[] y, float[] z) {
 		if ( (x.length != y.length) || (y.length != z.length) || (x.length != z.length) )
@@ -52,15 +40,14 @@ public class CubePath implements interfaces.Path {
 		return this.coordinatesList.size();
 	}
 	
-	public ArrayList<float[]> getAllCubesXYZ() {
-		ArrayList<float[]> co = new ArrayList<float[]>();
-		for (int i=0; i<getPathSize(); i++) {
-			float[] a = new float[] {getX()[i], getY()[i], getZ()[i]};
-			co.add(a);
-		}
-		return co;
-	}
-	
+	/**
+	 * Gives the path coordinates of the cube closest to the given 
+	 * coordinates (usually the position of the drone).
+	 * @param dronePos
+	 * 		The given coordinates.
+	 * @return
+	 * 		The path coordinates of the closest cube.
+	 */
 	public float[] getClosestXYZTo(double[] dronePos) {
 		float minimum = Float.POSITIVE_INFINITY;
 		float[] result = new float[3];
