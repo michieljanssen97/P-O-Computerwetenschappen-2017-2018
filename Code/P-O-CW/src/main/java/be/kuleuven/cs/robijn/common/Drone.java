@@ -2,6 +2,8 @@ package be.kuleuven.cs.robijn.common;
 
 import org.apache.commons.math3.geometry.euclidean.threed.*;
 import org.apache.commons.math3.linear.*;
+
+import be.kuleuven.cs.robijn.common.exceptions.CrashException;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
 import be.kuleuven.cs.robijn.tyres.*;
 import interfaces.*;
@@ -197,6 +199,15 @@ public class Drone extends WorldObject {
 	
 	public String getDroneID() {
 		return this.droneID;
+	}
+	
+	@Override
+	public void setRelativePosition(RealVector vector) throws CrashException {
+		
+		if (vector.getEntry(1) >= 0)
+			throw new CrashException();
+		
+		super.setRelativePosition(vector);
 	}
 	
     //  -----------------   //
@@ -1059,7 +1070,8 @@ public class Drone extends WorldObject {
 	 * 			The second element is the pitch angular acceleration.
 	 * 			The third element is the roll angular acceleration.
 	 */
-	public float[] getAngularAccelerations(float leftWingInclination, float rightWingInclination, float horStabInclination, float verStabInclination) {
+	public float[] getAngularAccelerations(float leftWingInclination, float rightWingInclination, float horStabInclination, float verStabInclination,
+			float frontBrakeForce, float leftBrakeForce, float rightBrakeForce) {
 		float inertiaMatrixXX = (float) (this.getTailMass()*Math.pow(this.getTailSize(),2) + this.getEngineMass()*Math.pow(this.getEngineDistance(), 2));
 		
 		float inertiaMatrixZZ = (float) (2*(this.getWingMass()*Math.pow(this.getWingX(),2)));
@@ -1101,8 +1113,6 @@ public class Drone extends WorldObject {
 							   this.transformationToDroneCoordinates(this.getLiftForceHorStab(horStabInclination).add(this.getLiftForceVerStab(verStabInclination))) //forces
 							   );
 		
-		RealVector momentOnFrontWheel = VectorMath.
-		
 		RealVector constants =  momentOnLeftWing
 								.add(momentOnRightWing)
 								.add(momentOnTail)
@@ -1116,42 +1126,15 @@ public class Drone extends WorldObject {
 										))
 									)
 								));
+		
+		for (WorldObject tyres: this.getChildren()) {
+			if (tyres instanceof Tyre) {
+				constants.add(((Tyre) tyres).getTyreMoment(this, frontBrakeForce, leftBrakeForce, rightBrakeForce));
+			}
+		}
+		
 		RealVector solution = solver.solve(constants);
 		
 		return new float[] {(float)solution.getEntry(0), (float)solution.getEntry(1), (float)solution.getEntry(2)};
-	}
-	
-	public int amountWheelsOnGround() {
-		int amount = 0;
-		for (WorldObject tyres: this.getChildren()) {
-			if (tyres instanceof Tyre) {
-				if (((Tyre) tyres).getD() != 0)
-					amount += 1;
-			}
-		}
-		return amount;
-	}
-	
-	public boolean crash(float secondsSinceLastUpdate, AutopilotOutputs output) {
-		if (this.getLeftWingPosition().getEntry(1) <= 0)
-			return true;
-		if (this.getRightWingPosition().getEntry(1) <= 0)
-			return true;
-		if (this.getEnginePosition().getEntry(1) <= 0)
-			return true;
-		if (this.getTailPosition().getEntry(1) <= 0)
-			return true;
-		
-		for (WorldObject tyres: this.getChildren()) {
-			if (tyres instanceof Tyre) {
-				if (((Tyre) tyres).updateD(secondsSinceLastUpdate, this, output))
-					return true;
-			}
-		}
-		return false;
-	}
-	
-	
-	
-	
+	}	
 }

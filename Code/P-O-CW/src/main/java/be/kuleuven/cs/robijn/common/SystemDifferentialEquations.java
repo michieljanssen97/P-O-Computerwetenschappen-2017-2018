@@ -2,6 +2,8 @@ package be.kuleuven.cs.robijn.common;
 
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.ode.*;
+
+import be.kuleuven.cs.robijn.tyres.Tyre;
 import interfaces.*;
 
 /**
@@ -11,9 +13,9 @@ import interfaces.*;
  * @author Pieter Vandensande
  *
  */
-public class SystemDifferentialEquations1 implements FirstOrderDifferentialEquations {
+public class SystemDifferentialEquations implements FirstOrderDifferentialEquations {
 	
-	public SystemDifferentialEquations1(Drone drone, AutopilotOutputs autopilotOutputs) throws IllegalArgumentException {
+	public SystemDifferentialEquations(Drone drone, AutopilotOutputs autopilotOutputs) throws IllegalArgumentException {
 		if (! isValidDrone(drone))
 			throw new IllegalArgumentException();
 		this.drone = drone;
@@ -66,13 +68,24 @@ public class SystemDifferentialEquations1 implements FirstOrderDifferentialEquat
 		drone.setRoll(newRoll);
 		drone.setRollAngularVelocity((float) y[11]);
 		
+		for (WorldObject tyres: drone.getChildren()) {
+			if (tyres instanceof Tyre) {
+				@SuppressWarnings("unused")
+				float d = ((Tyre) tyres).getD(drone);
+			}
+		}
+		
 		RealVector acceleration = this.getDrone().getAcceleration(this.getAutopilotOutputs().getThrust(),
 				this.getAutopilotOutputs().getLeftWingInclination(), this.getAutopilotOutputs().getRightWingInclination(),
-				this.getAutopilotOutputs().getHorStabInclination(), this.getAutopilotOutputs().getVerStabInclination());
+				this.getAutopilotOutputs().getHorStabInclination(), this.getAutopilotOutputs().getVerStabInclination(),
+				this.getAutopilotOutputs().getFrontBrakeForce(), this.getAutopilotOutputs().getLeftBrakeForce(),
+				this.getAutopilotOutputs().getRightBrakeForce());
 		
 		float[] angularAccelerations = this.getDrone().getAngularAccelerations(this.getAutopilotOutputs().getLeftWingInclination(),
 				this.getAutopilotOutputs().getRightWingInclination(), this.getAutopilotOutputs().getHorStabInclination(), 
-				this.getAutopilotOutputs().getVerStabInclination());
+				this.getAutopilotOutputs().getVerStabInclination(),
+				this.getAutopilotOutputs().getFrontBrakeForce(), this.getAutopilotOutputs().getLeftBrakeForce(),
+				this.getAutopilotOutputs().getRightBrakeForce());
 		float headingAngularAcceleration = angularAccelerations[0];
 		float pitchAngularAcceleration = angularAccelerations[1];
 		float rollAngularAcceleration = angularAccelerations[2];

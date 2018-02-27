@@ -391,17 +391,25 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			thrustTemp = 0;
 		final float thrust = thrustTemp;
 		
+		final float frontBrakeForce = 0;
+		final float leftBrakeForce = 0;
+		final float rightBrakeForce = 0;
+		
 		this.setPreviousHeadingAngularAccelerationError(
-				drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination)[0]
+				drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination,
+						frontBrakeForce, leftBrakeForce, rightBrakeForce)[0]
 				-headingAngularAcceleration);
 		this.setPreviousPitchAngularAccelerationError(
-				drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination)[1]
+				drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination,
+						frontBrakeForce, leftBrakeForce, rightBrakeForce)[1]
 				-pitchAngularAcceleration);
 		this.setPreviousRollAngularAccelerationError(
-				drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination)[2]
+				drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination,
+						frontBrakeForce, leftBrakeForce, rightBrakeForce)[2]
 				-rollAngularAcceleration);
 		this.setPreviousYAccelerationError(
-				((float)drone.getAcceleration(thrust, leftWingInclination, rightWingInclination, horStabInclination, verStabInclination).getEntry(1))
+				((float)drone.getAcceleration(thrust, leftWingInclination, rightWingInclination, horStabInclination, verStabInclination,
+						frontBrakeForce, leftBrakeForce, rightBrakeForce).getEntry(1))
 				-yAcceleration);
 		RealMatrix transformationMatrix = this.calculateTransformationMatrix(targetRoll, drone);
 		this.setPreviousXAccelerationError(
@@ -425,26 +433,50 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 				return verStabInclination;
 			}
 
-			@Override
 			public float getFrontBrakeForce() {
-				//TODO: implement
-				throw new RuntimeException("Not implemented");
+				return frontBrakeForce;
 			}
 
-			@Override
 			public float getLeftBrakeForce() {
-				//TODO: implement
-				throw new RuntimeException("Not implemented");
+				return leftBrakeForce;
 			}
 
-			@Override
 			public float getRightBrakeForce() {
-				//TODO: implement
-				throw new RuntimeException("Not implemented");
+				return rightBrakeForce;
+			}
+		};
+		
+		AutopilotOutputs output2 = new AutopilotOutputs() {
+			public float getThrust() {
+				return 0;
+			}
+			public float getLeftWingInclination() {
+				return 0;
+			}
+			public float getRightWingInclination() {
+				return 0;
+			}
+			public float getHorStabInclination() {
+				return 0;
+			}
+			public float getVerStabInclination() {
+				return 0;
+			}
+
+			public float getFrontBrakeForce() {
+				return 0;
+			}
+
+			public float getLeftBrakeForce() {
+				return 0;
+			}
+
+			public float getRightBrakeForce() {
+				return 0;
 			}
 		};
         
-        return output;
+        return output2;
 	}
 	
 	public RealMatrix calculateTransformationMatrix(float roll, Drone drone) {

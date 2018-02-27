@@ -2,14 +2,11 @@ package be.kuleuven.cs.robijn.tyres;
 
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
-import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
-import org.apache.commons.math3.ode.FirstOrderIntegrator;
-import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
 
 import be.kuleuven.cs.robijn.common.*;
+import be.kuleuven.cs.robijn.common.exceptions.CrashException;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
 import interfaces.AutopilotConfig;
-import interfaces.AutopilotOutputs;
 
 public abstract class Tyre extends WorldObject {
 	
@@ -152,9 +149,9 @@ public abstract class Tyre extends WorldObject {
 		return this.getTyreRadius() - D;
 	}
 	
-	public float getD(Drone drone) throws IllegalArgumentException {
+	public float getD(Drone drone) throws CrashException {
 		if (this.getPosition(drone).getEntry(1) < this.getTyreRadius())
-			throw new IllegalArgumentException();
+			throw new CrashException();
 		float d = (float) (this.getTyreRadius() - this.getPosition(drone).getEntry(1));
 		if (d < 0)
 			d = 0;
@@ -180,24 +177,11 @@ public abstract class Tyre extends WorldObject {
 	
 	public abstract RealVector getTyreForce(Drone drone, float frontBrakeForce, float leftBrakeForce, float rightBrakeForce);
 	
-	public boolean updateD(float secondsSinceLastUpdate, Drone drone, AutopilotOutputs output) {
-		if (this.getPosition(drone).getEntry(1) > (this.getWheelY() + this.getTyreRadius())) {
-			this.setD(0);
-			return false;
-		}
-		
-		int amount = drone.amountWheelsOnGround();
-		FirstOrderIntegrator rk4 = new ClassicalRungeKuttaIntegrator(secondsSinceLastUpdate/10);
-		FirstOrderDifferentialEquations ode = new SystemDifferentialEquations2(drone, output, amount);
-		double[] y = new double[] {d};
-		rk4.integrate(ode, 0.0, y, secondsSinceLastUpdate, y);
-		float d = (float) y[0];
-		try {
-			this.setD(d);
-		} catch (IllegalArgumentException exc) {
-			return true;
-		}
-		return false;
+	public RealVector getTyreMoment(Drone drone, float frontBrakeForce, float leftBrakeForce, float rightBrakeForce) {
+		return VectorMath.crossProduct(
+				   drone.transformationToDroneCoordinates(this.getRelativePositionTyreGround(drone)), //distance
+				   drone.transformationToDroneCoordinates(this.getTyreForce(drone, frontBrakeForce, leftBrakeForce, rightBrakeForce)) //forces
+				   );
 	}
 }
 

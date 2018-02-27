@@ -1,6 +1,7 @@
 package be.kuleuven.cs.robijn.common;
 
 import be.kuleuven.cs.robijn.autopilot.Autopilot;
+import be.kuleuven.cs.robijn.common.exceptions.CrashException;
 import be.kuleuven.cs.robijn.common.stopwatch.RealTimeStopwatch;
 import be.kuleuven.cs.robijn.common.stopwatch.Stopwatch;
 import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
@@ -38,7 +39,7 @@ public class SimulationDriver {
     public SimulationDriver(List<Box> boxes, AutopilotConfig config, Stopwatch stopwatch){
         this.config = config;
         this.stopwatch = stopwatch;
-    	RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -10.0}, false);
+    	RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, 0}, false);
         testBed = new VirtualTestbed(boxes, config, initialVelocity);
         autoPilot = new Autopilot();
         latestAutopilotInputs = testBed.getInputs();
@@ -69,7 +70,7 @@ public class SimulationDriver {
                         (float)stopwatch.getSecondsSinceLastUpdate(), latestAutopilotOutputs);
 
                 latestAutopilotInputs = testBed.getInputs();
-        	} catch (IllegalStateException exc1){
+        	} catch (CrashException exc1){
                 simulationCrashed = true;
                 System.err.println("Plane crashed!");
         		exc1.printStackTrace();
