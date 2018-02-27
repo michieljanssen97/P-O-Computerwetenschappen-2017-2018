@@ -34,8 +34,12 @@ public class ImageRecognizer {
 		this.pitch = pitch;
 		this.roll = roll;
 		this.UpdateImageRecognizerCubeList(im);
-		if (!this.hasTarget())
-			getClosestCubeInWorld(im).makeTarget();
+		if (!this.hasTarget()){
+			ImageRecognizerCube cube = getClosestCubeInWorld(im);
+			if(cube != null){
+				cube.makeTarget();
+			}
+		}
 		return im;
 	}
 	
