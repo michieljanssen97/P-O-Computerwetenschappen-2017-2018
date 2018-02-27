@@ -292,7 +292,7 @@ public class Image {
 	 */
 	private boolean isXPixel(Pixel p){
 		float v = p.getValue();
-		return ( floatFuzzyEquals(v, 0.4f, defaultEpsilon) || floatFuzzyEquals(v, 0.25f, defaultEpsilon) );
+		return ( floatFuzzyEquals(v, 0.85f, defaultEpsilon) || floatFuzzyEquals(v, 0.3f, defaultEpsilon) );
 	}
 	
 	/**
@@ -302,7 +302,7 @@ public class Image {
 	 */
 	private boolean isYPixel(Pixel p){
 		float v = p.getValue();
-		return ( floatFuzzyEquals(v, 0.45f, defaultEpsilon) || floatFuzzyEquals(v, 0.2f, defaultEpsilon) );
+		return ( floatFuzzyEquals(v, 0.15f, defaultEpsilon) || floatFuzzyEquals(v, 1.0f, defaultEpsilon) );
 	}
 	
 	/**
@@ -312,7 +312,7 @@ public class Image {
 	 */
 	private boolean isZPixel(Pixel p){
 		float v = p.getValue();
-		return ( floatFuzzyEquals(v, 0.35f, defaultEpsilon) || floatFuzzyEquals(v, 0.3f, defaultEpsilon) );
+		return ( floatFuzzyEquals(v, 0.7f, defaultEpsilon) || floatFuzzyEquals(v, 0.45f, defaultEpsilon) );
 	}
 	
 	private boolean floatFuzzyEquals(float input, float expected, float epsilon) {

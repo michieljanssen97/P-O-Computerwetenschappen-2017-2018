@@ -74,75 +74,31 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		int maxOrder = 5;
 		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
 		float turningTime = 0.5f;
-		float xMovementTime = 1.0f;
+		float xMovementTime = 2.0f;
 		float maxRoll = (float) Math.toRadians(45.0);
 		float maxHeadingAngularAcceleration = 2.0f;
 		float correctionFactor = 3.0f;
 		float correctionDistance = 30.0f;
 		
         ImageRecognizer recognizer = this.getImageRecognizer();
-        float[] necessaryRotation;
         float horizontalAngleOfView = (float) Math.toDegrees(this.getConfig().getHorizontalAngleOfView());
-        float verticalAngleOfView = (float) Math.toDegrees(this.getConfig().getVerticalAngleOfView());
+      	float verticalAngleOfView = (float) Math.toDegrees(this.getConfig().getVerticalAngleOfView());
 		Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
 				horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
 		
-		float distanceToCube;
-		try{
-			ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
-			if (closestCube == null)
-				this.simulationEnded();
-			necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
-			distanceToCube = recognizer.getDistanceToCube(image, closestCube.getHue(), closestCube.getSaturation());
-		} catch (NullPointerException exc1) {
-			necessaryRotation = new float[2];
-			distanceToCube = 0;
-		} catch (IllegalArgumentException exc2) {
-			ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
-			necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
-			distanceToCube = 0;
-		}
+		RealVector target = new ArrayRealVector(new double[] {-40, 20, -100}, false);
+		
+//		if (recognizer.isFollowingPathCoordinates()) {
+//			target = new ArrayRealVector(recognizer.getCurrentPathTarget(), false);
+//		} else {
+//			target = new ArrayRealVector(recognizer.searchForCubeInPathArea(image), false);
+//		}
+		
+		float XRotation = (float) Math.atan((target.getEntry(1) - drone.getWorldPosition().getEntry(1))
+				/(drone.getWorldPosition().getEntry(2) - target.getEntry(2)));
+		float YRotation = (float) Math.atan((drone.getWorldPosition().getEntry(0) - target.getEntry(0))
+				/(drone.getWorldPosition().getEntry(2) - target.getEntry(2)));
 
-		float imageYRotation = (float) Math.toRadians(necessaryRotation[0]);
-		float imageXRotation = (float) Math.toRadians(necessaryRotation[1]);
-		
-		float angleXYPlane;
-		if ((imageYRotation == 0.0) && (imageXRotation >= 0.0))
-			angleXYPlane = (float) (Math.PI/2);
-		else if ((imageYRotation == 0.0) && (imageXRotation < 0.0))
-			angleXYPlane = (float) (-Math.PI/2);
-		else {
-			angleXYPlane = (float) Math.atan(Math.tan(imageXRotation)/Math.tan(imageYRotation));
-		}
-		float lengthXYPlane = (float) Math.sqrt(Math.pow(Math.tan(imageXRotation),2) + Math.pow(Math.tan(imageYRotation), 2));
-		float newImageYRotation = (float) Math.atan(lengthXYPlane * Math.cos(angleXYPlane - drone.getRoll()));
-		float newImageXRotation = (float) Math.atan(lengthXYPlane * Math.sin(angleXYPlane - drone.getRoll()));
-		if (imageYRotation >= 0.0) {
-			imageYRotation = newImageYRotation;
-			imageXRotation = newImageXRotation;
-		}
-		else {
-			imageYRotation = -newImageYRotation;
-			imageXRotation = -newImageXRotation;
-		}
-		float pitch = drone.getPitch();
-		if (pitch > Math.PI)
-			pitch -= 2*Math.PI;
-		float heading = drone.getHeading();
-		if (heading > Math.PI)
-			heading -= 2*Math.PI;
-		if ((distanceToCube*Math.cos(heading + imageYRotation)*Math.cos(pitch + imageXRotation)) > correctionDistance) {
-			imageXRotation = (float) ((3.0/2.0)*imageXRotation + (1.0/2.0)*pitch);
-			imageYRotation = (float) ((5.0/4.0)*imageYRotation + (1.0/4.0)*heading);
-		}
-		
-		//TODO
-		if (recognizer.isFollowingPathCoordinates()) {
-			RealVector target = new ArrayRealVector(recognizer.getCurrentPathTarget(), false);
-		} else {
-			RealVector target = new ArrayRealVector(recognizer.searchForCubeInPathArea(image), false);
-		}
-		
 		float horStabInclinationTemp = 0;
 		float verStabInclinationTemp = 0;
 		float leftWingInclinationTemp = 0;
@@ -167,7 +123,10 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			}, false);
 		RealVector angularMomentumDroneCoordinates = inertiaMatrix.operate(totalAngularVelocityDroneCoordinates);
 		
-		float targetHeadingAngularVelocity = imageYRotation/turningTime;
+		float headingNew = drone.getHeading();
+		if (headingNew > Math.PI)
+			headingNew -= 2*Math.PI;
+		float targetHeadingAngularVelocity = (YRotation - headingNew)/turningTime;
 		float headingAngularVelocity = drone.getHeadingAngularVelocity();
 		float headingAngularAccelerationTemp = (targetHeadingAngularVelocity - headingAngularVelocity)/turningTime;
 		if (! Float.isNaN(this.getPreviousHeadingAngularAccelerationError()))
@@ -177,8 +136,11 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		else if (headingAngularAccelerationTemp < -maxHeadingAngularAcceleration)
 			headingAngularAccelerationTemp = -maxHeadingAngularAcceleration;
 		final float headingAngularAcceleration = headingAngularAccelerationTemp;
-
-		float targetPitchAngularVelocity = imageXRotation/turningTime;
+		
+		float pitchNew = drone.getPitch();
+		if (pitchNew > Math.PI)
+			pitchNew -= 2*Math.PI;
+		float targetPitchAngularVelocity = (XRotation - pitchNew)/turningTime;
 		float pitchAngularVelocity = drone.getPitchAngularVelocity();
 		float pitchAngularAccelerationTemp = (targetPitchAngularVelocity - pitchAngularVelocity)/turningTime;
 		if (! Float.isNaN(this.getPreviousPitchAngularAccelerationError()))
@@ -209,7 +171,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		
 		final float verStabInclination = verStabInclinationTemp;
 		
-		float targetYVelocity = (float) (-drone.getVelocity().getEntry(2)*Math.tan(drone.getPitch()+imageXRotation));
+		float targetYVelocity = (float) (-drone.getVelocity().getEntry(2)*Math.tan(XRotation));
 		float yVelocity = (float)drone.getVelocity().getEntry(1);
 		float yAccelerationTemp = (targetYVelocity - yVelocity)/turningTime;
 		if (! Float.isNaN(this.getPreviousYAccelerationError()))
@@ -238,7 +200,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		
 		final float wingInclination = wingInclinationTemp;
 		
-		float targetXVelocity = (float) (drone.getVelocity().getEntry(2)*Math.tan(drone.getHeading()+imageYRotation));
+		float targetXVelocity = (float) (drone.getVelocity().getEntry(2)*Math.tan(YRotation));
 		float xVelocity = (float)drone.getVelocity().getEntry(0);
 		float xAcceleration = (targetXVelocity - xVelocity)/xMovementTime;
 		if (! Float.isNaN(this.getPreviousXAccelerationError()))
@@ -382,16 +344,15 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		
 		final float horStabInclination = horStabInclinationTemp;
 		
-		float targetZVelocity = this.getInitialZVelocity();
-		float zVelocity = (float)drone.getVelocity().getEntry(2);
-		final float zAcceleration = (targetZVelocity - zVelocity)/turningTime;
+		float targetVelocity = this.getInitialZVelocity();
+		float zVelocity = (float) drone.transformationToDroneCoordinates(drone.getVelocity()).getEntry(2);
+		final float acceleration = (targetVelocity - zVelocity)/turningTime;
 		
-		float thrustTemp = (float) ((drone.getLiftForceHorStab(horStabInclination).getEntry(2)
-				+ drone.getLiftForceLeftWing(leftWingInclination).getEntry(2)
-				+ drone.getLiftForceRightWing(rightWingInclination).getEntry(2)
-				+ drone.getLiftForceVerStab(verStabInclination).getEntry(2)
-				- (drone.getTailMass() + drone.getEngineMass() + 2*drone.getWingMass())*zAcceleration)
-				/Math.cos(drone.getPitch()));
+		float thrustTemp = (float) (drone.transformationToDroneCoordinates(drone.getLiftForceHorStab(horStabInclination)).getEntry(2)
+				+ drone.transformationToDroneCoordinates(drone.getLiftForceLeftWing(leftWingInclination)).getEntry(2)
+				+ drone.transformationToDroneCoordinates(drone.getLiftForceRightWing(rightWingInclination)).getEntry(2)
+				+ drone.transformationToDroneCoordinates(drone.getLiftForceVerStab(verStabInclination)).getEntry(2)
+				- (drone.getTailMass() + drone.getEngineMass() + 2*drone.getWingMass())*acceleration);
 		if (thrustTemp > drone.getMaxThrust())
 			thrustTemp = drone.getMaxThrust();
 		else if (thrustTemp < 0)
