@@ -67,16 +67,14 @@ public abstract class Tyre extends WorldObject {
 	}
 	
 	public boolean isValidWheelY(float wheelY) {
-		return (wheelY > 0) && (wheelY <= Float.MAX_VALUE);
+		return (wheelY < 0) && (Float.isFinite(wheelY));
 	}
 	
 	public float getWheelZ() {
 		return this.wheelZ;
 	}
 	
-	public boolean isValidWheelZ(float wheelZ) {
-		return (wheelZ > 0) && (wheelZ <= Float.MAX_VALUE);
-	}
+	public abstract boolean isValidWheelZ(float wheelZ);
 	
 	public float getWheelX() {
 		return this.wheelX;
@@ -150,7 +148,7 @@ public abstract class Tyre extends WorldObject {
 	}
 	
 	public float getD(Drone drone) throws CrashException {
-		if (this.getPosition(drone).getEntry(1) < this.getTyreRadius())
+		if (this.getPosition(drone).getEntry(1) <=0)
 			throw new CrashException();
 		float d = (float) (this.getTyreRadius() - this.getPosition(drone).getEntry(1));
 		if (d < 0)

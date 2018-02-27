@@ -34,21 +34,26 @@ public class RightRearWheel extends Tyre{
 			RealVector forceTyre = drone.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 
 					this.getTyreSlope()*this.getD(drone)
 					+ this.getDampSlope()*this.getVelocityD(drone), 0}, false));
-			totalForce.add(forceTyre);
+			totalForce = totalForce.add(forceTyre);
 			
 			RealVector frictionForce = new ArrayRealVector(new double[] {
 					-this.getFcMax() * forceTyre.getEntry(1) * this.getLateralVelocity(drone),
 					0, 0}, false);
-			totalForce.add(frictionForce);
+			totalForce = totalForce.add(frictionForce);
 			
 			RealVector brakeForce = new ArrayRealVector(new double[] {this.getVelocityTyre(drone).getEntry(0), 
 					0, this.getVelocityTyre(drone).getEntry(2)}, false);
-			brakeForce = brakeForce.mapMultiply(-(1/brakeForce.getNorm()));
+			if (brakeForce.getNorm() != 0)
+				brakeForce = brakeForce.mapMultiply(-(1/brakeForce.getNorm()));
 			brakeForce = brakeForce.mapMultiply(rightBrakeForce);
 			
-			totalForce.add(brakeForce);
+			totalForce = totalForce.add(brakeForce);
 		}
 		
 		return totalForce;
+	}
+	
+	public boolean isValidWheelZ(float wheelZ) {
+		return ((wheelZ > 0) && (wheelZ < Float.MAX_VALUE));
 	}
 }

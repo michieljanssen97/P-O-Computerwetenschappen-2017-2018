@@ -80,7 +80,6 @@ public class SystemDifferentialEquations implements FirstOrderDifferentialEquati
 				this.getAutopilotOutputs().getHorStabInclination(), this.getAutopilotOutputs().getVerStabInclination(),
 				this.getAutopilotOutputs().getFrontBrakeForce(), this.getAutopilotOutputs().getLeftBrakeForce(),
 				this.getAutopilotOutputs().getRightBrakeForce());
-		
 		float[] angularAccelerations = this.getDrone().getAngularAccelerations(this.getAutopilotOutputs().getLeftWingInclination(),
 				this.getAutopilotOutputs().getRightWingInclination(), this.getAutopilotOutputs().getHorStabInclination(), 
 				this.getAutopilotOutputs().getVerStabInclination(),

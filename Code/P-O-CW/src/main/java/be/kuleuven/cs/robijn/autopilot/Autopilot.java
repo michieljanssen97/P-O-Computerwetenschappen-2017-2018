@@ -882,8 +882,9 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 
 		if (! isValidConfig(config))
 			throw new IllegalArgumentException();
-		RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -10.0}, false);
+		RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, 0}, false);
 		Drone drone = new Drone(config, initialVelocity);
+		drone.setRelativePosition(new ArrayRealVector(new double[] {0, -config.getWheelY() + config.getTyreRadius() - 0.132, 0}, false));
 		this.addChild(drone);
 		this.config = config;
 		RealVector previousPosition = drone.getWorldPosition();
