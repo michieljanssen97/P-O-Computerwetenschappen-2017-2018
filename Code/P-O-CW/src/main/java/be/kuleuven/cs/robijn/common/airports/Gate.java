@@ -4,15 +4,10 @@ import be.kuleuven.cs.robijn.common.WorldObject;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 public class Gate extends WorldObject{
-    private Vector2D size;
     private boolean hasPackage;
 
-    public Gate(Vector2D size){
-        this.size = size;
-    }
-
-    public Vector2D getSize() {
-        return size;
+    public Vector2D getSize(){
+        return new Vector2D(this.getScale().getEntry(0), this.getScale().getEntry(2));
     }
 
     public boolean hasPackage(){
