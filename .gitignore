@@ -193,3 +193,9 @@ Code/**/.idea/
 Code/P-O-CW/invoer.txt
 Code/P-O-CW/invoerProvidedTB.txt
 Code/P-O-CW/invoerMetDiff.txt
+/target/
+
+.classpath
+.idea/
+.settings/
+.project
