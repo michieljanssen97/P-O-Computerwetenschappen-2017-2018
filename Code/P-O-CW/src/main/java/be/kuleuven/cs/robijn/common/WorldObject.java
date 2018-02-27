@@ -94,6 +94,20 @@ public class WorldObject {
     }
 
     /**
+     * Adds a list of children to this object.
+     * @param objects an array of new children. Must not be null.
+     */
+    public void addChildren(WorldObject... objects){
+        if(objects == null){
+            throw new IllegalArgumentException("objects cannot be null");
+        }
+
+        for(WorldObject obj : objects){
+            addChild(obj);
+        }
+    }
+
+    /**
      * Removes a child from this object.
      * @param obj the child to remove. Must not be null
      * @return true if obj was a child of this object.
