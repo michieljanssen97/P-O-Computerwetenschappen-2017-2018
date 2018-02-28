@@ -252,8 +252,6 @@ public class DroneTest {
 	public final void testSetPosition_LegalCase_IllegalCase() {
 		RealVector pos = new ArrayRealVector(new double[] {4,7,5},false); //Valid value
 		drone.setRelativePosition(pos);
-		System.out.println(pos);
-		System.out.println(drone.getWorldPosition());
 		assertTrue(VectorMath.fuzzyEquals(pos, drone.getWorldPosition()));
 		
 		RealVector pos2 = null; //Invalid value

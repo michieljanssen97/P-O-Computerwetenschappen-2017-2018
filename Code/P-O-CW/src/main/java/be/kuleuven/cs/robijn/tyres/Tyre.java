@@ -170,7 +170,7 @@ public abstract class Tyre extends WorldObject {
 	}
 	
 	public float getLateralVelocity(Drone drone) {
-		return (float) this.getVelocityTyre(drone).getEntry(0);
+		return (float) drone.transformationToDroneCoordinates(this.getVelocityTyre(drone)).getEntry(0);
 	}
 	
 	public abstract RealVector getTyreForce(Drone drone, float frontBrakeForce, float leftBrakeForce, float rightBrakeForce);

@@ -38,9 +38,9 @@ public class LeftRearWheel extends Tyre{
 					+ this.getDampSlope()*this.getVelocityD(drone), 0}, false));
 			totalForce = totalForce.add(forceTyre);
 			
-			RealVector frictionForce = new ArrayRealVector(new double[] {
+			RealVector frictionForce = drone.transformationToWorldCoordinates(new ArrayRealVector(new double[] {
 					-this.getFcMax() * forceTyre.getEntry(1) * this.getLateralVelocity(drone),
-					0, 0}, false);
+					0, 0}, false));
 			totalForce = totalForce.add(frictionForce);
 			
 			RealVector brakeForce = new ArrayRealVector(new double[] {this.getVelocityTyre(drone).getEntry(0), 
