@@ -382,14 +382,14 @@ public class ImageRecognizer {
 	/**
 	 * Returns the path coordinates of the cube closest to the drone.
 	 */
-	public float[] getClosestPathXYZ() {
+	public RealVector getClosestPathXYZ() {
 		return this.path.getClosestXYZTo(getDronePositionCoordinates());
 	}
 	
 	/**
 	 * The path coordinate that the drone is currently travelling to.
 	 */
-	private float[] currentPathTarget;
+	private RealVector currentPathTarget;
 	
 	/**
 	 * Indicates the travelling pattern of the drone. True means it is travelling towards an 
@@ -404,20 +404,17 @@ public class ImageRecognizer {
 	 * "exact" mode, meaning it will use image recognition to determine the exact coordinate of the cube.
 	 */
 	public double[] getCurrentPathTarget() {
-		float[] path = this.currentPathTarget;
+		RealVector path = this.currentPathTarget;
 		double[] drone = getDronePositionCoordinates();
-		float distanceToPath = (float) Math.sqrt(Math.pow(path[0] - drone[0], 2) + Math.pow(path[1] - drone[1], 2) + Math.pow(path[2] - drone[2], 2));
+		float distanceToPath = (float) Math.sqrt(Math.pow(path.getEntry(0) - drone[0], 2) + Math.pow(path.getEntry(1) - drone[1], 2) + Math.pow(path.getEntry(2) - drone[2], 2));
 		if (distanceToPath < 20) //20 should probably be changed in the future
 			followExactCoordinates();
 		
-		double[] pathD = new double[3];
-		pathD[0] = (double) path[0];
-		pathD[1] = (double) path[1];
-		pathD[2] = (double) path[2];
+		double[] pathD = new double[] {path.getEntry(0), path.getEntry(1), path.getEntry(2)};
 		return pathD;
 	}
 	
-	public void setPathTarget(float[] target) {
+	public void setPathTarget(RealVector target) {
 		this.currentPathTarget = target;
 	}
 	
@@ -462,8 +459,8 @@ public class ImageRecognizer {
 		}
 		
 		float[] co = new float[] {closest.getX(), closest.getY(), closest.getZ()};
-		float[] pathCo = this.currentPathTarget;
-		float pathDistance = (float) Math.sqrt(Math.pow(co[0] - pathCo[0], 2) + Math.pow(co[1] - pathCo[1], 2) + Math.pow(co[2] - pathCo[2], 2));
+		RealVector pathCo = this.currentPathTarget;
+		float pathDistance = (float) Math.sqrt(Math.pow(co[0] - pathCo.getEntry(0), 2) + Math.pow(co[1] - pathCo.getEntry(1), 2) + Math.pow(co[2] - pathCo.getEntry(2), 2));
 		if (pathDistance > 5)
 			throw new IllegalStateException("No cube found within 5m of the path coordinates.");
 		

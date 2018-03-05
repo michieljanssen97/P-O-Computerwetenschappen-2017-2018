@@ -2,15 +2,18 @@ package be.kuleuven.cs.robijn.autopilot.image;
 
 import java.util.ArrayList;
 
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealVector;
+
 public class CubePath {
 	
 	public CubePath(float[] x, float[] y, float[] z) {
 		if (!isValidPath(x, y, z))
 			throw new IllegalArgumentException("The given path is invalid.");
-		ArrayList<float[]> co = new ArrayList<float[]>();
+		ArrayList<RealVector> co = new ArrayList<RealVector>();
 		int l = x.length;
 		for (int i=0; i<l; i++) {
-			float[] a = new float[] {x[i], y[i], z[i]};
+			ArrayRealVector a = new ArrayRealVector(new double[] {x[i], y[i], z[i]}, false);
 			co.add(a);
 		}
 		this.coordinatesList = co;
@@ -19,7 +22,7 @@ public class CubePath {
 	/**
 	 * List that stores the path coordinates of the cubes.
 	 */
-	private ArrayList<float[]> coordinatesList;
+	private ArrayList<RealVector> coordinatesList;
 	
 	private boolean isValidPath(float[] x, float[] y, float[] z) {
 		if ( (x.length != y.length) || (y.length != z.length) || (x.length != z.length) )
@@ -48,12 +51,12 @@ public class CubePath {
 	 * @return
 	 * 		The path coordinates of the closest cube.
 	 */
-	public float[] getClosestXYZTo(double[] dronePos) {
+	public RealVector getClosestXYZTo(double[] dronePos) {
 		float minimum = Float.POSITIVE_INFINITY;
-		float[] result = new float[3];
+		RealVector result = null;
 		for (int i=0; i<getPathSize(); i++) {
-			float[] curCo = coordinatesList.get(i);
-			float distance = (float) Math.sqrt(Math.pow(curCo[0] - dronePos[0], 2) + Math.pow(curCo[1] - dronePos[1], 2) + Math.pow(curCo[2] - dronePos[2], 2));
+			RealVector curCo = coordinatesList.get(i);
+			float distance = (float) Math.sqrt(Math.pow(curCo.getEntry(0) - dronePos[0], 2) + Math.pow(curCo.getEntry(1) - dronePos[1], 2) + Math.pow(curCo.getEntry(2) - dronePos[2], 2));
 			if (distance < minimum) {
 				minimum = distance;
 				result = curCo;
@@ -62,7 +65,7 @@ public class CubePath {
 		return result;
 	}
 	
-	public void removeCoordinate(float[] path) {
+	public void removeCoordinate(RealVector path) {
 		coordinatesList.remove(path);
 	}
 	
