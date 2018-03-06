@@ -90,6 +90,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		float correctionDistance = 30.0f;
 		float pitchTakeOff = (float) Math.toRadians(10.0);
 		float targetVelocity = -43f;
+		float hight = 50;
 		
 		float maxInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float) Math.toRadians(1.0), drone, 1);
 		float minInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float) Math.toRadians(1.0), drone, 1);
@@ -158,7 +159,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 				this.setMode(1);
 		}
 		
-		else if (this.getMode() == 1) {
+		else if ((this.getMode() == 1) || (this.getMode() == 4)) {
 	        ImageRecognizer recognizer = this.getImageRecognizer();
 	        float[] necessaryRotation;
 	        float horizontalAngleOfView = (float) Math.toDegrees(this.getConfig().getHorizontalAngleOfView());
@@ -215,11 +216,35 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 				imageYRotation = (float) ((5.0/4.0)*imageYRotation + (1.0/4.0)*heading);
 			}
 			
-			RealVector target = new ArrayRealVector(new double[] {0, 250, -1200}, false);
-			float XRotation = (float) Math.atan((target.getEntry(1) - drone.getWorldPosition().getEntry(1))
-					/(drone.getWorldPosition().getEntry(2) - target.getEntry(2)));
-			float YRotation = (float) Math.atan((drone.getWorldPosition().getEntry(0) - target.getEntry(0))
-					/(drone.getWorldPosition().getEntry(2) - target.getEntry(2)));
+			if (this.getMode() == 4) {
+				if (drone.getWorldPosition().getEntry(2) < (this.getTarget().getEntry(2)+2.5)) {
+					if (drone.getWorldPosition().getEntry(1) > 2*hight) {
+						this.setTarget(new ArrayRealVector(new double[] {this.getTarget().getEntry(0),
+								this.getTarget().getEntry(1) - hight, this.getTarget().getEntry(2) - 5*hight}, false));
+						System.out.println("test1");
+					}
+					else if ((hight < drone.getWorldPosition().getEntry(1)) && (drone.getWorldPosition().getEntry(1) < 2*hight)) {
+						this.setTarget(new ArrayRealVector(new double[] {this.getTarget().getEntry(0),
+								0.8*hight, this.getTarget().getEntry(2) - 10*hight}, false));
+						System.out.println("test2");
+					}
+					else if (((-this.getConfig().getWheelY() + this.getConfig().getTyreRadius()) < drone.getWorldPosition().getEntry(1)) 
+							&& (drone.getWorldPosition().getEntry(1) < hight)){
+						this.setTarget(new ArrayRealVector(new double[] {this.getTarget().getEntry(0),
+								-this.getConfig().getWheelY() + this.getConfig().getTyreRadius(), this.getTarget().getEntry(2) - 20*hight}, false));
+						System.out.println("test4");
+					}
+					else {
+						this.setMode(2);
+					}
+				}
+			} else {
+				this.setTarget(new ArrayRealVector(new double[] {0, 20, -500}, false));
+			}
+			float XRotation = (float) Math.atan((this.getTarget().getEntry(1) - drone.getWorldPosition().getEntry(1))
+					/(drone.getWorldPosition().getEntry(2) - this.getTarget().getEntry(2)));
+			float YRotation = (float) Math.atan((drone.getWorldPosition().getEntry(0) - this.getTarget().getEntry(0))
+					/(drone.getWorldPosition().getEntry(2) - this.getTarget().getEntry(2)));
 			
 			float headingNew = drone.getHeading();
 			if (headingNew > Math.PI)
@@ -469,13 +494,13 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 							+ transformationMatrix.operate(new ArrayRealVector(new double[] {0, 0, -thrust}, false)).getEntry(0))
 							/drone.getTotalMass()));
 			
-			if (drone.getWorldPosition().getEntry(2) > 1200)
+			if (drone.getWorldPosition().getEntry(2) < (this.getTarget().getEntry(2)+2.5))
 				this.setMode(4);
+        } else {
+        	frontBrakeForce = this.getConfig().getRMax();
+        	leftBrakeForce = this.getConfig().getRMax();
+        	rightBrakeForce = this.getConfig().getRMax();
         }
-		
-		else {
-			
-		}
         
         final float thrustOutput = thrust;
         final float leftWingInclinationOutput = leftWingInclination;
@@ -641,6 +666,22 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		if (! isValidMode(mode))
 			throw new IllegalArgumentException();
 		this.mode = mode;
+	}
+	
+	private RealVector target = null;
+	
+	public RealVector getTarget() {
+		return this.target;
+	}
+	
+	public static boolean isValidTarget(RealVector target) {
+		return (target != null);
+	}
+	
+	public void setTarget(RealVector target) throws IllegalArgumentException {
+		if (! isValidTarget(target))
+			throw new IllegalArgumentException();
+		this.target = target;
 	}
 	
 	public float minMaxInclination(float upperBound, float lowerBound, boolean max, float accuracy, Drone drone, int airfoil) {
