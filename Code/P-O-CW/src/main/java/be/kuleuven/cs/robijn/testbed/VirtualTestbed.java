@@ -8,8 +8,8 @@ import org.apache.commons.math3.ode.FirstOrderIntegrator;
 import org.apache.commons.math3.ode.nonstiff.*;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.experiments.ExpEquations;
-import be.kuleuven.cs.robijn.experiments.ExpPosition;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
+import be.kuleuven.cs.robijn.tyres.Tyre;
 import interfaces.*;
 
 import be.kuleuven.cs.robijn.autopilot.Autopilot;
@@ -43,6 +43,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		this.config = config;
 		//Add drone to world
 		Drone drone = new Drone(config, initialVelocity);
+		drone.setRelativePosition(new ArrayRealVector(new double[] {0, -config.getWheelY() + config.getTyreRadius(), 0}, false));
 		this.addChild(drone);
 
 		//Add boxes to world
@@ -186,10 +187,12 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		RealVector position = drone.getWorldPosition();
 		RealVector velocity = drone.getVelocity();
 		RealVector acceleration = drone.getAcceleration(output.getThrust(),
-				output.getLeftWingInclination(), output.getRightWingInclination(), output.getHorStabInclination(), output.getVerStabInclination());
+				output.getLeftWingInclination(), output.getRightWingInclination(), output.getHorStabInclination(), output.getVerStabInclination(),
+				output.getFrontBrakeForce(), output.getLeftBrakeForce(), output.getRightBrakeForce());
 		
 		float[] angularAccelerations = drone.getAngularAccelerations(output.getLeftWingInclination(),
-				output.getRightWingInclination(), output.getHorStabInclination(), output.getVerStabInclination());
+				output.getRightWingInclination(), output.getHorStabInclination(), output.getVerStabInclination(),
+				output.getFrontBrakeForce(), output.getLeftBrakeForce(), output.getRightBrakeForce());
 		float heading = drone.getHeading();
 		float headingAngularVelocity = drone.getHeadingAngularVelocity();
 		float headingAngularAcceleration = angularAccelerations[0];
@@ -237,6 +240,11 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 			drone.setHeadingAngularVelocity((float) y[7]);
 			drone.setPitchAngularVelocity((float) y[9]);
 			drone.setRollAngularVelocity((float) y[11]);
+			
+			for (Tyre tyres: drone.getChildrenOfType(Tyre.class)) {
+				@SuppressWarnings("unused")
+				float d = tyres.getD(drone);
+			}
 		}
 
 		else {

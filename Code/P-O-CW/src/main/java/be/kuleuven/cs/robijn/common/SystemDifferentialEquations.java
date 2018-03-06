@@ -2,6 +2,8 @@ package be.kuleuven.cs.robijn.common;
 
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.ode.*;
+
+import be.kuleuven.cs.robijn.tyres.Tyre;
 import interfaces.*;
 
 /**
@@ -66,13 +68,21 @@ public class SystemDifferentialEquations implements FirstOrderDifferentialEquati
 		drone.setRoll(newRoll);
 		drone.setRollAngularVelocity((float) y[11]);
 		
+		for (Tyre tyres: drone.getChildrenOfType(Tyre.class)) {
+			@SuppressWarnings("unused")
+			float d = tyres.getD(drone);
+		}
+		
 		RealVector acceleration = this.getDrone().getAcceleration(this.getAutopilotOutputs().getThrust(),
 				this.getAutopilotOutputs().getLeftWingInclination(), this.getAutopilotOutputs().getRightWingInclination(),
-				this.getAutopilotOutputs().getHorStabInclination(), this.getAutopilotOutputs().getVerStabInclination());
-		
+				this.getAutopilotOutputs().getHorStabInclination(), this.getAutopilotOutputs().getVerStabInclination(),
+				this.getAutopilotOutputs().getFrontBrakeForce(), this.getAutopilotOutputs().getLeftBrakeForce(),
+				this.getAutopilotOutputs().getRightBrakeForce());
 		float[] angularAccelerations = this.getDrone().getAngularAccelerations(this.getAutopilotOutputs().getLeftWingInclination(),
 				this.getAutopilotOutputs().getRightWingInclination(), this.getAutopilotOutputs().getHorStabInclination(), 
-				this.getAutopilotOutputs().getVerStabInclination());
+				this.getAutopilotOutputs().getVerStabInclination(),
+				this.getAutopilotOutputs().getFrontBrakeForce(), this.getAutopilotOutputs().getLeftBrakeForce(),
+				this.getAutopilotOutputs().getRightBrakeForce());
 		float headingAngularAcceleration = angularAccelerations[0];
 		float pitchAngularAcceleration = angularAccelerations[1];
 		float rollAngularAcceleration = angularAccelerations[2];

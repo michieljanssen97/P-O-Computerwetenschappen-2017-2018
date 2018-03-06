@@ -16,26 +16,36 @@ public class DroneTest {
 	
 	private static final double EPSILON = 0.0001;
 	
-	private static float wingX = 4;
-	private static float tailSize = 6;
-	private static float engineMass = 20;
-	private static float wingMass = 40;
-	private static float tailMass = 30;
-	private static float maxThrust = 60000;
-	private static float maxAOA = ((float) (Math.PI/3));
-	private static float wingLiftSlope = 15;
-	private static float horStabLiftSlope = 10;
-	private static float verStabLiftSlope = 10;
+	private static float wingX = 4.2f;
+	private static float tailSize = 4.2f;
+	private static float engineMass = 180;
+	private static float wingMass = 100;
+	private static float tailMass = 100;
+	private static float maxThrust = 2000;
+	private static float maxAOA = ((float) (Math.PI/12));
+	private static float wingLiftSlope = 10;
+	private static float horStabLiftSlope = 5;
+	private static float verStabLiftSlope = 5;
 	private static RealVector velocity = new ArrayRealVector(new double[] {20,20,20},false);
 	private static float horAngleOfView = (float) (Math.PI/3);
 	private static float verAngleOfView = (float) (Math.PI/3);
 	private static int nbColumns = 120;
 	private static int nbRows = 120;
+	private static String droneID = "drone";
+	private static float wheelY = -1.22f;
+	private static float rearWheelX = 1.4f;
+	private static float rearWheelZ = 1f;
+	private static float frontWheelZ = -2f;
+	private static float tyreSlope = 40875f;
+	private static float dampSlope = 470f;
+	private static float RMax = 4316f;
+	private static float fcMax = 0.7f;
+	private static float tyreRadius = 0.22f;
+	
 	private static AutopilotConfig config = new AutopilotConfig() {
 		@Override
 		public String getDroneID() {
-			//TODO: implement
-			throw new RuntimeException("Not implemented");
+			return droneID;
 		}
 
 		public float getGravity() { return (float) 9.81; }
@@ -44,56 +54,47 @@ public class DroneTest {
 
 		@Override
 		public float getWheelY() {
-			//TODO: implement
-			throw new RuntimeException("Not implemented");
+			return wheelY;
 		}
 
 		@Override
 		public float getFrontWheelZ() {
-			//TODO: implement
-			throw new RuntimeException("Not implemented");
+			return frontWheelZ;
 		}
 
 		@Override
 		public float getRearWheelZ() {
-			//TODO: implement
-			throw new RuntimeException("Not implemented");
+			return rearWheelZ;
 		}
 
 		@Override
 		public float getRearWheelX() {
-			//TODO: implement
-			throw new RuntimeException("Not implemented");
+			return rearWheelX;
 		}
 
 		@Override
 		public float getTyreSlope() {
-			//TODO: implement
-			throw new RuntimeException("Not implemented");
+			return tyreSlope;
 		}
 
 		@Override
 		public float getDampSlope() {
-			//TODO: implement
-			throw new RuntimeException("Not implemented");
+			return dampSlope;
 		}
 
 		@Override
 		public float getTyreRadius() {
-			//TODO: implement
-			throw new RuntimeException("Not implemented");
+			return tyreRadius;
 		}
 
 		@Override
 		public float getRMax() {
-			//TODO: implement
-			throw new RuntimeException("Not implemented");
+			return RMax;
 		}
 
 		@Override
 		public float getFcMax() {
-			//TODO: implement
-			throw new RuntimeException("Not implemented");
+			return fcMax;
 		}
 
 		public float getEngineMass() { return engineMass; }
@@ -131,8 +132,7 @@ public class DroneTest {
 		AutopilotConfig config = new AutopilotConfig() {
 			@Override
 			public String getDroneID() {
-				//TODO: implement
-				throw new RuntimeException("Not implemented");
+				return droneID;
 			}
 
 			public float getGravity() { return (float) 9.81; }
@@ -141,56 +141,47 @@ public class DroneTest {
 
 			@Override
 			public float getWheelY() {
-				//TODO: implement
-				throw new RuntimeException("Not implemented");
+				return wheelY;
 			}
 
 			@Override
 			public float getFrontWheelZ() {
-				//TODO: implement
-				throw new RuntimeException("Not implemented");
+				return frontWheelZ;
 			}
 
 			@Override
 			public float getRearWheelZ() {
-				//TODO: implement
-				throw new RuntimeException("Not implemented");
+				return rearWheelZ;
 			}
 
 			@Override
 			public float getRearWheelX() {
-				//TODO: implement
-				throw new RuntimeException("Not implemented");
+				return rearWheelX;
 			}
 
 			@Override
 			public float getTyreSlope() {
-				//TODO: implement
-				throw new RuntimeException("Not implemented");
+				return tyreSlope;
 			}
 
 			@Override
 			public float getDampSlope() {
-				//TODO: implement
-				throw new RuntimeException("Not implemented");
+				return dampSlope;
 			}
 
 			@Override
 			public float getTyreRadius() {
-				//TODO: implement
-				throw new RuntimeException("Not implemented");
+				return tyreRadius;
 			}
 
 			@Override
 			public float getRMax() {
-				//TODO: implement
-				throw new RuntimeException("Not implemented");
+				return RMax;
 			}
 
 			@Override
 			public float getFcMax() {
-				//TODO: implement
-				throw new RuntimeException("Not implemented");
+				return fcMax;
 			}
 
 			public float getEngineMass() { return engineMass; }
@@ -264,7 +255,7 @@ public class DroneTest {
 		assertTrue(VectorMath.fuzzyEquals(pos, drone.getWorldPosition()));
 		
 		RealVector pos2 = null; //Invalid value
-		assertThrows(IllegalArgumentException.class, ()->{
+		assertThrows(NullPointerException.class, ()->{
 			drone.setRelativePosition(pos2);
 		});
 	}

@@ -2,7 +2,10 @@ package be.kuleuven.cs.robijn.common;
 
 import org.apache.commons.math3.geometry.euclidean.threed.*;
 import org.apache.commons.math3.linear.*;
+
+import be.kuleuven.cs.robijn.common.exceptions.CrashException;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
+import be.kuleuven.cs.robijn.tyres.*;
 import interfaces.*;
 
 /**
@@ -32,6 +35,7 @@ public class Drone extends WorldObject {
  */
 	public Drone(AutopilotConfig config, RealVector velocity) 
 					throws IllegalArgumentException {
+		this.droneID = config.getDroneID();
 		if (! isValidWingX(config.getWingX()))
 			throw new IllegalArgumentException();
 		this.wingX = config.getWingX();
@@ -66,6 +70,14 @@ public class Drone extends WorldObject {
 			throw new IllegalArgumentException();
 		this.velocity = velocity;
 		this.initialVelocity = velocity;
+		
+		FrontWheel frontWheel = new FrontWheel(config);
+		RightRearWheel rightRearWheel = new RightRearWheel(config);
+		LeftRearWheel leftRearWheel = new LeftRearWheel(config);
+		this.addChild(frontWheel);
+		this.addChild(rightRearWheel);
+		this.addChild(leftRearWheel);
+		
 	}
 	
     //     -----------------     //
@@ -95,6 +107,7 @@ public class Drone extends WorldObject {
 	
 	private final float tailMass;
 	
+	private final String droneID;
 	
 	public float getGravity() {
 		return this.gravity;
@@ -182,6 +195,26 @@ public class Drone extends WorldObject {
 
 	public float getEngineDistance() {
 		return ((this.getTailMass() * this.getTailSize()) / this.getEngineMass());
+	}
+	
+	public String getDroneID() {
+		return this.droneID;
+	}
+	
+	@Override
+	public void setRelativePosition(RealVector vector) throws NullPointerException, CrashException {
+		
+		if (vector == null)
+			throw new NullPointerException();
+		
+		if (vector.getEntry(1) <= 0)
+			throw new CrashException();
+		
+		super.setRelativePosition(vector);
+	}
+	
+	public float getTotalMass() {
+		return (this.getEngineMass() + this.getTailMass() + 2*this.getWingMass());
 	}
 	
     //  -----------------   //
@@ -779,6 +812,10 @@ public class Drone extends WorldObject {
 		return new ArrayRealVector(new double[] {0, -(this.getEngineMass() * this.getGravity()), 0 }, false);
 	}
 	
+	public RealVector getTotalGravitationalForce() {
+		return this.getGravitationalForceWing().mapMultiply(2).add(this.getGravitationalForceEngine()).add(this.getGravitationalForceTail());
+	}
+	
 	/**
 	 * Return the Attack Vector for the horizontal Components (Wings and Horizontal Stabilizer) in World Coordinates.
 	 * @param horInclination
@@ -865,11 +902,8 @@ public class Drone extends WorldObject {
 	 * 			The attack vector of the airfoil.
 	 * @return	The Angle Of Attack of the airfoil.
 	 */
-	public float calculateAOA(RealVector normal, RealVector projectedVelocity, RealVector attackVector) throws IllegalArgumentException {
+	public float calculateAOA(RealVector normal, RealVector projectedVelocity, RealVector attackVector) {
 		float AOA = (float) -Math.atan2(normal.dotProduct(projectedVelocity), attackVector.dotProduct(projectedVelocity));
-		if ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA())) {
-			AOA = Float.NaN;
-		}
 		return AOA;
 	}
 	
@@ -893,10 +927,12 @@ public class Drone extends WorldObject {
 		RealVector projectedVelocity = this.getProjectedVelocityLeftWing();
 		
 		float AOA = this.calculateAOA(this.getNormalHor(leftWingInclination), projectedVelocity, this.getAttackVectorHor(leftWingInclination));
-		if (Float.isNaN(AOA))
-			throw new IllegalArgumentException();
 		
 		float liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
+		
+		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA())))
+			throw new IllegalArgumentException();
+		
 		return this.getNormalHor(leftWingInclination).mapMultiply(liftForce);
 	}
 	
@@ -920,10 +956,12 @@ public class Drone extends WorldObject {
 		RealVector projectedVelocity = this.getProjectedVelocityRightWing();
 		
 		float AOA = this.calculateAOA(this.getNormalHor(rightWingInclination), projectedVelocity, this.getAttackVectorHor(rightWingInclination));
-		if (Float.isNaN(AOA))
-			throw new IllegalArgumentException();
 		
 		float liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
+		
+		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA())))
+			throw new IllegalArgumentException();
+		
 		return this.getNormalHor(rightWingInclination).mapMultiply(liftForce);
 	}
 	
@@ -946,10 +984,12 @@ public class Drone extends WorldObject {
 		RealVector projectedVelocity = this.getProjectedVelocityHorStab();
 		
 		float AOA = this.calculateAOA(this.getNormalHor(horStabInclination), projectedVelocity, this.getAttackVectorHor(horStabInclination));
-		if (Float.isNaN(AOA))
-			throw new IllegalArgumentException();
 		
 		float liftForce = (float) (AOA * this.getHorStabLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
+		
+		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA())))
+			throw new IllegalArgumentException();
+		
 		return this.getNormalHor(horStabInclination).mapMultiply(liftForce);
 	}
 	
@@ -972,10 +1012,12 @@ public class Drone extends WorldObject {
 		RealVector projectedVelocity = this.getProjectedVelocityVerStab();
 		
 		float AOA = this.calculateAOA(this.getNormalVer(verStabInclination), projectedVelocity, this.getAttackVectorVer(verStabInclination));
-		if (Float.isNaN(AOA))
-			throw new IllegalArgumentException();
 		
 		float liftForce = (float) (AOA * this.getVerStabLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
+		
+		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA())))
+			throw new IllegalArgumentException();
+		
 		return this.getNormalVer(verStabInclination).mapMultiply(liftForce);
 	}
 	
@@ -998,19 +1040,26 @@ public class Drone extends WorldObject {
 	 * 			The given thrust is not a valid thrust for any drone.
 	 * 		  | thrust > this.maxThrust()
 	 */
-	public RealVector getAcceleration(float thrust, float leftWingInclination, float rightWingInclination, float horStabInclination, float verStabInclination)
+	public RealVector getAcceleration(float thrust, float leftWingInclination, float rightWingInclination, float horStabInclination, float verStabInclination
+			, float frontBrakeForce, float leftBrakeForce, float rightBrakeForce)
 			throws IllegalArgumentException {
 		if (thrust > this.getMaxThrust())
 			throw new IllegalArgumentException();
 		
+		RealVector liftForce = this.getLiftForceLeftWing(leftWingInclination)
+				.add(this.getLiftForceRightWing(rightWingInclination))
+				.add(this.getLiftForceHorStab(horStabInclination))
+				.add(this.getLiftForceVerStab(verStabInclination));
+			
 		RealVector totalForce = this.getGravitationalForceEngine()
 								.add(this.getGravitationalForceTail())
 								.add(this.getGravitationalForceWing().mapMultiply(2)) 
-								.add(this.getLiftForceLeftWing(leftWingInclination))
-								.add(this.getLiftForceRightWing(rightWingInclination))
-								.add(this.getLiftForceHorStab(horStabInclination))
-								.add(this.getLiftForceVerStab(verStabInclination))
+								.add(liftForce)
 								.add(this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, -thrust}, false)));
+		
+		for (Tyre tyres: this.getChildrenOfType(Tyre.class)) {
+			totalForce = totalForce.add(tyres.getTyreForce(this, frontBrakeForce, leftBrakeForce, rightBrakeForce));
+		}
 		
 		float totalMass = this.getEngineMass() + (2*this.getWingMass()) + this.getTailMass();
 		
@@ -1037,7 +1086,8 @@ public class Drone extends WorldObject {
 	 * 			The second element is the pitch angular acceleration.
 	 * 			The third element is the roll angular acceleration.
 	 */
-	public float[] getAngularAccelerations(float leftWingInclination, float rightWingInclination, float horStabInclination, float verStabInclination) {
+	public float[] getAngularAccelerations(float leftWingInclination, float rightWingInclination, float horStabInclination, float verStabInclination,
+			float frontBrakeForce, float leftBrakeForce, float rightBrakeForce) {
 		float inertiaMatrixXX = (float) (this.getTailMass()*Math.pow(this.getTailSize(),2) + this.getEngineMass()*Math.pow(this.getEngineDistance(), 2));
 		
 		float inertiaMatrixZZ = (float) (2*(this.getWingMass()*Math.pow(this.getWingX(),2)));
@@ -1092,6 +1142,11 @@ public class Drone extends WorldObject {
 										))
 									)
 								));
+		
+		for (Tyre tyres: this.getChildrenOfType(Tyre.class)) {
+			constants = constants.add(tyres.getTyreMoment(this, frontBrakeForce, leftBrakeForce, rightBrakeForce));
+		}
+		
 		RealVector solution = solver.solve(constants);
 		
 		return new float[] {(float)solution.getEntry(0), (float)solution.getEntry(1), (float)solution.getEntry(2)};
