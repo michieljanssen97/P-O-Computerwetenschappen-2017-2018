@@ -4,6 +4,8 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import be.kuleuven.cs.robijn.common.math.VectorMath;
+import be.kuleuven.cs.robijn.tyres.Tyre;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.*;
@@ -25,6 +27,20 @@ public class WorldObject {
     public List<WorldObject> getChildren(){
         return Collections.unmodifiableList(children);
     }
+    
+//	public <T extends WorldObject> T getFirstChildOfType(Class<T> clazz){
+//        if(clazz == null){
+//            throw new IllegalArgumentException("clazz cannot be null");
+//        }
+//
+//        for(WorldObject child : children){
+//            if(child.getClass().isAssignableFrom(clazz)){
+//                return (T) child;
+//            }
+//        }
+//
+//        return null;
+//    }
 
     /**
      * Searches the direct children of this object and returns the first child of the specified type.
@@ -33,19 +49,42 @@ public class WorldObject {
      */
     @SuppressWarnings("unchecked")
 	public <T extends WorldObject> T getFirstChildOfType(Class<T> clazz){
-        if(clazz == null){
-            throw new IllegalArgumentException("clazz cannot be null");
+        try {
+        	ArrayList<T> childrenOfType = getChildrenOfType(clazz);
+        	
+        	if(childrenOfType.size() == 0) {
+        		return null;
+        	}
+        	return childrenOfType.get(0);
+        	
         }
-
-        for(WorldObject child : children){
-            if(child.getClass().isAssignableFrom(clazz)){
-                return (T) child;
-            }
+        
+        catch(IllegalArgumentException e) {
+        	throw e;
         }
-
-        return null;
     }
 
+    /**
+     * Searches the direct children of this object.
+     * If no such object is found, null is returned.
+     * @param clazz the class of the child to return. Must not be null.
+     */
+    @SuppressWarnings("unchecked")
+	public <T extends WorldObject> ArrayList<T> getChildrenOfType(Class<T> clazz){
+    	ArrayList<T> childrenOfType = new ArrayList<T>();
+    	
+    	if(clazz == null) {
+    		throw new IllegalArgumentException("clazz cannot be null");
+    	}
+    	
+    	for(WorldObject child : getChildren()) {
+    		if(clazz.isAssignableFrom(child.getClass())) {
+    			childrenOfType.add((T) child);
+    		}    		
+    	}
+    	return childrenOfType;
+    	
+    }
     /**
      * Searches the direct children of this object and returns the first child with a matching name and type.
      * If no such object is found, null is returned.

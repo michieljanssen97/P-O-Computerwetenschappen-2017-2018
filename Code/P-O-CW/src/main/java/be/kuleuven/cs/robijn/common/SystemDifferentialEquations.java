@@ -68,11 +68,9 @@ public class SystemDifferentialEquations implements FirstOrderDifferentialEquati
 		drone.setRoll(newRoll);
 		drone.setRollAngularVelocity((float) y[11]);
 		
-		for (WorldObject tyres: drone.getChildren()) {
-			if (tyres instanceof Tyre) {
-				@SuppressWarnings("unused")
-				float d = ((Tyre) tyres).getD(drone);
-			}
+		for (Tyre tyres: drone.getChildrenOfType(Tyre.class)) {
+			@SuppressWarnings("unused")
+			float d = tyres.getD(drone);
 		}
 		
 		RealVector acceleration = this.getDrone().getAcceleration(this.getAutopilotOutputs().getThrust(),

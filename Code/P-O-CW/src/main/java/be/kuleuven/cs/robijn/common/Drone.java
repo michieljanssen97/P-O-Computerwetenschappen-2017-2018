@@ -1049,10 +1049,8 @@ public class Drone extends WorldObject {
 								.add(liftForce)
 								.add(this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, -thrust}, false)));
 		
-		for (WorldObject tyres: this.getChildren()) {
-			if (tyres instanceof Tyre) {
-				totalForce = totalForce.add(((Tyre) tyres).getTyreForce(this, frontBrakeForce, leftBrakeForce, rightBrakeForce));
-			}
+		for (Tyre tyres: this.getChildrenOfType(Tyre.class)) {
+			totalForce = totalForce.add(tyres.getTyreForce(this, frontBrakeForce, leftBrakeForce, rightBrakeForce));
 		}
 		
 		float totalMass = this.getEngineMass() + (2*this.getWingMass()) + this.getTailMass();
@@ -1137,10 +1135,8 @@ public class Drone extends WorldObject {
 									)
 								));
 		
-		for (WorldObject tyres: this.getChildren()) {
-			if (tyres instanceof Tyre) {
-				constants = constants.add(((Tyre) tyres).getTyreMoment(this, frontBrakeForce, leftBrakeForce, rightBrakeForce));
-			}
+		for (Tyre tyres: this.getChildrenOfType(Tyre.class)) {
+			constants = constants.add(tyres.getTyreMoment(this, frontBrakeForce, leftBrakeForce, rightBrakeForce));
 		}
 		
 		RealVector solution = solver.solve(constants);
