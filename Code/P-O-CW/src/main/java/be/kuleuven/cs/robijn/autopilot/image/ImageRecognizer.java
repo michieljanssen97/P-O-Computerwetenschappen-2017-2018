@@ -34,12 +34,8 @@ public class ImageRecognizer {
 		this.pitch = pitch;
 		this.roll = roll;
 		this.UpdateImageRecognizerCubeList(im);
-		if (!this.hasTarget()){
-			ImageRecognizerCube cube = getClosestCubeInWorld(im);
-			if(cube != null){
-				cube.makeTarget();
-			}
-		}
+//		if (!this.hasTarget())
+//			getClosestCubeInWorld(im).makeTarget();
 		return im;
 	}
 	
@@ -55,6 +51,8 @@ public class ImageRecognizer {
 	private float pitch = 0.0f;
 	
 	private float roll = 0.0f;
+	
+	private CubePath path = null;
 	
 	/**
 	 * Returns the average coordinates of the pixels of the cube with given hue and saturation in the given image.
@@ -369,6 +367,114 @@ public class ImageRecognizer {
 	 */
 	private RealVector transformationToWorldCoordinates(RealVector realVector, float roll, float pitch, float heading) {
 		return this.inverseHeadingTransformation(this.inversePitchTransformation(this.inverseRollTransformation(realVector, roll), pitch), heading);
+	}
+	
+	/**
+	 * Initialize the path (containing approximate cube coordinates). 
+	 * @param path
+	 * 		The path to initialize.
+	 */
+	public void setPath(CubePath path) {
+		this.path = path;
+		setPathTarget(getClosestPathXYZ());
+	}
+	
+	/**
+	 * Returns the path coordinates of the cube closest to the drone.
+	 */
+	public RealVector getClosestPathXYZ() {
+		return this.path.getClosestXYZTo(getDronePositionCoordinates());
+	}
+	
+	/**
+	 * The path coordinate that the drone is currently travelling to.
+	 */
+	private RealVector currentPathTarget;
+	
+	/**
+	 * Indicates the travelling pattern of the drone. True means it is travelling towards an 
+	 * approximate path coordinate. False means it is travelling towards an exact position of 
+	 * a cube, using image recognition to determine that position.
+	 */
+	private boolean followingPath = true;
+	
+	/**
+	 * Returns the path coordinates the drone is currently travelling to.
+	 * If the drone gets within a certain distance of the path coordinates, it will switch to 
+	 * "exact" mode, meaning it will use image recognition to determine the exact coordinate of the cube.
+	 */
+	public RealVector getCurrentPathTarget() {
+		RealVector path = this.currentPathTarget;
+		double[] drone = getDronePositionCoordinates();
+		float distanceToPath = (float) Math.sqrt(Math.pow(path.getEntry(0) - drone[0], 2) + Math.pow(path.getEntry(1) - drone[1], 2) + Math.pow(path.getEntry(2) - drone[2], 2));
+		if (distanceToPath < 20) //20 should probably be changed in the future
+			followExactCoordinates();
+		
+		return path;
+	}
+	
+	public void setPathTarget(RealVector target) {
+		this.currentPathTarget = target;
+	}
+	
+	public boolean isFollowingPathCoordinates() {
+		return this.followingPath;
+	}
+	
+	/**
+	 * Switch the drone's travelling pattern to "exact" mode. The drone will now try to 
+	 * determine the cube's exact position with image recognition.
+	 */
+	public void followExactCoordinates() {
+		this.followingPath = false;
+	}
+	
+	/**
+	 * Switch the drone to "path" mode. The closest remaining path coordinate is determined and set as 
+	 * the drone's current destination, while the previous path coordinate is removed.
+	 */
+	public void followNewPathCoordinates() {
+		this.followingPath = true;
+		this.path.removeCoordinate(this.currentPathTarget);
+		setPathTarget(getClosestPathXYZ());
+	}
+	
+	/**
+	 * Returns the coordinates of the cube close to the coordinates of the current path (5 meter).
+	 * @param im
+	 * 		The current image.
+	 */
+	public RealVector searchForCubeInPathArea(Image im) {
+		//Currently the same method as getClosestCubeInWorld(Image im). Needs to change.
+		float[] curPos = {(float)dronePosition.getEntry(0), (float)dronePosition.getEntry(1), (float)dronePosition.getEntry(2)};
+		float minimum = Float.POSITIVE_INFINITY;
+		ImageRecognizerCube closest = null;
+		for (ImageRecognizerCube c : getImageRecognizerCubesFromImage(im)) {
+			float distance = (float) Math.sqrt(Math.pow(curPos[0] - c.getX(), 2) + Math.pow(curPos[1] - c.getY(), 2) + Math.pow(curPos[2] - c.getZ(), 2));
+			if (distance < minimum){
+				minimum = distance;
+				closest = c;
+			}
+		}
+		
+		float[] co = new float[] {closest.getX(), closest.getY(), closest.getZ()};
+		RealVector pathCo = this.currentPathTarget;
+		float pathDistance = (float) Math.sqrt(Math.pow(co[0] - pathCo.getEntry(0), 2) + Math.pow(co[1] - pathCo.getEntry(1), 2) + Math.pow(co[2] - pathCo.getEntry(2), 2));
+		if (pathDistance > 5)
+			throw new IllegalStateException("No cube found within 5m of the path coordinates.");
+		
+		if (minimum < 3) {
+			//cube is touched
+			closest.destroy();
+			followNewPathCoordinates();
+		}
+		
+		double[] coD = new double[3];
+		coD[0] = co[0];
+		coD[1] = co[1];
+		coD[2] = co[2];
+		return new ArrayRealVector(coD, false);
+		
 	}
 	
 }
