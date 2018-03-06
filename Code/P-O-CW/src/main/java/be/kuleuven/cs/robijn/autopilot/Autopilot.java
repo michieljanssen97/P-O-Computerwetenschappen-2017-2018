@@ -82,14 +82,14 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		double absoluteAccuracy = 1.0e-8;
 		int maxOrder = 5;
 		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
-		float turningTime = 0.5f;
+		float turningTime = 2f;
 		float xMovementTime = 2.0f;
 		float maxRoll = (float) Math.toRadians(45.0);
 		float maxHeadingAngularAcceleration = 2.0f;
 		float correctionFactor = 3.0f;
 		float correctionDistance = 30.0f;
-		float pitchTakeOff = (float) Math.toRadians(15.0);
-		float targetVelocity = -56f;
+		float pitchTakeOff = (float) Math.toRadians(10.0);
+		float targetVelocity = -43f;
 		
 		float maxInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float) Math.toRadians(1.0), drone, 1);
 		float minInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float) Math.toRadians(1.0), drone, 1);
@@ -169,8 +169,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 				Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
 						horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
 				ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
-				if (closestCube == null)
-					this.simulationEnded();
 				necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
 				distanceToCube = recognizer.getDistanceToCube(image, closestCube.getHue(), closestCube.getSaturation());
 			} catch (NullPointerException exc1) {
@@ -217,7 +215,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 				imageYRotation = (float) ((5.0/4.0)*imageYRotation + (1.0/4.0)*heading);
 			}
 			
-			RealVector target = new ArrayRealVector(new double[] {0, 300, -1000}, false);
+			RealVector target = new ArrayRealVector(new double[] {0, 250, -1200}, false);
 			float XRotation = (float) Math.atan((target.getEntry(1) - drone.getWorldPosition().getEntry(1))
 					/(drone.getWorldPosition().getEntry(2) - target.getEntry(2)));
 			float YRotation = (float) Math.atan((drone.getWorldPosition().getEntry(0) - target.getEntry(0))
@@ -442,6 +440,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					+ drone.transformationToDroneCoordinates(drone.getLiftForceLeftWing(leftWingInclination)).getEntry(2)
 					+ drone.transformationToDroneCoordinates(drone.getLiftForceRightWing(rightWingInclination)).getEntry(2)
 					+ drone.transformationToDroneCoordinates(drone.getLiftForceVerStab(verStabInclination)).getEntry(2)
+					+ drone.transformationToDroneCoordinates(drone.getTotalGravitationalForce()).getEntry(2)
 					- drone.getTotalMass()*acceleration);
 			if (thrust > drone.getMaxThrust())
 				thrust = drone.getMaxThrust();
@@ -469,6 +468,9 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					(float) ((transformationMatrix.operate(drone.transformationToDroneCoordinates(drone.getLiftForceHorStab(horStabInclination))).getEntry(0) 
 							+ transformationMatrix.operate(new ArrayRealVector(new double[] {0, 0, -thrust}, false)).getEntry(0))
 							/drone.getTotalMass()));
+			
+			if (drone.getWorldPosition().getEntry(2) > 1200)
+				this.setMode(3);
         }
         
         final float thrustOutput = thrust;
@@ -621,14 +623,14 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 	private int mode = 2;
 	
 	/**
-	 * 1 == full flight, 2 == ascend, 3 == taxi
+	 * 1 == full flight, 2 == ascend, 3 == taxi, 4 == land
 	 */
 	public float getMode() {
 		return this.mode;
 	}
 	
 	public static boolean isValidMode(int mode) {
-		return ((mode == 1) || (mode == 2) || (mode == 3));
+		return ((mode == 1) || (mode == 2) || (mode == 3) || (mode == 4));
 	}
 	
 	public void setMode(int mode) throws IllegalArgumentException {
