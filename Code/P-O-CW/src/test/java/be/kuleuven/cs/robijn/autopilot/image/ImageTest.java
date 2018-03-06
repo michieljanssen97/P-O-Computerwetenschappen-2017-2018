@@ -14,7 +14,7 @@ import org.apache.commons.math3.linear.RealVector;
 import javax.imageio.ImageIO;
 
 public class ImageTest {
-	
+  
 	private byte[] loadImageRGBBytes(String resourceName) throws IOException {
 		BufferedImage image = ImageIO.read(getClass().getClassLoader().getResource(resourceName));
 		byte[] rgbBytes = new byte[image.getWidth() * image.getHeight()*3];
@@ -504,6 +504,7 @@ public class ImageTest {
 //		}
 //	}
 //	
+
 //	
 ////	@Test
 ////	public void testBackGroundHSV() throws Exception{
@@ -517,6 +518,7 @@ public class ImageTest {
 ////		}
 ////	}
 //	
+
 ////	@Test
 ////	public void testImageRecognizerCubeFactorRip() throws Exception{
 ////		ImageRecognizer rec = new ImageRecognizer();
