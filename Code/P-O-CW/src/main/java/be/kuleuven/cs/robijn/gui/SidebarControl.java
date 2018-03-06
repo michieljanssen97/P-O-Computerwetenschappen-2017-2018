@@ -159,6 +159,10 @@ public class SidebarControl extends VBox {
     }
 
     private void updateLabels(AutopilotInputs inputs, AutopilotOutputs outputs){
+        if(inputs == null || outputs == null){
+            return;
+        }
+
         positionLabel.setText(String.format("X:%6.2f  Y:%6.2f  Z:%6.2f", inputs.getX(), inputs.getY(), inputs.getZ()));
 
         //Heading

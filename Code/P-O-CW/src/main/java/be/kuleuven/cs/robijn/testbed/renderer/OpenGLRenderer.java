@@ -136,11 +136,13 @@ public class OpenGLRenderer implements Renderer {
 
         //Load gate model
         Mesh gateMesh = OBJLoader.loadFromResources("/models/plane/plane.obj");
+        gateMesh.setRenderOffset(new Vector3D(0, .006, 0));
         Texture gateTexture = Texture.load(Resources.loadImageResource("/models/gate/texture.png"));
         gateModel = new Model(gateMesh, gateTexture, texturedProgram);
 
         //Load runway model
         Mesh runwayMesh = OBJLoader.loadFromResources("/models/plane/plane.obj");
+        runwayMesh.setRenderOffset(new Vector3D(0, .006, 0));
         Texture runwayTexture = Texture.load(Resources.loadImageResource("/models/runway/texture.png"));
         runwayModel = new Model(runwayMesh, runwayTexture, texturedProgram);
     }
@@ -321,6 +323,14 @@ public class OpenGLRenderer implements Renderer {
             glBindTexture(GL_TEXTURE_2D, 0);
         }
         glUseProgram(model.getShader().getProgramId());
+
+        if(model.getShader().hasUniform("vertexOffset")){
+            model.getShader().setUniformFloat("vertexOffset",
+                    (float)model.getMesh().getRenderOffset().getX(),
+                    (float)model.getMesh().getRenderOffset().getY(),
+                    (float)model.getMesh().getRenderOffset().getZ()
+            );
+        }
 
         //Draw object
         glDrawElements(GL_TRIANGLES, model.getMesh().getIndexCount(), GL_UNSIGNED_INT, 0);
