@@ -110,7 +110,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			}, false);
 		RealVector angularMomentumDroneCoordinates = inertiaMatrix.operate(totalAngularVelocityDroneCoordinates);
 			
-		if (this.getMode() == 2) {
+		if (this.getMode() == 2) { //ascend
 			thrust = this.getConfig().getMaxThrust();
 			
 			float takeOffSpeed = (float) Math.sqrt((-drone.getTotalGravitationalForce().getEntry(1))
@@ -158,7 +158,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 				this.setMode(1);
 		}
 		
-		else if (this.getMode() == 1) {
+		else if (this.getMode() == 1) { //full flight
 	        ImageRecognizer recognizer = this.getImageRecognizer();
 	        float[] necessaryRotation;
 	        float horizontalAngleOfView = (float) Math.toDegrees(this.getConfig().getHorizontalAngleOfView());
@@ -627,7 +627,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 	private int mode = 2;
 	
 	/**
-	 * 1 == full flight, 2 == ascend, 3 == taxi, 4 == land
+	 * 1 == full flight, 2 == ascend, 3 == taxi, 4 == land, 5 == stopped
 	 */
 	public float getMode() {
 		return this.mode;
