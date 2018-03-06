@@ -63,22 +63,24 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		
 		//Check if the drone reached a cube
 		//true if the center of mass of the drone is in a specified distance of the center of a cube
-		if (calculateDistanceToDrone(box, drone) <= stopDistanceToCenterBox){
-			//The box should not be taken into account anymore, it is already reached
-			boxesToFlyTo.remove(box);
+		if (box != null) {
+			if (calculateDistanceToDrone(box, drone) <= stopDistanceToCenterBox){
+				//The box should not be taken into account anymore, it is already reached
+				boxesToFlyTo.remove(box);
 			
-			//Remove the reached box from the testbed
-			removeChild(box);
+				//Remove the reached box from the testbed
+				removeChild(box);
 			
-			//Stop the simulation if all boxes are handled
-			if(boxesToFlyTo.isEmpty()) {
-				if (drawChartEquations) {
-					expequations.drawMain(type); //draw chart of 'type' when simulation stops
+				//Stop the simulation if all boxes are handled
+				if(boxesToFlyTo.isEmpty()) {
+					if (drawChartEquations) {
+						expequations.drawMain(type); //draw chart of 'type' when simulation stops
+					}
+					else if (Autopilot.isPositionDrawn()) {
+						Autopilot.exppos.drawMain("Our");
+					}
+					return true;
 				}
-				else if (Autopilot.isPositionDrawn()) {
-					Autopilot.exppos.drawMain("Our");
-				}
-				return true;
 			}
 		}
 
