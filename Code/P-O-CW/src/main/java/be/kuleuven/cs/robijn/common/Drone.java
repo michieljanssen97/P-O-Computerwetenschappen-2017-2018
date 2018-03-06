@@ -202,7 +202,10 @@ public class Drone extends WorldObject {
 	}
 	
 	@Override
-	public void setRelativePosition(RealVector vector) throws CrashException {
+	public void setRelativePosition(RealVector vector) throws NullPointerException, CrashException {
+		
+		if (vector == null)
+			throw new NullPointerException();
 		
 		if (vector.getEntry(1) <= 0)
 			throw new CrashException();
