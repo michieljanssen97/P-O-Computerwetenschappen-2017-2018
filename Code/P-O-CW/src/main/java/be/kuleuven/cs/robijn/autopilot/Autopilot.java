@@ -470,8 +470,12 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 							/drone.getTotalMass()));
 			
 			if (drone.getWorldPosition().getEntry(2) > 1200)
-				this.setMode(3);
+				this.setMode(4);
         }
+		
+		else {
+			
+		}
         
         final float thrustOutput = thrust;
         final float leftWingInclinationOutput = leftWingInclination;
