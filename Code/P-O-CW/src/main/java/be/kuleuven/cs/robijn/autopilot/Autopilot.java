@@ -74,7 +74,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		int maxOrder = 5;
 		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
 		float turningTime = 0.5f;
-		float xMovementTime = 1.0f;
+		float xMovementTime = 2.0f;
 		float maxRoll = (float) Math.toRadians(45.0);
 		float maxHeadingAngularAcceleration = 2.0f;
 		float correctionFactor = 3.0f;
@@ -138,6 +138,12 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			imageYRotation = (float) ((5.0/4.0)*imageYRotation + (1.0/4.0)*heading);
 		}
 		
+		RealVector target = new ArrayRealVector(new double[] {40, 20, -100}, false);
+		float XRotation = (float) Math.atan((target.getEntry(1) - drone.getWorldPosition().getEntry(1))
+				/(drone.getWorldPosition().getEntry(2) - target.getEntry(2)));
+		float YRotation = (float) Math.atan((drone.getWorldPosition().getEntry(0) - target.getEntry(0))
+				/(drone.getWorldPosition().getEntry(2) - target.getEntry(2)));
+
 		float horStabInclinationTemp = 0;
 		float verStabInclinationTemp = 0;
 		float leftWingInclinationTemp = 0;
@@ -162,7 +168,10 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			}, false);
 		RealVector angularMomentumDroneCoordinates = inertiaMatrix.operate(totalAngularVelocityDroneCoordinates);
 		
-		float targetHeadingAngularVelocity = imageYRotation/turningTime;
+		float headingNew = drone.getHeading();
+		if (headingNew > Math.PI)
+			headingNew -= 2*Math.PI;
+		float targetHeadingAngularVelocity = (YRotation - headingNew)/turningTime;
 		float headingAngularVelocity = drone.getHeadingAngularVelocity();
 		float headingAngularAccelerationTemp = (targetHeadingAngularVelocity - headingAngularVelocity)/turningTime;
 		if (! Float.isNaN(this.getPreviousHeadingAngularAccelerationError()))
@@ -172,8 +181,11 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		else if (headingAngularAccelerationTemp < -maxHeadingAngularAcceleration)
 			headingAngularAccelerationTemp = -maxHeadingAngularAcceleration;
 		final float headingAngularAcceleration = headingAngularAccelerationTemp;
-
-		float targetPitchAngularVelocity = imageXRotation/turningTime;
+		
+		float pitchNew = drone.getPitch();
+		if (pitchNew > Math.PI)
+			pitchNew -= 2*Math.PI;
+		float targetPitchAngularVelocity = (XRotation - pitchNew)/turningTime;
 		float pitchAngularVelocity = drone.getPitchAngularVelocity();
 		float pitchAngularAccelerationTemp = (targetPitchAngularVelocity - pitchAngularVelocity)/turningTime;
 		if (! Float.isNaN(this.getPreviousPitchAngularAccelerationError()))
@@ -204,7 +216,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		
 		final float verStabInclination = verStabInclinationTemp;
 		
-		float targetYVelocity = (float) (-drone.getVelocity().getEntry(2)*Math.tan(drone.getPitch()+imageXRotation));
+		float targetYVelocity = (float) (-drone.getVelocity().getEntry(2)*Math.tan(XRotation));
 		float yVelocity = (float)drone.getVelocity().getEntry(1);
 		float yAccelerationTemp = (targetYVelocity - yVelocity)/turningTime;
 		if (! Float.isNaN(this.getPreviousYAccelerationError()))
@@ -233,7 +245,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		
 		final float wingInclination = wingInclinationTemp;
 		
-		float targetXVelocity = (float) (drone.getVelocity().getEntry(2)*Math.tan(drone.getHeading()+imageYRotation));
+		float targetXVelocity = (float) (drone.getVelocity().getEntry(2)*Math.tan(YRotation));
 		float xVelocity = (float)drone.getVelocity().getEntry(0);
 		float xAcceleration = (targetXVelocity - xVelocity)/xMovementTime;
 		if (! Float.isNaN(this.getPreviousXAccelerationError()))
@@ -377,16 +389,15 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		
 		final float horStabInclination = horStabInclinationTemp;
 		
-		float targetZVelocity = this.getInitialZVelocity();
-		float zVelocity = (float)drone.getVelocity().getEntry(2);
-		final float zAcceleration = (targetZVelocity - zVelocity)/turningTime;
+		float targetVelocity = this.getInitialZVelocity();
+		float zVelocity = (float) drone.transformationToDroneCoordinates(drone.getVelocity()).getEntry(2);
+		final float acceleration = (targetVelocity - zVelocity)/turningTime;
 		
-		float thrustTemp = (float) ((drone.getLiftForceHorStab(horStabInclination).getEntry(2)
-				+ drone.getLiftForceLeftWing(leftWingInclination).getEntry(2)
-				+ drone.getLiftForceRightWing(rightWingInclination).getEntry(2)
-				+ drone.getLiftForceVerStab(verStabInclination).getEntry(2)
-				- (drone.getTailMass() + drone.getEngineMass() + 2*drone.getWingMass())*zAcceleration)
-				/Math.cos(drone.getPitch()));
+		float thrustTemp = (float) (drone.transformationToDroneCoordinates(drone.getLiftForceHorStab(horStabInclination)).getEntry(2)
+				+ drone.transformationToDroneCoordinates(drone.getLiftForceLeftWing(leftWingInclination)).getEntry(2)
+				+ drone.transformationToDroneCoordinates(drone.getLiftForceRightWing(rightWingInclination)).getEntry(2)
+				+ drone.transformationToDroneCoordinates(drone.getLiftForceVerStab(verStabInclination)).getEntry(2)
+				- (drone.getTailMass() + drone.getEngineMass() + 2*drone.getWingMass())*acceleration);
 		if (thrustTemp > drone.getMaxThrust())
 			thrustTemp = drone.getMaxThrust();
 		else if (thrustTemp < 0)

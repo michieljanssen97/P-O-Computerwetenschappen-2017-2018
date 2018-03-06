@@ -1,5 +1,6 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL12;
 import java.awt.image.BufferedImage;
@@ -12,6 +13,7 @@ import static org.lwjgl.opengl.GL12.GL_UNSIGNED_INT_8_8_8_8_REV;
 
 public class Texture implements AutoCloseable {
     private final int textureId, width, height;
+    private Vector2D textureScale = new Vector2D(1, 1);
 
     public static Texture load(BufferedImage img){
         //Copy pixel values to array of integers
@@ -53,6 +55,18 @@ public class Texture implements AutoCloseable {
 
     public int getHeight() {
         return height;
+    }
+
+    public void setTextureScale(Vector2D textureScale) {
+        if(textureScale == null){
+            throw new IllegalArgumentException("textureScale cannot be null");
+        }
+
+        this.textureScale = textureScale;
+    }
+
+    public Vector2D getTextureScale() {
+        return textureScale;
     }
 
     @Override
