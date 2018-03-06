@@ -1,11 +1,13 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.*;
+import be.kuleuven.cs.robijn.common.airports.Airport;
+import be.kuleuven.cs.robijn.common.airports.Gate;
+import be.kuleuven.cs.robijn.common.airports.Runway;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.joml.*;
@@ -24,7 +26,6 @@ import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
 import static org.lwjgl.opengl.GL14.glBlendEquation;
-import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
@@ -88,6 +89,9 @@ public class OpenGLRenderer implements Renderer {
 
     private Model lineModel = null;
 
+    private Model runwayModel = null;
+    private Model gateModel = null;
+
     private Billboard droneIcon;
     private Billboard boxIcon;
 
@@ -125,10 +129,22 @@ public class OpenGLRenderer implements Renderer {
         boxModel = new Model(boxMesh, null, boxProgram);
 
         //Load ground model
-        Mesh groundMesh = OBJLoader.loadFromResources("/models/ground/ground.obj");
+        Mesh groundMesh = OBJLoader.loadFromResources("/models/plane/plane.obj");
         Texture groundTexture = Texture.load(Resources.loadImageResource("/models/ground/texture.png"));
         groundTexture.setTextureScale(new Vector2D(0.0001, 0.0001));
         groundModel = new Model(groundMesh, groundTexture, texturedProgram);
+
+        //Load gate model
+        Mesh gateMesh = OBJLoader.loadFromResources("/models/plane/plane.obj");
+        gateMesh.setRenderOffset(new Vector3D(0, .006, 0));
+        Texture gateTexture = Texture.load(Resources.loadImageResource("/models/gate/texture.png"));
+        gateModel = new Model(gateMesh, gateTexture, texturedProgram);
+
+        //Load runway model
+        Mesh runwayMesh = OBJLoader.loadFromResources("/models/plane/plane.obj");
+        runwayMesh.setRenderOffset(new Vector3D(0, .006, 0));
+        Texture runwayTexture = Texture.load(Resources.loadImageResource("/models/runway/texture.png"));
+        runwayModel = new Model(runwayMesh, runwayTexture, texturedProgram);
     }
 
     private void initializeIcons(){
@@ -201,7 +217,15 @@ public class OpenGLRenderer implements Renderer {
 
         //Render ground if needed
         if(camera.isGroundDrawn()){
-            renderModel(groundModel, viewProjectionMatrix, MatrixUtils.createRealIdentityMatrix(4));
+            WorldObject groundObj = new WorldObject();
+            groundObj.setScale(new ArrayRealVector(new double[]{10000, 1, 10000}, false));
+            RealMatrix transform = groundObj.getObjectToWorldTransform();
+            renderModel(groundModel, viewProjectionMatrix, transform);
+        }
+
+        //Render objects
+        for (WorldObject child : worldRoot.getChildren()){
+            renderChildren(child, viewProjectionMatrix, camera);
         }
 
         //Render debug objects if needed
@@ -209,11 +233,6 @@ public class OpenGLRenderer implements Renderer {
             for (Line line : linesToDraw){
                 renderLine(line, viewProjectionMatrix);
             }
-        }
-
-        //Render objects
-        for (WorldObject child : worldRoot.getChildren()){
-            renderChildren(child, viewProjectionMatrix, camera);
         }
     }
 
@@ -232,6 +251,10 @@ public class OpenGLRenderer implements Renderer {
             model.getShader().setUniformFloat("color", rgbValues);
         }else if(obj instanceof Drone && !camera.areDronesHidden()){
             model = droneModel;
+        }else if(obj instanceof Gate){
+            model = gateModel;
+        }else if(obj instanceof Runway){
+            model = runwayModel;
         }else{
             return;
         }
@@ -300,6 +323,14 @@ public class OpenGLRenderer implements Renderer {
             glBindTexture(GL_TEXTURE_2D, 0);
         }
         glUseProgram(model.getShader().getProgramId());
+
+        if(model.getShader().hasUniform("vertexOffset")){
+            model.getShader().setUniformFloat("vertexOffset",
+                    (float)model.getMesh().getRenderOffset().getX(),
+                    (float)model.getMesh().getRenderOffset().getY(),
+                    (float)model.getMesh().getRenderOffset().getZ()
+            );
+        }
 
         //Draw object
         glDrawElements(GL_TRIANGLES, model.getMesh().getIndexCount(), GL_UNSIGNED_INT, 0);
@@ -425,6 +456,12 @@ public class OpenGLRenderer implements Renderer {
 
         lineModel.getMesh().close();
         lineModel.getShader().close();
+
+        gateModel.getMesh().close();
+        gateModel.getTexture().close();
+
+        runwayModel.getMesh().close();
+        runwayModel.getTexture().close();
 
         //Destroy icons
         droneIcon.getTexture().close();
