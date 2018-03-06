@@ -15,6 +15,7 @@ public class WorldObject {
     private ArrayList<WorldObject> children = new ArrayList<>();
     private RealVector position = new ArrayRealVector(new double[]{0, 0, 0}, false);
     private Rotation rotation = new Rotation(new Vector3D(1, 0, 0), 0);
+    private RealVector scale = new ArrayRealVector(new double[]{1, 1, 1}, false);
     private String name = "";
 
     ////////////////////////
@@ -133,6 +134,20 @@ public class WorldObject {
     }
 
     /**
+     * Adds a list of children to this object.
+     * @param objects an array of new children. Must not be null.
+     */
+    public void addChildren(WorldObject... objects){
+        if(objects == null){
+            throw new IllegalArgumentException("objects cannot be null");
+        }
+
+        for(WorldObject obj : objects){
+            addChild(obj);
+        }
+    }
+
+    /**
      * Removes a child from this object.
      * @param obj the child to remove. Must not be null
      * @return true if obj was a child of this object.
@@ -222,6 +237,25 @@ public class WorldObject {
         return rotation;
     }
 
+    /**
+     * Returns the scale of this object as a 3D vector in object-space.
+     */
+    public RealVector getScale() {
+        return scale;
+    }
+
+    /**
+     * Sets the scale of this object.
+     * @param scale A 3D vector in object space, non-null
+     */
+    public void setScale(RealVector scale) {
+        if(scale == null || scale.getDimension() != 3){
+            throw new IllegalArgumentException("Invalid size vector");
+        }
+
+        this.scale = scale;
+    }
+
     /// WORLD TRANSFORM ///
 
     /**
@@ -229,6 +263,14 @@ public class WorldObject {
      * @return a non-null 4x4 homogeneous transformation matrix
      */
     public RealMatrix getObjectToWorldTransform(){
+        //Create local affine scale matrix
+        RealMatrix scaleMatrix = new Array2DRowRealMatrix(new double[][]{
+            {getScale().getEntry(0), 0, 0, 0},
+            {0, getScale().getEntry(1), 0, 0},
+            {0, 0, getScale().getEntry(2), 0},
+            {0, 0, 0, 1}
+        }, false);
+
         //Create local affine transformation matrix
         RealMatrix rotationMatrix = new Array2DRowRealMatrix(new double[4][4], false);
         rotationMatrix.setEntry(3, 3, 1); //Identity
@@ -243,7 +285,7 @@ public class WorldObject {
             {0, 0, 0, 1}
         }, false);
 
-        RealMatrix objectToParentTransform = translationMatrix.multiply(rotationMatrix);
+        RealMatrix objectToParentTransform = translationMatrix.multiply(rotationMatrix.multiply(scaleMatrix));
         if(getParent() != null) {
             return getParent().getObjectToWorldTransform().multiply(objectToParentTransform);
         }

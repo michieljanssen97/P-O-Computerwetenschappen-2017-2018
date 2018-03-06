@@ -21,6 +21,7 @@ public class SimulationDriver {
     private Autopilot autoPilot;
     private boolean simulationFinished;
     private boolean simulationCrashed;
+    private boolean simulationThrewException;
     private AutopilotInputs latestAutopilotInputs;
     private AutopilotOutputs latestAutopilotOutputs;
 
@@ -52,7 +53,7 @@ public class SimulationDriver {
     public void runUpdate(){
         stopwatch.tick();
 
-        if(!stopwatch.isPaused() && !simulationFinished && !simulationCrashed){
+        if(!stopwatch.isPaused() && !simulationFinished && !simulationCrashed && !simulationThrewException){
         	try {
         	    //Reset renderer
                 testBed.getRenderer().clearDebugObjects();
@@ -106,6 +107,8 @@ public class SimulationDriver {
     public boolean hasSimulationFinished() {return simulationFinished;}
 
     public boolean hasSimulationCrashed(){return simulationCrashed;}
+
+    public boolean hasSimulationThrownException(){return simulationThrewException;}
 
     public TestBed getTestBed(){
         return testBed;
