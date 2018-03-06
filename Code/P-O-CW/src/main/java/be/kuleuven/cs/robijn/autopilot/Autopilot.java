@@ -88,11 +88,11 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		
 		RealVector target = new ArrayRealVector(new double[] {-40, 20, -100}, false);
 		
-//		if (recognizer.isFollowingPathCoordinates()) {
-//			target = new ArrayRealVector(recognizer.getCurrentPathTarget(), false);
-//		} else {
-//			target = new ArrayRealVector(recognizer.searchForCubeInPathArea(image), false);
-//		}
+		if (recognizer.isFollowingPathCoordinates()) {
+			target = recognizer.getCurrentPathTarget();
+		} else {
+			target = recognizer.searchForCubeInPathArea(image);
+		}
 		
 		float XRotation = (float) Math.atan((target.getEntry(1) - drone.getWorldPosition().getEntry(1))
 				/(drone.getWorldPosition().getEntry(2) - target.getEntry(2)));

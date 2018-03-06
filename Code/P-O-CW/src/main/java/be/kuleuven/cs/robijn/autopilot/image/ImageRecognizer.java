@@ -403,15 +403,14 @@ public class ImageRecognizer {
 	 * If the drone gets within a certain distance of the path coordinates, it will switch to 
 	 * "exact" mode, meaning it will use image recognition to determine the exact coordinate of the cube.
 	 */
-	public double[] getCurrentPathTarget() {
+	public RealVector getCurrentPathTarget() {
 		RealVector path = this.currentPathTarget;
 		double[] drone = getDronePositionCoordinates();
 		float distanceToPath = (float) Math.sqrt(Math.pow(path.getEntry(0) - drone[0], 2) + Math.pow(path.getEntry(1) - drone[1], 2) + Math.pow(path.getEntry(2) - drone[2], 2));
 		if (distanceToPath < 20) //20 should probably be changed in the future
 			followExactCoordinates();
 		
-		double[] pathD = new double[] {path.getEntry(0), path.getEntry(1), path.getEntry(2)};
-		return pathD;
+		return path;
 	}
 	
 	public void setPathTarget(RealVector target) {
@@ -445,7 +444,7 @@ public class ImageRecognizer {
 	 * @param im
 	 * 		The current image.
 	 */
-	public double[] searchForCubeInPathArea(Image im) {
+	public RealVector searchForCubeInPathArea(Image im) {
 		//Currently the same method as getClosestCubeInWorld(Image im). Needs to change.
 		float[] curPos = {(float)dronePosition.getEntry(0), (float)dronePosition.getEntry(1), (float)dronePosition.getEntry(2)};
 		float minimum = Float.POSITIVE_INFINITY;
@@ -469,12 +468,13 @@ public class ImageRecognizer {
 			closest.destroy();
 			followNewPathCoordinates();
 		}
-
+		
 		double[] coD = new double[3];
-		coD[0] = (double) co[0];
-		coD[1] = (double) co[1];
-		coD[2] = (double) co[2];
-		return coD;
+		coD[0] = co[0];
+		coD[1] = co[1];
+		coD[2] = co[2];
+		return new ArrayRealVector(coD, false);
+		
 	}
 	
 }
