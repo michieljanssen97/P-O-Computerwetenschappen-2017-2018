@@ -77,6 +77,7 @@ public class SimulationDriver {
         	} catch (Exception ex){
                 simulationThrewException = true;
                 System.err.println("A critical error occurred in the autopilot!");
+                ex.printStackTrace();
             }
         }
 
