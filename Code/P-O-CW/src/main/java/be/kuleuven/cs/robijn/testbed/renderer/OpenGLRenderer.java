@@ -127,7 +127,7 @@ public class OpenGLRenderer implements Renderer {
         //Load ground model
         Mesh groundMesh = OBJLoader.loadFromResources("/models/ground/ground.obj");
         Texture groundTexture = Texture.load(Resources.loadImageResource("/models/ground/texture.png"));
-        groundTexture.setTextureScale(new Vector2D(0.001, 0.001));
+        groundTexture.setTextureScale(new Vector2D(0.0001, 0.0001));
         groundModel = new Model(groundMesh, groundTexture, texturedProgram);
     }
 

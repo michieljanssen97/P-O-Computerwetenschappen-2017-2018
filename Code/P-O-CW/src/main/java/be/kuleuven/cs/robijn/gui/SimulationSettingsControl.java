@@ -13,8 +13,6 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.Callback;
-import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
 
 import interfaces.AutopilotConfig;
@@ -45,7 +43,10 @@ public class SimulationSettingsControl extends AnchorPane {
     private Button loadConfigDefaultsButton;
 
     @FXML
-    private TableView propertiesTable;
+    private TableView stringPropertiesTable;
+
+    @FXML
+    private TableView numberPropertiesTable;
 
     /// BOXES
 
@@ -247,7 +248,8 @@ public class SimulationSettingsControl extends AnchorPane {
      */
     private void loadConfig(AutopilotConfig config){
         configProperty.set(new ObservableAutoPilotConfig(config));
-        propertiesTable.refresh();
+        stringPropertiesTable.refresh();
+        numberPropertiesTable.refresh();
     }
 
     /**
@@ -263,28 +265,48 @@ public class SimulationSettingsControl extends AnchorPane {
 
     private void setupConfigTable(){
         //Make table editable
-        propertiesTable.setEditable(true);
+        stringPropertiesTable.setEditable(true);
+        numberPropertiesTable.setEditable(true);
 
         //Load property names (hashmap keys) in table
-        propertiesTable.setItems(FXCollections.observableArrayList(configProperty.get().getProperties().keySet()));
+        stringPropertiesTable.setItems(FXCollections.observableArrayList(configProperty.get().getStringProperties().keySet()));
+        numberPropertiesTable.setItems(FXCollections.observableArrayList(configProperty.get().getNumberProperties().keySet()));
 
         //Column 1 is keys and is readonly
         TableColumn<String, String> keyColumn = new TableColumn<>();
         keyColumn.setText("Property");
         keyColumn.setEditable(false);
         keyColumn.setCellValueFactory(cd -> Bindings.createStringBinding(() -> cd.getValue()));
-        propertiesTable.getColumns().add(keyColumn);
+        stringPropertiesTable.getColumns().add(keyColumn);
+
+        //Column 1 is keys and is readonly
+        TableColumn<String, String> keyColumn2 = new TableColumn<>();
+        keyColumn2.setText("Property");
+        keyColumn2.setEditable(false);
+        keyColumn2.setCellValueFactory(cd -> Bindings.createStringBinding(() -> cd.getValue()));
+        numberPropertiesTable.getColumns().add(keyColumn2);
 
         //Column 2 is values and is editable
-        TableColumn<String, Number> valueColumn = new TableColumn<>();
+        TableColumn<String, String> valueColumn = new TableColumn<>();
         valueColumn.setText("Value");
         valueColumn.setEditable(true);
-        valueColumn.setCellFactory(TextFieldTableCell.forTableColumn(new NumberStringConverter()));
-        valueColumn.setCellValueFactory(cd -> Bindings.valueAt(configProperty.get().getProperties(), cd.getValue()));
+        valueColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        valueColumn.setCellValueFactory(cd -> Bindings.valueAt(configProperty.get().getStringProperties(), cd.getValue()));
         valueColumn.setOnEditCommit( (e) ->
-                configProperty.get().setProperty((String)propertiesTable.getItems().get(e.getTablePosition().getRow()), e.getNewValue())
+                configProperty.get().setProperty((String)stringPropertiesTable.getItems().get(e.getTablePosition().getRow()), e.getNewValue())
         );
-        propertiesTable.getColumns().add(valueColumn);
+        stringPropertiesTable.getColumns().add(valueColumn);
+
+        //Column 2 is values and is editable
+        TableColumn<String, Number> valueColumn2 = new TableColumn<>();
+        valueColumn2.setText("Value");
+        valueColumn2.setEditable(true);
+        valueColumn2.setCellFactory(TextFieldTableCell.forTableColumn(new NumberStringConverter()));
+        valueColumn2.setCellValueFactory(cd -> Bindings.valueAt(configProperty.get().getNumberProperties(), cd.getValue()));
+        valueColumn2.setOnEditCommit( (e) ->
+                configProperty.get().setProperty((String)numberPropertiesTable.getItems().get(e.getTablePosition().getRow()), e.getNewValue())
+        );
+        numberPropertiesTable.getColumns().add(valueColumn2);
     }
 
     private void setupBoxTable(){
