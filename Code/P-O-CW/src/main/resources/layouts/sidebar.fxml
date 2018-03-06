@@ -142,9 +142,16 @@
                         <Insets top="3.0" />
                     </VBox.margin>
                 </ProgressBar>-->
-                <Label text="Thrust" style="-fx-font-weight: bold;">
+                <Label text="Path" style="-fx-font-weight: bold;">
                     <VBox.margin>
                         <Insets />
+                    </VBox.margin>
+                </Label>
+                <Button fx:id="editPathButton" text="Set path"/>
+
+                <Label text="Thrust" style="-fx-font-weight: bold;">
+                    <VBox.margin>
+                        <Insets top="7"/>
                     </VBox.margin>
                 </Label>
                 <ProgressBar fx:id="thrustBar" minWidth="200"/>

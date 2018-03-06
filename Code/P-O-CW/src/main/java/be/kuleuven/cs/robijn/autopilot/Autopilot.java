@@ -93,7 +93,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		} else {
 			target = recognizer.searchForCubeInPathArea(image);
 		}
-		
+	  
 		float XRotation = (float) Math.atan((target.getEntry(1) - drone.getWorldPosition().getEntry(1))
 				/(drone.getWorldPosition().getEntry(2) - target.getEntry(2)));
 		float YRotation = (float) Math.atan((drone.getWorldPosition().getEntry(0) - target.getEntry(0))

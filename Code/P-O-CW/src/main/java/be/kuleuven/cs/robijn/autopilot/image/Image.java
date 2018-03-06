@@ -292,7 +292,7 @@ public class Image {
 	 */
 	private boolean isXPixel(Pixel p){
 		float v = p.getValue();
-		return ( floatFuzzyEquals(v, 0.85f, defaultEpsilon) || floatFuzzyEquals(v, 0.3f, defaultEpsilon) );
+		return ( (v >= 0.225 && v < 0.275) || (v >= 0.375 && v < 0.425) );
 	}
 	
 	/**
@@ -302,7 +302,7 @@ public class Image {
 	 */
 	private boolean isYPixel(Pixel p){
 		float v = p.getValue();
-		return ( floatFuzzyEquals(v, 0.15f, defaultEpsilon) || floatFuzzyEquals(v, 1.0f, defaultEpsilon) );
+		return ( (v >= 0.175 && v < 0.225) || (v >= 0.425 && v < 0.475) );
 	}
 	
 	/**
@@ -312,15 +312,9 @@ public class Image {
 	 */
 	private boolean isZPixel(Pixel p){
 		float v = p.getValue();
-		return ( floatFuzzyEquals(v, 0.7f, defaultEpsilon) || floatFuzzyEquals(v, 0.45f, defaultEpsilon) );
+		return (v >= 0.275 && v < 0.375);
 	}
-	
-	private boolean floatFuzzyEquals(float input, float expected, float epsilon) {
-		return (Math.abs(input - expected) <= epsilon);
-	}
-	
-	private float defaultEpsilon = 0.01f;
-	
+
 	/**
 	 * Return the distance from the cube with given hue and saturation to the camera along the (negative) z axis of the drone coordinate system.
 	 * @param hue	The given hue
@@ -424,24 +418,24 @@ public class Image {
 	 */
 	public float[] getPercentageXYZPixels(float hue, float sat) throws IllegalStateException{
 		ArrayList<Pixel> redPixels = getCubePixels(hue, sat);
-		float TotalRedPixels = getCubePixels(hue, sat).size();
-		float redXPixels = 0;
-		float redYPixels = 0;
-		float redZPixels = 0;
+		float TotalCubePixels = getCubePixels(hue, sat).size();
+		float CubeXPixels = 0;
+		float CubeYPixels = 0;
+		float CubeZPixels = 0;
 		if (redPixels.size() == 0)
-			throw new IllegalStateException("there is no red cube on the camera image");
+			throw new IllegalStateException("there is no cube with given hue and saturation on the camera image");
 		for (Pixel p : redPixels){
 			if (isXPixel(p)){
-				redXPixels += 1;
+				CubeXPixels += 1;
 			} else if (isYPixel(p)){
-				redYPixels += 1;
+				CubeYPixels += 1;
 			} else if (isZPixel(p)){
-				redZPixels += 1;
+				CubeZPixels += 1;
 			}
 		}
-		float percentageXPixels = redXPixels / TotalRedPixels;
-		float percentageYPixels = redYPixels / TotalRedPixels;
-		float percentageZPixels = redZPixels / TotalRedPixels;
+		float percentageXPixels = CubeXPixels / TotalCubePixels;
+		float percentageYPixels = CubeYPixels / TotalCubePixels;
+		float percentageZPixels = CubeZPixels / TotalCubePixels;
 		float[] percentageXYZPixels = new float[] {percentageXPixels, percentageYPixels, percentageZPixels};
 		return percentageXYZPixels;
 	}
@@ -482,6 +476,17 @@ public class Image {
 		return (hsv[1] == 0.0f) && (hsv[2] == 1.0f);
 	}
 	
+	
+	/**
+	 * Check whether the given pixel is part of the ground texture.
+	 * @param p	The given pixel
+	 * @return	True if the hue of the pixel is between 0.16 and 0.17.
+	 */
+	private boolean isGroundPixelHSV(float[] hsv){
+		if (!isValidHSV(hsv)) {throw new IllegalArgumentException();}
+		return hsv[2] >= 0.5;
+	}
+	
 	/**
 	 * Return a list containing all the cubes that are visible on this image.
 	 * @throws Exception 
@@ -492,7 +497,7 @@ public class Image {
 		for (int y = 0; y < getnbRows(); y++){
 			for (int x = 0; x < getnbColumns(); x++){
 				float[] hsv = getPixelHSV(x, y);
-				if (!isWhiteHSV(hsv)){
+				if (!isWhiteHSV(hsv) && !isGroundPixelHSV(hsv)){
 					for (ImageCube c : cubeCollection){
 						if ((hsv[0] == c.getHue()) && (hsv[1] == c.getSaturation())){
 							c.addPixel(new Pixel(x, y, hsv));

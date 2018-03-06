@@ -14,25 +14,25 @@ import org.apache.commons.math3.linear.RealVector;
 import javax.imageio.ImageIO;
 
 public class ImageTest {
-	
-//	private byte[] loadImageRGBBytes(String resourceName) throws IOException {
-//		BufferedImage image = ImageIO.read(getClass().getClassLoader().getResource(resourceName));
-//		byte[] rgbBytes = new byte[image.getWidth() * image.getHeight()*3];
-//		for(int y = 0; y < image.getHeight(); y++){
-//			for(int x = 0; x < image.getWidth(); x++){
-//				int argb = image.getRGB(x, y);
-//				byte r = (byte)((argb >> 16) & 0xFF);
-//				byte g = (byte)((argb >>  8) & 0xFF);
-//				byte b = (byte)((argb >>  0) & 0xFF);
-//				int offset = ((y*image.getWidth()) + x) * 3;
-//				rgbBytes[offset] = r;
-//				rgbBytes[offset+1] = g;
-//				rgbBytes[offset+2] = b;
-//			}
-//		}
-//		return rgbBytes;
-//	}
-//
+  
+	private byte[] loadImageRGBBytes(String resourceName) throws IOException {
+		BufferedImage image = ImageIO.read(getClass().getClassLoader().getResource(resourceName));
+		byte[] rgbBytes = new byte[image.getWidth() * image.getHeight()*3];
+		for(int y = 0; y < image.getHeight(); y++){
+			for(int x = 0; x < image.getWidth(); x++){
+				int argb = image.getRGB(x, y);
+				byte r = (byte)((argb >> 16) & 0xFF);
+				byte g = (byte)((argb >>  8) & 0xFF);
+				byte b = (byte)((argb >>  0) & 0xFF);
+				int offset = ((y*image.getWidth()) + x) * 3;
+				rgbBytes[offset] = r;
+				rgbBytes[offset+1] = g;
+				rgbBytes[offset+2] = b;
+			}
+		}
+		return rgbBytes;
+	}
+
 //	@Test
 //	public void testRGBtoHSV() {
 //		float[] hsv = new float[3];
@@ -471,12 +471,22 @@ public class ImageTest {
 //		RealVector dronePos = new ArrayRealVector(new double[] {10,0,0});
 //		Image im = rec.createImage(image, 200, 200, 120, 120, dronePos, (float) Math.PI/2, 0.0f, 0.0f);
 //		for (ImageRecognizerCube cube : rec.getImageRecognizerCubes()){
-////			System.out.println(Float.toString(cube.getFactor()));
+//			System.out.println(Float.toString(cube.getFactor()));
 ////			System.out.println(Float.toString(im.getTotalDistance(cube.getHue(), cube.getSaturation())));
 ////			System.out.println(Float.toString(cube.getPosition()[0]));
 ////			System.out.println(Float.toString(cube.getPosition()[1]));
 ////			System.out.println(Float.toString(cube.getPosition()[2]));
 //		}
+//	}
+//	
+//	
+//	@Test
+//	public void testBackGroundH() throws Exception{
+//		ImageRecognizer rec = new ImageRecognizer();
+//		byte[] image = this.loadImageRGBBytes("backgroundcolor.png");
+//		RealVector dronePos = new ArrayRealVector(new double[] {10,0,0});
+//		Image im = rec.createImage(image, 200, 200, 120, 120, dronePos, (float) Math.PI/2, 0.0f, 0.0f);
+//		assertTrue(rec.getImageRecognizerCubes().size() == 0);
 //	}
 //	
 //	@Test
@@ -494,6 +504,21 @@ public class ImageTest {
 //		}
 //	}
 //	
+
+//	
+////	@Test
+////	public void testBackGroundHSV() throws Exception{
+////		ImageRecognizer rec = new ImageRecognizer();
+////		byte[] image = this.loadImageRGBBytes("texture.png");
+////		RealVector dronePos = new ArrayRealVector(new double[] {10,0,0});
+////		Image im = rec.createImage(image, 200, 200, 120, 120, dronePos, (float) Math.PI/2, 0.0f, 0.0f);
+////		for (ImageRecognizerCube cube : rec.getImageRecognizerCubes()){
+////			System.out.println(Float.toString(cube.getHue()));
+////			System.out.println(Float.toString(cube.getSaturation()));
+////		}
+////	}
+//	
+
 ////	@Test
 ////	public void testImageRecognizerCubeFactorRip() throws Exception{
 ////		ImageRecognizer rec = new ImageRecognizer();

@@ -53,6 +53,11 @@ public class ShaderProgram implements AutoCloseable{
     //They are part of the shader program state.
     //
 
+    public boolean hasUniform(String argumentName){
+        final int location = glGetUniformLocation(programId, argumentName);
+        return location != -1;
+    }
+
     //Getters
     public float getUniformFloat(String argumentName){
         glUseProgram(programId);

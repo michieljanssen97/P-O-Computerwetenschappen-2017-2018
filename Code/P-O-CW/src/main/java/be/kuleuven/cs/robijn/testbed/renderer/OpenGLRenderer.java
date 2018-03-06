@@ -3,6 +3,7 @@ package be.kuleuven.cs.robijn.testbed.renderer;
 import be.kuleuven.cs.robijn.common.*;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -108,8 +109,8 @@ public class OpenGLRenderer implements Renderer {
 
         //Load drone
         Mesh droneMesh = OBJLoader.loadFromResources("/models/drone/drone.obj");
-        Texture texture = Texture.load(Resources.loadImageResource("/models/drone/texture.jpg"));
-        droneModel = new Model(droneMesh, texture, texturedProgram);
+        Texture droneTexture = Texture.load(Resources.loadImageResource("/models/drone/texture.jpg"));
+        droneModel = new Model(droneMesh, droneTexture, texturedProgram);
 
         //Load shader for box model
         ShaderProgram boxProgram;
@@ -123,17 +124,11 @@ public class OpenGLRenderer implements Renderer {
         Mesh boxMesh = OBJLoader.loadFromResources("/models/cube/cube.obj");
         boxModel = new Model(boxMesh, null, boxProgram);
 
-        //Load shader for ground model
-        ShaderProgram groundProgram;
-        try(Shader vertexShader = Shader.compileVertexShader(Resources.loadTextResource("/shaders/ground/vertex.glsl"))){
-            try(Shader fragmentShader = Shader.compileFragmentShader(Resources.loadTextResource("/shaders/ground/fragment.glsl"))){
-                groundProgram = ShaderProgram.link(vertexShader, fragmentShader);
-            }
-        }
-
         //Load ground model
         Mesh groundMesh = OBJLoader.loadFromResources("/models/ground/ground.obj");
-        groundModel = new Model(groundMesh, null, groundProgram);
+        Texture groundTexture = Texture.load(Resources.loadImageResource("/models/ground/texture.png"));
+        groundTexture.setTextureScale(new Vector2D(0.0001, 0.0001));
+        groundModel = new Model(groundMesh, groundTexture, texturedProgram);
     }
 
     private void initializeIcons(){
@@ -294,6 +289,13 @@ public class OpenGLRenderer implements Renderer {
         glActiveTexture(GL_TEXTURE0);
         if(model.getTexture() != null){
             glBindTexture(GL_TEXTURE_2D, model.getTexture().getTextureId());
+            if(model.getShader().hasUniform("textureScale")){
+                model.getShader().setUniformFloat(
+                        "textureScale",
+                        (float)model.getTexture().getTextureScale().getX(),
+                        (float)model.getTexture().getTextureScale().getY()
+                );
+            }
         }else{
             glBindTexture(GL_TEXTURE_2D, 0);
         }
