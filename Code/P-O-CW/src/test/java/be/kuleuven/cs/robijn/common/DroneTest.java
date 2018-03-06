@@ -255,7 +255,7 @@ public class DroneTest {
 		assertTrue(VectorMath.fuzzyEquals(pos, drone.getWorldPosition()));
 		
 		RealVector pos2 = null; //Invalid value
-		assertThrows(IllegalArgumentException.class, ()->{
+		assertThrows(NullPointerException.class, ()->{
 			drone.setRelativePosition(pos2);
 		});
 	}
