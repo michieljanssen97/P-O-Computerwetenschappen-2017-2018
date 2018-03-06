@@ -20,6 +20,7 @@ public class SimulationDriver {
     private Autopilot autoPilot;
     private boolean simulationFinished;
     private boolean simulationCrashed;
+    private boolean simulationThrewException;
     private AutopilotInputs latestAutopilotInputs;
     private AutopilotOutputs latestAutopilotOutputs;
 
@@ -51,7 +52,7 @@ public class SimulationDriver {
     public void runUpdate(){
         stopwatch.tick();
 
-        if(!stopwatch.isPaused() && !simulationFinished && !simulationCrashed){
+        if(!stopwatch.isPaused() && !simulationFinished && !simulationCrashed && !simulationThrewException){
         	try {
         	    //Reset renderer
                 testBed.getRenderer().clearDebugObjects();
@@ -73,7 +74,10 @@ public class SimulationDriver {
                 simulationCrashed = true;
                 System.err.println("Simulation failed!");
         		exc.printStackTrace();
-        	}
+        	} catch (Exception ex){
+                simulationThrewException = true;
+                System.err.println("A critical error occurred in the autopilot!");
+            }
         }
 
         //Invokes the event handlers
@@ -97,6 +101,8 @@ public class SimulationDriver {
     public boolean hasSimulationFinished() {return simulationFinished;}
 
     public boolean hasSimulationCrashed(){return simulationCrashed;}
+
+    public boolean hasSimulationThrownException(){return simulationThrewException;}
 
     public TestBed getTestBed(){
         return testBed;
