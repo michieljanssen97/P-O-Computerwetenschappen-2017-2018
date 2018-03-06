@@ -136,7 +136,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			imageYRotation = (float) ((5.0/4.0)*imageYRotation + (1.0/4.0)*heading);
 		}
 		
-		RealVector target = new ArrayRealVector(new double[] {40, 20, -100}, false);
+		RealVector target = new ArrayRealVector(new double[] {0, -this.getConfig().getWheelY() + this.getConfig().getTyreRadius(), 0}, false);
 		float XRotation = (float) Math.atan((target.getEntry(1) - drone.getWorldPosition().getEntry(1))
 				/(drone.getWorldPosition().getEntry(2) - target.getEntry(2)));
 		float YRotation = (float) Math.atan((drone.getWorldPosition().getEntry(0) - target.getEntry(0))
@@ -406,27 +406,27 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		final float leftBrakeForce = 0;
 		final float rightBrakeForce = 0;
 		
-		this.setPreviousHeadingAngularAccelerationError(
-				drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination,
-						frontBrakeForce, leftBrakeForce, rightBrakeForce)[0]
-				-headingAngularAcceleration);
-		this.setPreviousPitchAngularAccelerationError(
-				drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination,
-						frontBrakeForce, leftBrakeForce, rightBrakeForce)[1]
-				-pitchAngularAcceleration);
-		this.setPreviousRollAngularAccelerationError(
-				drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination,
-						frontBrakeForce, leftBrakeForce, rightBrakeForce)[2]
-				-rollAngularAcceleration);
-		this.setPreviousYAccelerationError(
-				((float)drone.getAcceleration(thrust, leftWingInclination, rightWingInclination, horStabInclination, verStabInclination,
-						frontBrakeForce, leftBrakeForce, rightBrakeForce).getEntry(1))
-				-yAcceleration);
-		RealMatrix transformationMatrix = this.calculateTransformationMatrix(targetRoll, drone);
-		this.setPreviousXAccelerationError(
-				(float) ((transformationMatrix.operate(drone.transformationToDroneCoordinates(drone.getLiftForceHorStab(horStabInclination))).getEntry(0) 
-						+ transformationMatrix.operate(new ArrayRealVector(new double[] {0, 0, -thrust}, false)).getEntry(0))
-						/(drone.getTailMass() + drone.getEngineMass() + 2*drone.getWingMass())));
+//		this.setPreviousHeadingAngularAccelerationError(
+//				drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination,
+//						frontBrakeForce, leftBrakeForce, rightBrakeForce)[0]
+//				-headingAngularAcceleration);
+//		this.setPreviousPitchAngularAccelerationError(
+//				drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination,
+//						frontBrakeForce, leftBrakeForce, rightBrakeForce)[1]
+//				-pitchAngularAcceleration);
+//		this.setPreviousRollAngularAccelerationError(
+//				drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination,
+//						frontBrakeForce, leftBrakeForce, rightBrakeForce)[2]
+//				-rollAngularAcceleration);
+//		this.setPreviousYAccelerationError(
+//				((float)drone.getAcceleration(thrust, leftWingInclination, rightWingInclination, horStabInclination, verStabInclination,
+//						frontBrakeForce, leftBrakeForce, rightBrakeForce).getEntry(1))
+//				-yAcceleration);
+//		RealMatrix transformationMatrix = this.calculateTransformationMatrix(targetRoll, drone);
+//		this.setPreviousXAccelerationError(
+//				(float) ((transformationMatrix.operate(drone.transformationToDroneCoordinates(drone.getLiftForceHorStab(horStabInclination))).getEntry(0) 
+//						+ transformationMatrix.operate(new ArrayRealVector(new double[] {0, 0, -thrust}, false)).getEntry(0))
+//						/(drone.getTailMass() + drone.getEngineMass() + 2*drone.getWingMass())));
 		AutopilotOutputs output = new AutopilotOutputs() {
 			public float getThrust() {
 				return thrust;
