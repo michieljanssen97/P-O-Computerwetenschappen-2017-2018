@@ -213,6 +213,10 @@ public class Drone extends WorldObject {
 		super.setRelativePosition(vector);
 	}
 	
+	public float getTotalMass() {
+		return (this.getEngineMass() + this.getTailMass() + 2*this.getWingMass());
+	}
+	
     //  -----------------   //
     //                      //
     //       HEADING        //
@@ -806,6 +810,10 @@ public class Drone extends WorldObject {
 	 */
 	public RealVector getGravitationalForceEngine() {
 		return new ArrayRealVector(new double[] {0, -(this.getEngineMass() * this.getGravity()), 0 }, false);
+	}
+	
+	public RealVector getTotalGravitationalForce() {
+		return this.getGravitationalForceWing().mapMultiply(2).add(this.getGravitationalForceEngine()).add(this.getGravitationalForceTail());
 	}
 	
 	/**
