@@ -7,6 +7,7 @@ import be.kuleuven.cs.robijn.common.stopwatch.Stopwatch;
 import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
 import interfaces.AutopilotConfig;
 import interfaces.AutopilotInputs;
+import interfaces.AutopilotModule;
 import interfaces.AutopilotOutputs;
 
 import java.util.List;
@@ -18,32 +19,23 @@ import org.apache.commons.math3.linear.*;
  */
 public class SimulationDriver {
     private TestBed testBed;
-    private Autopilot autoPilot;
+    private AutopilotModule autoPilotModule;
     private boolean simulationFinished;
     private boolean simulationCrashed;
     private boolean simulationThrewException;
-    private AutopilotInputs latestAutopilotInputs;
-    private AutopilotOutputs latestAutopilotOutputs;
 
     private Stopwatch stopwatch;
 
     private boolean simulationStarted = false;
-    private final AutopilotConfig config;
 
     //List of eventhandlers that are invoked when the simulation has updated.
     private TreeSet<UpdateEventHandler> updateEventHandlers = new TreeSet<>();
 
-    public SimulationDriver(List<Box> boxes, AutopilotConfig config){
-        this(boxes, config, new RealTimeStopwatch());
-    }
-
-    public SimulationDriver(List<Box> boxes, AutopilotConfig config, Stopwatch stopwatch){
-        this.config = config;
+    public SimulationDriver(SimulationSettings settings, Stopwatch stopwatch){
         this.stopwatch = stopwatch;
-    	RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, 0}, false);
-        testBed = new VirtualTestbed(boxes, config, initialVelocity);
-        autoPilot = new Autopilot();
-        latestAutopilotInputs = testBed.getInputs();
+
+        //testBed = new VirtualTestbed(boxes, config, initialVelocity);
+        //autoPilotModule = new AutopilotModule();
     }
 
     /**
@@ -53,24 +45,24 @@ public class SimulationDriver {
     public void runUpdate(){
         stopwatch.tick();
 
-        if(!stopwatch.isPaused() && !simulationFinished && !simulationCrashed && !simulationThrewException){
+        if(!isSimulationPaused() && !simulationFinished && !simulationCrashed && !simulationThrewException){
         	try {
         	    //Reset renderer
                 testBed.getRenderer().clearDebugObjects();
 
-        		//Run the autopilot
-                if (simulationStarted == false ){
+        		//Run the autopilotmodule
+                /*if (simulationStarted == false ){
                     latestAutopilotOutputs = autoPilot.simulationStarted(config,latestAutopilotInputs);
                     simulationStarted = true;
                 }
         		else {
                     latestAutopilotOutputs = autoPilot.timePassed(latestAutopilotInputs);
-                }
+                }*/
         		//Run the testbed
-                simulationFinished = testBed.update((float)stopwatch.getSecondsSinceStart(),
+                /*simulationFinished = testBed.update((float)stopwatch.getSecondsSinceStart(),
                         (float)stopwatch.getSecondsSinceLastUpdate(), latestAutopilotOutputs);
 
-                latestAutopilotInputs = testBed.getInputs();
+                latestAutopilotInputs = testBed.getInputs();*/
         	} catch (CrashException exc1){
                 simulationCrashed = true;
                 System.err.println("Plane crashed!");
@@ -88,16 +80,12 @@ public class SimulationDriver {
 
         //Invokes the event handlers
         for (UpdateEventHandler eventHandler : updateEventHandlers) {
-            eventHandler.getFunction().accept(latestAutopilotInputs, latestAutopilotOutputs);
+            //eventHandler.getFunction().accept(latestAutopilotInputs, latestAutopilotOutputs);
         }
     }
 
     public void setSimulationPaused(boolean simulationPaused) {
         stopwatch.setPaused(simulationPaused);
-    }
-
-    public AutopilotConfig getConfig() {
-        return config;
     }
 
     public boolean isSimulationPaused() {
@@ -114,8 +102,8 @@ public class SimulationDriver {
         return testBed;
     }
 
-    public Autopilot getAutoPilot(){
-        return autoPilot;
+    public AutopilotModule getAutoPilotModule() {
+        return autoPilotModule;
     }
 
     public void addOnUpdateEventHandler(UpdateEventHandler handler){

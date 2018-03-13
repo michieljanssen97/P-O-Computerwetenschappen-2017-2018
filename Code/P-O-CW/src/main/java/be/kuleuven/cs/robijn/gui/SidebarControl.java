@@ -69,10 +69,6 @@ public class SidebarControl extends VBox {
 
     /// AUTOPILOT INFO
 
-    //Path
-    @FXML
-    private Button editPathButton;
-
     //Thrust
     @FXML
     private ProgressBar thrustBar;
@@ -156,13 +152,6 @@ public class SidebarControl extends VBox {
 
         simulationThrewExceptionLabel.visibleProperty().bind(simulationThrewExceptionProperty);
         simulationThrewExceptionLabel.managedProperty().bind(simulationThrewExceptionProperty);
-
-        editPathButton.setOnMouseClicked(e -> {
-            Path newPath = PathEditorControl.showDialog((Stage)this.editPathButton.getScene().getWindow());
-            if(newPath != null){
-                this.getSimulation().getAutoPilot().setPath(newPath);
-            }
-        });
     }
 
     private void updateLabels(AutopilotInputs inputs, AutopilotOutputs outputs){
@@ -185,9 +174,10 @@ public class SidebarControl extends VBox {
         rollLabel.setText(String.format("%.2f", Math.toDegrees(inputs.getRoll())));
 
         //Thrust
-        double thrustValue = outputs.getThrust()/getSimulation().getConfig().getMaxThrust();
-        thrustBar.setProgress(thrustValue);
-        thrustLabel.setText(String.format("%15.2f", outputs.getThrust()));
+        //TODO
+        //double thrustValue = outputs.getThrust()/getSimulation().getConfig().getMaxThrust();
+        //thrustBar.setProgress(thrustValue);
+        //thrustLabel.setText(String.format("%15.2f", outputs.getThrust()));
 
         //Wing inclination
         setIndicatorValue(leftWingInclinationIndicator, outputs.getLeftWingInclination(), Math.PI/2d);

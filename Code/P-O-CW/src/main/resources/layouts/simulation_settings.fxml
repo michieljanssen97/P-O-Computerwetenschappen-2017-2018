@@ -6,96 +6,133 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root prefHeight="700.0" prefWidth="1000.0" style="-fx-border-style: solid; -fx-border-color: #999999; -fx-background-color: white;" type="javafx.scene.layout.AnchorPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
-   <children>
-      <VBox prefHeight="100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <children>
-            <Label text="Simulatie configuratie">
-               <font>
-                  <Font size="24.0" />
-               </font>
-               <VBox.margin>
-                  <Insets left="15.0" top="10.0" />
-               </VBox.margin>
-            </Label>
-         </children>
-      </VBox>
-      <Accordion AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="51.0" AnchorPane.bottomAnchor="51.0">
-        <panes>
-          <TitledPane animated="false" text="Eigenschappen">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <HBox prefHeight="25.0" prefWidth="698.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <Button fx:id="loadConfigFileButton" mnemonicParsing="false" text="Load file…">
-                                 <HBox.margin>
-                                    <Insets />
-                                 </HBox.margin>
-                              </Button>
-                              <Button fx:id="saveConfigFileButton" mnemonicParsing="false" text="Save as…">
-                                 <HBox.margin>
-                                    <Insets left="10.0" />
-                                 </HBox.margin>
-                              </Button>
-                              <Button fx:id="loadConfigDefaultsButton" mnemonicParsing="false" text="Reset default values">
-                                 <HBox.margin>
-                                    <Insets left="10.0" />
-                                 </HBox.margin>
-                              </Button>
-                           </children>
-                        </HBox>
-                        <TableView fx:id="stringPropertiesTable" prefHeight="50.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0" />
-                        <TableView fx:id="numberPropertiesTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="85.0" />
-                     </children>
-                  </AnchorPane>
-            </content>
-          </TitledPane>
-          <TitledPane animated="false" text="Kubussen">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <HBox prefHeight="25.0" prefWidth="698.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <Button fx:id="loadBoxFileButton" mnemonicParsing="false" text="Load file…">
-                                 <HBox.margin>
-                                    <Insets />
-                                 </HBox.margin>
-                              </Button>
-                              <Button fx:id="saveBoxFileButton" mnemonicParsing="false" text="Save as…">
-                                 <HBox.margin>
-                                    <Insets left="10.0" />
-                                 </HBox.margin>
-                              </Button>
-                               <Button fx:id="loadBoxDefaultsButton" mnemonicParsing="false" text="Reset default values">
-                                   <HBox.margin>
-                                       <Insets left="10.0" />
-                                   </HBox.margin>
-                               </Button>
-                               <Button fx:id="addBoxButton" mnemonicParsing="false" text="Add box">
-                                   <HBox.margin>
-                                       <Insets left="10.0" />
-                                   </HBox.margin>
-                               </Button>
-                               <Button fx:id="removeBoxButton" mnemonicParsing="false" text="Remove box">
-                                   <HBox.margin>
-                                       <Insets left="10.0" />
-                                   </HBox.margin>
-                               </Button>
-                               <Button fx:id="randomBoxesButton" mnemonicParsing="false" text="Generate random boxes">
-                                   <HBox.margin>
-                                       <Insets left="10.0" />
-                                   </HBox.margin>
-                               </Button>
-                           </children>
-                        </HBox>
-                        <TableView fx:id="boxTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0" />
-                     </children>
-                  </AnchorPane>
-            </content>
-          </TitledPane>
-        </panes>
-      </Accordion>
-      <Button fx:id="okButton" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0" text="OK" AnchorPane.bottomAnchor="16.0" AnchorPane.rightAnchor="16.0" />
-   </children>
+<fx:root prefHeight="700.0" prefWidth="1000.0"
+         style="-fx-border-style: solid; -fx-border-color: #999999; -fx-background-color: white;"
+         type="javafx.scene.layout.AnchorPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <VBox prefHeight="100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <Label text="Simulatie configuratie">
+                    <font>
+                        <Font size="24.0"/>
+                    </font>
+                    <VBox.margin>
+                        <Insets left="15.0" top="10.0"/>
+                    </VBox.margin>
+                </Label>
+            </children>
+        </VBox>
+        <Accordion AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="51.0"
+                   AnchorPane.bottomAnchor="51.0">
+            <panes>
+                <TitledPane animated="false" text="Airports">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <HBox prefHeight="25.0" prefWidth="698.0" AnchorPane.leftAnchor="0.0"
+                                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" alignment="CENTER_LEFT">
+                                    <Label text="Runway length:"/>
+                                    <Spinner fx:id="runwayLengthSpinner" min="1" max="1000" initialValue="3" prefWidth="80.0">
+                                        <editable>true</editable>
+                                        <HBox.margin>
+                                            <Insets left="5.0"/>
+                                        </HBox.margin>
+                                    </Spinner>
+                                    <Label text="Gate length:">
+                                        <HBox.margin>
+                                            <Insets left="20.0"/>
+                                        </HBox.margin>
+                                    </Label>
+                                    <Spinner fx:id="gateLengthSpinner" min="1" max="1000" initialValue="3" prefWidth="80.0">
+                                        <editable>true</editable>
+                                        <HBox.margin>
+                                            <Insets left="5.0"/>
+                                        </HBox.margin>
+                                    </Spinner>
+                                </HBox>
+                                <HBox prefHeight="25.0" prefWidth="698.0" AnchorPane.leftAnchor="0.0"
+                                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="37.0">
+                                    <children>
+                                        <Button fx:id="addAirportButton" mnemonicParsing="false"
+                                                text="Add airport">
+                                        </Button>
+                                        <Button fx:id="removeAirportButton" mnemonicParsing="false"
+                                                text="Remove airport">
+                                            <HBox.margin>
+                                                <Insets left="10.0"/>
+                                            </HBox.margin>
+                                        </Button>
+                                        <Button fx:id="loadAirportsConfigFileButton" mnemonicParsing="false"
+                                                text="Load file…">
+                                            <HBox.margin>
+                                                <Insets left="10.0"/>
+                                            </HBox.margin>
+                                        </Button>
+                                        <Button fx:id="saveAirportsConfigFileButton" mnemonicParsing="false"
+                                                text="Save as…">
+                                            <HBox.margin>
+                                                <Insets left="10.0"/>
+                                            </HBox.margin>
+                                        </Button>
+                                        <Button fx:id="generateAirportsButton" mnemonicParsing="false"
+                                                text="Generate airports...">
+                                            <HBox.margin>
+                                                <Insets left="10.0"/>
+                                            </HBox.margin>
+                                        </Button>
+                                    </children>
+                                </HBox>
+                                <TableView fx:id="airportsTable" prefHeight="200.0" prefWidth="200.0"
+                                           AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="72.0"/>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </TitledPane>
+                <TitledPane animated="false" text="Drones">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <HBox prefHeight="25.0" prefWidth="698.0" AnchorPane.leftAnchor="0.0"
+                                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <Button fx:id="addDroneButton" mnemonicParsing="false"
+                                                text="Add drone">
+                                        </Button>
+                                        <Button fx:id="removeDroneButton" mnemonicParsing="false"
+                                                text="Remove drone">
+                                            <HBox.margin>
+                                                <Insets left="10.0"/>
+                                            </HBox.margin>
+                                        </Button>
+                                        <Button fx:id="loadDroneSetupFileButton" mnemonicParsing="false" text="Load file…">
+                                            <HBox.margin>
+                                                <Insets left="10.0"/>
+                                            </HBox.margin>
+                                        </Button>
+                                        <Button fx:id="saveDroneSetupFileButton" mnemonicParsing="false" text="Save as…">
+                                            <HBox.margin>
+                                                <Insets left="10.0"/>
+                                            </HBox.margin>
+                                        </Button>
+                                        <Button fx:id="loadDroneSetupDefaultsButton" mnemonicParsing="false"
+                                                text="Reset default values">
+                                            <HBox.margin>
+                                                <Insets left="10.0"/>
+                                            </HBox.margin>
+                                        </Button>
+                                    </children>
+                                </HBox>
+                                <TableView fx:id="dronesTable" prefHeight="200.0" prefWidth="200.0"
+                                           AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0"/>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </TitledPane>
+            </panes>
+        </Accordion>
+        <Button fx:id="okButton" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0" text="OK"
+                AnchorPane.bottomAnchor="16.0" AnchorPane.rightAnchor="16.0"/>
+    </children>
 </fx:root>

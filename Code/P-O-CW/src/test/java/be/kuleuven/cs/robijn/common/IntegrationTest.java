@@ -15,7 +15,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class IntegrationTest {
-    @Test
+    /*@Test
     public void testSingleRedBoxForward(){
         //Config
         int maxSimulationRuntimeInSeconds = 30;
@@ -53,5 +53,5 @@ public class IntegrationTest {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-    }
+    }*/
 }

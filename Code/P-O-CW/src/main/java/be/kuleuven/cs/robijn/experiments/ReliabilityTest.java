@@ -18,7 +18,7 @@ public class ReliabilityTest {
         SUCCESS, CRASH, DID_NOT_REACH_TARGET
     }
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         ReliabilityTest tester = new ReliabilityTest();
         tester.runTests();
     }
@@ -79,5 +79,5 @@ public class ReliabilityTest {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-    }
+    }*/
 }
