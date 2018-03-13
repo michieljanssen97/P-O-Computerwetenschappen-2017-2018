@@ -33,7 +33,8 @@ public class ImageRecognizer {
 		this.heading = heading;
 		this.pitch = pitch;
 		this.roll = roll;
-		this.UpdateImageRecognizerCubeList(im);
+		if (!isFollowingPathCoordinates())
+			this.UpdateImageRecognizerCubeList(im);
 //		if (!this.hasTarget())
 //			getClosestCubeInWorld(im).makeTarget();
 		return im;
@@ -407,7 +408,7 @@ public class ImageRecognizer {
 		RealVector path = this.currentPathTarget;
 		double[] drone = getDronePositionCoordinates();
 		float distanceToPath = (float) Math.sqrt(Math.pow(path.getEntry(0) - drone[0], 2) + Math.pow(path.getEntry(1) - drone[1], 2) + Math.pow(path.getEntry(2) - drone[2], 2));
-		if (distanceToPath < 50) //20 should probably be changed in the future
+		if (distanceToPath <= 50)
 			followExactCoordinates();
 		
 		return path;
@@ -435,7 +436,6 @@ public class ImageRecognizer {
 	 */
 	public void followNewPathCoordinates() {
 		this.followingPath = true;
-		this.path.removeCoordinate(this.currentPathTarget);
 		setPathTarget(getClosestPathXYZ());
 	}
 	
@@ -465,12 +465,13 @@ public class ImageRecognizer {
 		RealVector pathCo = this.currentPathTarget;
 		float pathDistance = (float) Math.sqrt(Math.pow(co[0] - pathCo.getEntry(0), 2) + Math.pow(co[1] - pathCo.getEntry(1), 2) + Math.pow(co[2] - pathCo.getEntry(2), 2));
 		System.out.println(pathDistance);
-		if (pathDistance > 20)
+		if (pathDistance > 10)
 			throw new IllegalStateException("No cube found near the path coordinates.");
 		
-		if (minimum < 3) {
+		if (minimum <= 3) {
 			//cube is touched
 			closest.destroy();
+			this.path.removeCoordinate(this.currentPathTarget);
 			followNewPathCoordinates();
 		}
 		
