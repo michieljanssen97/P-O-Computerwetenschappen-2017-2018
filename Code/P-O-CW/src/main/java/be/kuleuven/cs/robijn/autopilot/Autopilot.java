@@ -82,8 +82,8 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		double absoluteAccuracy = 1.0e-8;
 		int maxOrder = 5;
 		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
-		float turningTime = 2f;
-		float xMovementTime = 2f;
+		float turningTime = 0.5f;
+		float xMovementTime = 3f;
 		float maxRoll = (float) Math.toRadians(45.0);
 		float maxHeadingAngularAcceleration = Float.MAX_VALUE;
 		float maxPitchAngularAcceleration =Float.MAX_VALUE;
@@ -165,9 +165,8 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			else {
 				boolean finished = false;
 				while (! finished) {
-					System.out.println(turningTime);
 					finished = true;
-			        ImageRecognizer recognizer = this.getImageRecognizer();
+					ImageRecognizer recognizer = this.getImageRecognizer();
 			        float[] necessaryRotation;
 			        float horizontalAngleOfView = (float) Math.toDegrees(this.getConfig().getHorizontalAngleOfView());
 			        float verticalAngleOfView = (float) Math.toDegrees(this.getConfig().getVerticalAngleOfView());
@@ -367,9 +366,11 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			        try {
 			        	double solution3 = solver.solve(100, function3, -Math.PI/2, Math.PI/2);
 			        	targetRoll = (float) solution3;
-			        	targetRoll = drone.getRoll();
 			        } catch (NoBracketingException exc) {
-			        	targetRoll = drone.getRoll();
+			        	finished = false;
+						turningTime += 0.5;
+						xMovementTime += 0.5;
+						continue;
 					}
 			        if ((targetRoll > maxRoll) && (targetRoll < Math.PI))
 			        	targetRoll = maxRoll;
