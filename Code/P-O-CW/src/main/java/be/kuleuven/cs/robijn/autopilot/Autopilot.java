@@ -82,7 +82,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		double absoluteAccuracy = 1.0e-8;
 		int maxOrder = 5;
 		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
-		float turningTime = 0.5f;
+		float turningTime = 2f;
 		float xMovementTime = 2f;
 		float maxRoll = (float) Math.toRadians(45.0);
 		float maxHeadingAngularAcceleration = Float.MAX_VALUE;
