@@ -933,7 +933,7 @@ public class Drone extends WorldObject {
 		
 		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA())))
 //			throw new IllegalArgumentException();
-			AOA = Math.signum(this.getMaxAOA()) * this.getMaxAOA();
+			AOA = Math.signum(AOA) * this.getMaxAOA();
 		
 		liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		
@@ -965,7 +965,7 @@ public class Drone extends WorldObject {
 		
 		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA())))
 //			throw new IllegalArgumentException();
-			AOA = Math.signum(this.getMaxAOA()) * this.getMaxAOA();
+			AOA = Math.signum(AOA) * this.getMaxAOA();
 		
 		liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		
@@ -996,7 +996,7 @@ public class Drone extends WorldObject {
 		
 		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA())))
 //			throw new IllegalArgumentException();
-			AOA = Math.signum(this.getMaxAOA()) * this.getMaxAOA();
+			AOA = Math.signum(AOA) * this.getMaxAOA();
 		
 		liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		
@@ -1027,7 +1027,7 @@ public class Drone extends WorldObject {
 		
 		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA())))
 //			throw new IllegalArgumentException();
-			AOA = Math.signum(this.getMaxAOA()) * this.getMaxAOA();
+			AOA = Math.signum(AOA) * this.getMaxAOA();
 		
 		liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		
