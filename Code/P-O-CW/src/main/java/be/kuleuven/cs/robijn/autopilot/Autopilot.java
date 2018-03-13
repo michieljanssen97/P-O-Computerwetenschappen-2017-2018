@@ -94,7 +94,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		float correctionDistance = 30.0f;
 		float pitchTakeOff = (float) Math.toRadians(10.0);
 		float targetVelocity = -43f;
-		float hight = 25;
+		float hight = 50;
 		
 		float maxInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float) Math.toRadians(1.0), drone, 1);
 		float minInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float) Math.toRadians(1.0), drone, 1);
@@ -225,20 +225,23 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					if (this.getMode() == 4) {
 						if (drone.getWorldPosition().getEntry(2) < (this.getTarget().getEntry(2)+1)) {
 							if (drone.getWorldPosition().getEntry(1) > 2*hight) {
-								this.setTarget(new ArrayRealVector(new double[] {this.getTarget().getEntry(0),
-										this.getTarget().getEntry(1) - hight, this.getTarget().getEntry(2) - 5*hight}, false));
+								RealVector vector = drone.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, -10*hight}, false));
+								vector.setEntry(1, -hight);
+								this.setTarget(this.getTarget().add(vector));
 							}
 							else if ((hight < drone.getWorldPosition().getEntry(1)) && (drone.getWorldPosition().getEntry(1) < 2*hight)) {
-								this.setTarget(new ArrayRealVector(new double[] {this.getTarget().getEntry(0),
-										0.8*hight, this.getTarget().getEntry(2) - 10*hight}, false));
+								RealVector vector = drone.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, -15*hight}, false));
+								vector.setEntry(1, 0.8*hight - this.getTarget().getEntry(1));
+								this.setTarget(this.getTarget().add(vector));
 							}
 							else {
-								this.setTarget(new ArrayRealVector(new double[] {this.getTarget().getEntry(0),
-										-this.getConfig().getWheelY() + this.getConfig().getTyreRadius(), this.getTarget().getEntry(2) - 20*hight}, false));
+								RealVector vector = drone.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, -20*hight}, false));
+								vector.setEntry(1, -this.getConfig().getWheelY() + this.getConfig().getTyreRadius() - this.getTarget().getEntry(1));
+								this.setTarget(this.getTarget().add(vector));
 							}
 						}
 					} else {
-						this.setTarget(new ArrayRealVector(new double[] {300, 100, -1000}, false));
+						this.setTarget(new ArrayRealVector(new double[] {0, 100, -100}, false));
 					}
 					float XRotation = (float) Math.atan((this.getTarget().getEntry(1) - drone.getWorldPosition().getEntry(1))
 							/(drone.getWorldPosition().getEntry(2) - this.getTarget().getEntry(2)));
@@ -653,7 +656,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		this.previousRollAngularAccelerationError = previousRollAngularAccelerationError;
 	}
 	
-	private int mode = 2;
+	private int mode = 1;
 	
 	/**
 	 * 1 == full flight, 2 == ascend, 3 == taxi, 4 == land, 5 == stopped
@@ -986,9 +989,10 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 
 		if (! isValidConfig(config))
 			throw new IllegalArgumentException();
-		RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, 0}, false);
+		RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -43}, false);
 		Drone drone = new Drone(config, initialVelocity);
-		drone.setRelativePosition(new ArrayRealVector(new double[] {0, -config.getWheelY() + config.getTyreRadius(), 0}, false));
+		//drone.setRelativePosition(new ArrayRealVector(new double[] {0, -config.getWheelY() + config.getTyreRadius(), 0}, false));
+		drone.setRelativePosition(new ArrayRealVector(new double[] {0, 100, 0}, false));
 		this.addChild(drone);
 		this.config = config;
 		RealVector previousPosition = drone.getWorldPosition();

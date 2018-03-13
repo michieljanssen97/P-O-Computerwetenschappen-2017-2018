@@ -40,7 +40,7 @@ public class SimulationDriver {
     public SimulationDriver(List<Box> boxes, AutopilotConfig config, Stopwatch stopwatch){
         this.config = config;
         this.stopwatch = stopwatch;
-    	RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, 0}, false);
+    	RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -43}, false);
         testBed = new VirtualTestbed(boxes, config, initialVelocity);
         autoPilot = new Autopilot();
         latestAutopilotInputs = testBed.getInputs();

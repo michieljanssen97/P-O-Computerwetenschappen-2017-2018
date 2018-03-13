@@ -43,7 +43,8 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		this.config = config;
 		//Add drone to world
 		Drone drone = new Drone(config, initialVelocity);
-		drone.setRelativePosition(new ArrayRealVector(new double[] {0, -config.getWheelY() + config.getTyreRadius(), 0}, false));
+		//drone.setRelativePosition(new ArrayRealVector(new double[] {0, -config.getWheelY() + config.getTyreRadius(), 0}, false));
+		drone.setRelativePosition(new ArrayRealVector(new double[] {0, 100, 0}, false));
 		this.addChild(drone);
 
 		//Add boxes to world
