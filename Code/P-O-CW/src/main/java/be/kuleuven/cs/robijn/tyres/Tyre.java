@@ -173,12 +173,12 @@ public abstract class Tyre extends WorldObject {
 		return (float) drone.transformationToDroneCoordinates(this.getVelocityTyre(drone)).getEntry(0);
 	}
 	
-	public abstract RealVector getTyreForce(Drone drone, float frontBrakeForce, float leftRearWheelBrakeForce, float rightRearWheelBrakeForce);
+	public abstract RealVector getTyreForce(Drone drone, float frontBrakeForce, float rearWheelBrakeForce);
 	
-	public RealVector getTyreMoment(Drone drone, float frontBrakeForce, float leftRearWheelBrakeForce, float rightRearWheelBrakeForce) {
+	public RealVector getTyreMoment(Drone drone, float frontBrakeForce, float rearWheelBrakeForce) {
 		return VectorMath.crossProduct(
 				   drone.transformationToDroneCoordinates(this.getRelativePositionTyreGround(drone)), //distance
-				   drone.transformationToDroneCoordinates(this.getTyreForce(drone, frontBrakeForce, leftRearWheelBrakeForce, rightRearWheelBrakeForce)) //forces
+				   drone.transformationToDroneCoordinates(this.getTyreForce(drone, frontBrakeForce, rearWheelBrakeForce)) //forces
 				   );
 	}
 }

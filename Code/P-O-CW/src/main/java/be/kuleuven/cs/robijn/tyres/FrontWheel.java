@@ -24,7 +24,7 @@ public class FrontWheel extends Tyre{
 		return wheelX == 0; //Zie opgave
 	}
 	
-	public RealVector getTyreForce(Drone drone, float frontBrakeForce, float leftRearWheelBrakeForce, float rightRearWheelBrakeForce) {
+	public RealVector getTyreForce(Drone drone, float frontBrakeForce, float rearWheelBrakeForce) {
 		RealVector totalForce = new ArrayRealVector(new double[] {0, 0, 0}, false);
 		
 		if (this.getD(drone) != 0)  {
