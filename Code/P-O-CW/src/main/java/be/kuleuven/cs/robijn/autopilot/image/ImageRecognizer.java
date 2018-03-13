@@ -407,7 +407,7 @@ public class ImageRecognizer {
 		RealVector path = this.currentPathTarget;
 		double[] drone = getDronePositionCoordinates();
 		float distanceToPath = (float) Math.sqrt(Math.pow(path.getEntry(0) - drone[0], 2) + Math.pow(path.getEntry(1) - drone[1], 2) + Math.pow(path.getEntry(2) - drone[2], 2));
-		if (distanceToPath < 20) //20 should probably be changed in the future
+		if (distanceToPath < 50) //20 should probably be changed in the future
 			followExactCoordinates();
 		
 		return path;
@@ -449,6 +449,10 @@ public class ImageRecognizer {
 		float[] curPos = {(float)dronePosition.getEntry(0), (float)dronePosition.getEntry(1), (float)dronePosition.getEntry(2)};
 		float minimum = Float.POSITIVE_INFINITY;
 		ImageRecognizerCube closest = null;
+		if (getImageRecognizerCubesFromImage(im).size() == 0) {
+			followNewPathCoordinates();
+			return getCurrentPathTarget();
+		}
 		for (ImageRecognizerCube c : getImageRecognizerCubesFromImage(im)) {
 			float distance = (float) Math.sqrt(Math.pow(curPos[0] - c.getX(), 2) + Math.pow(curPos[1] - c.getY(), 2) + Math.pow(curPos[2] - c.getZ(), 2));
 			if (distance < minimum){
@@ -460,8 +464,9 @@ public class ImageRecognizer {
 		float[] co = new float[] {closest.getX(), closest.getY(), closest.getZ()};
 		RealVector pathCo = this.currentPathTarget;
 		float pathDistance = (float) Math.sqrt(Math.pow(co[0] - pathCo.getEntry(0), 2) + Math.pow(co[1] - pathCo.getEntry(1), 2) + Math.pow(co[2] - pathCo.getEntry(2), 2));
-		if (pathDistance > 5)
-			throw new IllegalStateException("No cube found within 5m of the path coordinates.");
+		System.out.println(pathDistance);
+		if (pathDistance > 20)
+			throw new IllegalStateException("No cube found near the path coordinates.");
 		
 		if (minimum < 3) {
 			//cube is touched

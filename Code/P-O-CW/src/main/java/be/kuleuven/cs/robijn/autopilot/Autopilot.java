@@ -166,23 +166,23 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			
 	        Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
 					horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
-			float distanceToCube;
-			try{
-				ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
-				if (closestCube == null)
-					this.simulationEnded();
-				necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
-				distanceToCube = recognizer.getDistanceToCube(image, closestCube.getHue(), closestCube.getSaturation());
-			} catch (NullPointerException exc1) {
-				necessaryRotation = new float[2];
-				distanceToCube = 0;
-			} catch (IllegalArgumentException exc2) {
-//				Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
-//						horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
-				ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
-				necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
-				distanceToCube = 0;
-			}
+//			float distanceToCube;
+//			try{
+//				ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
+//				if (closestCube == null)
+//					this.simulationEnded();
+//				necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
+//				distanceToCube = recognizer.getDistanceToCube(image, closestCube.getHue(), closestCube.getSaturation());
+//			} catch (NullPointerException exc1) {
+//				necessaryRotation = new float[2];
+//				distanceToCube = 0;
+//			} catch (IllegalArgumentException exc2) {
+////				Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
+////						horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
+//				ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
+//				necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
+//				distanceToCube = 0;
+//			}
 
 //			float imageYRotation = (float) Math.toRadians(necessaryRotation[0]);
 //			float imageXRotation = (float) Math.toRadians(necessaryRotation[1]);
@@ -217,7 +217,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 //				imageYRotation = (float) ((5.0/4.0)*imageYRotation + (1.0/4.0)*heading);
 //			}
 			
-			RealVector target = new ArrayRealVector(new double[] {0, 300, -1000}, false);
+			RealVector target = new ArrayRealVector(new double[] {0, 20, -1000}, false);
 			if (recognizer.isFollowingPathCoordinates()) {
 				target = recognizer.getCurrentPathTarget();
 			} else {
