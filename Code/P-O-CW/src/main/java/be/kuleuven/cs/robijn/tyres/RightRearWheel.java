@@ -1,33 +1,18 @@
 package be.kuleuven.cs.robijn.tyres;
-
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 
 import be.kuleuven.cs.robijn.common.Drone;
 import interfaces.AutopilotConfig;
 
-public class RightRearWheel extends Tyre{
+public class RightRearWheel extends RearWheel{
 
 	public RightRearWheel(AutopilotConfig config) throws IllegalArgumentException {
 		super(config);
-		if(! isValidWheelZ(config.getRearWheelZ())) {
-			throw new IllegalArgumentException();
-		}
-		this.wheelZ = config.getRearWheelZ();
-		
-		if(! isValidWheelX(config.getRearWheelX(), config.getWingX())) {
-			throw new IllegalArgumentException();
-		}
 		this.wheelX = config.getRearWheelX();
-		
 	}
 	
-	@Override
-	public boolean isValidWheelX(float wheelX, float wingX) {
-		return (wheelX > 0) && (wheelX <= wingX);
-	}
-	
-	public RealVector getTyreForce(Drone drone, float frontBrakeForce, float leftBrakeForce, float rightBrakeForce) {
+	public RealVector getTyreForce(Drone drone, float frontBrakeForce, float leftRearWheelBrakeForce, float rightRearWheelBrakeForce) {
 		RealVector totalForce = new ArrayRealVector(new double[] {0, 0, 0}, false);
 		
 		if (this.getD(drone) != 0)  {
@@ -45,15 +30,11 @@ public class RightRearWheel extends Tyre{
 					0, this.getVelocityTyre(drone).getEntry(2)}, false);
 			if (brakeForce.getNorm() != 0)
 				brakeForce = brakeForce.mapMultiply(-(1/brakeForce.getNorm()));
-			brakeForce = brakeForce.mapMultiply(rightBrakeForce);
+			brakeForce = brakeForce.mapMultiply(rightRearWheelBrakeForce);
 			
 			totalForce = totalForce.add(brakeForce);
 		}
 		
 		return totalForce;
-	}
-	
-	public boolean isValidWheelZ(float wheelZ) {
-		return ((wheelZ > 0) && (wheelZ < Float.MAX_VALUE));
 	}
 }
