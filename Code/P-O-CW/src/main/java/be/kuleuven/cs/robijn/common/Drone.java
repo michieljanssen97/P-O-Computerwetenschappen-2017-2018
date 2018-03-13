@@ -1062,7 +1062,7 @@ public class Drone extends WorldObject {
 		}
 		
 		float totalMass = this.getEngineMass() + (2*this.getWingMass()) + this.getTailMass();
-		
+
 		return totalForce.mapMultiply(1/totalMass);
 	}
 	

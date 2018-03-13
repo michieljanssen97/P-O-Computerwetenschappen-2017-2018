@@ -27,13 +27,16 @@ public class RightRearWheel extends Tyre{
 		return (wheelX > 0) && (wheelX <= wingX);
 	}
 	
-	public RealVector getTyreForce(Drone drone, float frontBrakeForce, float leftBrakeForce, float rightBrakeForce) {
+	public RealVector getTyreForce(Drone drone, float frontBrakeForce, float leftBrakeForce, float rightBrakeForce) throws IllegalArgumentException {
+		if ((rightBrakeForce > this.getRMax()) || (rightBrakeForce < 0))
+			throw new IllegalArgumentException();
+		
 		RealVector totalForce = new ArrayRealVector(new double[] {0, 0, 0}, false);
 		
 		if (this.getD(drone) != 0)  {
-			RealVector forceTyre = drone.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 
+			RealVector forceTyre = new ArrayRealVector(new double[] {0, 
 					this.getTyreSlope()*this.getD(drone)
-					+ this.getDampSlope()*this.getVelocityD(drone), 0}, false));
+					+ this.getDampSlope()*this.getVelocityD(drone), 0}, false);
 			totalForce = totalForce.add(forceTyre);
 			
 			RealVector frictionForce = drone.transformationToWorldCoordinates(new ArrayRealVector(new double[] {
@@ -43,6 +46,11 @@ public class RightRearWheel extends Tyre{
 			
 			RealVector brakeForce = new ArrayRealVector(new double[] {this.getVelocityTyre(drone).getEntry(0), 
 					0, this.getVelocityTyre(drone).getEntry(2)}, false);
+			if (brakeForce.getNorm() == 0) {
+				brakeForce = new ArrayRealVector(new double[] {totalForce.getEntry(1), 0, totalForce.getEntry(2)}, false);
+				if (brakeForce.getNorm() < rightBrakeForce)
+					throw new IllegalArgumentException();
+			}
 			if (brakeForce.getNorm() != 0)
 				brakeForce = brakeForce.mapMultiply(-(1/brakeForce.getNorm()));
 			brakeForce = brakeForce.mapMultiply(rightBrakeForce);
