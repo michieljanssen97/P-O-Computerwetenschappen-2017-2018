@@ -9,7 +9,7 @@
 
 <?import be.kuleuven.cs.robijn.gui.SidebarControl?>
 <?import be.kuleuven.cs.robijn.gui.SplittablePane?>
-<AnchorPane fx:id="root" fx:controller="be.kuleuven.cs.robijn.gui.MainController" prefHeight="700" prefWidth="1400" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8">
+<AnchorPane fx:id="root" fx:controller="be.kuleuven.cs.robijn.gui.MainController" prefHeight="900" prefWidth="1600" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8">
    <children>
       <SplitPane fx:id="contentRoot" dividerPositions="0.95" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
          <items>

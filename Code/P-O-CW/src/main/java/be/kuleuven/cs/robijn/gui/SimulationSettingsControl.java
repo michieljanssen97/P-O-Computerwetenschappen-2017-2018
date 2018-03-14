@@ -13,6 +13,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 import javafx.util.converter.NumberStringConverter;
 
 import java.io.DataInputStream;
@@ -138,14 +139,17 @@ public class SimulationSettingsControl extends AnchorPane {
         removeAirportButton.setOnAction(e -> airportsTable.getItems().removeAll(airportsTable.getSelectionModel().getSelectedItems()));
         removeAirportButton.disableProperty().bind(airportsTable.getSelectionModel().selectedIndexProperty().isEqualTo(-1));
 
+        loadAirportsConfigFileButton.setVisible(false); //Not implemented yet
         loadAirportsConfigFileButton.setOnAction(e -> {
 
         });
 
+        saveAirportsConfigFileButton.setVisible(false); //Not implemented yet
         saveAirportsConfigFileButton.setOnAction(e -> {
 
         });
 
+        generateAirportsButton.setVisible(false); //Not implemented yet
         generateAirportsButton.setOnAction(e -> {
 
         });
@@ -226,14 +230,17 @@ public class SimulationSettingsControl extends AnchorPane {
         removeDroneButton.setOnAction(e -> dronesTable.getItems().removeAll(dronesTable.getSelectionModel().getSelectedItems()));
         removeDroneButton.disableProperty().bind(dronesTable.getSelectionModel().selectedIndexProperty().isEqualTo(-1));
 
+        loadDroneSetupFileButton.setVisible(false); //Not implemented yet
         loadDroneSetupFileButton.setOnAction(e -> {
 
         });
 
+        saveDroneSetupFileButton.setVisible(false); //Not implemented yet
         saveDroneSetupFileButton.setOnAction(e -> {
 
         });
 
+        loadDroneSetupDefaultsButton.setVisible(false); //Not implemented yet
         loadDroneSetupDefaultsButton.setOnAction(e -> {
 
         });
@@ -342,7 +349,14 @@ public class SimulationSettingsControl extends AnchorPane {
                         setText(null);
                     } else {
                         btn.setOnAction(event -> {
-                            //TODO: Open config editor dialog, set drone config if user pressed OK
+                            Stage parentStage = (Stage)addDroneButton.getScene().getWindow();
+                            ObservableAutoPilotConfig newConfig = ConfigEditorDialog.showDialog(parentStage, item);
+                            if(newConfig != null){
+                                int rowIndex = getTableRow().getIndex();
+                                DroneDefinition oldDef = (DroneDefinition)dronesTable.getItems().get(rowIndex);
+                                DroneDefinition newDef = new DroneDefinition(newConfig, oldDef.getAirport(), oldDef.getGate(), oldDef.getRunwayToFace());
+                                dronesTable.getItems().set(rowIndex, newDef);
+                            }
                         });
                         setGraphic(btn);
                         setText(null);

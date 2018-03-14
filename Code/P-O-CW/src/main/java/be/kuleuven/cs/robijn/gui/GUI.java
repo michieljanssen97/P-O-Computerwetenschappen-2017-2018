@@ -29,8 +29,8 @@ public class GUI extends Application {
         Scene scene = new Scene(root);
         stage.setTitle("P&O Robijn Testbed");
         stage.setScene(scene);
-        stage.setWidth(1400);
-        stage.setHeight(700);
+        stage.setWidth(1600);
+        stage.setHeight(900);
         stage.show();
     }
 }
