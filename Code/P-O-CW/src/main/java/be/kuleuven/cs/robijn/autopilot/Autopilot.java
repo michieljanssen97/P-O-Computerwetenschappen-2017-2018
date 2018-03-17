@@ -18,6 +18,7 @@ import interfaces.*;
 public class Autopilot extends WorldObject implements interfaces.Autopilot {
 	private static boolean drawChartPositions = false;
 	public static ExpPosition exppos = new ExpPosition();
+	public FlightMode currentFlightMode = FlightMode.ASCEND;
 	
 	public AutopilotConfig getConfig() {
 		return this.config;
@@ -115,7 +116,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			}, false);
 		RealVector angularMomentumDroneCoordinates = inertiaMatrix.operate(totalAngularVelocityDroneCoordinates);
 			
-		if (this.getMode() == 2) { //ascend
+		if (this.getFlightMode() == FlightMode.ASCEND) { //ascend
 			thrust = this.getConfig().getMaxThrust();
 			
 			float takeOffSpeed = (float) Math.sqrt((-drone.getTotalGravitationalForce().getEntry(1))
@@ -160,11 +161,11 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			}
 			
 			if (drone.getWorldPosition().getEntry(1) > this.getConfig().getTailSize())
-				this.setMode(1);
+				this.setFlightMode(FlightMode.FULL_FLIGHT);
 		}
-		else if ((this.getMode() == 1) || (this.getMode() == 4)) {
+		else if ((this.getFlightMode() == FlightMode.FULL_FLIGHT) || (this.getFlightMode() == FlightMode.LAND)) {
 			if ((-this.getConfig().getWheelY() + this.getConfig().getTyreRadius()) >= drone.getWorldPosition().getEntry(1)) {
-				this.setMode(3);
+				this.setFlightMode(FlightMode.TAXI);
 			}
 			else {
 		        ImageRecognizer recognizer = this.getImageRecognizer();
@@ -223,7 +224,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					imageYRotation = (float) ((5.0/4.0)*imageYRotation + (1.0/4.0)*heading);
 				}
 				
-				if (this.getMode() == 4) {
+				if (this.getFlightMode() == FlightMode.LAND) {
 					if (drone.getWorldPosition().getEntry(2) < (this.getTarget().getEntry(2)+1)) {
 						if (drone.getWorldPosition().getEntry(1) > 2*hight) {
 							this.setTarget(new ArrayRealVector(new double[] {this.getTarget().getEntry(0),
@@ -239,7 +240,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 						}
 					}
 				} else {
-					this.setTarget(new ArrayRealVector(new double[] {300, 100, -1000}, false));
+					this.setTarget(new ArrayRealVector(new double[] {50, 100, -1000}, false));
 				}
 				float XRotation = (float) Math.atan((this.getTarget().getEntry(1) - drone.getWorldPosition().getEntry(1))
 						/(drone.getWorldPosition().getEntry(2) - this.getTarget().getEntry(2)));
@@ -512,10 +513,10 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 								+ transformationMatrix.operate(new ArrayRealVector(new double[] {0, 0, -thrust}, false)).getEntry(0))
 								/drone.getTotalMass()));
 				
-				if ((this.getMode() == 1) && (drone.getWorldPosition().getEntry(2) < (this.getTarget().getEntry(2)+1)))
-					this.setMode(4);
+				if ((this.getFlightMode() == FlightMode.FULL_FLIGHT) && (drone.getWorldPosition().getEntry(2) < (this.getTarget().getEntry(2)+1)))
+					this.setFlightMode(FlightMode.LAND);
 			}
-        } if (this.getMode() == 3) {
+        } if (this.getFlightMode() == FlightMode.TAXI) {
         	frontBrakeForce = 0;
         	leftBrakeForce = 0;
         	rightBrakeForce = 0;
@@ -667,24 +668,13 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			throw new IllegalArgumentException();
 		this.previousRollAngularAccelerationError = previousRollAngularAccelerationError;
 	}
-	
-	private int mode = 2;
-	
-	/**
-	 * 1 == full flight, 2 == ascend, 3 == taxi, 4 == land, 5 == stopped
-	 */
-	public float getMode() {
-		return this.mode;
+
+	public FlightMode getFlightMode() {
+		return this.currentFlightMode;
 	}
 	
-	public static boolean isValidMode(int mode) {
-		return ((mode == 1) || (mode == 2) || (mode == 3) || (mode == 4) || (mode == 5));
-	}
-	
-	public void setMode(int mode) throws IllegalArgumentException {
-		if (! isValidMode(mode))
-			throw new IllegalArgumentException();
-		this.mode = mode;
+	public void setFlightMode(FlightMode mode) throws IllegalArgumentException {
+		this.currentFlightMode = mode;
 	}
 	
 	private RealVector target = null;
