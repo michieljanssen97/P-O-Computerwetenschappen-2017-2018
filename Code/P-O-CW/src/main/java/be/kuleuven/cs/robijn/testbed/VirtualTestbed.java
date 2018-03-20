@@ -16,8 +16,12 @@ import org.apache.commons.math3.linear.RealVector;
 import java.util.HashMap;
 import java.util.List;
 
-public class VirtualTestbed extends WorldObject implements TestBed {
+public class VirtualTestbed implements TestBed {
+	//Simulation
 	private final AutopilotInputs[] inputs;
+	private final TestbedSimulation simulation;
+	private final WorldObject world;
+	private final List<Drone> drones;
 
 	//Renderer
 	private OpenGLRenderer renderer;
@@ -25,36 +29,35 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 	private final HashMap<Drone, byte[]> latestCameraImage = new HashMap<>();
 
 	public VirtualTestbed(SimulationSettings settings) {
+		world = new WorldObject();
+
 		//Create airports and drones
-		SimulationBuilder.buildSimulation(settings, this);
+		SimulationBuilder.buildSimulation(settings, world);
+		drones = world.getChildrenOfType(Drone.class);
 
 		//Set initial autopilotinputs
-		List<Drone> drones = this.getChildrenOfType(Drone.class);
+		List<Drone> drones = world.getChildrenOfType(Drone.class);
 		inputs = new AutopilotInputs[settings.getDrones().length];
 		for (int i = 0; i < settings.getDrones().length; i++) {
 			Drone drone = drones.get(i);
 			byte[] image = renderCameraView(drone);
 			inputs[i] = new VirtualTestbed.TestbedAutopilotInputs(drone, image, 0);
 		}
+
+		simulation = new TestbedSimulation(world);
 	}
 
 	@Override
 	public boolean update(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs[] outputs) {
 		//Update drones
-		List<Drone> drones = getChildrenOfType(Drone.class);
 		for(int i = 0; i < drones.size(); i++){
 			Drone drone = drones.get(i);
-			updateDrone(drone, secondsSinceStart, secondsSinceLastUpdate, outputs[i]);
+			simulation.updateDrone(drone, secondsSinceStart, secondsSinceLastUpdate, outputs[i]);
+			byte[] image = renderCameraView(drone);
+			inputs[i] = new VirtualTestbed.TestbedAutopilotInputs(drone, image, secondsSinceLastUpdate);
 		}
 
-		//TODO: return true here if simulation has finished
-		return false;
-	}
-
-	private void updateDrone(Drone drone, float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs output){
-		//TODO: run physics, ... here
-
-		renderCameraView(drone);
+		return simulation.isSimulationFinished();
 	}
 
 	@Override
@@ -65,7 +68,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 
 	@Override
 	public WorldObject getWorldRepresentation() {
-		return this;
+		return world;
 	}
 
 	/////////////////
@@ -112,7 +115,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		if(droneCamera == null){
 			droneCamera = createDroneCamera(drone);
 		}
-		renderer.render(this, frameBuffer, droneCamera);
+		renderer.render(world, frameBuffer, droneCamera);
 		frameBuffer.readPixels(targetArray);
 
 		//Swap blue and red bytes (BGR -> RGB)
