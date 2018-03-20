@@ -16,19 +16,6 @@
             <fx:define>
                <ToggleGroup fx:id="perspectiveToggleGroup"/>
             </fx:define>
-            <ToggleButton toggleGroup="$perspectiveToggleGroup" selected="true" mnemonicParsing="false" text="Drone camera">
-               <userData>
-                  <CameraViewControl fx:constant="DRONE_CAMERA_ID"/>
-               </userData>
-            </ToggleButton>
-            <ToggleButton toggleGroup="$perspectiveToggleGroup" mnemonicParsing="false" text="Third person">
-               <userData>
-                  <CameraViewControl fx:constant="THIRDPERSON_CAMERA_ID"/>
-               </userData>
-               <HBox.margin>
-                  <Insets left="5.0" />
-               </HBox.margin>
-            </ToggleButton>
             <ToggleButton toggleGroup="$perspectiveToggleGroup" mnemonicParsing="false" text="Side camera">
                <userData>
                   <CameraViewControl fx:constant="SIDE_CAMERA_ID"/>
@@ -53,6 +40,27 @@
                   <Insets left="5.0" />
                </HBox.margin>
             </ToggleButton>-->
+            <ToggleButton toggleGroup="$perspectiveToggleGroup" selected="true" mnemonicParsing="false" text="Drone camera">
+               <userData>
+                  <CameraViewControl fx:constant="DRONE_CAMERA_ID"/>
+               </userData>
+               <HBox.margin>
+                  <Insets left="5.0" />
+               </HBox.margin>
+            </ToggleButton>
+            <ToggleButton toggleGroup="$perspectiveToggleGroup" mnemonicParsing="false" text="Third person">
+               <userData>
+                  <CameraViewControl fx:constant="THIRDPERSON_CAMERA_ID"/>
+               </userData>
+               <HBox.margin>
+                  <Insets left="5.0" />
+               </HBox.margin>
+            </ToggleButton>
+            <ComboBox fx:id="droneComboBox">
+               <HBox.margin>
+                  <Insets left="5.0" />
+               </HBox.margin>
+            </ComboBox>
          </children>
       </HBox>
    </children>
