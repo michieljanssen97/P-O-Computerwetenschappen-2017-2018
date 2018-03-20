@@ -381,6 +381,13 @@ public class ImageRecognizer {
 	}
 	
 	/**
+	 * Return the path of this image recognizer.
+	 */
+	public CubePath getPath() {
+		return this.path;
+	}
+	
+	/**
 	 * Returns the path coordinates of the cube closest to the drone.
 	 */
 	public RealVector getClosestPathXYZ() {

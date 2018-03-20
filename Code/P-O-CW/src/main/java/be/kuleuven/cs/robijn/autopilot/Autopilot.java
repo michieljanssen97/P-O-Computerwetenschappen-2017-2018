@@ -159,7 +159,13 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		}
 		
 		else if (this.getMode() == 1) {
+			
 	        ImageRecognizer recognizer = this.getImageRecognizer();
+	        
+	        if (recognizer.getPath().getPathSize() == 0) {
+	        	//TODO switch to landing mode
+	        }
+	        
 	        float[] necessaryRotation;
 	        float horizontalAngleOfView = (float) Math.toDegrees(this.getConfig().getHorizontalAngleOfView());
 	        float verticalAngleOfView = (float) Math.toDegrees(this.getConfig().getVerticalAngleOfView());
