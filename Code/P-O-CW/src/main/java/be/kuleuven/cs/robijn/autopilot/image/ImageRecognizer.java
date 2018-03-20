@@ -507,11 +507,10 @@ public class ImageRecognizer {
 		float[] co = new float[] {toFollow.getX(), toFollow.getY(), toFollow.getZ()};
 		RealVector pathCo = this.currentPathTarget;
 		float pathDistance = (float) Math.sqrt(Math.pow(co[0] - pathCo.getEntry(0), 2) + Math.pow(co[1] - pathCo.getEntry(1), 2) + Math.pow(co[2] - pathCo.getEntry(2), 2));
-		System.out.println(pathDistance);
 //		if (pathDistance > 10)
 //			throw new IllegalStateException("No cube found near the path coordinates.");
 		
-		if (toFollowDistance <= 5) {
+		if (toFollowDistance <= 3) {
 			//cube is touched
 			toFollow.destroy();
 			followNewPathCoordinates();
