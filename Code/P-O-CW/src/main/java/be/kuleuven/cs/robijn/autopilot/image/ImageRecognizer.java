@@ -474,7 +474,6 @@ public class ImageRecognizer {
 		float toFollowDistance;
 		
 		if (!this.currentCubeColorCalculated) {
-			
 			float[] curPos = {(float)dronePosition.getEntry(0), (float)dronePosition.getEntry(1), (float)dronePosition.getEntry(2)};
 			float minimum = Float.POSITIVE_INFINITY;
 			ImageRecognizerCube closest = null;
