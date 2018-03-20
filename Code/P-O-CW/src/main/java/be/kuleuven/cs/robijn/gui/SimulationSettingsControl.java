@@ -8,6 +8,8 @@ import interfaces.AutopilotConfig;
 import interfaces.AutopilotConfigReader;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -28,10 +30,10 @@ public class SimulationSettingsControl extends AnchorPane {
     /// AIRPORT WIDTH & HEIGHT
 
     @FXML
-    private Spinner<Float> runwayLengthSpinner;
+    private Spinner<Double> runwayLengthSpinner;
 
     @FXML
-    private Spinner<Float> gateLengthSpinner;
+    private Spinner<Double> gateLengthSpinner;
 
     /// AIRPORTS SETUP
 
@@ -100,19 +102,27 @@ public class SimulationSettingsControl extends AnchorPane {
         //User can only click OK if number of airports > 0 and number of drones > 0
         okButton.disableProperty().bind(Bindings.createBooleanBinding(
                 () -> airportsTable.getItems().size() == 0 ||
-                        dronesTable.getItems().size() == 0 ||
-                        dronesTable.getItems().stream().anyMatch(d -> {
-                           DroneDefinition drone = (DroneDefinition)d;
-                           return !drone.isValid();
-                        }
-                ),
-                airportsTable.itemsProperty(),
-                dronesTable.itemsProperty()
+                        dronesTable.getItems().size() == 0,
+                Bindings.size(airportsTable.getItems()),
+                Bindings.size(dronesTable.getItems())
         ));
 
         //Fire a SimulationSettingsConfirmEvent when the user clicks the OK button
         //This event is observed in the MainController, where the overlay is hidden and the simulation is started.
         okButton.setOnAction(e -> {
+            boolean allDronesValid = dronesTable.getItems().stream().allMatch(d -> {
+                DroneDefinition drone = (DroneDefinition)d;
+                return drone.isValid();
+            });
+            if(!allDronesValid){
+                Alert alert = new Alert(
+                        Alert.AlertType.ERROR,
+                        "Some drone(s) have invalid settings. \nPlease check the drone airport and config settings.",
+                        ButtonType.OK
+                );
+                alert.showAndWait();
+                return;
+            }
             SimulationSettingsConfirmEvent confirmEvent = new SimulationSettingsConfirmEvent();
             confirmEvent.setSimulationSettings(buildSettings());
             fireEvent(confirmEvent);
@@ -124,13 +134,8 @@ public class SimulationSettingsControl extends AnchorPane {
     /****************/
 
     private void setupAirportsTab(){
-        setupAirportSizeSpinners();
         setupAirportsButtons();
         setupAirportsTable();
-    }
-
-    private void setupAirportSizeSpinners(){
-
     }
 
     private void setupAirportsButtons(){
@@ -393,8 +398,8 @@ public class SimulationSettingsControl extends AnchorPane {
         SimulationSettings settings = new SimulationSettings();
 
         //Airport size
-        settings.setRunwayLength(runwayLengthSpinner.getValue());
-        settings.setGateLength(gateLengthSpinner.getValue());
+        settings.setRunwayLength(runwayLengthSpinner.getValue().floatValue());
+        settings.setGateLength(gateLengthSpinner.getValue().floatValue());
 
         //Airports
         AirportDefinition[] airports = new AirportDefinition[airportsTable.getItems().size()];
