@@ -1,41 +1,74 @@
 package be.kuleuven.cs.robijn.common;
 
-import be.kuleuven.cs.robijn.autopilot.Autopilot;
+import be.kuleuven.cs.robijn.autopilot.AutopilotModuleAdapter;
 import be.kuleuven.cs.robijn.common.exceptions.CrashException;
-import be.kuleuven.cs.robijn.common.stopwatch.RealTimeStopwatch;
 import be.kuleuven.cs.robijn.common.stopwatch.Stopwatch;
 import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
-import interfaces.AutopilotConfig;
 import interfaces.AutopilotInputs;
-import interfaces.AutopilotModule;
 import interfaces.AutopilotOutputs;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.TreeSet;
-import org.apache.commons.math3.linear.*;
 
 /**
  * This class combines the testbed and autopilot into one runnable simulation.
  */
 public class SimulationDriver {
-    private TestBed testBed;
-    private AutopilotModule autoPilotModule;
+    private final SimulationSettings settings;
+    private final TestBed testBed;
+    private final AutopilotModuleAdapter autoPilotModule;
+    private final Stopwatch stopwatch;
+
+    private boolean simulationStarted = false;
     private boolean simulationFinished;
     private boolean simulationCrashed;
     private boolean simulationThrewException;
 
-    private Stopwatch stopwatch;
-
-    private boolean simulationStarted = false;
+    private AutopilotInputs[] latestAutopilotInputs;
+    private AutopilotOutputs[] latestAutopilotOutputs;
 
     //List of eventhandlers that are invoked when the simulation has updated.
-    private TreeSet<UpdateEventHandler> updateEventHandlers = new TreeSet<>();
+    private final TreeSet<UpdateEventHandler> updateEventHandlers = new TreeSet<>();
 
     public SimulationDriver(SimulationSettings settings, Stopwatch stopwatch){
+        this.settings = settings;
         this.stopwatch = stopwatch;
 
-        //testBed = new VirtualTestbed(boxes, config, initialVelocity);
-        //autoPilotModule = new AutopilotModule();
+        latestAutopilotInputs = new AutopilotInputs[settings.getDrones().length];
+        latestAutopilotOutputs = new AutopilotOutputs[settings.getDrones().length];
+        testBed = new VirtualTestbed(settings);
+        autoPilotModule = new AutopilotModuleAdapter();
+        initializeAutopilotModule(settings);
+        initializeAutopilotInputs();
+    }
+
+    private void initializeAutopilotModule(SimulationSettings settings){
+        //Define airport parameters
+        autoPilotModule.defineAirportParams(settings.getRunwayLength(), settings.getGateLength());
+
+        //Define airports
+        for(SimulationSettings.AirportDefinition airport : settings.getAirports()){
+            autoPilotModule.defineAirport(
+                airport.getCenterX(), airport.getCenterZ(),
+                airport.getCenterToRunway0X(), airport.getCenterToRunway0Z()
+            );
+        }
+
+        //Define drones
+        List<SimulationSettings.AirportDefinition> airportsList = Arrays.asList(settings.getAirports());
+        for(SimulationSettings.DroneDefinition drone : settings.getDrones()){
+            int airportIndex = airportsList.indexOf(drone.getAirport());
+            autoPilotModule.defineDrone(
+                airportIndex, drone.getGate(), drone.getRunwayToFace(), drone.getConfig()
+            );
+        }
+    }
+
+    private void initializeAutopilotInputs(){
+        for(int i = 0; i < settings.getDrones().length; i++){
+            latestAutopilotInputs[i] = testBed.getInputs(i);
+        }
     }
 
     /**
@@ -46,41 +79,55 @@ public class SimulationDriver {
         stopwatch.tick();
 
         if(!isSimulationPaused() && !simulationFinished && !simulationCrashed && !simulationThrewException){
-        	try {
-        	    //Reset renderer
-                testBed.getRenderer().clearDebugObjects();
+            //Reset renderer
+            testBed.getRenderer().clearDebugObjects();
 
-        		//Run the autopilotmodule
-                /*if (simulationStarted == false ){
-                    latestAutopilotOutputs = autoPilot.simulationStarted(config,latestAutopilotInputs);
-                    simulationStarted = true;
+            //Run the autopilotmodule update
+            try {
+                //autoPilotModule.deliverPackage(); // Called for every (new?) package?
+
+                for(int i = 0; i < settings.getDrones().length; i++){
+                    autoPilotModule.startTimeHasPassed(i, latestAutopilotInputs[i]);
                 }
-        		else {
-                    latestAutopilotOutputs = autoPilot.timePassed(latestAutopilotInputs);
-                }*/
-        		//Run the testbed
-                /*simulationFinished = testBed.update((float)stopwatch.getSecondsSinceStart(),
-                        (float)stopwatch.getSecondsSinceLastUpdate(), latestAutopilotOutputs);
 
-                latestAutopilotInputs = testBed.getInputs();*/
-        	} catch (CrashException exc1){
+                for(int i = 0; i < settings.getDrones().length; i++){
+                    latestAutopilotOutputs[i] = autoPilotModule.completeTimeHasPassed(i);
+                }
+        	} catch (IllegalArgumentException ex) {
+        		simulationCrashed = true;
+        		System.err.println("Autopilot failed!");
+        		ex.printStackTrace();
+        	} catch (Exception ex) {
+                simulationThrewException = true;
+        		System.err.println("Autopilot module threw an unexpected exception!");
+        		ex.printStackTrace();
+        	}
+
+            //Run the testbed update
+        	try {
+                simulationFinished = testBed.update(
+                        (float)stopwatch.getSecondsSinceStart(),
+                        (float)stopwatch.getSecondsSinceLastUpdate(),
+                        latestAutopilotOutputs
+                );
+
+                for(int i = 0; i < settings.getDrones().length; i++){
+                    latestAutopilotInputs[i] = testBed.getInputs(i);
+                }
+            } catch (CrashException ex){
                 simulationCrashed = true;
                 System.err.println("Plane crashed!");
-        		exc1.printStackTrace();
-        	} catch (IllegalArgumentException exc2) {
-        		simulationCrashed = true;
-        		System.err.println("Autopilot failed!");
-        		exc2.printStackTrace();
-        	} catch (NullPointerException exc3) {
-        		simulationCrashed = true;
-        		System.err.println("Autopilot failed!");
-        		exc3.printStackTrace();
-        	}
+                ex.printStackTrace();
+            } catch (Exception ex) {
+                simulationThrewException = true;
+                System.err.println("Testbed threw an unexpected exception!");
+                ex.printStackTrace();
+            }
         }
 
-        //Invokes the event handlers
+        //Invoke the event handlers
         for (UpdateEventHandler eventHandler : updateEventHandlers) {
-            //eventHandler.getFunction().accept(latestAutopilotInputs, latestAutopilotOutputs);
+            eventHandler.getFunction().accept(latestAutopilotInputs, latestAutopilotOutputs);
         }
     }
 
@@ -102,7 +149,7 @@ public class SimulationDriver {
         return testBed;
     }
 
-    public AutopilotModule getAutoPilotModule() {
+    public AutopilotModuleAdapter getAutoPilotModule() {
         return autoPilotModule;
     }
 

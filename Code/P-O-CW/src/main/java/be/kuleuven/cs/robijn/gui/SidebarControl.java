@@ -1,8 +1,10 @@
 package be.kuleuven.cs.robijn.gui;
 
+import be.kuleuven.cs.robijn.common.Drone;
 import be.kuleuven.cs.robijn.common.Resources;
 import be.kuleuven.cs.robijn.common.SimulationDriver;
 import be.kuleuven.cs.robijn.common.UpdateEventHandler;
+import interfaces.Autopilot;
 import interfaces.AutopilotInputs;
 import interfaces.Path;
 import javafx.beans.property.BooleanProperty;
@@ -154,44 +156,49 @@ public class SidebarControl extends VBox {
         simulationThrewExceptionLabel.managedProperty().bind(simulationThrewExceptionProperty);
     }
 
-    private void updateLabels(AutopilotInputs inputs, AutopilotOutputs outputs){
+    private void updateLabels(AutopilotInputs[] inputs, AutopilotOutputs[] outputs){
         if(inputs == null || outputs == null){
             return;
         }
 
-        positionLabel.setText(String.format("X:%6.2f  Y:%6.2f  Z:%6.2f", inputs.getX(), inputs.getY(), inputs.getZ()));
+        //TODO: set in,out to inputs/outputs of selected drone
+        Drone selectedDrone = null;
+        AutopilotInputs in = inputs[0];
+        AutopilotOutputs out = outputs[0];
+
+        positionLabel.setText(String.format("X:%6.2f  Y:%6.2f  Z:%6.2f", in.getX(), in.getY(), in.getZ()));
 
         //Heading
-        setIndicatorValue(headingIndicator, remap360to180(inputs.getHeading()), Math.PI*2d);
-        headingLabel.setText(String.format("%.2f", Math.toDegrees(inputs.getHeading())));
+        setIndicatorValue(headingIndicator, remap360to180(in.getHeading()), Math.PI*2d);
+        headingLabel.setText(String.format("%.2f", Math.toDegrees(in.getHeading())));
 
         //Pitch
-        setIndicatorValue(pitchIndicator, remap360to180(inputs.getPitch()), Math.PI*2d);
-        pitchLabel.setText(String.format("%.2f", Math.toDegrees(inputs.getPitch())));
+        setIndicatorValue(pitchIndicator, remap360to180(in.getPitch()), Math.PI*2d);
+        pitchLabel.setText(String.format("%.2f", Math.toDegrees(in.getPitch())));
 
         //Roll
-        setIndicatorValue(rollIndicator, remap360to180(inputs.getRoll()), Math.PI*2d);
-        rollLabel.setText(String.format("%.2f", Math.toDegrees(inputs.getRoll())));
+        setIndicatorValue(rollIndicator, remap360to180(in.getRoll()), Math.PI*2d);
+        rollLabel.setText(String.format("%.2f", Math.toDegrees(in.getRoll())));
 
         //Thrust
         //TODO
-        //double thrustValue = outputs.getThrust()/getSimulation().getConfig().getMaxThrust();
+        //double thrustValue = out.getThrust()/selectedDrone.getConfig().getMaxThrust();
         //thrustBar.setProgress(thrustValue);
-        //thrustLabel.setText(String.format("%15.2f", outputs.getThrust()));
+        //thrustLabel.setText(String.format("%15.2f", out.getThrust()));
 
         //Wing inclination
-        setIndicatorValue(leftWingInclinationIndicator, outputs.getLeftWingInclination(), Math.PI/2d);
-        leftWingInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(outputs.getLeftWingInclination())));
+        setIndicatorValue(leftWingInclinationIndicator, out.getLeftWingInclination(), Math.PI/2d);
+        leftWingInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(out.getLeftWingInclination())));
 
-        setIndicatorValue(rightWingInclinationIndicator, outputs.getRightWingInclination(), Math.PI/2d);
-        rightWingInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(outputs.getRightWingInclination())));
+        setIndicatorValue(rightWingInclinationIndicator, out.getRightWingInclination(), Math.PI/2d);
+        rightWingInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(out.getRightWingInclination())));
 
         //Stabilizer inclination
-        setIndicatorValue(horStabInclinationIndicator, outputs.getHorStabInclination(), Math.PI/2d);
-        horStabInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(outputs.getHorStabInclination())));
+        setIndicatorValue(horStabInclinationIndicator, out.getHorStabInclination(), Math.PI/2d);
+        horStabInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(out.getHorStabInclination())));
 
-        setIndicatorValue(verStabInclinationIndicator, outputs.getVerStabInclination(), Math.PI/2d);
-        verStabInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(outputs.getVerStabInclination())));
+        setIndicatorValue(verStabInclinationIndicator, out.getVerStabInclination(), Math.PI/2d);
+        verStabInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(out.getVerStabInclination())));
     }
 
     //Remaps [0;(2*PI)] to [-PI;PI]
