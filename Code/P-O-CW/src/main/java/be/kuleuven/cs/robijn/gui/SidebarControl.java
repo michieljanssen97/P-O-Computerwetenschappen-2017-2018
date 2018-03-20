@@ -7,10 +7,7 @@ import be.kuleuven.cs.robijn.common.UpdateEventHandler;
 import interfaces.Autopilot;
 import interfaces.AutopilotInputs;
 import interfaces.Path;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -112,6 +109,9 @@ public class SidebarControl extends VBox {
 
     private ObjectProperty<SimulationDriver> simulationProperty = new SimpleObjectProperty<>(this, "simulation");
 
+    private ObjectProperty<Drone> selectedDroneProperty = new SimpleObjectProperty<>(this, "selectedDrone");
+    private IntegerProperty selectedDroneIndexProperty = new SimpleIntegerProperty(this, "selectedDroneIndex");
+
     public SidebarControl(){
         //Load the layout associated with this GUI control.
         FXMLLoader fxmlLoader = new FXMLLoader(Resources.getResourceURL("/layouts/sidebar.fxml"));
@@ -157,14 +157,13 @@ public class SidebarControl extends VBox {
     }
 
     private void updateLabels(AutopilotInputs[] inputs, AutopilotOutputs[] outputs){
-        if(inputs == null || outputs == null){
+        if(inputs == null || outputs == null || getSelectedDrone() == null){
             return;
         }
 
-        //TODO: set in,out to inputs/outputs of selected drone
-        Drone selectedDrone = null;
-        AutopilotInputs in = inputs[0];
-        AutopilotOutputs out = outputs[0];
+        int index = selectedDroneIndexProperty.get();
+        AutopilotInputs in = inputs[index];
+        AutopilotOutputs out = outputs[index];
 
         positionLabel.setText(String.format("X:%6.2f  Y:%6.2f  Z:%6.2f", in.getX(), in.getY(), in.getZ()));
 
@@ -181,10 +180,9 @@ public class SidebarControl extends VBox {
         rollLabel.setText(String.format("%.2f", Math.toDegrees(in.getRoll())));
 
         //Thrust
-        //TODO
-        //double thrustValue = out.getThrust()/selectedDrone.getConfig().getMaxThrust();
-        //thrustBar.setProgress(thrustValue);
-        //thrustLabel.setText(String.format("%15.2f", out.getThrust()));
+        double thrustValue = out.getThrust()/getSelectedDrone().getConfig().getMaxThrust();
+        thrustBar.setProgress(thrustValue);
+        thrustLabel.setText(String.format("%15.2f", out.getThrust()));
 
         //Wing inclination
         setIndicatorValue(leftWingInclinationIndicator, out.getLeftWingInclination(), Math.PI/2d);
@@ -224,5 +222,21 @@ public class SidebarControl extends VBox {
 
     public ObjectProperty<SimulationDriver> getSimulationProperty() {
         return simulationProperty;
+    }
+
+    public Drone getSelectedDrone() {
+        return selectedDroneProperty.get();
+    }
+
+    public ObjectProperty<Drone> selectedDroneProperty() {
+        return selectedDroneProperty;
+    }
+
+    public int getSelectedDroneIndex() {
+        return selectedDroneIndexProperty.get();
+    }
+
+    public IntegerProperty selectedDroneIndexProperty() {
+        return selectedDroneIndexProperty;
     }
 }

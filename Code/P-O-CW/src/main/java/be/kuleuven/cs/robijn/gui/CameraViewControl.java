@@ -97,7 +97,7 @@ public class CameraViewControl extends AnchorPane {
         simulationProperty.addListener((observableValue, oldValue, newValue) -> {
             WorldObject world = newValue.getTestBed().getWorldRepresentation();
 
-            sideCamera = getSimulation().getTestBed().getRenderer().createOrthographicCamera();
+            activeCamera = sideCamera = getSimulation().getTestBed().getRenderer().createOrthographicCamera();
             sideCamera.setWidth(130);
             sideCamera.setHeight(30);
             sideCamera.setName(CameraViewControl.SIDE_CAMERA_ID);
@@ -151,6 +151,7 @@ public class CameraViewControl extends AnchorPane {
                 droneCamera.setDrawnDebugObjects(true);
                 newDrone.addChild(droneCamera);
             }
+            setActiveCamera((String)perspectiveToggleGroup.getSelectedToggle().getUserData());
         });
     }
 

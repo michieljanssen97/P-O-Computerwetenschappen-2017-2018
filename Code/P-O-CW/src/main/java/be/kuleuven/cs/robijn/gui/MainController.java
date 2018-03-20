@@ -4,11 +4,12 @@ import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.common.stopwatch.RealTimeStopwatch;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.SplitPane;
 import javafx.scene.effect.BoxBlur;
 import javafx.scene.layout.*;
@@ -18,12 +19,17 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.ArrayRealVector;
 
+import java.util.List;
+
 /**
  * Controller for the main window layout
  */
 public class MainController {
     @FXML
     private SplitPane contentRoot;
+
+    @FXML
+    private ListView<Drone> droneList;
 
     @FXML
     private AnchorPane overlayRoot;
@@ -41,12 +47,15 @@ public class MainController {
     private ObjectProperty<SimulationDriver> simulationProperty = new SimpleObjectProperty<>(this, "simulation");
 
     private ObjectProperty<Drone> selectedDroneProperty = new SimpleObjectProperty<>(this, "selectedDrone");
+    private IntegerProperty selectedDroneIndexProperty = new SimpleIntegerProperty(this, "selectedDroneIndex");
 
     @FXML
     private void initialize(){
         //Setup simulation settings overlay
         initializeOverlay();
         initializeSimulationSettings();
+
+        setupDroneList();
 
         //Setup CameraViewControls
         camerasViewRoot.setViewSupplier(() -> {
@@ -59,6 +68,32 @@ public class MainController {
 
         //Setup sidebar
         sidebar.getSimulationProperty().bind(simulationProperty);
+        sidebar.selectedDroneProperty().bind(selectedDroneProperty);
+        sidebar.selectedDroneIndexProperty().bind(selectedDroneIndexProperty);
+    }
+
+    private void setupDroneList(){
+        //Bind selected drone property to dronelist selection model
+        selectedDroneProperty.bind(droneList.getSelectionModel().selectedItemProperty());
+        selectedDroneIndexProperty.bind(droneList.getSelectionModel().selectedIndexProperty());
+
+        //Add all drones
+        simulationProperty.addListener((observableValue, oldValue, newValue) -> {
+            List<Drone> drones = newValue.getTestBed().getWorldRepresentation().getChildrenOfType(Drone.class);
+            droneList.getItems().addAll(drones);
+            droneList.getSelectionModel().select(0);
+        });
+
+
+        droneList.setCellFactory(view -> new ListCell<Drone>(){
+            @Override
+            protected void updateItem(Drone item, boolean empty) {
+                super.updateItem(item, empty);
+                if(!empty && item != null){
+                    setText(item.getDroneID());
+                }
+            }
+        });
     }
 
     /////////////////
