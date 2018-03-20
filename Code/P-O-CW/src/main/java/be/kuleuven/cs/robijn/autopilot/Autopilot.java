@@ -18,7 +18,7 @@ import interfaces.*;
 public class Autopilot extends WorldObject implements interfaces.Autopilot {
 	private static boolean drawChartPositions = false;
 	public static ExpPosition exppos = new ExpPosition();
-	public FlightMode currentFlightMode = FlightMode.ASCEND;
+	public FlightMode currentFlightMode = FlightMode.TAXI;
 	
 	public AutopilotConfig getConfig() {
 		return this.config;
@@ -517,12 +517,14 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					this.setFlightMode(FlightMode.LAND);
 			}
         } if (this.getFlightMode() == FlightMode.TAXI) {	
-			double[] targetPositionCoordinates = {-500,0,-500};
-			RealVector targetPosition = new ArrayRealVector(targetPositionCoordinates);
-			RealVector targetPositionDroneCoordinates = drone.transformationToDroneCoordinates(targetPosition);
+			double[] targetPositionCoordinates = {-10,1.40,-100};
+			RealVector targetPosition = new ArrayRealVector(targetPositionCoordinates, false);
+			RealVector targetPositionDroneCoordinates = drone.transformationToDroneCoordinates(targetPosition.subtract(drone.getWorldPosition()));
+		//	System.out.println(Float.toString((float) targetPositionDroneCoordinates.getEntry(2)));
+			System.out.println(targetPositionDroneCoordinates);
 			
 			if (targetPositionDroneCoordinates.getEntry(0) == 0) {
-				thrust = 100; 
+				thrust = 100;
 				rightWingInclination = 0;
 				leftWingInclination = 0;
 				horStabInclination = 0;
@@ -531,7 +533,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 				leftBrakeForce = 0;
 				rightBrakeForce = 0;
 			}else {
-				float targetHeading = (float) Math.atan(- targetPositionDroneCoordinates.getEntry(2)/targetPositionDroneCoordinates.getEntry(0));
+				float targetHeading = (float) Math.atan(- targetPositionDroneCoordinates.getEntry(0)/targetPositionDroneCoordinates.getEntry(2));
 				if (targetPositionDroneCoordinates.getEntry(0) < 0) {
 					targetHeading += Math.PI;
 				}
@@ -550,7 +552,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 						thrust = 0;
 					}
 					else if (rotationNecessary < Math.PI/18 && drone.getHeadingAngularVelocity() < rotationNecessary/10) {
-						leftBrakeForce = (float) Math.abs(5000*targetPositionDroneCoordinates.getEntry(0)/targetPositionDroneCoordinates.getEntry(2));
+						leftBrakeForce = (float) Math.abs(500*targetPositionDroneCoordinates.getEntry(0)/targetPositionDroneCoordinates.getEntry(2));
 						rightBrakeForce = 0;
 						thrust = 2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, leftBrakeForce, 0)[0] * drone.getTotalMass() + leftBrakeForce + 500;
 					}
@@ -562,7 +564,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 						thrust = 0;
 					}
 					else if (rotationNecessary > - Math.PI/18 && drone.getHeadingAngularVelocity() < Math.abs((double) rotationNecessary)/10) {
-						rightBrakeForce = (float) Math.abs(5000*targetPositionDroneCoordinates.getEntry(0)/targetPositionDroneCoordinates.getEntry(2));
+						rightBrakeForce = (float) Math.abs(500*targetPositionDroneCoordinates.getEntry(0)/targetPositionDroneCoordinates.getEntry(2));
 						leftBrakeForce = 0;
 						thrust = 2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, 0, rightBrakeForce)[0] * drone.getTotalMass() + rightBrakeForce + 500;
 					}
@@ -573,11 +575,12 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					}
 				}
 			}
-        }
-		System.out.println(Float.toString(leftBrakeForce));
-		System.out.println(Float.toString(rightBrakeForce));
-		System.out.println(Float.toString(thrust));
-		System.out.println("");
+        }	
+        
+//		System.out.println(Float.toString(leftBrakeForce));
+//		System.out.println(Float.toString(rightBrakeForce));
+//		System.out.println(Float.toString(thrust));
+//		System.out.println("");
 
         final float thrustOutput = thrust;
         final float leftWingInclinationOutput = leftWingInclination;
