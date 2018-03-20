@@ -473,10 +473,93 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 				this.setMode(4);
         }
 		
-		else {
+		else {		
+			double[] targetPositionCoordinates = {-500,0,-500};
+			RealVector targetPosition = new ArrayRealVector(targetPositionCoordinates);
+			RealVector targetPositionDroneCoordinates = drone.transformationToDroneCoordinates(targetPosition);
 			
+//			______________________________________________________________________________			
+			if (targetPositionDroneCoordinates.getEntry(0) == 0) {
+				AutopilotOutputs output = new AutopilotOutputs() {
+					public float getThrust() {
+						return 100;
+					}
+					public float getLeftWingInclination() {
+						return 0;
+					}
+					public float getRightWingInclination() {
+						return 0;
+					}
+					public float getHorStabInclination() {
+						return 0;
+					}
+					public float getVerStabInclination() {
+						return 0;
+					}
+
+					public float getFrontBrakeForce() {
+						return 0;
+					}
+
+					public float getLeftBrakeForce() {
+						return 0;
+					}
+
+					public float getRightBrakeForce() {
+						return 0;
+					}
+				};
+				
+		        return output;
+			}
+//			______________________________________________________________________________			
+			float targetHeading = (float) Math.atan(-targetPositionDroneCoordinates.getEntry(2)/targetPositionDroneCoordinates.getEntry(0));
+			if (targetPositionDroneCoordinates.getEntry(0) < 0) {
+				targetHeading += Math.PI;
+			}
+			float rotationNecessary = targetHeading - (float) Math.PI/2;
+			if (rotationNecessary > 2*Math.PI)
+				rotationNecessary -= 2*Math.PI;
+			if (rotationNecessary > 0 && rotationNecessary < Math.PI) {
+				if (rotationNecessary > Math.PI/18) {
+					leftBrakeForce = (float) Math.abs(500*targetPositionDroneCoordinates.getEntry(0)/targetPositionDroneCoordinates.getEntry(2));
+					rightBrakeForce = 0;
+					thrust = 2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, leftBrakeForce, 0)[0] * drone.getTotalMass() + leftBrakeForce + 500;
+				}
+				else if (rotationNecessary < Math.PI/18 && drone.getHeadingAngularVelocity() > rotationNecessary/10) {
+					leftBrakeForce = 0;
+					rightBrakeForce = 0;
+					thrust = 0;
+				}
+				else if (rotationNecessary < Math.PI/18 && drone.getHeadingAngularVelocity() < rotationNecessary/10) {
+					leftBrakeForce = (float) Math.abs(5000*targetPositionDroneCoordinates.getEntry(0)/targetPositionDroneCoordinates.getEntry(2));
+					rightBrakeForce = 0;
+					thrust = 2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, leftBrakeForce, 0)[0] * drone.getTotalMass() + leftBrakeForce + 500;
+				}
+			}
+			else if (rotationNecessary > - Math.PI && rotationNecessary < 0) {
+				if (rotationNecessary > - Math.PI/18 && drone.getHeadingAngularVelocity() > Math.abs((double) rotationNecessary)/10) {
+					rightBrakeForce = 0;
+					leftBrakeForce = 0;
+					thrust = 0;
+				}
+				else if (rotationNecessary > - Math.PI/18 && drone.getHeadingAngularVelocity() < Math.abs((double) rotationNecessary)/10) {
+					rightBrakeForce = (float) Math.abs(5000*targetPositionDroneCoordinates.getEntry(0)/targetPositionDroneCoordinates.getEntry(2));
+					leftBrakeForce = 0;
+					thrust = 2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, 0, rightBrakeForce)[0] * drone.getTotalMass() + rightBrakeForce + 500;
+				}
+				else if (rotationNecessary < - Math.PI/18){
+					rightBrakeForce = (float) Math.abs(500*targetPositionDroneCoordinates.getEntry(0)/targetPositionDroneCoordinates.getEntry(2));
+					leftBrakeForce = 0;
+					thrust = 2.5f*drone.getAngularAccelerations(0, 0, 0, 0, 0, 0, rightBrakeForce)[0]*drone.getTotalMass() + rightBrakeForce + 500;
+				}
+			}
 		}
-        
+		System.out.println(Float.toString(leftBrakeForce));
+		System.out.println(Float.toString(rightBrakeForce));
+		System.out.println(Float.toString(thrust));
+		System.out.println("");
+		
         final float thrustOutput = thrust;
         final float leftWingInclinationOutput = leftWingInclination;
         final float rightWingInclinationOutput = rightWingInclination;
@@ -624,7 +707,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		this.previousRollAngularAccelerationError = previousRollAngularAccelerationError;
 	}
 	
-	private int mode = 2;
+	private int mode = 3;
 	
 	/**
 	 * 1 == full flight, 2 == ascend, 3 == taxi, 4 == land
