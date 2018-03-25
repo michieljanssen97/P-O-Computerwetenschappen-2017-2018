@@ -205,7 +205,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		
 		if (useDiffEquations){
 //			FirstOrderIntegrator dp853 = new DormandPrince853Integrator(1.0e-8, 100.0, 1.0e-5, 1.0e-5);
-			FirstOrderIntegrator rk4 = new ClassicalRungeKuttaIntegrator(secondsSinceLastUpdate/10);
+			FirstOrderIntegrator rk4 = new ClassicalRungeKuttaIntegrator(secondsSinceLastUpdate);
 			FirstOrderDifferentialEquations ode = new SystemDifferentialEquations(drone, output);
 			double[] y = new double[] { drone.getWorldPosition().getEntry(0), drone.getVelocity().getEntry(0), 
 					drone.getWorldPosition().getEntry(1), drone.getVelocity().getEntry(1),
