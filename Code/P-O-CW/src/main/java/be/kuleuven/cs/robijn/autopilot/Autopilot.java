@@ -490,7 +490,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					}
 					
 					UnivariateFunction function6 = (x)->{return drone.transformationToDroneCoordinates(drone.getLiftForceHorStab((float)x)).getEntry(1)*drone.getTailSize()
-							+ drone.transformationToDroneCoordinates(drone.getLiftForceVerStab(verStabInclinationTemp)).getEntry(1)*drone.getTailSize()
 							+ inertiaMatrixXX*Math.cos(drone.getRoll())*pitchAngularAcceleration
 							+ inertiaMatrixXX*Math.cos(drone.getPitch())*Math.sin(drone.getRoll())*headingAngularAcceleration
 							+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(0)
@@ -1128,7 +1127,8 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		this.target = target;
 	}
 	
-	public float minMaxInclination(float upperBound, float lowerBound, boolean max, float accuracy, Drone drone, int airfoil) {
+	public float minMaxInclination(float upperBound, float lowerBound, boolean max, float accuracy, Drone drone, int airfoil)
+			throws IllegalStateException {
 		float inclination;
 		if (max == true) {
 			inclination = upperBound;
