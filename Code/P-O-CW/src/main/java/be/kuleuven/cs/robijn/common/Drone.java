@@ -633,6 +633,10 @@ public class Drone extends WorldObject {
 		return this.rollTransformation(this.pitchTransformation(this.headingTransformation(realVector)));
 	}
 	
+	public RealVector transformationToDroneWithoutRollCoordinates(RealVector realVector) {
+		return this.pitchTransformation(this.headingTransformation(realVector));
+	}
+	
 	public RealMatrix getRotationMatrix() {
 		float rollAngle = this.getRoll();
 		float pitchAngle = this.getPitch();
@@ -717,6 +721,10 @@ public class Drone extends WorldObject {
 	 */
 	public RealVector transformationToWorldCoordinates(RealVector realVector) {
 		return this.inverseHeadingTransformation(this.inversePitchTransformation(this.inverseRollTransformation(realVector)));
+	}
+	
+	public RealVector transformationFromDroneWithoutRollCoordinates(RealVector realVector) {
+		return this.inverseHeadingTransformation(this.inversePitchTransformation(realVector));
 	}
 	
 	
