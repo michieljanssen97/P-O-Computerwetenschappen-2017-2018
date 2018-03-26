@@ -97,19 +97,14 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		float targetVelocity = -43f;
 		float hight = 25;
 		
-//		float maxInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float) Math.toRadians(1.0), drone, 1);
-//		float minInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float) Math.toRadians(1.0), drone, 1);
-//		float maxInclinationHorStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float) Math.toRadians(1.0), drone, 2);
-//		float minInclinationHorStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float) Math.toRadians(1.0), drone, 2);
-//		float maxInclinationVerStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float) Math.toRadians(1.0), drone, 3);
-//		float minInclinationVerStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float) Math.toRadians(1.0), drone, 3);
-		float maxInclinationWing = 0;
-		float minInclinationWing = 0;		
-		float maxInclinationHorStab = 0;
-		float minInclinationHorStab = 0;
-		float maxInclinationVerStab = 0;
-		float minInclinationVerStab = 0;		
+		float maxInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float) Math.toRadians(1.0), drone, 1);
+		float minInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float) Math.toRadians(1.0), drone, 1);
+		float maxInclinationHorStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float) Math.toRadians(1.0), drone, 2);
+		float minInclinationHorStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float) Math.toRadians(1.0), drone, 2);
+		float maxInclinationVerStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float) Math.toRadians(1.0), drone, 3);
+		float minInclinationVerStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float) Math.toRadians(1.0), drone, 3);	
 		
+		double[] targetPositionCoordinates = {0,0,200};
 		float inertiaMatrixXX = (float) (drone.getTailMass()*Math.pow(drone.getTailSize(),2) +drone.getEngineMass()*Math.pow(drone.getEngineDistance(), 2));
 		float inertiaMatrixZZ = (float) (2*(drone.getWingMass()*Math.pow(drone.getWingX(),2)));
 		float inertiaMatrixYY = inertiaMatrixXX + inertiaMatrixZZ;
@@ -648,8 +643,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 				if ((this.getFlightMode() == FlightMode.FULL_FLIGHT) && (drone.getWorldPosition().getEntry(2) < (this.getTarget().getEntry(2)+1)))
 					this.setFlightMode(FlightMode.LAND);
 			}
-        } if (this.getFlightMode() == FlightMode.TAXI) {	
-			double[] targetPositionCoordinates = {500,0,-200};
+        } if (this.getFlightMode() == FlightMode.TAXI) {		
 			RealVector targetPosition = new ArrayRealVector(targetPositionCoordinates);
 			RealVector targetPositionDroneCoordinates = drone.transformationToDroneCoordinates(targetPosition.subtract(drone.getWorldPosition()));
 			double droneVelocity = drone.getVelocity().getNorm();
@@ -715,7 +709,9 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					}
 				}
 				int maxVelocity;
-				if (targetPositionDroneCoordinates.getNorm() > 500)
+				if (targetPositionDroneCoordinates.getNorm() > 1500)
+					maxVelocity = 30;
+				else if (targetPositionDroneCoordinates.getNorm() > 500)
 					maxVelocity = 20;
 				else if (targetPositionDroneCoordinates.getNorm() > 200)
 					maxVelocity = 10;
@@ -727,20 +723,34 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					thrust = 0;
 				}
 			}
-			if ((targetPositionDroneCoordinates.getNorm() <= 20 + drone.getVelocity().getNorm() / 5)){
+			if ((targetPositionDroneCoordinates.getNorm() <= 20 + drone.getVelocity().getNorm())){
 				thrust = 0;
-				if (droneVelocity >= 1) {
+				if (droneVelocity >= 3) {
 					float breakforce = Math.min( 8600, (float) (droneVelocity*droneVelocity*480)/(2*(float)targetPositionDroneCoordinates.getNorm()));
 					rightBrakeForce += breakforce/2f;
 					rightBrakeForce = Math.min(rightBrakeForce, 4300);
 					leftBrakeForce += breakforce/2f;
 					leftBrakeForce = Math.min(leftBrakeForce, 4300);
 				}
+				if (targetPositionDroneCoordinates.getNorm() <= 3) {
+					if (droneVelocity >= 1) {
+						float breakforce = Math.min( 8600, (float) (droneVelocity*droneVelocity*480)/(2*(float)targetPositionDroneCoordinates.getNorm()));
+						rightBrakeForce += breakforce/2f;
+						rightBrakeForce = Math.min(rightBrakeForce, 4300);
+						leftBrakeForce += breakforce/2f;
+						leftBrakeForce = Math.min(leftBrakeForce, 4300);
+					}
+					if (droneVelocity < 1) {
+						thrust = Math.min(2000,2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, Math.min(4300,Math.abs(leftBrakeForce - rightBrakeForce)), 0)[0] * drone.getTotalMass() + leftBrakeForce + rightBrakeForce);
+						if (targetPositionDroneCoordinates.getNorm() < 2)
+							System.out.println("SUCCES");
+					}
+				}
 				if (droneVelocity < 1) {
 					thrust = Math.min(2000,2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, Math.min(4300,Math.abs(leftBrakeForce - rightBrakeForce)), 0)[0] * drone.getTotalMass() + leftBrakeForce + rightBrakeForce);
 //					rightBrakeForce = 0;
 //					leftBrakeForce = 0;
-					if (targetPositionDroneCoordinates.getNorm() < 2)
+					if (targetPositionDroneCoordinates.getNorm() < 5)
 						System.out.println("SUCCES");
 				}
 			}
