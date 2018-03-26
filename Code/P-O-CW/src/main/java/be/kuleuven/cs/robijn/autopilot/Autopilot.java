@@ -159,65 +159,79 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		}
 		
 		else if (this.getMode() == 1) {
+			
 	        ImageRecognizer recognizer = this.getImageRecognizer();
+	        
+	        if (recognizer.getPath().getPathSize() == 0) {
+	        	//TODO switch to landing mode
+	        }
+	        
 	        float[] necessaryRotation;
 	        float horizontalAngleOfView = (float) Math.toDegrees(this.getConfig().getHorizontalAngleOfView());
 	        float verticalAngleOfView = (float) Math.toDegrees(this.getConfig().getVerticalAngleOfView());
 			
-			float distanceToCube;
-			try{
-				Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
-						horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
-				ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
-				if (closestCube == null)
-					this.simulationEnded();
-				necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
-				distanceToCube = recognizer.getDistanceToCube(image, closestCube.getHue(), closestCube.getSaturation());
-			} catch (NullPointerException exc1) {
-				necessaryRotation = new float[2];
-				distanceToCube = 0;
-			} catch (IllegalArgumentException exc2) {
-				Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
-						horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
-				ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
-				necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
-				distanceToCube = 0;
-			}
+	        Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
+					horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
+//			float distanceToCube;
+//			try{
+//				ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
+//				if (closestCube == null)
+//					this.simulationEnded();
+//				necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
+//				distanceToCube = recognizer.getDistanceToCube(image, closestCube.getHue(), closestCube.getSaturation());
+//			} catch (NullPointerException exc1) {
+//				necessaryRotation = new float[2];
+//				distanceToCube = 0;
+//			} catch (IllegalArgumentException exc2) {
+////				Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
+////						horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
+//				ImageRecognizerCube closestCube = recognizer.getClosestCubeInWorld(image);
+//				necessaryRotation = recognizer.getNecessaryRotation(image, closestCube.getHue(), closestCube.getSaturation());
+//				distanceToCube = 0;
+//			}
 
-			float imageYRotation = (float) Math.toRadians(necessaryRotation[0]);
-			float imageXRotation = (float) Math.toRadians(necessaryRotation[1]);
+//			float imageYRotation = (float) Math.toRadians(necessaryRotation[0]);
+//			float imageXRotation = (float) Math.toRadians(necessaryRotation[1]);
+//			
+//			float angleXYPlane;
+//			if ((imageYRotation == 0.0) && (imageXRotation >= 0.0))
+//				angleXYPlane = (float) (Math.PI/2);
+//			else if ((imageYRotation == 0.0) && (imageXRotation < 0.0))
+//				angleXYPlane = (float) (-Math.PI/2);
+//			else {
+//				angleXYPlane = (float) Math.atan(Math.tan(imageXRotation)/Math.tan(imageYRotation));
+//			}
+//			float lengthXYPlane = (float) Math.sqrt(Math.pow(Math.tan(imageXRotation),2) + Math.pow(Math.tan(imageYRotation), 2));
+//			float newImageYRotation = (float) Math.atan(lengthXYPlane * Math.cos(angleXYPlane - drone.getRoll()));
+//			float newImageXRotation = (float) Math.atan(lengthXYPlane * Math.sin(angleXYPlane - drone.getRoll()));
+//			if (imageYRotation >= 0.0) {
+//				imageYRotation = newImageYRotation;
+//				imageXRotation = newImageXRotation;
+//			}
+//			else {
+//				imageYRotation = -newImageYRotation;
+//				imageXRotation = -newImageXRotation;
+//			}
+//			float pitch = drone.getPitch();
+//			if (pitch > Math.PI)
+//				pitch -= 2*Math.PI;
+//			float heading = drone.getHeading();
+//			if (heading > Math.PI)
+//				heading -= 2*Math.PI;
+//			if ((distanceToCube*Math.cos(heading + imageYRotation)*Math.cos(pitch + imageXRotation)) > correctionDistance) {
+//				imageXRotation = (float) ((3.0/2.0)*imageXRotation + (1.0/2.0)*pitch);
+//				imageYRotation = (float) ((5.0/4.0)*imageYRotation + (1.0/4.0)*heading);
+//			}
 			
-			float angleXYPlane;
-			if ((imageYRotation == 0.0) && (imageXRotation >= 0.0))
-				angleXYPlane = (float) (Math.PI/2);
-			else if ((imageYRotation == 0.0) && (imageXRotation < 0.0))
-				angleXYPlane = (float) (-Math.PI/2);
-			else {
-				angleXYPlane = (float) Math.atan(Math.tan(imageXRotation)/Math.tan(imageYRotation));
-			}
-			float lengthXYPlane = (float) Math.sqrt(Math.pow(Math.tan(imageXRotation),2) + Math.pow(Math.tan(imageYRotation), 2));
-			float newImageYRotation = (float) Math.atan(lengthXYPlane * Math.cos(angleXYPlane - drone.getRoll()));
-			float newImageXRotation = (float) Math.atan(lengthXYPlane * Math.sin(angleXYPlane - drone.getRoll()));
-			if (imageYRotation >= 0.0) {
-				imageYRotation = newImageYRotation;
-				imageXRotation = newImageXRotation;
-			}
-			else {
-				imageYRotation = -newImageYRotation;
-				imageXRotation = -newImageXRotation;
-			}
-			float pitch = drone.getPitch();
-			if (pitch > Math.PI)
-				pitch -= 2*Math.PI;
-			float heading = drone.getHeading();
-			if (heading > Math.PI)
-				heading -= 2*Math.PI;
-			if ((distanceToCube*Math.cos(heading + imageYRotation)*Math.cos(pitch + imageXRotation)) > correctionDistance) {
-				imageXRotation = (float) ((3.0/2.0)*imageXRotation + (1.0/2.0)*pitch);
-				imageYRotation = (float) ((5.0/4.0)*imageYRotation + (1.0/4.0)*heading);
+			RealVector target = new ArrayRealVector(new double[] {0, 20, -1000}, false);
+			if (recognizer.isFollowingPathCoordinates()) {
+				target = recognizer.getCurrentPathTarget();
+			} else {
+				target = recognizer.searchForCubeInPathArea(image);
 			}
 			
-			RealVector target = new ArrayRealVector(new double[] {0, 300, -1000}, false);
+			
+			
 			float XRotation = (float) Math.atan((target.getEntry(1) - drone.getWorldPosition().getEntry(1))
 					/(drone.getWorldPosition().getEntry(2) - target.getEntry(2)));
 			float YRotation = (float) Math.atan((drone.getWorldPosition().getEntry(0) - target.getEntry(0))
