@@ -162,10 +162,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			
 	        ImageRecognizer recognizer = this.getImageRecognizer();
 	        
-	        if (recognizer.getPath().getPathSize() == 0) {
-	        	//TODO switch to landing mode
-	        }
-	        
 	        float[] necessaryRotation;
 	        float horizontalAngleOfView = (float) Math.toDegrees(this.getConfig().getHorizontalAngleOfView());
 	        float verticalAngleOfView = (float) Math.toDegrees(this.getConfig().getVerticalAngleOfView());
@@ -230,7 +226,10 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 				target = recognizer.searchForCubeInPathArea(image);
 			}
 			
-			
+			if (recognizer.getPath().getPathSize() == 0) {
+				//switch to landing mode after this frame.
+	        	this.setMode(3);
+	        }
 			
 			float XRotation = (float) Math.atan((target.getEntry(1) - drone.getWorldPosition().getEntry(1))
 					/(drone.getWorldPosition().getEntry(2) - target.getEntry(2)));

@@ -930,9 +930,11 @@ public class Drone extends WorldObject {
 		
 		float liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		
-		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA())))
+		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA()))) {
+			System.out.println("AOAError!   Left wing: " + AOA + "     MaxAOA: " + this.getMaxAOA());
 //			throw new IllegalArgumentException();
 			AOA = Math.signum(AOA) * this.getMaxAOA();
+		}
 		
 		liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		
@@ -962,9 +964,11 @@ public class Drone extends WorldObject {
 		
 		float liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		
-		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA())))
+		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA()))) {
+			System.out.println("AOAError!   Right wing: " + AOA + "     MaxAOA: " + this.getMaxAOA());
 //			throw new IllegalArgumentException();
 			AOA = Math.signum(AOA) * this.getMaxAOA();
+		}
 		
 		liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		
@@ -993,9 +997,11 @@ public class Drone extends WorldObject {
 		
 		float liftForce = (float) (AOA * this.getHorStabLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		
-		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA())))
+		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA()))) {
+			System.out.println("AOAError!   Hor Stab: " + AOA + "     MaxAOA: " + this.getMaxAOA());
 //			throw new IllegalArgumentException();
 			AOA = Math.signum(AOA) * this.getMaxAOA();
+		}
 		
 		liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		
@@ -1024,9 +1030,11 @@ public class Drone extends WorldObject {
 		
 		float liftForce = (float) (AOA * this.getVerStabLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		
-		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA())))
+		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA()))) {
+			System.out.println("AOAError!   Ver Stab: " + AOA + "     MaxAOA: " + this.getMaxAOA());
 //			throw new IllegalArgumentException();
 			AOA = Math.signum(AOA) * this.getMaxAOA();
+		}
 		
 		liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		

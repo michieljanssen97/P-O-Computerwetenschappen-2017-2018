@@ -421,7 +421,7 @@ public class ImageRecognizer {
 		RealVector path = this.currentPathTarget;
 		double[] drone = getDronePositionCoordinates();
 		float distanceToPath = (float) Math.sqrt(Math.pow(path.getEntry(0) - drone[0], 2) + Math.pow(path.getEntry(1) - drone[1], 2) + Math.pow(path.getEntry(2) - drone[2], 2));
-		if (distanceToPath <= 100)
+		if (distanceToPath <= 150)
 			followExactCoordinates();
 		
 		return path;
@@ -464,7 +464,7 @@ public class ImageRecognizer {
 			setPathTarget(getClosestPathXYZ());
 		else {
 			double[] dronePos = getDronePositionCoordinates();
-			dronePos[2] = dronePos[2]-100;
+			dronePos[2] = dronePos[2]-1000;
 			nextPath = new ArrayRealVector(dronePos);
 			setPathTarget(nextPath);
 		}
@@ -484,7 +484,8 @@ public class ImageRecognizer {
 			float[] curPos = {(float)dronePosition.getEntry(0), (float)dronePosition.getEntry(1), (float)dronePosition.getEntry(2)};
 			float minimum = Float.POSITIVE_INFINITY;
 			ImageRecognizerCube closest = null;
-			if (getImageRecognizerCubesFromImage(im).size() == 0) {
+//			if (getImageRecognizerCubesFromImage(im).size() == 0) {
+			if (currentCubeColorCalculated && getEquivalentImageRecognizerCube(this.currentCubeHue, this.currentCubeSat) == null) {
 				followNewPathCoordinates();
 				return getCurrentPathTarget();
 			}
@@ -495,9 +496,11 @@ public class ImageRecognizer {
 					closest = c;
 				}
 			}
-			setCurrentCubeHue(closest.getHue());
-			setCurrentCubeSat(closest.getSaturation());
-			this.currentCubeColorCalculated = true;
+			if (minimum <= 50) {
+				setCurrentCubeHue(closest.getHue());
+				setCurrentCubeSat(closest.getSaturation());
+				this.currentCubeColorCalculated = true;
+			}
 			toFollow = closest;
 			toFollowDistance = minimum;
 //		} else {
