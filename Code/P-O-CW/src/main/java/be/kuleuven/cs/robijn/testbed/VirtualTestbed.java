@@ -58,9 +58,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		//Box box = this.getFirstChildOfType(Box.class);
 		Box box = getClosestBox(drone);
 
-		float stopDistanceToBox = 4;
-		float cubeRadius = (float) 0.5;
-		float stopDistanceToCenterBox = stopDistanceToBox + cubeRadius;
+		float stopDistanceToCenterBox = 3;
 		
 		//Check if the drone reached a cube
 		//true if the center of mass of the drone is in a specified distance of the center of a cube
