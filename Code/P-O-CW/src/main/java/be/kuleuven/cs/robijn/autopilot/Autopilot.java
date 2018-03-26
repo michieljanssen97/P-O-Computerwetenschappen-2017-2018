@@ -162,14 +162,13 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			
 	        ImageRecognizer recognizer = this.getImageRecognizer();
 	        
-	        float[] necessaryRotation;
 	        float horizontalAngleOfView = (float) Math.toDegrees(this.getConfig().getHorizontalAngleOfView());
 	        float verticalAngleOfView = (float) Math.toDegrees(this.getConfig().getVerticalAngleOfView());
 			
 	        Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
 					horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
 			
-			RealVector target = new ArrayRealVector(new double[] {0, 20, -1000}, false);
+			RealVector target;
 			if (recognizer.isFollowingPathCoordinates()) {
 				target = recognizer.getCurrentPathTarget();
 			} else {
