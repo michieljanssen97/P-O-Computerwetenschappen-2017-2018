@@ -222,7 +222,11 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					} else {
 						target = recognizer.searchForCubeInPathArea(image);
 					}
-					
+          
+          if (recognizer.getPath().getPathSize() == 0){
+            this.setFlightMode(FlightMode.LAND);
+          }
+          
 					if (this.getFlightMode() == FlightMode.LAND) {
 						if (drone.getWorldPosition().getEntry(2) < (this.getTarget().getEntry(2)+1)) {
 							if (drone.getWorldPosition().getEntry(1) > 2*hight) {
