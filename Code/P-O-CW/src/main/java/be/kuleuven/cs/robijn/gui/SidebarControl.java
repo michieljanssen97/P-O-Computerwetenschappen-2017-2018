@@ -5,6 +5,7 @@ import be.kuleuven.cs.robijn.common.SimulationDriver;
 import be.kuleuven.cs.robijn.common.UpdateEventHandler;
 import interfaces.AutopilotInputs;
 import interfaces.Path;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -33,6 +34,7 @@ public class SidebarControl extends VBox {
     private BooleanProperty simulationRunningProperty = new SimpleBooleanProperty(this, "simulationRunning");
     private BooleanProperty simulationFinishedProperty = new SimpleBooleanProperty(this, "simulationFinished");
     private BooleanProperty simulationCrashedProperty = new SimpleBooleanProperty(this, "simulationCrashed");
+    private BooleanProperty outOfControlProperty = new SimpleBooleanProperty(this, "outOfControl");
     private BooleanProperty simulationThrewExceptionProperty = new SimpleBooleanProperty(this, "simulationThrewException");
 
     @FXML
@@ -40,6 +42,9 @@ public class SidebarControl extends VBox {
 
     @FXML
     private Label simulationCrashedLabel;
+    
+    @FXML
+    private Label outOfControlLabel;
 
     @FXML
     private Label simulationThrewExceptionLabel;
@@ -141,18 +146,26 @@ public class SidebarControl extends VBox {
             getSimulation().addOnUpdateEventHandler(new UpdateEventHandler((inputs, outputs) -> {
                 simulationFinishedProperty.set(getSimulation().hasSimulationFinished());
                 simulationCrashedProperty.set(getSimulation().hasSimulationCrashed());
+                outOfControlProperty.set(getSimulation().isOutOfControl());
                 simulationThrewExceptionProperty.set(getSimulation().hasSimulationThrownException());
                 updateLabels(inputs, outputs);
             },UpdateEventHandler.LOW_PRIORITY));
         });
-        playButton.disableProperty().bind(simulationFinishedProperty.or(simulationCrashedProperty).or(simulationThrewExceptionProperty));
-        pauseButton.disableProperty().bind(simulationFinishedProperty.or(simulationCrashedProperty).or(simulationThrewExceptionProperty));
+        BooleanBinding canPlay = simulationFinishedProperty
+        		.or(simulationCrashedProperty)
+        		.or(simulationThrewExceptionProperty)
+        		.or(outOfControlProperty);
+        playButton.disableProperty().bind(canPlay);
+        pauseButton.disableProperty().bind(canPlay);
 
         simulationFinishedLabel.visibleProperty().bind(simulationFinishedProperty);
         simulationFinishedLabel.managedProperty().bind(simulationFinishedProperty);
 
         simulationCrashedLabel.visibleProperty().bind(simulationCrashedProperty);
         simulationCrashedLabel.managedProperty().bind(simulationCrashedProperty);
+        
+        outOfControlLabel.visibleProperty().bind(outOfControlProperty);
+        outOfControlLabel.managedProperty().bind(outOfControlProperty);
 
         simulationThrewExceptionLabel.visibleProperty().bind(simulationThrewExceptionProperty);
         simulationThrewExceptionLabel.managedProperty().bind(simulationThrewExceptionProperty);
