@@ -3,6 +3,8 @@ package be.kuleuven.cs.robijn.gui;
 import be.kuleuven.cs.robijn.common.Resources;
 import be.kuleuven.cs.robijn.common.SimulationDriver;
 import be.kuleuven.cs.robijn.common.UpdateEventHandler;
+import interfaces.AutopilotInputs;
+import interfaces.Path;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -11,8 +13,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -30,13 +32,17 @@ public class SidebarControl extends VBox {
     private ToggleGroup simulationRunningToggleGroup;
     private BooleanProperty simulationRunningProperty = new SimpleBooleanProperty(this, "simulationRunning");
     private BooleanProperty simulationFinishedProperty = new SimpleBooleanProperty(this, "simulationFinished");
-    private BooleanProperty simulationErrorProperty = new SimpleBooleanProperty(this, "simulationError");
+    private BooleanProperty simulationCrashedProperty = new SimpleBooleanProperty(this, "simulationCrashed");
+    private BooleanProperty simulationThrewExceptionProperty = new SimpleBooleanProperty(this, "simulationThrewException");
 
     @FXML
     private Label simulationFinishedLabel;
 
     @FXML
-    private Label simulationErrorLabel;
+    private Label simulationCrashedLabel;
+
+    @FXML
+    private Label simulationThrewExceptionLabel;
 
     /// TESTBED INFO
 
@@ -62,6 +68,10 @@ public class SidebarControl extends VBox {
     private Label rollLabel;
 
     /// AUTOPILOT INFO
+
+    //Path
+    @FXML
+    private Button editPathButton;
 
     //Thrust
     @FXML
@@ -130,21 +140,37 @@ public class SidebarControl extends VBox {
             }
             getSimulation().addOnUpdateEventHandler(new UpdateEventHandler((inputs, outputs) -> {
                 simulationFinishedProperty.set(getSimulation().hasSimulationFinished());
-                simulationErrorProperty.set(getSimulation().hasSimulationCrashed());
+                simulationCrashedProperty.set(getSimulation().hasSimulationCrashed());
+                simulationThrewExceptionProperty.set(getSimulation().hasSimulationThrownException());
                 updateLabels(inputs, outputs);
             },UpdateEventHandler.LOW_PRIORITY));
         });
-        playButton.disableProperty().bind(simulationFinishedProperty.or(simulationErrorProperty));
-        pauseButton.disableProperty().bind(simulationFinishedProperty.or(simulationErrorProperty));
+        playButton.disableProperty().bind(simulationFinishedProperty.or(simulationCrashedProperty).or(simulationThrewExceptionProperty));
+        pauseButton.disableProperty().bind(simulationFinishedProperty.or(simulationCrashedProperty).or(simulationThrewExceptionProperty));
 
         simulationFinishedLabel.visibleProperty().bind(simulationFinishedProperty);
         simulationFinishedLabel.managedProperty().bind(simulationFinishedProperty);
 
-        simulationErrorLabel.visibleProperty().bind(simulationErrorProperty);
-        simulationErrorLabel.managedProperty().bind(simulationErrorProperty);
+        simulationCrashedLabel.visibleProperty().bind(simulationCrashedProperty);
+        simulationCrashedLabel.managedProperty().bind(simulationCrashedProperty);
+
+        simulationThrewExceptionLabel.visibleProperty().bind(simulationThrewExceptionProperty);
+        simulationThrewExceptionLabel.managedProperty().bind(simulationThrewExceptionProperty);
+
+        editPathButton.setOnMouseClicked(e -> {
+            Path newPath = PathEditorControl.showDialog((Stage)this.editPathButton.getScene().getWindow());
+            if(newPath != null){
+                this.getSimulation().getAutoPilot().setPath(newPath);
+                this.getSimulation().notifyPathSet();
+            }
+        });
     }
 
     private void updateLabels(AutopilotInputs inputs, AutopilotOutputs outputs){
+        if(inputs == null || outputs == null){
+            return;
+        }
+
         positionLabel.setText(String.format("X:%6.2f  Y:%6.2f  Z:%6.2f", inputs.getX(), inputs.getY(), inputs.getZ()));
 
         //Heading

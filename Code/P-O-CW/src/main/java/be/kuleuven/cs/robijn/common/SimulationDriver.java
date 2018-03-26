@@ -1,7 +1,7 @@
 package be.kuleuven.cs.robijn.common;
 
 import be.kuleuven.cs.robijn.autopilot.Autopilot;
-import be.kuleuven.cs.robijn.common.stopwatch.ConstantIntervalStopwatch;
+import be.kuleuven.cs.robijn.common.exceptions.CrashException;
 import be.kuleuven.cs.robijn.common.stopwatch.RealTimeStopwatch;
 import be.kuleuven.cs.robijn.common.stopwatch.Stopwatch;
 import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
@@ -21,6 +21,8 @@ public class SimulationDriver {
     private Autopilot autoPilot;
     private boolean simulationFinished;
     private boolean simulationCrashed;
+    private boolean simulationThrewException;
+    private boolean pathSet = false;
     private AutopilotInputs latestAutopilotInputs;
     private AutopilotOutputs latestAutopilotOutputs;
 
@@ -39,7 +41,7 @@ public class SimulationDriver {
     public SimulationDriver(List<Box> boxes, AutopilotConfig config, Stopwatch stopwatch){
         this.config = config;
         this.stopwatch = stopwatch;
-    	RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -10.0}, false);
+    	RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, 0}, false);
         testBed = new VirtualTestbed(boxes, config, initialVelocity);
         autoPilot = new Autopilot();
         latestAutopilotInputs = testBed.getInputs();
@@ -52,7 +54,7 @@ public class SimulationDriver {
     public void runUpdate(){
         stopwatch.tick();
 
-        if(!stopwatch.isPaused() && !simulationFinished && !simulationCrashed){
+        if(!stopwatch.isPaused() && !simulationFinished && !simulationCrashed && !simulationThrewException && pathSet){
         	try {
         	    //Reset renderer
                 testBed.getRenderer().clearDebugObjects();
@@ -70,10 +72,18 @@ public class SimulationDriver {
                         (float)stopwatch.getSecondsSinceLastUpdate(), latestAutopilotOutputs);
 
                 latestAutopilotInputs = testBed.getInputs();
-        	} catch (IllegalStateException exc){
+        	} catch (CrashException exc1){
                 simulationCrashed = true;
-                System.err.println("Simulation failed!");
-        		exc.printStackTrace();
+                System.err.println("Plane crashed!");
+        		exc1.printStackTrace();
+        	} catch (IllegalArgumentException exc2) {
+        		simulationCrashed = true;
+        		System.err.println("Autopilot failed!");
+        		exc2.printStackTrace();
+        	} catch (NullPointerException exc3) {
+        		simulationCrashed = true;
+        		System.err.println("Autopilot failed!");
+        		exc3.printStackTrace();
         	}
         }
 
@@ -94,10 +104,18 @@ public class SimulationDriver {
     public boolean isSimulationPaused() {
         return stopwatch.isPaused();
     }
+    
+    public void notifyPathSet() {
+    	this.pathSet = true;
+    }
 
     public boolean hasSimulationFinished() {return simulationFinished;}
 
     public boolean hasSimulationCrashed(){return simulationCrashed;}
+
+    public boolean hasSimulationThrownException(){return simulationThrewException;}
+    
+    public boolean isPathSet() {return pathSet;}
 
     public TestBed getTestBed(){
         return testBed;

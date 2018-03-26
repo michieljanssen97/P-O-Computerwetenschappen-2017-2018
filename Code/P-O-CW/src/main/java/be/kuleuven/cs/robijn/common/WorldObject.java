@@ -4,6 +4,8 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import be.kuleuven.cs.robijn.common.math.VectorMath;
+import be.kuleuven.cs.robijn.tyres.Tyre;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.*;
@@ -13,6 +15,7 @@ public class WorldObject {
     private ArrayList<WorldObject> children = new ArrayList<>();
     private RealVector position = new ArrayRealVector(new double[]{0, 0, 0}, false);
     private Rotation rotation = new Rotation(new Vector3D(1, 0, 0), 0);
+    private RealVector scale = new ArrayRealVector(new double[]{1, 1, 1}, false);
     private String name = "";
 
     ////////////////////////
@@ -25,6 +28,20 @@ public class WorldObject {
     public List<WorldObject> getChildren(){
         return Collections.unmodifiableList(children);
     }
+    
+//	public <T extends WorldObject> T getFirstChildOfType(Class<T> clazz){
+//        if(clazz == null){
+//            throw new IllegalArgumentException("clazz cannot be null");
+//        }
+//
+//        for(WorldObject child : children){
+//            if(child.getClass().isAssignableFrom(clazz)){
+//                return (T) child;
+//            }
+//        }
+//
+//        return null;
+//    }
 
     /**
      * Searches the direct children of this object and returns the first child of the specified type.
@@ -33,19 +50,42 @@ public class WorldObject {
      */
     @SuppressWarnings("unchecked")
 	public <T extends WorldObject> T getFirstChildOfType(Class<T> clazz){
-        if(clazz == null){
-            throw new IllegalArgumentException("clazz cannot be null");
+        try {
+        	ArrayList<T> childrenOfType = getChildrenOfType(clazz);
+        	
+        	if(childrenOfType.size() == 0) {
+        		return null;
+        	}
+        	return childrenOfType.get(0);
+        	
         }
-
-        for(WorldObject child : children){
-            if(child.getClass().isAssignableFrom(clazz)){
-                return (T) child;
-            }
+        
+        catch(IllegalArgumentException e) {
+        	throw e;
         }
-
-        return null;
     }
 
+    /**
+     * Searches the direct children of this object.
+     * If no such object is found, null is returned.
+     * @param clazz the class of the child to return. Must not be null.
+     */
+    @SuppressWarnings("unchecked")
+	public <T extends WorldObject> ArrayList<T> getChildrenOfType(Class<T> clazz){
+    	ArrayList<T> childrenOfType = new ArrayList<T>();
+    	
+    	if(clazz == null) {
+    		throw new IllegalArgumentException("clazz cannot be null");
+    	}
+    	
+    	for(WorldObject child : getChildren()) {
+    		if(clazz.isAssignableFrom(child.getClass())) {
+    			childrenOfType.add((T) child);
+    		}    		
+    	}
+    	return childrenOfType;
+    	
+    }
     /**
      * Searches the direct children of this object and returns the first child with a matching name and type.
      * If no such object is found, null is returned.
@@ -91,6 +131,20 @@ public class WorldObject {
 
         children.add(obj);
         obj.parent = this;
+    }
+
+    /**
+     * Adds a list of children to this object.
+     * @param objects an array of new children. Must not be null.
+     */
+    public void addChildren(WorldObject... objects){
+        if(objects == null){
+            throw new IllegalArgumentException("objects cannot be null");
+        }
+
+        for(WorldObject obj : objects){
+            addChild(obj);
+        }
     }
 
     /**
@@ -183,6 +237,25 @@ public class WorldObject {
         return rotation;
     }
 
+    /**
+     * Returns the scale of this object as a 3D vector in object-space.
+     */
+    public RealVector getScale() {
+        return scale;
+    }
+
+    /**
+     * Sets the scale of this object.
+     * @param scale A 3D vector in object space, non-null
+     */
+    public void setScale(RealVector scale) {
+        if(scale == null || scale.getDimension() != 3){
+            throw new IllegalArgumentException("Invalid size vector");
+        }
+
+        this.scale = scale;
+    }
+
     /// WORLD TRANSFORM ///
 
     /**
@@ -190,6 +263,14 @@ public class WorldObject {
      * @return a non-null 4x4 homogeneous transformation matrix
      */
     public RealMatrix getObjectToWorldTransform(){
+        //Create local affine scale matrix
+        RealMatrix scaleMatrix = new Array2DRowRealMatrix(new double[][]{
+            {getScale().getEntry(0), 0, 0, 0},
+            {0, getScale().getEntry(1), 0, 0},
+            {0, 0, getScale().getEntry(2), 0},
+            {0, 0, 0, 1}
+        }, false);
+
         //Create local affine transformation matrix
         RealMatrix rotationMatrix = new Array2DRowRealMatrix(new double[4][4], false);
         rotationMatrix.setEntry(3, 3, 1); //Identity
@@ -204,7 +285,7 @@ public class WorldObject {
             {0, 0, 0, 1}
         }, false);
 
-        RealMatrix objectToParentTransform = translationMatrix.multiply(rotationMatrix);
+        RealMatrix objectToParentTransform = translationMatrix.multiply(rotationMatrix.multiply(scaleMatrix));
         if(getParent() != null) {
             return getParent().getObjectToWorldTransform().multiply(objectToParentTransform);
         }

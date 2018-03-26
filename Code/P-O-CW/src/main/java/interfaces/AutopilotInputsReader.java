@@ -1,10 +1,16 @@
 package interfaces;
 
 public class AutopilotInputsReader {
-	private static byte[] readByteArray(java.io.DataInputStream stream) throws java.io.IOException {
+    private static byte[] readByteArray(java.io.DataInputStream stream) throws java.io.IOException {
         int length = stream.readInt();
         byte[] array = new byte[length];
         stream.readFully(array);
+        return array;
+    }
+    private static float[] readFloatArray(java.io.DataInputStream stream) throws java.io.IOException {
+        int length = stream.readInt();
+        float[] array = new float[length];
+        for (int i = 0; i < length; i++) { array[i] = stream.readFloat(); }
         return array;
     }
     public static AutopilotInputs read(java.io.DataInputStream stream) throws java.io.IOException {

@@ -8,8 +8,8 @@ import org.apache.commons.math3.ode.FirstOrderIntegrator;
 import org.apache.commons.math3.ode.nonstiff.*;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.experiments.ExpEquations;
-import be.kuleuven.cs.robijn.experiments.ExpPosition;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
+import be.kuleuven.cs.robijn.tyres.Tyre;
 import interfaces.*;
 
 import be.kuleuven.cs.robijn.autopilot.Autopilot;
@@ -43,6 +43,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		this.config = config;
 		//Add drone to world
 		Drone drone = new Drone(config, initialVelocity);
+		drone.setRelativePosition(new ArrayRealVector(new double[] {0, -config.getWheelY() + config.getTyreRadius(), 0}, false));
 		this.addChild(drone);
 
 		//Add boxes to world
@@ -57,28 +58,28 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		//Box box = this.getFirstChildOfType(Box.class);
 		Box box = getClosestBox(drone);
 
-		float stopDistanceToBox = 4;
-		float cubeRadius = (float) 0.5;
-		float stopDistanceToCenterBox = stopDistanceToBox + cubeRadius;
+		float stopDistanceToCenterBox = 3;
 		
 		//Check if the drone reached a cube
 		//true if the center of mass of the drone is in a specified distance of the center of a cube
-		if (calculateDistanceToDrone(box, drone) <= stopDistanceToCenterBox){
-			//The box should not be taken into account anymore, it is already reached
-			boxesToFlyTo.remove(box);
+		if (box != null) {
+			if (calculateDistanceToDrone(box, drone) <= stopDistanceToCenterBox){
+				//The box should not be taken into account anymore, it is already reached
+				boxesToFlyTo.remove(box);
 			
-			//Remove the reached box from the testbed
-			removeChild(box);
+				//Remove the reached box from the testbed
+				removeChild(box);
 			
-			//Stop the simulation if all boxes are handled
-			if(boxesToFlyTo.isEmpty()) {
-				if (drawChartEquations) {
-					expequations.drawMain(type); //draw chart of 'type' when simulation stops
+				//Stop the simulation if all boxes are handled
+				if(boxesToFlyTo.isEmpty()) {
+					if (drawChartEquations) {
+						expequations.drawMain(type); //draw chart of 'type' when simulation stops
+					}
+					else if (Autopilot.isPositionDrawn()) {
+						Autopilot.exppos.drawMain("Our");
+					}
+					return true;
 				}
-				else if (Autopilot.isPositionDrawn()) {
-					Autopilot.exppos.drawMain("Our");
-				}
-				return true;
 			}
 		}
 
@@ -184,10 +185,12 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		RealVector position = drone.getWorldPosition();
 		RealVector velocity = drone.getVelocity();
 		RealVector acceleration = drone.getAcceleration(output.getThrust(),
-				output.getLeftWingInclination(), output.getRightWingInclination(), output.getHorStabInclination(), output.getVerStabInclination());
+				output.getLeftWingInclination(), output.getRightWingInclination(), output.getHorStabInclination(), output.getVerStabInclination(),
+				output.getFrontBrakeForce(), output.getLeftBrakeForce(), output.getRightBrakeForce());
 		
 		float[] angularAccelerations = drone.getAngularAccelerations(output.getLeftWingInclination(),
-				output.getRightWingInclination(), output.getHorStabInclination(), output.getVerStabInclination());
+				output.getRightWingInclination(), output.getHorStabInclination(), output.getVerStabInclination(),
+				output.getFrontBrakeForce(), output.getLeftBrakeForce(), output.getRightBrakeForce());
 		float heading = drone.getHeading();
 		float headingAngularVelocity = drone.getHeadingAngularVelocity();
 		float headingAngularAcceleration = angularAccelerations[0];
@@ -200,7 +203,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		
 		if (useDiffEquations){
 //			FirstOrderIntegrator dp853 = new DormandPrince853Integrator(1.0e-8, 100.0, 1.0e-5, 1.0e-5);
-			FirstOrderIntegrator rk4 = new ClassicalRungeKuttaIntegrator(secondsSinceLastUpdate/10);
+			FirstOrderIntegrator rk4 = new ClassicalRungeKuttaIntegrator(secondsSinceLastUpdate);
 			FirstOrderDifferentialEquations ode = new SystemDifferentialEquations(drone, output);
 			double[] y = new double[] { drone.getWorldPosition().getEntry(0), drone.getVelocity().getEntry(0), 
 					drone.getWorldPosition().getEntry(1), drone.getVelocity().getEntry(1),
@@ -235,6 +238,11 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 			drone.setHeadingAngularVelocity((float) y[7]);
 			drone.setPitchAngularVelocity((float) y[9]);
 			drone.setRollAngularVelocity((float) y[11]);
+			
+			for (Tyre tyres: drone.getChildrenOfType(Tyre.class)) {
+				@SuppressWarnings("unused")
+				float d = tyres.getD(drone);
+			}
 		}
 
 		else {

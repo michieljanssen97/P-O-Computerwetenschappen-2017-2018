@@ -1,5 +1,6 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
+import org.apache.commons.math3.geometry.Vector;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
@@ -121,6 +122,7 @@ public class Mesh implements AutoCloseable {
     private final int vertexArrayObjectId;
     private final int indexCount;
     private final BoundingBox boundingBox;
+    private Vector3D offset = new Vector3D(0, 0, 0);
 
     private Mesh(int vertexArrayObjectId, int indexCount, BoundingBox boundingBox){
         this.vertexArrayObjectId = vertexArrayObjectId;
@@ -138,6 +140,18 @@ public class Mesh implements AutoCloseable {
 
     public BoundingBox getBoundingBox() {
         return boundingBox;
+    }
+
+    public Vector3D getRenderOffset(){
+        return this.offset;
+    }
+
+    public void setRenderOffset(Vector3D offset){
+        if(offset == null){
+            throw new IllegalArgumentException("Invalid offset");
+        }
+
+        this.offset = offset;
     }
 
     @Override
