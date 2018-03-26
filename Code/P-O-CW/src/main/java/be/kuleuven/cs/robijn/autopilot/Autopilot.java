@@ -523,7 +523,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					this.setFlightMode(FlightMode.LAND);
 			}
         } if (this.getFlightMode() == FlightMode.TAXI) {	
-			double[] targetPositionCoordinates = {40,0,200};
+			double[] targetPositionCoordinates = {500,0,-200};
 			RealVector targetPosition = new ArrayRealVector(targetPositionCoordinates);
 			RealVector targetPositionDroneCoordinates = drone.transformationToDroneCoordinates(targetPosition.subtract(drone.getWorldPosition()));
 			double droneVelocity = drone.getVelocity().getNorm();
@@ -534,7 +534,10 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			if (targetPositionDroneCoordinates.getEntry(2) > 0 && targetHeading < 0) {
 				targetHeading += Math.PI;
 			}
-			if ((- targetPositionDroneCoordinates.getEntry(2) < Math.tan(Math.PI/12) * Math.abs(targetPositionDroneCoordinates.getEntry(0)) && targetPositionDroneCoordinates.getEntry(2) < 0) || targetPositionDroneCoordinates.getEntry(2) > 0){
+			if (targetPositionDroneCoordinates.getEntry(0) == 0 && targetPositionDroneCoordinates.getEntry(2) < 0) {
+				thrust = 200;
+			}
+			else if ((- targetPositionDroneCoordinates.getEntry(2) < Math.tan(Math.PI/3) * Math.abs(targetPositionDroneCoordinates.getEntry(0)) && targetPositionDroneCoordinates.getEntry(2) < 0) || targetPositionDroneCoordinates.getEntry(2) > 0){
 //				System.out.println("SCHERPE BOCHT");
 				if (drone.getVelocity().getNorm() > 3)
 					thrust = 0;
@@ -598,7 +601,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					thrust = 0;
 				}
 			}
-			if ((targetPositionDroneCoordinates.getNorm() <= 30)){
+			if ((targetPositionDroneCoordinates.getNorm() <= 20 + drone.getVelocity().getNorm() / 5)){
 				thrust = 0;
 				if (droneVelocity >= 1) {
 					float breakforce = Math.min( 8600, (float) (droneVelocity*droneVelocity*480)/(2*(float)targetPositionDroneCoordinates.getNorm()));
@@ -608,12 +611,14 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					leftBrakeForce = Math.min(leftBrakeForce, 4300);
 				}
 				if (droneVelocity < 1) {
-					rightBrakeForce = 0;
-					leftBrakeForce = 0;
+					thrust = Math.min(2000,2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, Math.min(4300,Math.abs(leftBrakeForce - rightBrakeForce)), 0)[0] * drone.getTotalMass() + leftBrakeForce + rightBrakeForce);
+//					rightBrakeForce = 0;
+//					leftBrakeForce = 0;
 					if (targetPositionDroneCoordinates.getNorm() < 2)
 						System.out.println("SUCCES");
 				}
 			}
+			thrust = Math.max(0, thrust);
 //			System.out.println("");
         }
 
