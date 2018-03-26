@@ -206,10 +206,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 						target = recognizer.searchForCubeInPathArea(image);
 					}
           
-          if (recognizer.getPath().getPathSize() == 0){
-            this.setFlightMode(FlightMode.LAND);
-          }
-          
 					if (this.getFlightMode() == FlightMode.LAND) {
 						if (drone.getWorldPosition().getEntry(2) < (this.getTarget().getEntry(2)+1)) {
 							if (drone.getWorldPosition().getEntry(1) > 2*hight) {
@@ -229,7 +225,11 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 							}
 						}
 					} else {
-						this.setTarget(new ArrayRealVector(new double[] {300, 300, -700}, false));
+						this.setTarget(target);
+					}
+					
+					if (recognizer.getPath().getPathSize() == 0){
+						this.setFlightMode(FlightMode.LAND);
 					}
 					
 					float XRotation = (float) Math.atan((this.getTarget().getEntry(1) - drone.getWorldPosition().getEntry(1))
