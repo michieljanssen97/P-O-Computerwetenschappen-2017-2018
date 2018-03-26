@@ -99,7 +99,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		
 
 
-		double[] targetPositionCoordinates = {50,0,0};
+		double[] targetPositionCoordinates = {5528,1.4,2371};
 		float inertiaMatrixXX = (float) (drone.getTailMass()*Math.pow(drone.getTailSize(),2) +drone.getEngineMass()*Math.pow(drone.getEngineDistance(), 2));
 		float inertiaMatrixZZ = (float) (2*(drone.getWingMass()*Math.pow(drone.getWingX(),2)));
 		float inertiaMatrixYY = inertiaMatrixXX + inertiaMatrixZZ;
@@ -733,7 +733,16 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					thrust = 0;
 				}
 			}
-			if ((targetPositionDroneCoordinates.getNorm() <= 20 + drone.getVelocity().getNorm())){
+			int factor;
+			if (droneVelocity < 10)
+				factor = 1;
+			else if (droneVelocity < 20)
+				factor = 2;
+			else if (droneVelocity < 30)
+				factor = 3;
+			else
+				factor = 4;
+			if ((targetPositionDroneCoordinates.getNorm() <= 20 + factor * drone.getVelocity().getNorm())){
 				thrust = 0;
 				if (droneVelocity >= 3) {
 					float breakforce = Math.min( 8600, (float) (droneVelocity*droneVelocity*480)/(2*(float)targetPositionDroneCoordinates.getNorm()));
@@ -757,11 +766,11 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					}
 				}
 				if (droneVelocity < 1) {
-					thrust = Math.min(2000,2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, Math.min(4300,Math.abs(leftBrakeForce - rightBrakeForce)), 0)[0] * drone.getTotalMass() + leftBrakeForce + rightBrakeForce);
+					thrust = Math.min(2000,2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, Math.min(4300,leftBrakeForce), Math.min(4300, rightBrakeForce))[0] * drone.getTotalMass() + leftBrakeForce + rightBrakeForce);
 //					rightBrakeForce = 0;
 //					leftBrakeForce = 0;
-					if (targetPositionDroneCoordinates.getNorm() < 5)
-						System.out.println("SUCCES");
+//					if (targetPositionDroneCoordinates.getNorm() < 5)
+//						System.out.println("SUCCES");
 				}
 			}
 			thrust = Math.max(0, thrust);
