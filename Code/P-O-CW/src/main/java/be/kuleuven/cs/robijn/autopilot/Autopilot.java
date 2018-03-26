@@ -643,13 +643,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 				if ((this.getFlightMode() == FlightMode.FULL_FLIGHT) && (drone.getWorldPosition().getEntry(2) < (this.getTarget().getEntry(2)+1)))
 					this.setFlightMode(FlightMode.LAND);
 			}
-        } if (this.getFlightMode() == FlightMode.TAXI) {	
-    		maxInclinationWing = 0;
-    		minInclinationWing = 0;		
-    		maxInclinationHorStab = 0;
-    		minInclinationHorStab = 0;
-    		maxInclinationVerStab = 0;
-    		minInclinationVerStab = 0;	
+        } if (this.getFlightMode() == FlightMode.TAXI) {		
 			RealVector targetPosition = new ArrayRealVector(targetPositionCoordinates);
 			RealVector targetPositionDroneCoordinates = drone.transformationToDroneCoordinates(targetPosition.subtract(drone.getWorldPosition()));
 			double droneVelocity = drone.getVelocity().getNorm();
@@ -715,7 +709,9 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					}
 				}
 				int maxVelocity;
-				if (targetPositionDroneCoordinates.getNorm() > 500)
+				if (targetPositionDroneCoordinates.getNorm() > 1500)
+					maxVelocity = 30;
+				else if (targetPositionDroneCoordinates.getNorm() > 500)
 					maxVelocity = 20;
 				else if (targetPositionDroneCoordinates.getNorm() > 200)
 					maxVelocity = 10;
