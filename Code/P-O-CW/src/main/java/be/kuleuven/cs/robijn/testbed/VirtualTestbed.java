@@ -130,7 +130,8 @@ public class VirtualTestbed implements TestBed {
 		PerspectiveCamera camera = getRenderer().createPerspectiveCamera();
 		camera.setHorizontalFOV(drone.getConfig().getHorizontalAngleOfView());
 		camera.setVerticalFOV(drone.getConfig().getVerticalAngleOfView());
-		camera.setDronesHidden(true);
+		camera.addVisibilityFilter(obj -> obj != drone); //Hide drone from itself
+		camera.addVisibilityFilter(Camera.HIDE_DEBUG_OBJECTS);
 		drone.addChild(camera);
 		return camera;
 	}

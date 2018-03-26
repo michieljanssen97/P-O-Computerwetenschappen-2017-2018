@@ -216,12 +216,10 @@ public class OpenGLRenderer implements Renderer {
         Matrix4f viewProjectionMatrix = new Matrix4f(projectionMatrix).mul(viewMatrix);
 
         //Render ground if needed
-        if(camera.isGroundDrawn()){
-            WorldObject groundObj = new WorldObject();
-            groundObj.setScale(new ArrayRealVector(new double[]{10000, 1, 10000}, false));
-            RealMatrix transform = groundObj.getObjectToWorldTransform();
-            renderModel(groundModel, viewProjectionMatrix, transform);
-        }
+        WorldObject groundObj = new WorldObject();
+        groundObj.setScale(new ArrayRealVector(new double[]{10000, 1, 10000}, false));
+        RealMatrix transform = groundObj.getObjectToWorldTransform();
+        renderModel(groundModel, viewProjectionMatrix, transform);
 
         //Render objects
         for (WorldObject child : worldRoot.getChildren()){
@@ -229,7 +227,9 @@ public class OpenGLRenderer implements Renderer {
         }
 
         //Render debug objects if needed
-        if(camera.areDebugObjectsDrawn()){
+        WorldObject dummyLine = new WorldObject();
+        dummyLine.setName("debug-line");
+        if(camera.isVisible(dummyLine)){
             for (Line line : linesToDraw){
                 renderLine(line, viewProjectionMatrix);
             }
@@ -242,6 +242,10 @@ public class OpenGLRenderer implements Renderer {
             renderChildren(child, viewProjectionMatrix, camera);
         }
 
+        if(!camera.isVisible(obj)){
+            return;
+        }
+
         Model model = null;
         if(obj instanceof Box){
             model = boxModel;
@@ -249,7 +253,7 @@ public class OpenGLRenderer implements Renderer {
             float[] rgbValues = new float[3];
             boxColor.getRGBColorComponents(rgbValues);
             model.getShader().setUniformFloat("color", rgbValues);
-        }else if(obj instanceof Drone && !camera.areDronesHidden()){
+        }else if(obj instanceof Drone){
             model = droneModel;
         }else if(obj instanceof Gate){
             model = gateModel;
@@ -274,7 +278,7 @@ public class OpenGLRenderer implements Renderer {
                 Billboard icon = null;
                 if(obj instanceof Box){
                     icon = boxIcon;
-                }else if(obj instanceof Drone && !camera.areDronesHidden()){
+                }else if(obj instanceof Drone){
                     icon = droneIcon;
                 }else{
                     return;

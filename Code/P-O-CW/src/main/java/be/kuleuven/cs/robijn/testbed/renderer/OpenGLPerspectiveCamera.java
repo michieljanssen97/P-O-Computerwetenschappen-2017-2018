@@ -1,6 +1,5 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
-import be.kuleuven.cs.robijn.common.Camera;
 import be.kuleuven.cs.robijn.common.PerspectiveCamera;
 
 public class OpenGLPerspectiveCamera extends PerspectiveCamera {
@@ -8,9 +7,6 @@ public class OpenGLPerspectiveCamera extends PerspectiveCamera {
 	private float fovVertical = (float)Math.PI/2f;
 	private float zNear = 0.1f;
 	private float zFar = 100000f;
-	private boolean areDronesHidden;
-	private boolean drawGround = true;
-	private boolean drawDebugObjects;
 
 	@Override
 	public float getHorizontalFOV() {
@@ -62,33 +58,5 @@ public class OpenGLPerspectiveCamera extends PerspectiveCamera {
 			throw new IllegalArgumentException("'zFar' must be a positive number, not NaN or infinite");
 		}
 		this.zFar = zFar;
-	}
-
-	@Override
-	public void setDronesHidden(boolean renderDrones) {
-		areDronesHidden = renderDrones;
-	}
-
-	@Override
-	public boolean areDronesHidden() {
-		return areDronesHidden;
-	}
-
-	public void setDrawGround(boolean drawGround) {
-		this.drawGround = drawGround;
-	}
-
-	public boolean isGroundDrawn() {
-		return drawGround;
-	}
-
-	@Override
-	public boolean areDebugObjectsDrawn() {
-		return drawDebugObjects;
-	}
-
-	@Override
-	public void setDrawnDebugObjects(boolean drawDebugObjects) {
-		this.drawDebugObjects = drawDebugObjects;
 	}
 }

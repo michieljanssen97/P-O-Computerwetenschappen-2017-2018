@@ -1,34 +1,26 @@
 package be.kuleuven.cs.robijn.gui;
 
 import be.kuleuven.cs.robijn.common.*;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
-import javafx.util.StringConverter;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.RealVector;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.HashMap;
-import java.util.Objects;
 
 /**
  * GUI component that displays a 3D render of the world, along with several buttons for changing the view
@@ -104,7 +96,6 @@ public class CameraViewControl extends AnchorPane {
             sideCamera.setRelativePosition(new ArrayRealVector(new double[]{1000, 5, -55}, false));
             sideCamera.setRelativeRotation(new Rotation(new Vector3D(0, 1, 0), Math.PI/2d));
             sideCamera.setFarPlane(100000);
-            sideCamera.setDrawnDebugObjects(true);
             world.addChild(sideCamera);
 
             topCamera = getSimulation().getTestBed().getRenderer().createOrthographicCamera();
@@ -116,7 +107,6 @@ public class CameraViewControl extends AnchorPane {
                     .applyTo(new Rotation(new Vector3D(0, 1, 0), Math.PI/2d));
             topCamera.setRelativeRotation(rot);
             topCamera.setFarPlane(100000);
-            topCamera.setDrawnDebugObjects(true);
             world.addChild(topCamera);
 
             chaseCamera = getSimulation().getTestBed().getRenderer().createPerspectiveCamera();
@@ -124,7 +114,6 @@ public class CameraViewControl extends AnchorPane {
             chaseCamera.setVerticalFOV((float)Math.toRadians(120));
             chaseCamera.setName(CameraViewControl.THIRDPERSON_CAMERA_ID);
             chaseCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 0d, 7}, false));
-            chaseCamera.setDrawnDebugObjects(true);
             getSimulation().addOnUpdateEventHandler(new UpdateEventHandler((inputs, outputs) -> {
                 Drone drone = activeDroneProperty.get();
                 if(drone != null){
@@ -146,9 +135,8 @@ public class CameraViewControl extends AnchorPane {
                 droneCamera.setHorizontalFOV((float)Math.toRadians(120));
                 droneCamera.setVerticalFOV((float)Math.toRadians(120));
                 droneCamera.setName(CameraViewControl.DRONE_CAMERA_ID);
-                droneCamera.setDronesHidden(true);
+                droneCamera.addVisibilityFilter(obj -> obj != newDrone); //Hide drone from itself
                 droneCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 0, 0}, false));
-                droneCamera.setDrawnDebugObjects(true);
                 newDrone.addChild(droneCamera);
             }
             setActiveCamera((String)perspectiveToggleGroup.getSelectedToggle().getUserData());
