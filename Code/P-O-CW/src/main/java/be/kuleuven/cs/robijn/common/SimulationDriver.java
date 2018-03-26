@@ -21,6 +21,7 @@ public class SimulationDriver {
     private Autopilot autoPilot;
     private boolean simulationFinished;
     private boolean simulationCrashed;
+    private boolean outOfControl;
     private boolean simulationThrewException;
     private boolean pathSet = false;
     private AutopilotInputs latestAutopilotInputs;
@@ -41,7 +42,7 @@ public class SimulationDriver {
     public SimulationDriver(List<Box> boxes, AutopilotConfig config, Stopwatch stopwatch){
         this.config = config;
         this.stopwatch = stopwatch;
-    	RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -43}, false);
+    	RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, 0}, false);
         testBed = new VirtualTestbed(boxes, config, initialVelocity);
         autoPilot = new Autopilot();
         latestAutopilotInputs = testBed.getInputs();
@@ -58,7 +59,7 @@ public class SimulationDriver {
         else {
         	stopwatch.setPaused(false);
         }
-        if(!stopwatch.isPaused() && !simulationFinished && !simulationCrashed && !simulationThrewException) {
+        if(!stopwatch.isPaused() && !simulationFinished && !simulationCrashed && !outOfControl && !simulationThrewException) {
         	try {
         	    //Reset renderer
                 testBed.getRenderer().clearDebugObjects();
@@ -77,15 +78,15 @@ public class SimulationDriver {
 
                 latestAutopilotInputs = testBed.getInputs();
         	} catch (CrashException exc1){
-                simulationCrashed = true;
+        		simulationCrashed = true;
                 System.err.println("Plane crashed!");
         		exc1.printStackTrace();
         	} catch (IllegalArgumentException exc2) {
-        		simulationCrashed = true;
+        		outOfControl = true;
         		System.err.println("Autopilot failed!");
         		exc2.printStackTrace();
         	} catch (NullPointerException exc3) {
-        		simulationCrashed = true;
+        		outOfControl = true;
         		System.err.println("Autopilot failed!");
         		exc3.printStackTrace();
         	}
@@ -118,6 +119,8 @@ public class SimulationDriver {
     public boolean hasSimulationCrashed(){return simulationCrashed;}
 
     public boolean hasSimulationThrownException(){return simulationThrewException;}
+    
+    public boolean isOutOfControl(){return outOfControl;}
     
     public boolean isPathSet() {return pathSet;}
 

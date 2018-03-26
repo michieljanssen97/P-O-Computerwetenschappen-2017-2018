@@ -14,7 +14,7 @@ import interfaces.*;
 public class Autopilot extends WorldObject implements interfaces.Autopilot {
 	private static boolean drawChartPositions = false;
 	public static ExpPosition exppos = new ExpPosition();
-	public FlightMode currentFlightMode = FlightMode.FULL_FLIGHT;
+	public FlightMode currentFlightMode = FlightMode.ASCEND;
 	
 	public AutopilotConfig getConfig() {
 		return this.config;
@@ -90,7 +90,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		float maxYVelocity = Float.MAX_VALUE;
 		float correctionFactor = 3.0f;
 		float correctionDistance = 30.0f;
-		float pitchTakeOff = (float) Math.toRadians(10.0);
+		float pitchTakeOff = (float) Math.toRadians(30.0);
 		float targetVelocity = -43f;
 		float hight = 50;
 		
@@ -105,13 +105,30 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			if ((maxPitch > pitchTakeOff) || (Float.isNaN(maxPitch)))
 				maxPitch = pitchTakeOff;
 			
-			float pitchNew = drone.getPitch();
-			if (pitchNew > Math.PI)
-				pitchNew -= 2*Math.PI;
+			RealVector vel = drone.getVelocity().add(drone.getWorldPosition());
+			float XRotation = (float) Math.atan((vel.getEntry(1) - drone.getWorldPosition().getEntry(1))
+					/(drone.getWorldPosition().getEntry(2) - vel.getEntry(2)));
+			if (XRotation > maxPitch)
+				XRotation = maxPitch;
+			XRotation -= drone.getPitch();
+			if (XRotation < - Math.PI)
+				XRotation += 2*Math.PI;
+			else if (XRotation > Math.PI)
+				XRotation -= 2*Math.PI;
+			
+			float targetPitchAngularVelocity = (XRotation)/turningTime;
 			float pitchAngularVelocity = drone.getPitchAngularVelocity();
-			float pitchAngularAcceleration = (maxPitch - pitchAngularVelocity)/turningTime;
+			if (pitchAngularVelocity > maxPitchAngularVelocity)
+				pitchAngularVelocity = maxPitchAngularVelocity;
+			else if (pitchAngularVelocity < -maxPitchAngularVelocity)
+				pitchAngularVelocity = -maxPitchAngularVelocity;
+			float pitchAngularAcceleration = (targetPitchAngularVelocity - pitchAngularVelocity)/turningTime;
 			if (! Float.isNaN(this.getPreviousPitchAngularAccelerationError()))
 				pitchAngularAcceleration -= this.getPreviousPitchAngularAccelerationError();
+			if (pitchAngularAcceleration > maxPitchAngularAcceleration)
+				pitchAngularAcceleration = maxPitchAngularAcceleration;
+			else if (pitchAngularAcceleration < -maxPitchAngularAcceleration)
+				pitchAngularAcceleration = -maxPitchAngularAcceleration;
 			
 			FunctionCalculator functionCalculator = new FunctionCalculator(drone, 0, pitchAngularAcceleration, 0, 0, 0);
 			EquationSolver solver = new EquationSolver(drone, this.getConfig(), functionCalculator);
@@ -232,11 +249,11 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 						this.setFlightMode(FlightMode.LAND);
 					}
 					
-					float XRotation = (float) Math.atan((this.getTarget().getEntry(1) - drone.getWorldPosition().getEntry(1))
-							/(drone.getWorldPosition().getEntry(2) - this.getTarget().getEntry(2)));
-					float YRotation = (float) Math.atan((drone.getWorldPosition().getEntry(0) - this.getTarget().getEntry(0))
-							/(drone.getWorldPosition().getEntry(2) - this.getTarget().getEntry(2)));
-					if ((drone.getWorldPosition().getEntry(2) - this.getTarget().getEntry(2)) < 0) {
+					float XRotation = (float) Math.atan((target.getEntry(1) - drone.getWorldPosition().getEntry(1))
+							/(drone.getWorldPosition().getEntry(2) - target.getEntry(2)));
+					float YRotation = (float) Math.atan((drone.getWorldPosition().getEntry(0) - target.getEntry(0))
+							/(drone.getWorldPosition().getEntry(2) - target.getEntry(2)));
+					if ((drone.getWorldPosition().getEntry(2) - target.getEntry(2)) < 0) {
 						YRotation += Math.PI;
 						XRotation = -XRotation;
 					}
@@ -1264,10 +1281,10 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 
 		if (! isValidConfig(config))
 			throw new IllegalArgumentException();
-		RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, -43}, false);
+		RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, 0}, false);
 		Drone drone = new Drone(config, initialVelocity);
-		//drone.setRelativePosition(new ArrayRealVector(new double[] {0, -config.getWheelY() + config.getTyreRadius(), 0}, false));
-		drone.setRelativePosition(new ArrayRealVector(new double[] {0, 100, 0}, false));
+		drone.setRelativePosition(new ArrayRealVector(new double[] {0, -config.getWheelY() + config.getTyreRadius(), 0}, false));
+		//drone.setRelativePosition(new ArrayRealVector(new double[] {0, 100, 0}, false));
 		this.addChild(drone);
 		this.config = config;
 		RealVector previousPosition = drone.getWorldPosition();
