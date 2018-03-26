@@ -14,6 +14,7 @@ import interfaces.*;
 public class Autopilot extends WorldObject implements interfaces.Autopilot {
 	private static boolean drawChartPositions = false;
 	public static ExpPosition exppos = new ExpPosition();
+	public FlightMode currentFlightMode = FlightMode.TURN;
 	
 	public AutopilotConfig getConfig() {
 		return this.config;
@@ -73,7 +74,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		float leftBrakeForce = 0;
 		float rightBrakeForce = 0;
 		float frontBrakeForce = 0;
-		
+
 		float turningTime = 0.5f;
 		float xMovementTime = 3f;
 		float maxRoll = (float) Math.toRadians(45.0);
@@ -92,8 +93,8 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		float pitchTakeOff = (float) Math.toRadians(10.0);
 		float targetVelocity = -43f;
 		float hight = 50;
-			
-		if (this.getMode() == 2) { //ascend
+		
+		if (this.getFlightMode() == FlightMode.ASCEND) { //ascend
 			thrust = this.getConfig().getMaxThrust();
 			
 			float takeOffSpeed = (float) Math.sqrt((-drone.getTotalGravitationalForce().getEntry(1))
@@ -128,11 +129,12 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			}
 			
 			if (drone.getWorldPosition().getEntry(1) > this.getConfig().getTailSize())
-				this.setMode(1);
+				this.setFlightMode(FlightMode.FULL_FLIGHT);
 		}
-		else if ((this.getMode() == 1) || (this.getMode() == 4)) {
+
+		else if ((this.getFlightMode() == FlightMode.FULL_FLIGHT) || (this.getFlightMode() == FlightMode.LAND)) {
 			if ((-this.getConfig().getWheelY() + this.getConfig().getTyreRadius()) >= drone.getWorldPosition().getEntry(1)) {
-				this.setMode(3);
+				this.setFlightMode(FlightMode.TAXI);
 			}
 			else {
 				boolean finished = false;
@@ -196,7 +198,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 						imageYRotation = (float) ((5.0/4.0)*imageYRotation + (1.0/4.0)*heading);
 					}
 					
-					if (this.getMode() == 4) {
+					if (this.getFlightMode() == FlightMode.LAND) {
 						if (drone.getWorldPosition().getEntry(2) < (this.getTarget().getEntry(2)+1)) {
 							if (drone.getWorldPosition().getEntry(1) > 2*hight) {
 								RealVector vector = drone.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, -10*hight}, false));
@@ -440,7 +442,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 //				if ((this.getMode() == 1) && (drone.getWorldPosition().getEntry(2) < (this.getTarget().getEntry(2)+1)))
 //					this.setMode(4);
 			}
-        } else if (this.getMode() == 100) {
+        } else if (this.getFlightMode() == FlightMode.TURN) {
         	boolean finished = false;
 			int iterations = 1;
 			while ((! finished) && (iterations < 5)) {
@@ -502,7 +504,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					imageYRotation = (float) ((5.0/4.0)*imageYRotation + (1.0/4.0)*heading);
 				}
 				
-				if (this.getMode() == 4) {
+				if (this.getFlightMode() == FlightMode.LAND) {
 					if (drone.getWorldPosition().getEntry(2) < (this.getTarget().getEntry(2)+1)) {
 						if (drone.getWorldPosition().getEntry(1) > 2*hight) {
 							RealVector vector = drone.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, -10*hight}, false));
@@ -716,12 +718,107 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 								+ drone.transformationToDroneCoordinates(transformationMatrix.operate(new ArrayRealVector(new double[] {0, 0, -thrust}, false))).getEntry(0))
 								/drone.getTotalMass()));
 			}
-        } if (this.getMode() == 3) {
-        	frontBrakeForce = 0;
-        	leftBrakeForce = 0;
-        	rightBrakeForce = 0;
+        } if (this.getFlightMode() == FlightMode.TAXI) {	
+			double[] targetPositionCoordinates = {500,0,-200};
+			RealVector targetPosition = new ArrayRealVector(targetPositionCoordinates);
+			RealVector targetPositionDroneCoordinates = drone.transformationToDroneCoordinates(targetPosition.subtract(drone.getWorldPosition()));
+			double droneVelocity = drone.getVelocity().getNorm();
+			float targetHeading = (float) Math.atan(targetPositionDroneCoordinates.getEntry(0)/targetPositionDroneCoordinates.getEntry(2));
+			if (targetPositionDroneCoordinates.getEntry(2) > 0 && targetHeading > 0) {
+				targetHeading -= Math.PI;
+
+			}
+			if (targetPositionDroneCoordinates.getEntry(2) > 0 && targetHeading < 0) {
+				targetHeading += Math.PI;
+			}
+			if (targetPositionDroneCoordinates.getEntry(0) == 0 && targetPositionDroneCoordinates.getEntry(2) < 0) {
+				thrust = 200;
+			}
+			else if ((- targetPositionDroneCoordinates.getEntry(2) < Math.tan(Math.PI/3) * Math.abs(targetPositionDroneCoordinates.getEntry(0)) && targetPositionDroneCoordinates.getEntry(2) < 0) || targetPositionDroneCoordinates.getEntry(2) > 0){
+//				System.out.println("SCHERPE BOCHT");
+				if (drone.getVelocity().getNorm() > 3)
+					thrust = 0;
+				else
+					thrust = 1500;
+				if (targetPositionDroneCoordinates.getEntry(0) < 0)
+					leftBrakeForce = 500;
+				else
+					rightBrakeForce = 500;
+			}else {
+//				System.out.println("GEEN SCHERPE BOCHT");
+				float rotationNecessary = targetHeading;
+				if (rotationNecessary > 2* Math.PI)
+					rotationNecessary -= 2* Math.PI;
+				if (rotationNecessary > 0 && rotationNecessary < Math.PI) {
+//					System.out.println("BOCHT NAAR LINKS");
+					if (rotationNecessary > Math.PI/18) {
+						leftBrakeForce = (float) Math.abs(500*targetPositionDroneCoordinates.getEntry(0)/targetPositionDroneCoordinates.getEntry(2));
+						rightBrakeForce = 0;
+						thrust = Math.min(2000,2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, Math.min(4300,leftBrakeForce), 0)[0] * drone.getTotalMass() + leftBrakeForce + 200);
+					}
+					else if (rotationNecessary < Math.PI/18 && drone.getHeadingAngularVelocity() > rotationNecessary/10) {
+						leftBrakeForce = 0;
+						rightBrakeForce = 0;
+						thrust = 0;
+					}
+					else if (rotationNecessary < Math.PI/18 && drone.getHeadingAngularVelocity() < rotationNecessary/10) {
+						leftBrakeForce = (float) Math.abs(500*targetPositionDroneCoordinates.getEntry(0)/targetPositionDroneCoordinates.getEntry(2));
+						rightBrakeForce = 0;
+						thrust = Math.min(2000,2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, Math.min(4300,leftBrakeForce), 0)[0] * drone.getTotalMass() + leftBrakeForce + 200);
+					}
+				}
+				else if (rotationNecessary > - Math.PI && rotationNecessary < 0) {
+//					System.out.println("BOCHT NAAR RECHTS");
+					if (rotationNecessary > - Math.PI/18 && drone.getHeadingAngularVelocity() < rotationNecessary/10) {
+						rightBrakeForce = 0;
+						leftBrakeForce = 0;
+						thrust = 0;
+					}
+					else if (rotationNecessary > - Math.PI/18 && drone.getHeadingAngularVelocity() < Math.abs((double) rotationNecessary)/10) {
+						rightBrakeForce = (float) Math.abs(1000*targetPositionDroneCoordinates.getEntry(0)/targetPositionDroneCoordinates.getEntry(2));
+						leftBrakeForce = 0;
+						thrust = Math.min(2000,2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, 0, Math.min(4300,rightBrakeForce))[0] * drone.getTotalMass() + rightBrakeForce + 500);
+					}
+					else if (rotationNecessary < - Math.PI/18){
+						rightBrakeForce = (float) Math.abs(1000*targetPositionDroneCoordinates.getEntry(0)/targetPositionDroneCoordinates.getEntry(2));
+						leftBrakeForce = 0;
+						thrust = Math.min(2000,2.5f*drone.getAngularAccelerations(0, 0, 0, 0, 0, 0, Math.min(4300,rightBrakeForce))[0]*drone.getTotalMass() + rightBrakeForce + 500);
+					}
+				}
+				int maxVelocity;
+				if (targetPositionDroneCoordinates.getNorm() > 500)
+					maxVelocity = 20;
+				else if (targetPositionDroneCoordinates.getNorm() > 200)
+					maxVelocity = 10;
+				else if (targetPositionDroneCoordinates.getNorm() > 100)
+					maxVelocity = 5;
+				else
+					maxVelocity = 3;
+				if (drone.getVelocity().getNorm() > maxVelocity) {
+					thrust = 0;
+				}
+			}
+			if ((targetPositionDroneCoordinates.getNorm() <= 20 + drone.getVelocity().getNorm() / 5)){
+				thrust = 0;
+				if (droneVelocity >= 1) {
+					float breakforce = Math.min( 8600, (float) (droneVelocity*droneVelocity*480)/(2*(float)targetPositionDroneCoordinates.getNorm()));
+					rightBrakeForce += breakforce/2f;
+					rightBrakeForce = Math.min(rightBrakeForce, 4300);
+					leftBrakeForce += breakforce/2f;
+					leftBrakeForce = Math.min(leftBrakeForce, 4300);
+				}
+				if (droneVelocity < 1) {
+					thrust = Math.min(2000,2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, Math.min(4300,Math.abs(leftBrakeForce - rightBrakeForce)), 0)[0] * drone.getTotalMass() + leftBrakeForce + rightBrakeForce);
+//					rightBrakeForce = 0;
+//					leftBrakeForce = 0;
+					if (targetPositionDroneCoordinates.getNorm() < 2)
+						System.out.println("SUCCES");
+				}
+			}
+			thrust = Math.max(0, thrust);
+//			System.out.println("");
         }
-        
+
         final float thrustOutput = thrust;
         final float leftWingInclinationOutput = leftWingInclination;
         final float rightWingInclinationOutput = rightWingInclination;
@@ -868,27 +965,17 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			throw new IllegalArgumentException();
 		this.previousRollAngularAccelerationError = previousRollAngularAccelerationError;
 	}
-	
-	private int mode = 1;
-	
-	/**
-	 * 1 == full flight, 2 == ascend, 3 == taxi, 4 == land, 5 == stopped
-	 */
-	public float getMode() {
-		return this.mode;
+
+	public FlightMode getFlightMode() {
+		return this.currentFlightMode;
 	}
 	
-	public static boolean isValidMode(int mode) {
-		return ((mode == 1) || (mode == 2) || (mode == 3) || (mode == 4) || (mode == 5));
-	}
-	
-	public void setMode(int mode) throws IllegalArgumentException {
-		if (! isValidMode(mode))
-			throw new IllegalArgumentException();
-		this.mode = mode;
+	public void setFlightMode(FlightMode mode) throws IllegalArgumentException {
+		this.currentFlightMode = mode;
 	}
 	
 	private RealVector target = null;
+
 	
 	public RealVector getTarget() {
 		return this.target;

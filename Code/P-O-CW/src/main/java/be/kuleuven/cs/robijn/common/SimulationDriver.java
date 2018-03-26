@@ -22,6 +22,7 @@ public class SimulationDriver {
     private boolean simulationFinished;
     private boolean simulationCrashed;
     private boolean simulationThrewException;
+    private boolean pathSet = false;
     private AutopilotInputs latestAutopilotInputs;
     private AutopilotOutputs latestAutopilotOutputs;
 
@@ -52,8 +53,12 @@ public class SimulationDriver {
      */
     public void runUpdate(){
         stopwatch.tick();
-
-        if(!stopwatch.isPaused() && !simulationFinished && !simulationCrashed && !simulationThrewException){
+        if (! pathSet)
+        	stopwatch.setPaused(true);
+        else {
+        	stopwatch.setPaused(false);
+        }
+        if(!stopwatch.isPaused() && !simulationFinished && !simulationCrashed && !simulationThrewException) {
         	try {
         	    //Reset renderer
                 testBed.getRenderer().clearDebugObjects();
@@ -103,12 +108,18 @@ public class SimulationDriver {
     public boolean isSimulationPaused() {
         return stopwatch.isPaused();
     }
+    
+    public void notifyPathSet() {
+    	this.pathSet = true;
+    }
 
     public boolean hasSimulationFinished() {return simulationFinished;}
 
     public boolean hasSimulationCrashed(){return simulationCrashed;}
 
     public boolean hasSimulationThrownException(){return simulationThrewException;}
+    
+    public boolean isPathSet() {return pathSet;}
 
     public TestBed getTestBed(){
         return testBed;
