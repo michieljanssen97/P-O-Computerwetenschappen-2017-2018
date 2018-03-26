@@ -215,7 +215,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 							}
 						}
 					} else {
-						this.setTarget(new ArrayRealVector(new double[] {300, 100, -1000}, false));
+						this.setTarget(new ArrayRealVector(new double[] {300, 300, -700}, false));
 					}
 					
 					float XRotation = (float) Math.atan((this.getTarget().getEntry(1) - drone.getWorldPosition().getEntry(1))
@@ -245,7 +245,23 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					if (pitchNew > Math.PI)
 						pitchNew -= 2*Math.PI;
 					
-					float targetHeadingAngularVelocity = (YRotation)/turningTime;
+					RealVector vel = drone.getVelocity().add(drone.getWorldPosition());
+					float XRotation2 = (float) Math.atan((vel.getEntry(1) - drone.getWorldPosition().getEntry(1))
+							/(drone.getWorldPosition().getEntry(2) - vel.getEntry(2)));
+					float YRotation2 = (float) Math.atan((drone.getWorldPosition().getEntry(0) - vel.getEntry(0))
+							/(drone.getWorldPosition().getEntry(2) - vel.getEntry(2)));
+					XRotation2 -= drone.getPitch();
+					YRotation2 -= drone.getHeading();
+					if (XRotation2 < - Math.PI)
+						XRotation2 += 2*Math.PI;
+					else if (XRotation2 > Math.PI)
+						XRotation2 -= 2*Math.PI;
+					if (YRotation2 < - Math.PI)
+						YRotation2 += 2*Math.PI;
+					else if (YRotation2 > Math.PI)
+						YRotation2 -= 2*Math.PI;
+					
+					float targetHeadingAngularVelocity = (YRotation2)/turningTime;
 					float headingAngularVelocity = drone.getHeadingAngularVelocity();
 					if (headingAngularVelocity > maxHeadingAngularVelocity)
 						headingAngularVelocity = maxHeadingAngularVelocity;
@@ -259,7 +275,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					else if (headingAngularAcceleration < -maxHeadingAngularAcceleration)
 						headingAngularAcceleration = -maxHeadingAngularAcceleration;
 					
-					float targetPitchAngularVelocity = (XRotation)/turningTime;
+					float targetPitchAngularVelocity = (XRotation2)/turningTime;
 					float pitchAngularVelocity = drone.getPitchAngularVelocity();
 					if (pitchAngularVelocity > maxPitchAngularVelocity)
 						pitchAngularVelocity = maxPitchAngularVelocity;
@@ -424,11 +440,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 //				if ((this.getMode() == 1) && (drone.getWorldPosition().getEntry(2) < (this.getTarget().getEntry(2)+1)))
 //					this.setMode(4);
 			}
-        } if (this.getMode() == 3) {
-        	frontBrakeForce = 0;
-        	leftBrakeForce = 0;
-        	rightBrakeForce = 0;
-        } else {
+        } else if (this.getMode() == 100) {
         	boolean finished = false;
 			int iterations = 1;
 			while ((! finished) && (iterations < 5)) {
@@ -704,6 +716,10 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 								+ drone.transformationToDroneCoordinates(transformationMatrix.operate(new ArrayRealVector(new double[] {0, 0, -thrust}, false))).getEntry(0))
 								/drone.getTotalMass()));
 			}
+        } if (this.getMode() == 3) {
+        	frontBrakeForce = 0;
+        	leftBrakeForce = 0;
+        	rightBrakeForce = 0;
         }
         
         final float thrustOutput = thrust;
