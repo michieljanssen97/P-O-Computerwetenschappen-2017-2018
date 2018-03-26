@@ -56,9 +56,11 @@ public class SimulationDriver {
         stopwatch.tick();
         if (! pathSet)
         	stopwatch.setPaused(true);
-        else {
+        else if (start) {
         	stopwatch.setPaused(false);
+        	start = false;
         }
+        
         if(!stopwatch.isPaused() && !simulationFinished && !simulationCrashed && !outOfControl && !simulationThrewException) {
         	try {
         	    //Reset renderer
@@ -113,6 +115,8 @@ public class SimulationDriver {
     public void notifyPathSet() {
     	this.pathSet = true;
     }
+    
+    private boolean start = true;
 
     public boolean hasSimulationFinished() {return simulationFinished;}
 
