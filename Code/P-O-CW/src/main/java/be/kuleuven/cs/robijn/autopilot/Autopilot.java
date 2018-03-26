@@ -14,7 +14,7 @@ import interfaces.*;
 public class Autopilot extends WorldObject implements interfaces.Autopilot {
 	private static boolean drawChartPositions = false;
 	public static ExpPosition exppos = new ExpPosition();
-	public FlightMode currentFlightMode = FlightMode.TURN;
+	public FlightMode currentFlightMode = FlightMode.FULL_FLIGHT;
 	
 	public AutopilotConfig getConfig() {
 		return this.config;
@@ -196,6 +196,13 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					if ((distanceToCube*Math.cos(heading + imageYRotation)*Math.cos(pitch + imageXRotation)) > correctionDistance) {
 						imageXRotation = (float) ((3.0/2.0)*imageXRotation + (1.0/2.0)*pitch);
 						imageYRotation = (float) ((5.0/4.0)*imageYRotation + (1.0/4.0)*heading);
+					}
+					
+					RealVector target;
+					if (recognizer.isFollowingPathCoordinates()) {
+						target = recognizer.getCurrentPathTarget();
+					} else {
+						target = recognizer.searchForCubeInPathArea(image);
 					}
 					
 					if (this.getFlightMode() == FlightMode.LAND) {
