@@ -215,7 +215,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 							}
 						}
 					} else {
-						this.setTarget(new ArrayRealVector(new double[] {300, 100, -700}, false));
+						this.setTarget(new ArrayRealVector(new double[] {300, 100, -1000}, false));
 					}
 					
 					float XRotation = (float) Math.atan((this.getTarget().getEntry(1) - drone.getWorldPosition().getEntry(1))
@@ -853,7 +853,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		this.previousRollAngularAccelerationError = previousRollAngularAccelerationError;
 	}
 	
-	private int mode = 100;
+	private int mode = 1;
 	
 	/**
 	 * 1 == full flight, 2 == ascend, 3 == taxi, 4 == land, 5 == stopped
