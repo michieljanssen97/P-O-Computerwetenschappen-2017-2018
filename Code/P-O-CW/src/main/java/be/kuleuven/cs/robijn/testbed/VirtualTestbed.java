@@ -43,7 +43,8 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		this.config = config;
 		//Add drone to world
 		Drone drone = new Drone(config, initialVelocity);
-		drone.setRelativePosition(new ArrayRealVector(new double[] {0, -config.getWheelY() + config.getTyreRadius(), 0}, false));
+		//drone.setRelativePosition(new ArrayRealVector(new double[] {0, -config.getWheelY() + config.getTyreRadius(), 0}, false));
+		drone.setRelativePosition(new ArrayRealVector(new double[] {0, 100, 0}, false));
 		this.addChild(drone);
 
 		//Add boxes to world
@@ -58,9 +59,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		//Box box = this.getFirstChildOfType(Box.class);
 		Box box = getClosestBox(drone);
 
-		float stopDistanceToBox = 4;
-		float cubeRadius = (float) 0.5;
-		float stopDistanceToCenterBox = stopDistanceToBox + cubeRadius;
+		float stopDistanceToCenterBox = 3;
 		
 		//Check if the drone reached a cube
 		//true if the center of mass of the drone is in a specified distance of the center of a cube
@@ -205,7 +204,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		
 		if (useDiffEquations){
 //			FirstOrderIntegrator dp853 = new DormandPrince853Integrator(1.0e-8, 100.0, 1.0e-5, 1.0e-5);
-			FirstOrderIntegrator rk4 = new ClassicalRungeKuttaIntegrator(secondsSinceLastUpdate/10);
+			FirstOrderIntegrator rk4 = new ClassicalRungeKuttaIntegrator(secondsSinceLastUpdate);
 			FirstOrderDifferentialEquations ode = new SystemDifferentialEquations(drone, output);
 			double[] y = new double[] { drone.getWorldPosition().getEntry(0), drone.getVelocity().getEntry(0), 
 					drone.getWorldPosition().getEntry(1), drone.getVelocity().getEntry(1),
