@@ -104,7 +104,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		float maxInclinationVerStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float) Math.toRadians(1.0), drone, 3);
 		float minInclinationVerStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float) Math.toRadians(1.0), drone, 3);	
 		
-		double[] targetPositionCoordinates = {0,0,50};
+		double[] targetPositionCoordinates = {0,0,200};
 		float inertiaMatrixXX = (float) (drone.getTailMass()*Math.pow(drone.getTailSize(),2) +drone.getEngineMass()*Math.pow(drone.getEngineDistance(), 2));
 		float inertiaMatrixZZ = (float) (2*(drone.getWingMass()*Math.pow(drone.getWingX(),2)));
 		float inertiaMatrixYY = inertiaMatrixXX + inertiaMatrixZZ;
