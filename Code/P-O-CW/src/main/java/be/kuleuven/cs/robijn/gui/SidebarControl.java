@@ -161,6 +161,7 @@ public class SidebarControl extends VBox {
             Path newPath = PathEditorControl.showDialog((Stage)this.editPathButton.getScene().getWindow());
             if(newPath != null){
                 this.getSimulation().getAutoPilot().setPath(newPath);
+                this.getSimulation().notifyPathSet();
             }
         });
     }
