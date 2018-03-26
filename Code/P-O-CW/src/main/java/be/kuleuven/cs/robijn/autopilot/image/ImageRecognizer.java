@@ -421,7 +421,7 @@ public class ImageRecognizer {
 		RealVector path = this.currentPathTarget;
 		double[] drone = getDronePositionCoordinates();
 		float distanceToPath = (float) Math.sqrt(Math.pow(path.getEntry(0) - drone[0], 2) + Math.pow(path.getEntry(1) - drone[1], 2) + Math.pow(path.getEntry(2) - drone[2], 2));
-		if (distanceToPath <= 100)
+		if (distanceToPath <= 150)
 			followExactCoordinates();
 		
 		return path;
@@ -464,7 +464,7 @@ public class ImageRecognizer {
 			setPathTarget(getClosestPathXYZ());
 		else {
 			double[] dronePos = getDronePositionCoordinates();
-			dronePos[2] = dronePos[2]-100;
+			dronePos[2] = dronePos[2]-1000;
 			nextPath = new ArrayRealVector(dronePos);
 			setPathTarget(nextPath);
 		}
@@ -480,47 +480,33 @@ public class ImageRecognizer {
 		ImageRecognizerCube toFollow;
 		float toFollowDistance;
 		
-//		if (!this.currentCubeColorCalculated) {
-			float[] curPos = {(float)dronePosition.getEntry(0), (float)dronePosition.getEntry(1), (float)dronePosition.getEntry(2)};
-			float minimum = Float.POSITIVE_INFINITY;
-			ImageRecognizerCube closest = null;
-			if (getImageRecognizerCubesFromImage(im).size() == 0) {
-				followNewPathCoordinates();
-				return getCurrentPathTarget();
+		float[] curPos = {(float)dronePosition.getEntry(0), (float)dronePosition.getEntry(1), (float)dronePosition.getEntry(2)};
+		float minimum = Float.POSITIVE_INFINITY;
+		ImageRecognizerCube closest = null;
+		if (currentCubeColorCalculated && getEquivalentImageRecognizerCube(this.currentCubeHue, this.currentCubeSat) == null) {
+			followNewPathCoordinates();
+			return getCurrentPathTarget();
+		}
+		for (ImageRecognizerCube c : getImageRecognizerCubesFromImage(im)) {
+			float distance = (float) Math.sqrt(Math.pow(curPos[0] - c.getX(), 2) + Math.pow(curPos[1] - c.getY(), 2) + Math.pow(curPos[2] - c.getZ(), 2));
+			if (distance < minimum){
+				minimum = distance;
+				closest = c;
 			}
-			for (ImageRecognizerCube c : getImageRecognizerCubesFromImage(im)) {
-				float distance = (float) Math.sqrt(Math.pow(curPos[0] - c.getX(), 2) + Math.pow(curPos[1] - c.getY(), 2) + Math.pow(curPos[2] - c.getZ(), 2));
-				if (distance < minimum){
-					minimum = distance;
-					closest = c;
-				}
-			}
+		}
+		if (minimum <= 50) {
 			setCurrentCubeHue(closest.getHue());
 			setCurrentCubeSat(closest.getSaturation());
 			this.currentCubeColorCalculated = true;
-			toFollow = closest;
-			toFollowDistance = minimum;
-//		} else {
-//			toFollow = getEquivalentImageRecognizerCube(this.currentCubeHue, this.currentCubeSat);
-//			if (toFollow == null) {
-//				float[] curPos = {(float)dronePosition.getEntry(0), (float)dronePosition.getEntry(1), (float)dronePosition.getEntry(2)};
-//				toFollowDistance = (float) Math.sqrt(Math.pow(curPos[0] - this.currentPathTarget.getEntry(0), 2) + Math.pow(curPos[1] - this.currentPathTarget.getEntry(1), 2) + Math.pow(curPos[2] - this.currentPathTarget.getEntry(2), 2));
-//				System.out.println("EARLY: " + toFollowDistance);
-//				followNewPathCoordinates();
-//				return getCurrentPathTarget();
-//			}
-//			float[] curPos = {(float)dronePosition.getEntry(0), (float)dronePosition.getEntry(1), (float)dronePosition.getEntry(2)};
-//			toFollowDistance = (float) Math.sqrt(Math.pow(curPos[0] - toFollow.getX(), 2) + Math.pow(curPos[1] - toFollow.getY(), 2) + Math.pow(curPos[2] - toFollow.getZ(), 2));
-//		}
+		}
+		toFollow = closest;
+		toFollowDistance = minimum;
 		
 		float[] co = new float[] {toFollow.getX(), toFollow.getY(), toFollow.getZ()};
-		RealVector pathCo = this.currentPathTarget;
-		float pathDistance = (float) Math.sqrt(Math.pow(co[0] - pathCo.getEntry(0), 2) + Math.pow(co[1] - pathCo.getEntry(1), 2) + Math.pow(co[2] - pathCo.getEntry(2), 2));
-//		if (pathDistance > 10)
-//			throw new IllegalStateException("No cube found near the path coordinates.");
+//		RealVector pathCo = this.currentPathTarget;
+//		float pathDistance = (float) Math.sqrt(Math.pow(co[0] - pathCo.getEntry(0), 2) + Math.pow(co[1] - pathCo.getEntry(1), 2) + Math.pow(co[2] - pathCo.getEntry(2), 2));
 		
 		if (toFollowDistance <= 3) {
-			System.out.println("TOUCHED");
 			//cube is touched
 			toFollow.destroy();
 			followNewPathCoordinates();
