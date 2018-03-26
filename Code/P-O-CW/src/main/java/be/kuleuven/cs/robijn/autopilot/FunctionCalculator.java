@@ -26,13 +26,33 @@ public class FunctionCalculator {
 	
 	private float headingAngularAcceleration = 0;
 	
+	public void setHeadingAngularAcceleration(float headingAngularAcceleration) {
+		this.headingAngularAcceleration = headingAngularAcceleration;
+	}
+	
 	private float pitchAngularAcceleration = 0;
+	
+	public void setPitchAngularAcceleration(float pitchAngularAcceleration) {
+		this.pitchAngularAcceleration = pitchAngularAcceleration;
+	}
 	
 	private float rollAngularAcceleration = 0;
 	
+	public void setRollAngularAcceleration(float rollAngularAcceleration) {
+		this.rollAngularAcceleration = rollAngularAcceleration;
+	}
+	
 	private float xAcceleration = 0;
 	
+	public void setXAcceleration(float xAcceleration) {
+		this.xAcceleration = xAcceleration;
+	}
+	
 	private float yAcceleration = 0;
+	
+	public void setYAcceleration(float yAcceleration) {
+		this.yAcceleration = yAcceleration;
+	}
 	
 	private Drone drone;
 	
@@ -50,7 +70,8 @@ public class FunctionCalculator {
 	
 	public RealVector getTotalAngularVelocityDroneCoordinates() {
 		return drone.transformationToDroneCoordinates(drone.getHeadingAngularVelocityVector()
-				.add(drone.getRollAngularVelocityVector()));
+				.add(drone.getRollAngularVelocityVector())
+				.add(drone.getPitchAngularVelocityVector()));
 	}
 	
 	public RealMatrix getInertiaMatrix() {
@@ -84,6 +105,15 @@ public class FunctionCalculator {
 				+ drone.transformationToDroneWithoutRollCoordinates(drone.getLiftForceRightWing((float)x)).getEntry(1)
 				+ drone.transformationToDroneWithoutRollCoordinates(drone.getTotalGravitationalForce()).getEntry(1)
 				+ drone.transformationToDroneWithoutRollCoordinates(drone.getLiftForceVerStab(verStabInclination)).getEntry(1)
+				- (drone.getTotalMass() * yAcceleration)
+				;};
+	}
+	
+	public UnivariateFunction functionForYVelocityWorldCoordinates(float verStabInclination) {
+		return (x)->{return drone.getLiftForceLeftWing((float)x).getEntry(1)
+				+ drone.getLiftForceRightWing((float)x).getEntry(1)
+				+ drone.getTotalGravitationalForce().getEntry(1)
+				+ drone.getLiftForceVerStab(verStabInclination).getEntry(1)
 				- (drone.getTotalMass() * yAcceleration)
 				;};
 	}
@@ -145,6 +175,15 @@ public class FunctionCalculator {
 				;};
 	}
 	
+	public UnivariateFunction functionForYVelocityWithRollWorldCoordinates(float verStabInclination, float rollInclination) {
+		return (x)->{return drone.getLiftForceLeftWing(((float)x) - rollInclination).getEntry(1)
+				+ drone.getLiftForceRightWing(((float)x) + rollInclination).getEntry(1)
+				+ drone.getTotalGravitationalForce().getEntry(1)
+				+ drone.getLiftForceVerStab(verStabInclination).getEntry(1)
+				- (drone.getTotalMass() * yAcceleration)
+				;};
+	}
+	
 	public UnivariateFunction functionForPitch() {
 		return (x)->{return drone.transformationToDroneCoordinates(drone.getLiftForceHorStab((float)x)).getEntry(1)*drone.getTailSize()
 				+ getInertiaMatrixXX()*Math.cos(drone.getRoll())*pitchAngularAcceleration
@@ -157,5 +196,11 @@ public class FunctionCalculator {
 							drone.getRollAngularVelocityVector()
 						))
 				 )).getEntry(0);};
+	}
+	
+	public UnivariateFunction functionforPitchSimplified() {
+		return (x)->{return drone.transformationToDroneCoordinates(drone.getLiftForceHorStab((float)x)).getEntry(1)*drone.getTailSize()
+				+ getInertiaMatrixXX()*Math.cos(drone.getRoll())*pitchAngularAcceleration
+				+ VectorMath.crossProduct(getTotalAngularVelocityDroneCoordinates(), getAngularMomentumDroneCoordinates()).getEntry(0);};
 	}
 }

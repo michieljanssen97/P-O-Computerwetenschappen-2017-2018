@@ -112,8 +112,13 @@ public class EquationSolver {
 		}
 	}
 	
-	public float solverForYVelocity(float verStabInclination) {
-		UnivariateFunction function = this.functionCalculator.functionForYVelocity(verStabInclination);
+	public float solverForYVelocity(float verStabInclination, boolean worldCoordinates) {
+		UnivariateFunction function;
+		if (worldCoordinates)
+			function = this.functionCalculator.functionForYVelocityWorldCoordinates(verStabInclination);
+		else {
+			function = this.functionCalculator.functionForYVelocity(verStabInclination);
+		}
 		try {
 			double solution = solver.solve(100, function, getMinInclinationWing(), getMaxInclinationWing());
 			return (float) solution;
@@ -143,8 +148,13 @@ public class EquationSolver {
 		}
 	}
 	
-	public float solverForYVelocityWithRoll(float verStabInclination, float rollInclination) {
-		UnivariateFunction function = this.functionCalculator.functionForYVelocityWithRoll(verStabInclination, rollInclination);
+	public float solverForYVelocityWithRoll(float verStabInclination, float rollInclination, boolean worldCoordinates) {
+		UnivariateFunction function;
+		if (worldCoordinates)
+			function = this.functionCalculator.functionForYVelocityWithRollWorldCoordinates(verStabInclination, rollInclination);
+		else {
+			function = this.functionCalculator.functionForYVelocityWithRoll(verStabInclination, rollInclination);
+		}
 		try {
 			double solution = solver.solve(100, function, getMinInclinationWing() + Math.abs(rollInclination), getMaxInclinationWing() - Math.abs(rollInclination));
 			return (float) solution;
@@ -153,8 +163,13 @@ public class EquationSolver {
 		}
 	}
 	
-	public float solverForPitch() {
-		UnivariateFunction function = this.functionCalculator.functionForPitch();
+	public float solverForPitch(boolean simplified) {
+		UnivariateFunction function;
+		if (simplified)
+			function = this.functionCalculator.functionforPitchSimplified();
+		else {
+			function = this.functionCalculator.functionForPitch();
+		}
 		try {
 			double solution = solver.solve(100, function, getMinInclinationHorStab(), getMaxInclinationHorStab());
 			return (float) solution;

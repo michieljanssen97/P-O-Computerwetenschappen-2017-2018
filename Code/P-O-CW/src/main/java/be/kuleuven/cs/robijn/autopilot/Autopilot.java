@@ -1,12 +1,8 @@
 package be.kuleuven.cs.robijn.autopilot;
 
-import org.apache.commons.math3.analysis.*;
-import org.apache.commons.math3.analysis.solvers.*;
-import org.apache.commons.math3.exception.*;
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.autopilot.image.*;
-import be.kuleuven.cs.robijn.common.math.*;
 import be.kuleuven.cs.robijn.experiments.ExpPosition;
 import interfaces.*;
 
@@ -78,10 +74,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		float rightBrakeForce = 0;
 		float frontBrakeForce = 0;
 		
-		double relativeAccuracy = 1.0e-12;
-		double absoluteAccuracy = 1.0e-8;
-		int maxOrder = 5;
-		UnivariateSolver solver = new BracketingNthOrderBrentSolver(relativeAccuracy, absoluteAccuracy, maxOrder);
 		float turningTime = 0.5f;
 		float xMovementTime = 3f;
 		float maxRoll = (float) Math.toRadians(45.0);
@@ -100,25 +92,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		float pitchTakeOff = (float) Math.toRadians(10.0);
 		float targetVelocity = -43f;
 		float hight = 50;
-		
-		float maxInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float) Math.toRadians(1.0), drone, 1);
-		float minInclinationWing = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float) Math.toRadians(1.0), drone, 1);
-		float maxInclinationHorStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float) Math.toRadians(1.0), drone, 2);
-		float minInclinationHorStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float) Math.toRadians(1.0), drone, 2);
-		float maxInclinationVerStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), true, (float) Math.toRadians(1.0), drone, 3);
-		float minInclinationVerStab = this.minMaxInclination((float)(Math.PI/2), (float)(-Math.PI/2), false, (float) Math.toRadians(1.0), drone, 3);
-		
-		float inertiaMatrixXX = (float) (drone.getTailMass()*Math.pow(drone.getTailSize(),2) +drone.getEngineMass()*Math.pow(drone.getEngineDistance(), 2));
-		float inertiaMatrixZZ = (float) (2*(drone.getWingMass()*Math.pow(drone.getWingX(),2)));
-		float inertiaMatrixYY = inertiaMatrixXX + inertiaMatrixZZ;
-		RealVector totalAngularVelocityDroneCoordinates = drone.transformationToDroneCoordinates(drone.getHeadingAngularVelocityVector()
-				.add(drone.getRollAngularVelocityVector()));
-		RealMatrix inertiaMatrix = new Array2DRowRealMatrix(new double[][] {
-			{inertiaMatrixXX, 0,                0},
-			{0,               inertiaMatrixYY,  0}, 
-			{0,               0,                inertiaMatrixZZ}
-			}, false);
-		RealVector angularMomentumDroneCoordinates = inertiaMatrix.operate(totalAngularVelocityDroneCoordinates);
 			
 		if (this.getMode() == 2) { //ascend
 			thrust = this.getConfig().getMaxThrust();
@@ -135,25 +108,19 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			if (pitchNew > Math.PI)
 				pitchNew -= 2*Math.PI;
 			float pitchAngularVelocity = drone.getPitchAngularVelocity();
-			float pitchAngularAccelerationTemp = (maxPitch - pitchAngularVelocity)/turningTime;
+			float pitchAngularAcceleration = (maxPitch - pitchAngularVelocity)/turningTime;
 			if (! Float.isNaN(this.getPreviousPitchAngularAccelerationError()))
-				pitchAngularAccelerationTemp -= this.getPreviousPitchAngularAccelerationError();
-			final float pitchAngularAcceleration = pitchAngularAccelerationTemp;
+				pitchAngularAcceleration -= this.getPreviousPitchAngularAccelerationError();
 			
-			UnivariateFunction function1 = (x)->{return drone.transformationToDroneCoordinates(drone.getLiftForceHorStab((float)x)).getEntry(1)*drone.getTailSize()
-					+ inertiaMatrixXX*Math.cos(drone.getRoll())*pitchAngularAcceleration
-					+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(0);};
+			FunctionCalculator functionCalculator = new FunctionCalculator(drone, 0, pitchAngularAcceleration, 0, 0, 0);
+			EquationSolver solver = new EquationSolver(drone, this.getConfig(), functionCalculator);
 			
 			if (Math.abs(drone.transformationToDroneCoordinates(drone.getVelocity()).getEntry(2)) > takeOffSpeed) {
-				leftWingInclination = (float) (maxInclinationWing - Math.toRadians(correctionFactor));
-				rightWingInclination = (float) (maxInclinationWing - Math.toRadians(correctionFactor));
+				leftWingInclination = (float) (solver.getMaxInclinationWing() - Math.toRadians(correctionFactor));
+				rightWingInclination = (float) (solver.getMaxInclinationWing() - Math.toRadians(correctionFactor));
 				
-				try {
-					double solution6 = solver.solve(100, function1, minInclinationHorStab, maxInclinationHorStab);
-					horStabInclination = (float) solution6;
-				} catch (NoBracketingException exc1) {
-					
-				}
+				horStabInclination = solver.solverForPitch(true);
+				
 				this.setPreviousPitchAngularAccelerationError(
 						drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination,
 								frontBrakeForce, leftBrakeForce, rightBrakeForce)[1]
@@ -284,14 +251,13 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 						headingAngularVelocity = maxHeadingAngularVelocity;
 					else if (headingAngularVelocity < -maxHeadingAngularVelocity)
 						headingAngularVelocity = -maxHeadingAngularVelocity;
-					float headingAngularAccelerationTemp = (targetHeadingAngularVelocity - headingAngularVelocity)/turningTime;
+					float headingAngularAcceleration = (targetHeadingAngularVelocity - headingAngularVelocity)/turningTime;
 					if (! Float.isNaN(this.getPreviousHeadingAngularAccelerationError()))
-						headingAngularAccelerationTemp -= this.getPreviousHeadingAngularAccelerationError();
-					if (headingAngularAccelerationTemp > maxHeadingAngularAcceleration)
-						headingAngularAccelerationTemp = maxHeadingAngularAcceleration;
-					else if (headingAngularAccelerationTemp < -maxHeadingAngularAcceleration)
-						headingAngularAccelerationTemp = -maxHeadingAngularAcceleration;
-					final float headingAngularAcceleration = headingAngularAccelerationTemp;
+						headingAngularAcceleration -= this.getPreviousHeadingAngularAccelerationError();
+					if (headingAngularAcceleration > maxHeadingAngularAcceleration)
+						headingAngularAcceleration = maxHeadingAngularAcceleration;
+					else if (headingAngularAcceleration < -maxHeadingAngularAcceleration)
+						headingAngularAcceleration = -maxHeadingAngularAcceleration;
 					
 					float targetPitchAngularVelocity = (XRotation)/turningTime;
 					float pitchAngularVelocity = drone.getPitchAngularVelocity();
@@ -299,37 +265,13 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 						pitchAngularVelocity = maxPitchAngularVelocity;
 					else if (pitchAngularVelocity < -maxPitchAngularVelocity)
 						pitchAngularVelocity = -maxPitchAngularVelocity;
-					float pitchAngularAccelerationTemp = (targetPitchAngularVelocity - pitchAngularVelocity)/turningTime;
+					float pitchAngularAcceleration = (targetPitchAngularVelocity - pitchAngularVelocity)/turningTime;
 					if (! Float.isNaN(this.getPreviousPitchAngularAccelerationError()))
-						pitchAngularAccelerationTemp -= this.getPreviousPitchAngularAccelerationError();
-					if (pitchAngularAccelerationTemp > maxPitchAngularAcceleration)
-						pitchAngularAccelerationTemp = maxPitchAngularAcceleration;
-					else if (pitchAngularAccelerationTemp < -maxPitchAngularAcceleration)
-						pitchAngularAccelerationTemp = -maxPitchAngularAcceleration;
-					final float pitchAngularAcceleration = pitchAngularAccelerationTemp;
-					
-					UnivariateFunction function1 = (x)->{return drone.transformationToDroneCoordinates(drone.getLiftForceVerStab((float)x)).getEntry(0)*drone.getTailSize()
-							- inertiaMatrixYY*Math.cos(drone.getRoll())*Math.cos(drone.getPitch())*headingAngularAcceleration
-							+ inertiaMatrixYY*Math.sin(drone.getRoll())*pitchAngularAcceleration
-							- VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(1)
-							- inertiaMatrix.operate(drone.transformationToDroneCoordinates(
-									VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
-									.add(VectorMath.crossProduct(
-										drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
-										drone.getRollAngularVelocityVector()
-									))
-							 )).getEntry(1);};
-					try {
-						double solution1 = solver.solve(100, function1, minInclinationVerStab, maxInclinationVerStab);
-						verStabInclination = (float) solution1;
-					} catch (NoBracketingException exc) {
-						finished = false;
-						turningTime += 0.5;
-						xMovementTime += 0.5;
-						continue;
-					}
-					
-					final float verStabInclinationTemp = verStabInclination;
+						pitchAngularAcceleration -= this.getPreviousPitchAngularAccelerationError();
+					if (pitchAngularAcceleration > maxPitchAngularAcceleration)
+						pitchAngularAcceleration = maxPitchAngularAcceleration;
+					else if (pitchAngularAcceleration < -maxPitchAngularAcceleration)
+						pitchAngularAcceleration = -maxPitchAngularAcceleration;
 					
 					float targetYVelocity = (float) (-drone.transformationToDroneWithoutRollCoordinates(drone.getVelocity()).getEntry(2)*Math.tan(XRotation));
 					float yVelocity = (float)drone.transformationToDroneWithoutRollCoordinates(drone.getVelocity()).getEntry(1);
@@ -337,33 +279,13 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 						yVelocity = maxYVelocity;
 					else if (yVelocity < -maxYVelocity)
 						yVelocity = -maxYVelocity;
-					float yAccelerationTemp = (targetYVelocity - yVelocity)/turningTime;
+					float yAcceleration = (targetYVelocity - yVelocity)/turningTime;
 					if (! Float.isNaN(this.getPreviousYAccelerationError()))
-						yAccelerationTemp -= this.getPreviousYAccelerationError();
-					if (yAccelerationTemp > maxYAcceleration)
-						yAccelerationTemp = maxYAcceleration;
-					else if (yAccelerationTemp < -maxYAcceleration)
-						yAccelerationTemp = -maxYAcceleration;
-					final float yAcceleration = yAccelerationTemp;
-					
-					float wingInclinationTemp = 0;
-					UnivariateFunction function2 = (x)->{return drone.transformationToDroneWithoutRollCoordinates(drone.getLiftForceLeftWing((float)x)).getEntry(1)
-							+ drone.transformationToDroneWithoutRollCoordinates(drone.getLiftForceRightWing((float)x)).getEntry(1)
-							+ drone.transformationToDroneWithoutRollCoordinates(drone.getTotalGravitationalForce()).getEntry(1)
-							+ drone.transformationToDroneWithoutRollCoordinates(drone.getLiftForceVerStab(verStabInclinationTemp)).getEntry(1)
-							- (drone.getTotalMass() * yAcceleration)
-							;};
-					try {
-						double solution2 = solver.solve(100, function2, minInclinationWing, maxInclinationWing);
-						wingInclinationTemp = (float) solution2;
-					} catch (NoBracketingException exc) {
-						finished = false;
-						turningTime += 0.5;
-						xMovementTime += 0.5;
-						continue;
-					}
-					
-					final float wingInclination = wingInclinationTemp;
+						yAcceleration -= this.getPreviousYAccelerationError();
+					if (yAcceleration > maxYAcceleration)
+						yAcceleration = maxYAcceleration;
+					else if (yAcceleration < -maxYAcceleration)
+						yAcceleration = -maxYAcceleration;
 					
 					float targetXVelocity = (float) (drone.transformationToDroneWithoutRollCoordinates(drone.getVelocity()).getEntry(2)*Math.tan(YRotation));
 					float xVelocity = (float)drone.transformationToDroneWithoutRollCoordinates(drone.getVelocity()).getEntry(0);
@@ -379,42 +301,29 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					else if (xAcceleration < -maxXAcceleration)
 						xAcceleration = -maxXAcceleration;
 					
-					float targetXForce = drone.getTotalMass()*xAcceleration;
+					FunctionCalculator functionCalculator = new FunctionCalculator(drone, headingAngularAcceleration, pitchAngularAcceleration, 0,
+							xAcceleration, yAcceleration);
+					EquationSolver solver = new EquationSolver(drone, this.getConfig(), functionCalculator);
 					
-					//don't use inverse, ...
-					float targetRoll = 0;
-					UnivariateFunction function3 = new UnivariateFunction() {
-						public double value(double x) {
-							RealMatrix inverseRollTransformation = new Array2DRowRealMatrix(new double[][] {
-								{Math.cos(x),      -Math.sin(x),       0},
-								{Math.sin(x),       Math.cos(x),       0}, 
-								{0,                         0,                         1}
-								}, false);
-							RealMatrix inversePitchTransformation = new Array2DRowRealMatrix(new double[][] { 
-								{1,       0,                        0},
-								{0,       Math.cos(drone.getPitch()),    -Math.sin(drone.getPitch())},
-								{0,       Math.sin(drone.getPitch()),     Math.cos(drone.getPitch())}
-								}, false);
-							RealMatrix inverseHeadingTransformation = new Array2DRowRealMatrix(new double[][] {
-								{Math.cos(drone.getHeading()),     0,       Math.sin(drone.getHeading())}, 
-								{0,                          1,       0}, 
-								{-Math.sin(drone.getHeading()),    0,       Math.cos(drone.getHeading())}
-								}, false);
-							RealMatrix matrix = inverseHeadingTransformation.multiply(inversePitchTransformation).multiply(inverseRollTransformation);
-							return drone.transformationToDroneWithoutRollCoordinates(
-									matrix.operate(drone.transformationToDroneCoordinates(drone.getLiftForceLeftWing(wingInclination)))).getEntry(0)
-									+ drone.transformationToDroneWithoutRollCoordinates(
-											matrix.operate(drone.transformationToDroneCoordinates(drone.getLiftForceRightWing(wingInclination)))).getEntry(0)
-									+ drone.transformationToDroneWithoutRollCoordinates(
-											matrix.operate(drone.transformationToDroneCoordinates(drone.getLiftForceVerStab(verStabInclinationTemp)))).getEntry(0)
-									- targetXForce;
-						}
-			        };
-			        try {
-			        	double solution3 = solver.solve(100, function3, -Math.PI/2, Math.PI/2);
-			        	targetRoll = (float) solution3;
-			        } catch (NoBracketingException exc) {
-			        	finished = false;
+					verStabInclination = solver.solverForHeading();
+					if (Float.isNaN(verStabInclination)) {
+						finished = false;
+						turningTime += 0.5;
+						xMovementTime += 0.5;
+						continue;
+					}
+					
+					float wingInclination = solver.solverForYVelocity(verStabInclination, false);
+					if (Float.isNaN(wingInclination)) {
+						finished = false;
+						turningTime += 0.5;
+						xMovementTime += 0.5;
+						continue;
+					}
+					
+					float targetRoll = solver.solverForXVelocity(verStabInclination, wingInclination);
+					if (Float.isNaN(targetRoll)) {
+						finished = false;
 						turningTime += 0.5;
 						xMovementTime += 0.5;
 						continue;
@@ -436,74 +345,37 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 						rollAngularVelocity = maxRollAngularVelocity;
 					else if (rollAngularVelocity < -maxRollAngularVelocity)
 						rollAngularVelocity = -maxRollAngularVelocity;
-					float rollAngularAccelerationTemp = (targetRollAngularVelocity - rollAngularVelocity)/turningTime;
+					float rollAngularAcceleration = (targetRollAngularVelocity - rollAngularVelocity)/turningTime;
 					if (! Float.isNaN(this.getPreviousRollAngularAccelerationError()))
-						rollAngularAccelerationTemp -= this.getPreviousRollAngularAccelerationError();
-					if (rollAngularAccelerationTemp > maxRollAngularAcceleration)
-						rollAngularAccelerationTemp = maxRollAngularAcceleration;
-					else if (rollAngularAccelerationTemp < -maxRollAngularAcceleration)
-						rollAngularAccelerationTemp = -maxRollAngularAcceleration;
-					final float rollAngularAcceleration = rollAngularAccelerationTemp;
+						rollAngularAcceleration -= this.getPreviousRollAngularAccelerationError();
+					if (rollAngularAcceleration > maxRollAngularAcceleration)
+						rollAngularAcceleration = maxRollAngularAcceleration;
+					else if (rollAngularAcceleration < -maxRollAngularAcceleration)
+						rollAngularAcceleration = -maxRollAngularAcceleration;
 					
-					float rollInclinationTemp = 0;
-					UnivariateFunction function4 = (x)->{return 
-							(- drone.transformationToDroneCoordinates(drone.getLiftForceLeftWing(wingInclination - ((float)x))).getEntry(1)*drone.getWingX())
-							+ drone.transformationToDroneCoordinates(drone.getLiftForceRightWing(wingInclination + ((float)x))).getEntry(1)*drone.getWingX()
-							- inertiaMatrixZZ*rollAngularAcceleration
-							+ inertiaMatrixZZ*Math.sin(drone.getPitch())*headingAngularAcceleration
-							- VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(2)
-							- inertiaMatrix.operate(drone.transformationToDroneCoordinates(
-									VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
-									.add(VectorMath.crossProduct(
-										drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
-										drone.getRollAngularVelocityVector()
-									))
-							 )).getEntry(2);};
-					try {
-						double solution4 = solver.solve(100, function4, Math.max(minInclinationWing - wingInclination, wingInclination - maxInclinationWing),
-								Math.min(maxInclinationWing - wingInclination, wingInclination - minInclinationWing));
-						rollInclinationTemp = (float) solution4;
-					} catch (NoBracketingException exc) {
+					functionCalculator.setRollAngularAcceleration(rollAngularAcceleration);
+					solver = new EquationSolver(drone, this.getConfig(), functionCalculator);
+					
+					float rollInclination = solver.solverForRoll(wingInclination);
+					if (Float.isNaN(rollInclination)) {
 						finished = false;
 						turningTime += 0.5;
 						xMovementTime += 0.5;
 						continue;
 					}
 					
-					final float rollInclination = rollInclinationTemp;
-					
-					UnivariateFunction function5 = (x)->{return drone.transformationToDroneWithoutRollCoordinates(drone.getLiftForceLeftWing(((float)x) - rollInclination)).getEntry(1)
-							+ drone.transformationToDroneWithoutRollCoordinates(drone.getLiftForceRightWing(((float)x) + rollInclination)).getEntry(1)
-							+ drone.transformationToDroneWithoutRollCoordinates(drone.getTotalGravitationalForce()).getEntry(1)
-							+ drone.transformationToDroneWithoutRollCoordinates(drone.getLiftForceVerStab(verStabInclinationTemp)).getEntry(1)
-							- (drone.getTotalMass() * yAcceleration)
-							;};
-					try {
-						double solution5 = solver.solve(100, function5, minInclinationWing + Math.abs(rollInclination), maxInclinationWing - Math.abs(rollInclination));
-						leftWingInclination = ((float)solution5) - rollInclination;
-						rightWingInclination = ((float)solution5) + rollInclination;
-					} catch (NoBracketingException exc) {
+					float solution = solver.solverForYVelocityWithRoll(verStabInclination, rollInclination, false);
+					if (Float.isNaN(solution)) {
 						finished = false;
 						turningTime += 0.5;
 						xMovementTime += 0.5;
 						continue;
 					}
+					leftWingInclination = solution - rollInclination;
+					rightWingInclination = solution + rollInclination;
 					
-					UnivariateFunction function6 = (x)->{return drone.transformationToDroneCoordinates(drone.getLiftForceHorStab((float)x)).getEntry(1)*drone.getTailSize()
-							+ inertiaMatrixXX*Math.cos(drone.getRoll())*pitchAngularAcceleration
-							+ inertiaMatrixXX*Math.cos(drone.getPitch())*Math.sin(drone.getRoll())*headingAngularAcceleration
-							+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(0)
-							+ inertiaMatrix.operate(drone.transformationToDroneCoordinates(
-									VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
-									.add(VectorMath.crossProduct(
-										drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
-										drone.getRollAngularVelocityVector()
-									))
-							 )).getEntry(0);};
-					try {
-						double solution6 = solver.solve(100, function6, minInclinationHorStab, maxInclinationHorStab);
-						horStabInclination = (float) solution6;
-					} catch (NoBracketingException exc1) {
+					horStabInclination = solver.solverForPitch(false);
+					if (Float.isNaN(horStabInclination)) {
 						finished = false;
 						turningTime += 0.5;
 						xMovementTime += 0.5;
@@ -637,7 +509,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 						}
 					}
 				} else {
-					this.setTarget(drone.getWorldPosition().add(drone.getVelocity()));
+					this.setTarget(drone.getVelocity().add(drone.getWorldPosition()));
 				}
 				
 				float XRotation = (float) Math.atan((this.getTarget().getEntry(1) - drone.getWorldPosition().getEntry(1))
@@ -650,7 +522,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 				}
 				
 				XRotation = 0;
-				//YRotation = 0;
 				XRotation -= drone.getPitch();
 				YRotation -= drone.getHeading();
 				if (XRotation < - Math.PI)
@@ -661,8 +532,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					YRotation += 2*Math.PI;
 				else if (YRotation > Math.PI)
 					YRotation -= 2*Math.PI;
-				//XRotation = 0;
-				//YRotation = 0;
 				
 				float headingNew = drone.getHeading();
 				if (headingNew > Math.PI)
@@ -677,14 +546,13 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					headingAngularVelocity = maxHeadingAngularVelocity;
 				else if (headingAngularVelocity < -maxHeadingAngularVelocity)
 					headingAngularVelocity = -maxHeadingAngularVelocity;
-				float headingAngularAccelerationTemp = (targetHeadingAngularVelocity - headingAngularVelocity)/turningTime;
+				float headingAngularAcceleration = (targetHeadingAngularVelocity - headingAngularVelocity)/turningTime;
 				if (! Float.isNaN(this.getPreviousHeadingAngularAccelerationError()))
-					headingAngularAccelerationTemp -= this.getPreviousHeadingAngularAccelerationError();
-				if (headingAngularAccelerationTemp > maxHeadingAngularAcceleration)
-					headingAngularAccelerationTemp = maxHeadingAngularAcceleration;
-				else if (headingAngularAccelerationTemp < -maxHeadingAngularAcceleration)
-					headingAngularAccelerationTemp = -maxHeadingAngularAcceleration;
-				final float headingAngularAcceleration = headingAngularAccelerationTemp;
+					headingAngularAcceleration -= this.getPreviousHeadingAngularAccelerationError();
+				if (headingAngularAcceleration > maxHeadingAngularAcceleration)
+					headingAngularAcceleration = maxHeadingAngularAcceleration;
+				else if (headingAngularAcceleration < -maxHeadingAngularAcceleration)
+					headingAngularAcceleration = -maxHeadingAngularAcceleration;
 				
 				float targetPitchAngularVelocity = (XRotation)/turningTime;
 				float pitchAngularVelocity = drone.getPitchAngularVelocity();
@@ -692,72 +560,27 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					pitchAngularVelocity = maxPitchAngularVelocity;
 				else if (pitchAngularVelocity < -maxPitchAngularVelocity)
 					pitchAngularVelocity = -maxPitchAngularVelocity;
-				float pitchAngularAccelerationTemp = (targetPitchAngularVelocity - pitchAngularVelocity)/turningTime;
+				float pitchAngularAcceleration = (targetPitchAngularVelocity - pitchAngularVelocity)/turningTime;
 				if (! Float.isNaN(this.getPreviousPitchAngularAccelerationError()))
-					pitchAngularAccelerationTemp -= this.getPreviousPitchAngularAccelerationError();
-				if (pitchAngularAccelerationTemp > maxPitchAngularAcceleration)
-					pitchAngularAccelerationTemp = maxPitchAngularAcceleration;
-				else if (pitchAngularAccelerationTemp < -maxPitchAngularAcceleration)
-					pitchAngularAccelerationTemp = -maxPitchAngularAcceleration;
-				final float pitchAngularAcceleration = pitchAngularAccelerationTemp;
-				
-				UnivariateFunction function1 = (x)->{return drone.transformationToDroneCoordinates(drone.getLiftForceVerStab((float)x)).getEntry(0)*drone.getTailSize()
-						- inertiaMatrixYY*Math.cos(drone.getRoll())*Math.cos(drone.getPitch())*headingAngularAcceleration
-						+ inertiaMatrixYY*Math.sin(drone.getRoll())*pitchAngularAcceleration
-						- VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(1)
-						- inertiaMatrix.operate(drone.transformationToDroneCoordinates(
-								VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
-								.add(VectorMath.crossProduct(
-									drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
-									drone.getRollAngularVelocityVector()
-								))
-						 )).getEntry(1);};
-				try {
-					double solution1 = solver.solve(100, function1, minInclinationVerStab, maxInclinationVerStab);
-					verStabInclination = (float) solution1;
-				} catch (NoBracketingException exc) {
-					finished = false;
-					turningTime += 0.5;
-					xMovementTime += 0.5;
-					continue;
-				}
-				
-				final float verStabInclinationTemp = verStabInclination;
+					pitchAngularAcceleration -= this.getPreviousPitchAngularAccelerationError();
+				if (pitchAngularAcceleration > maxPitchAngularAcceleration)
+					pitchAngularAcceleration = maxPitchAngularAcceleration;
+				else if (pitchAngularAcceleration < -maxPitchAngularAcceleration)
+					pitchAngularAcceleration = -maxPitchAngularAcceleration;
 				
 				float targetYVelocity = 0;
-				float yVelocity = (float) drone.getVelocity().getEntry(1);
-				System.out.println(yVelocity);
+				float yVelocity = (float)drone.getVelocity().getEntry(1);
 				if (yVelocity > maxYVelocity)
 					yVelocity = maxYVelocity;
 				else if (yVelocity < -maxYVelocity)
 					yVelocity = -maxYVelocity;
-				float yAccelerationTemp = (targetYVelocity - yVelocity)/turningTime;
+				float yAcceleration = (targetYVelocity - yVelocity)/turningTime;
 				if (! Float.isNaN(this.getPreviousYAccelerationError()))
-					yAccelerationTemp -= this.getPreviousYAccelerationError();
-				if (yAccelerationTemp > maxYAcceleration)
-					yAccelerationTemp = maxYAcceleration;
-				else if (yAccelerationTemp < -maxYAcceleration)
-					yAccelerationTemp = -maxYAcceleration;
-				final float yAcceleration = yAccelerationTemp;
-				
-				float wingInclinationTemp = 0;
-				UnivariateFunction function2 = (x)->{return drone.getLiftForceLeftWing((float)x).getEntry(1)
-						+ drone.getLiftForceRightWing((float)x).getEntry(1)
-						+ drone.getTotalGravitationalForce().getEntry(1)
-						+ drone.getLiftForceVerStab(verStabInclinationTemp).getEntry(1)
-						- (drone.getTotalMass() * yAcceleration)
-						;};
-				try {
-					double solution2 = solver.solve(100, function2, minInclinationWing, maxInclinationWing);
-					wingInclinationTemp = (float) solution2;
-				} catch (NoBracketingException exc) {
-					finished = false;
-					turningTime += 0.5;
-					xMovementTime += 0.5;
-					continue;
-				}
-				
-				final float wingInclination = wingInclinationTemp;
+					yAcceleration -= this.getPreviousYAccelerationError();
+				if (yAcceleration > maxYAcceleration)
+					yAcceleration = maxYAcceleration;
+				else if (yAcceleration < -maxYAcceleration)
+					yAcceleration = -maxYAcceleration;
 				
 				float targetXVelocity = (float) (drone.transformationToDroneWithoutRollCoordinates(drone.getVelocity()).getEntry(2)*Math.tan(YRotation));
 				float xVelocity = (float)drone.transformationToDroneWithoutRollCoordinates(drone.getVelocity()).getEntry(0);
@@ -773,51 +596,27 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 				else if (xAcceleration < -maxXAcceleration)
 					xAcceleration = -maxXAcceleration;
 				
-				float targetXForce = drone.getTotalMass()*xAcceleration;
+				FunctionCalculator functionCalculator = new FunctionCalculator(drone, headingAngularAcceleration, pitchAngularAcceleration, 0,
+						xAcceleration, yAcceleration);
+				EquationSolver solver = new EquationSolver(drone, this.getConfig(), functionCalculator);
 				
-				//don't use inverse, ...
-				float targetRoll = 0;
-				UnivariateFunction function3 = new UnivariateFunction() {
-					public double value(double x) {
-						RealMatrix inverseRollTransformation = new Array2DRowRealMatrix(new double[][] {
-							{Math.cos(x),      -Math.sin(x),       0},
-							{Math.sin(x),       Math.cos(x),       0}, 
-							{0,                         0,                         1}
-							}, false);
-						RealMatrix inversePitchTransformation = new Array2DRowRealMatrix(new double[][] { 
-							{1,       0,                        0},
-							{0,       Math.cos(drone.getPitch()),    -Math.sin(drone.getPitch())},
-							{0,       Math.sin(drone.getPitch()),     Math.cos(drone.getPitch())}
-							}, false);
-						RealMatrix inverseHeadingTransformation = new Array2DRowRealMatrix(new double[][] {
-							{Math.cos(drone.getHeading()),     0,       Math.sin(drone.getHeading())}, 
-							{0,                          1,       0}, 
-							{-Math.sin(drone.getHeading()),    0,       Math.cos(drone.getHeading())}
-							}, false);
-						RealMatrix matrix = inverseHeadingTransformation.multiply(inversePitchTransformation).multiply(inverseRollTransformation);
-						return drone.transformationToDroneWithoutRollCoordinates(
-								matrix.operate(drone.transformationToDroneCoordinates(drone.getLiftForceLeftWing(wingInclination)))).getEntry(0)
-								+ drone.transformationToDroneWithoutRollCoordinates(
-										matrix.operate(drone.transformationToDroneCoordinates(drone.getLiftForceRightWing(wingInclination)))).getEntry(0)
-								+ drone.transformationToDroneWithoutRollCoordinates(
-										matrix.operate(drone.transformationToDroneCoordinates(drone.getLiftForceVerStab(verStabInclinationTemp)))).getEntry(0)
-								- targetXForce;
-					}
-		        };
-		        try {
-		        	double solution3 = solver.solve(100, function3, -Math.PI/2, Math.PI/2);
-		        	targetRoll = (float) solution3;
-		        } catch (NoBracketingException exc) {
-		        	finished = false;
+				verStabInclination = solver.solverForHeading();
+				if (Float.isNaN(verStabInclination)) {
+					finished = false;
 					turningTime += 0.5;
 					xMovementTime += 0.5;
 					continue;
 				}
-		        if ((targetRoll > maxRoll) && (targetRoll < Math.PI))
-		        	targetRoll = maxRoll;
-		        else if ((targetRoll > Math.PI) && (targetRoll < (2*Math.PI - maxRoll)))
-		        	targetRoll = (float) (2*Math.PI - maxRoll);
-		        targetRoll = (float) Math.toRadians(30);
+				
+				float wingInclination = solver.solverForYVelocity(verStabInclination, true);
+				if (Float.isNaN(wingInclination)) {
+					finished = false;
+					turningTime += 0.5;
+					xMovementTime += 0.5;
+					continue;
+				}
+				
+				float targetRoll = (float) Math.toRadians(40);
 		        
 		        float rollDifference = targetRoll - drone.getRoll();
 				if (rollDifference > Math.PI)
@@ -831,75 +630,37 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					rollAngularVelocity = maxRollAngularVelocity;
 				else if (rollAngularVelocity < -maxRollAngularVelocity)
 					rollAngularVelocity = -maxRollAngularVelocity;
-				float rollAngularAccelerationTemp = (targetRollAngularVelocity - rollAngularVelocity)/turningTime;
+				float rollAngularAcceleration = (targetRollAngularVelocity - rollAngularVelocity)/turningTime;
 				if (! Float.isNaN(this.getPreviousRollAngularAccelerationError()))
-					rollAngularAccelerationTemp -= this.getPreviousRollAngularAccelerationError();
-				if (rollAngularAccelerationTemp > maxRollAngularAcceleration)
-					rollAngularAccelerationTemp = maxRollAngularAcceleration;
-				else if (rollAngularAccelerationTemp < -maxRollAngularAcceleration)
-					rollAngularAccelerationTemp = -maxRollAngularAcceleration;
-				final float rollAngularAcceleration = rollAngularAccelerationTemp;
+					rollAngularAcceleration -= this.getPreviousRollAngularAccelerationError();
+				if (rollAngularAcceleration > maxRollAngularAcceleration)
+					rollAngularAcceleration = maxRollAngularAcceleration;
+				else if (rollAngularAcceleration < -maxRollAngularAcceleration)
+					rollAngularAcceleration = -maxRollAngularAcceleration;
 				
-				float rollInclinationTemp = 0;
-				UnivariateFunction function4 = (x)->{return 
-						(- drone.transformationToDroneCoordinates(drone.getLiftForceLeftWing(wingInclination - ((float)x))).getEntry(1)*drone.getWingX())
-						+ drone.transformationToDroneCoordinates(drone.getLiftForceRightWing(wingInclination + ((float)x))).getEntry(1)*drone.getWingX()
-						- inertiaMatrixZZ*rollAngularAcceleration
-						+ inertiaMatrixZZ*Math.sin(drone.getPitch())*headingAngularAcceleration
-						- VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(2)
-						- inertiaMatrix.operate(drone.transformationToDroneCoordinates(
-								VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
-								.add(VectorMath.crossProduct(
-									drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
-									drone.getRollAngularVelocityVector()
-								))
-						 )).getEntry(2);};
-				try {
-					double solution4 = solver.solve(100, function4, Math.max(minInclinationWing - wingInclination, wingInclination - maxInclinationWing),
-							Math.min(maxInclinationWing - wingInclination, wingInclination - minInclinationWing));
-					rollInclinationTemp = (float) solution4;
-				} catch (NoBracketingException exc) {
+				functionCalculator.setRollAngularAcceleration(rollAngularAcceleration);
+				solver = new EquationSolver(drone, this.getConfig(), functionCalculator);
+				
+				float rollInclination = solver.solverForRoll(wingInclination);
+				if (Float.isNaN(rollInclination)) {
 					finished = false;
 					turningTime += 0.5;
 					xMovementTime += 0.5;
 					continue;
 				}
 				
-				final float rollInclination = rollInclinationTemp;
-				
-				UnivariateFunction function5 = (x)->{return drone.getLiftForceLeftWing(((float)x) - rollInclination).getEntry(1)
-						+ drone.getLiftForceRightWing(((float)x) + rollInclination).getEntry(1)
-						+drone.getTotalGravitationalForce().getEntry(1)
-						+ drone.getLiftForceVerStab(verStabInclinationTemp).getEntry(1)
-						- (drone.getTotalMass() * yAcceleration)
-						;};
-				try {
-					double solution5 = solver.solve(100, function5, minInclinationWing + Math.abs(rollInclination), maxInclinationWing - Math.abs(rollInclination));
-					leftWingInclination = ((float)solution5) - rollInclination;
-					rightWingInclination = ((float)solution5) + rollInclination;
-				} catch (NoBracketingException exc) {
+				float solution = solver.solverForYVelocityWithRoll(verStabInclination, rollInclination, true);
+				if (Float.isNaN(solution)) {
 					finished = false;
 					turningTime += 0.5;
 					xMovementTime += 0.5;
 					continue;
 				}
+				leftWingInclination = solution - rollInclination;
+				rightWingInclination = solution + rollInclination;
 				
-				UnivariateFunction function6 = (x)->{return drone.transformationToDroneCoordinates(drone.getLiftForceHorStab((float)x)).getEntry(1)*drone.getTailSize()
-						+ drone.transformationToDroneCoordinates(drone.getLiftForceVerStab(verStabInclinationTemp)).getEntry(1)*drone.getTailSize()
-						+ inertiaMatrixXX*Math.cos(drone.getRoll())*pitchAngularAcceleration
-						+ inertiaMatrixXX*Math.cos(drone.getPitch())*Math.sin(drone.getRoll())*headingAngularAcceleration
-						+ VectorMath.crossProduct(totalAngularVelocityDroneCoordinates, angularMomentumDroneCoordinates).getEntry(0)
-						+ inertiaMatrix.operate(drone.transformationToDroneCoordinates(
-								VectorMath.crossProduct(drone.getHeadingAngularVelocityVector(), drone.getPitchAngularVelocityVector())
-								.add(VectorMath.crossProduct(
-									drone.getHeadingAngularVelocityVector().add(drone.getPitchAngularVelocityVector()),
-									drone.getRollAngularVelocityVector()
-								))
-						 )).getEntry(0);};
-				try {
-					double solution6 = solver.solve(100, function6, minInclinationHorStab, maxInclinationHorStab);
-					horStabInclination = (float) solution6;
-				} catch (NoBracketingException exc1) {
+				horStabInclination = solver.solverForPitch(false);
+				if (Float.isNaN(horStabInclination)) {
 					finished = false;
 					turningTime += 0.5;
 					xMovementTime += 0.5;
@@ -1125,60 +886,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		if (! isValidTarget(target))
 			throw new IllegalArgumentException();
 		this.target = target;
-	}
-	
-	public float minMaxInclination(float upperBound, float lowerBound, boolean max, float accuracy, Drone drone, int airfoil)
-			throws IllegalStateException {
-		float inclination;
-		if (max == true) {
-			inclination = upperBound;
-		}
-		else {
-			inclination = lowerBound;
-		}
-		while (this.hasCrash(inclination, drone, airfoil)) {
-			if (max == true) {
-				inclination -= accuracy;
-				if (inclination < lowerBound) {
-					throw new IllegalStateException("simulation failed!");
-				}
-			}
-			else {
-				inclination += accuracy;
-				if (inclination > upperBound)
-					throw new IllegalStateException("simulation failed!");
-			}
-		}
-		return inclination;
-	}
-	
-	public boolean hasCrash(float inclination, Drone drone, int airfoil) {
-		boolean crash = false;
-		if (airfoil == 1) {
-			float AOALeftWing = drone.calculateAOA(drone.getNormalHor(inclination),
-					drone.getProjectedVelocityLeftWing(), drone.getAttackVectorHor(inclination));
-			if ((AOALeftWing > this.getConfig().getMaxAOA()) || (AOALeftWing < -this.getConfig().getMaxAOA()))
-				crash = true;
-		}
-		if ((airfoil == 1) && (crash == false)) {
-			float AOARightWing = drone.calculateAOA(drone.getNormalHor(inclination),
-					drone.getProjectedVelocityRightWing(), drone.getAttackVectorHor(inclination));
-			if ((AOARightWing > this.getConfig().getMaxAOA()) || (AOARightWing < -this.getConfig().getMaxAOA()))
-				crash = true;
-		}
-		if ((airfoil == 2) && (crash == false)) {
-			float AOAHorStab = drone.calculateAOA(drone.getNormalHor(inclination),
-					drone.getProjectedVelocityHorStab(), drone.getAttackVectorHor(inclination));
-			if ((AOAHorStab > this.getConfig().getMaxAOA()) || (AOAHorStab < -this.getConfig().getMaxAOA()))
-				crash = true;
-		}
-		if ((airfoil == 3) && (crash == false)) {
-			float AOAVerStab = drone.calculateAOA(drone.getNormalVer(inclination),
-					drone.getProjectedVelocityVerStab(), drone.getAttackVectorVer(inclination));
-			if ((AOAVerStab > this.getConfig().getMaxAOA()) || (AOAVerStab < -this.getConfig().getMaxAOA()))
-				crash = true;
-		}
-		return crash;	
 	}
 	
     public static boolean isPositionDrawn() {
