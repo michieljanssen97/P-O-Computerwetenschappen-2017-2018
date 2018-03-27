@@ -16,10 +16,6 @@ public class CubePath {
 			ArrayRealVector a = new ArrayRealVector(new double[] {x[i], y[i], z[i]}, false);
 			co.add(a);
 		}
-//		if (l != 0) {
-//			ArrayRealVector a = new ArrayRealVector(new double[] {x[l-1]/4, 30, z[l-1]/2}, false);
-//			co.add(a);
-//		}
 		this.coordinatesList = co;
 	}
 	
@@ -55,18 +51,8 @@ public class CubePath {
 	 * @return
 	 * 		The path coordinates of the closest cube.
 	 */
-	public RealVector getClosestXYZTo(double[] dronePos) {
-		float minimum = Float.POSITIVE_INFINITY;
+	public RealVector getNextPathCoordinate() {
 		RealVector result = null;
-//		for (int i=0; i<getPathSize(); i++) {
-//			RealVector curCo = coordinatesList.get(i);
-//			float distance = (float) Math.sqrt(Math.pow(curCo.getEntry(0) - dronePos[0], 2) + Math.pow(curCo.getEntry(1) - dronePos[1], 2) + Math.pow(curCo.getEntry(2) - dronePos[2], 2));
-//			if (distance < minimum) {
-//				minimum = distance;
-//				result = curCo;
-//			}
-//		}
-//		return result;
 		if (getPathSize() != 0)
 			result = coordinatesList.get(0);
 		return result;
