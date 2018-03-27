@@ -44,6 +44,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		//Add drone to world
 		Drone drone = new Drone(config, initialVelocity);
 		drone.setRelativePosition(new ArrayRealVector(new double[] {0, -config.getWheelY() + config.getTyreRadius(), 0}, false));
+		//drone.setRelativePosition(new ArrayRealVector(new double[] {0, 100, 0}, false));
 		this.addChild(drone);
 
 		//Add boxes to world
@@ -71,7 +72,12 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 				removeChild(box);
 			
 				//Stop the simulation if all boxes are handled
-				if(boxesToFlyTo.isEmpty()) {
+				RealVector pos = drone.getWorldPosition();
+				pos.setEntry(1, 0);
+				boolean isInEndPosition = (pos.getNorm() < 5);
+				if (drone.getVelocity().getNorm() > 1)
+					isInEndPosition = false;
+				if(boxesToFlyTo.isEmpty() && (isInEndPosition)) {
 					if (drawChartEquations) {
 						expequations.drawMain(type); //draw chart of 'type' when simulation stops
 					}

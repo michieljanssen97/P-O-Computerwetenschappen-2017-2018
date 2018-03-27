@@ -2,6 +2,7 @@ package be.kuleuven.cs.robijn.common;
 
 import be.kuleuven.cs.robijn.autopilot.Autopilot;
 import be.kuleuven.cs.robijn.common.exceptions.CrashException;
+import be.kuleuven.cs.robijn.common.exceptions.FinishedException;
 import be.kuleuven.cs.robijn.common.stopwatch.RealTimeStopwatch;
 import be.kuleuven.cs.robijn.common.stopwatch.Stopwatch;
 import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
@@ -21,6 +22,7 @@ public class SimulationDriver {
     private Autopilot autoPilot;
     private boolean simulationFinished;
     private boolean simulationCrashed;
+    private boolean outOfControl;
     private boolean simulationThrewException;
     private boolean pathSet = false;
     private AutopilotInputs latestAutopilotInputs;
@@ -53,8 +55,14 @@ public class SimulationDriver {
      */
     public void runUpdate(){
         stopwatch.tick();
-
-        if(!stopwatch.isPaused() && !simulationFinished && !simulationCrashed && !simulationThrewException && pathSet){
+        if (! pathSet)
+        	stopwatch.setPaused(true);
+        else if (start) {
+        	stopwatch.setPaused(false);
+        	start = false;
+        }
+        
+        if(!stopwatch.isPaused() && !simulationFinished && !simulationCrashed && !outOfControl && !simulationThrewException) {
         	try {
         	    //Reset renderer
                 testBed.getRenderer().clearDebugObjects();
@@ -73,17 +81,19 @@ public class SimulationDriver {
 
                 latestAutopilotInputs = testBed.getInputs();
         	} catch (CrashException exc1){
-                simulationCrashed = true;
+        		simulationCrashed = true;
                 System.err.println("Plane crashed!");
         		exc1.printStackTrace();
         	} catch (IllegalArgumentException exc2) {
-        		simulationCrashed = true;
+        		outOfControl = true;
         		System.err.println("Autopilot failed!");
         		exc2.printStackTrace();
         	} catch (NullPointerException exc3) {
-        		simulationCrashed = true;
+        		outOfControl = true;
         		System.err.println("Autopilot failed!");
         		exc3.printStackTrace();
+        	} catch (FinishedException exc4) {
+        		simulationFinished = true;
         	}
         }
 
@@ -108,12 +118,16 @@ public class SimulationDriver {
     public void notifyPathSet() {
     	this.pathSet = true;
     }
+    
+    private boolean start = true;
 
     public boolean hasSimulationFinished() {return simulationFinished;}
 
     public boolean hasSimulationCrashed(){return simulationCrashed;}
 
     public boolean hasSimulationThrownException(){return simulationThrewException;}
+    
+    public boolean isOutOfControl(){return outOfControl;}
     
     public boolean isPathSet() {return pathSet;}
 

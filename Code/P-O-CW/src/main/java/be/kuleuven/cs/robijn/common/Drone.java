@@ -633,6 +633,10 @@ public class Drone extends WorldObject {
 		return this.rollTransformation(this.pitchTransformation(this.headingTransformation(realVector)));
 	}
 	
+	public RealVector transformationToDroneWithoutRollCoordinates(RealVector realVector) {
+		return this.pitchTransformation(this.headingTransformation(realVector));
+	}
+	
 	public RealMatrix getRotationMatrix() {
 		float rollAngle = this.getRoll();
 		float pitchAngle = this.getPitch();
@@ -717,6 +721,10 @@ public class Drone extends WorldObject {
 	 */
 	public RealVector transformationToWorldCoordinates(RealVector realVector) {
 		return this.inverseHeadingTransformation(this.inversePitchTransformation(this.inverseRollTransformation(realVector)));
+	}
+	
+	public RealVector transformationFromDroneWithoutRollCoordinates(RealVector realVector) {
+		return this.inverseHeadingTransformation(this.inversePitchTransformation(realVector));
 	}
 	
 	
@@ -931,10 +939,7 @@ public class Drone extends WorldObject {
 		float liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		
 		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA())))
-//			throw new IllegalArgumentException();
-			AOA = Math.signum(AOA) * this.getMaxAOA();
-		
-		liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
+			throw new IllegalArgumentException();
 		
 		return this.getNormalHor(leftWingInclination).mapMultiply(liftForce);
 	}
@@ -963,10 +968,7 @@ public class Drone extends WorldObject {
 		float liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		
 		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA())))
-//			throw new IllegalArgumentException();
-			AOA = Math.signum(AOA) * this.getMaxAOA();
-		
-		liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
+			throw new IllegalArgumentException();
 		
 		return this.getNormalHor(rightWingInclination).mapMultiply(liftForce);
 	}
@@ -994,10 +996,7 @@ public class Drone extends WorldObject {
 		float liftForce = (float) (AOA * this.getHorStabLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		
 		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA())))
-//			throw new IllegalArgumentException();
-			AOA = Math.signum(AOA) * this.getMaxAOA();
-		
-		liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
+			throw new IllegalArgumentException();
 		
 		return this.getNormalHor(horStabInclination).mapMultiply(liftForce);
 	}
@@ -1025,10 +1024,7 @@ public class Drone extends WorldObject {
 		float liftForce = (float) (AOA * this.getVerStabLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
 		
 		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA())))
-//			throw new IllegalArgumentException();
-			AOA = Math.signum(AOA) * this.getMaxAOA();
-		
-		liftForce = (float) (AOA * this.getWingLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
+			throw new IllegalArgumentException();
 		
 		return this.getNormalVer(verStabInclination).mapMultiply(liftForce);
 	}
