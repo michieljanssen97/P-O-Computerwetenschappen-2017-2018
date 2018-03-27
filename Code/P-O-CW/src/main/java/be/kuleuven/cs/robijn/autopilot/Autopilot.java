@@ -164,8 +164,8 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 				int iterations = 1;
 				while ((! finished) && (iterations < 5)) {
 					iterations += 1;
-					if (iterations == 5)
-						System.out.println("test");
+//					if (iterations == 5)
+//						System.out.println("test");
 					finished = true;
 					
 					ImageRecognizer recognizer = this.getImageRecognizer();
@@ -501,6 +501,8 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			int iterations = 1;
 			while ((! finished) && (iterations < 5)) {
 				iterations += 1;
+//				if (iterations == 5)
+//					System.out.println("test");
 				finished = true;
 				ImageRecognizer recognizer = this.getImageRecognizer();
 		        float horizontalAngleOfView = (float) Math.toDegrees(this.getConfig().getHorizontalAngleOfView());

@@ -421,8 +421,9 @@ public class ImageRecognizer {
 		RealVector path = this.currentPathTarget;
 		double[] drone = getDronePositionCoordinates();
 		float distanceToPath = (float) Math.sqrt(Math.pow(path.getEntry(0) - drone[0], 2) + Math.pow(path.getEntry(1) - drone[1], 2) + Math.pow(path.getEntry(2) - drone[2], 2));
-		if (distanceToPath <= 150)
-			followExactCoordinates();
+		if (distanceToPath <= 3)
+			//followExactCoordinates();
+			this.followNewPathCoordinates();
 		
 		return path;
 	}
