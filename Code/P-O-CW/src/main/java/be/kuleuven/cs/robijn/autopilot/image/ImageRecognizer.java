@@ -34,7 +34,7 @@ public class ImageRecognizer {
 		this.pitch = pitch;
 		this.roll = roll;
 //		if (!isFollowingPathCoordinates())
-//			this.UpdateImageRecognizerCubeList(im);
+			this.UpdateImageRecognizerCubeList(im);
 //		if (!this.hasTarget())
 //			getClosestCubeInWorld(im).makeTarget();
 		return im;
@@ -393,19 +393,6 @@ public class ImageRecognizer {
 	private RealVector currentPathTarget;
 	
 	/**
-	 * Indicates the travelling pattern of the drone. True means it is travelling towards an 
-	 * approximate path coordinate. False means it is travelling towards an exact position of 
-	 * a cube, using image recognition to determine that position.
-	 */
-	private boolean followingPath = true;
-	
-	private float currentCubeHue;
-	
-	private float currentCubeSat;
-	
-	private boolean currentCubeColorCalculated = false;
-	
-	/**
 	 * Returns the path coordinates the drone is currently travelling to.
 	 * If the drone gets within a certain distance of the path coordinates, it will switch to 
 	 * "exact" mode, meaning it will use image recognition to determine the exact coordinate of the cube.
@@ -414,7 +401,7 @@ public class ImageRecognizer {
 		RealVector path = this.currentPathTarget;
 		double[] drone = getDronePositionCoordinates();
 		float distanceToPath = (float) Math.sqrt(Math.pow(path.getEntry(0) - drone[0], 2) + Math.pow(path.getEntry(1) - drone[1], 2) + Math.pow(path.getEntry(2) - drone[2], 2));
-		if (distanceToPath <= 10) {
+		if (distanceToPath <= 3) {
 			this.followNewPathCoordinates();
 			return getCurrentPathTarget();
 		}
@@ -424,26 +411,6 @@ public class ImageRecognizer {
 	public void setPathTarget(RealVector target) {
 		this.currentPathTarget = target;
 	}
-		
-//	private void setCurrentCubeHue(float hue) {
-//		this.currentCubeHue = hue;
-//	}
-//	
-//	private void setCurrentCubeSat(float sat) {
-//		this.currentCubeHue = sat;
-//	}
-//	
-//	public boolean isFollowingPathCoordinates() {
-//		return this.followingPath;
-//	}
-//	
-//	/**
-//	 * Switch the drone's travelling pattern to "exact" mode. The drone will now try to 
-//	 * determine the cube's exact position with image recognition.
-//	 */
-//	public void followExactCoordinates() {
-//		this.followingPath = false;
-//	}
 	
 	/**
 	 * Switch the drone to "path" mode. The closest remaining path coordinate is determined and set as 
@@ -462,56 +429,6 @@ public class ImageRecognizer {
 			setPathTarget(nextPath);
 		}
 	}
-	
-//	/**
-//	 * Returns the coordinates of the cube close to the coordinates of the current path (5 meter).
-//	 * @param im
-//	 * 		The current image.
-//	 */
-//	public RealVector searchForCubeInPathArea(Image im) {
-//		
-//		ImageRecognizerCube toFollow;
-//		float toFollowDistance;
-//		
-//		float[] curPos = {(float)dronePosition.getEntry(0), (float)dronePosition.getEntry(1), (float)dronePosition.getEntry(2)};
-//		float minimum = Float.POSITIVE_INFINITY;
-//		ImageRecognizerCube closest = null;
-//		if (currentCubeColorCalculated && getEquivalentImageRecognizerCube(this.currentCubeHue, this.currentCubeSat) == null) {
-//			followNewPathCoordinates();
-//			return getCurrentPathTarget();
-//		}
-//		for (ImageRecognizerCube c : getImageRecognizerCubesFromImage(im)) {
-//			float distance = (float) Math.sqrt(Math.pow(curPos[0] - c.getX(), 2) + Math.pow(curPos[1] - c.getY(), 2) + Math.pow(curPos[2] - c.getZ(), 2));
-//			if (distance < minimum){
-//				minimum = distance;
-//				closest = c;
-//			}
-//		}
-//		if (minimum <= 50) {
-//			setCurrentCubeHue(closest.getHue());
-//			setCurrentCubeSat(closest.getSaturation());
-//			this.currentCubeColorCalculated = true;
-//		}
-//		toFollow = closest;
-//		toFollowDistance = minimum;
-//		
-//		float[] co = new float[] {toFollow.getX(), toFollow.getY(), toFollow.getZ()};
-////		RealVector pathCo = this.currentPathTarget;
-////		float pathDistance = (float) Math.sqrt(Math.pow(co[0] - pathCo.getEntry(0), 2) + Math.pow(co[1] - pathCo.getEntry(1), 2) + Math.pow(co[2] - pathCo.getEntry(2), 2));
-//		
-//		if (toFollowDistance <= 3) {
-//			//cube is touched
-//			toFollow.destroy();
-//			followNewPathCoordinates();
-//		}
-//		
-//		double[] coD = new double[3];
-//		coD[0] = co[0];
-//		coD[1] = co[1];
-//		coD[2] = co[2];
-//		return new ArrayRealVector(coD, false);
-//		
-//	}
 	
 	public void updateDronePosition(RealVector dronePos) {
 		this.dronePosition = dronePos;

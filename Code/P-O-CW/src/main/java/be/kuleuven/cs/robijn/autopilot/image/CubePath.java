@@ -16,10 +16,6 @@ public class CubePath {
 			ArrayRealVector a = new ArrayRealVector(new double[] {x[i], y[i], z[i]}, false);
 			co.add(a);
 		}
-//		if (l != 0) {
-//			ArrayRealVector a = new ArrayRealVector(new double[] {x[l-1]/4, 30, z[l-1]/2}, false);
-//			co.add(a);
-//		}
 		this.coordinatesList = co;
 	}
 	
