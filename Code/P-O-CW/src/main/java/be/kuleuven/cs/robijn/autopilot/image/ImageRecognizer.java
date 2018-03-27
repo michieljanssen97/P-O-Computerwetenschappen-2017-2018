@@ -492,13 +492,7 @@ public class ImageRecognizer {
 		
 		if (getImageRecognizerCubesFromImage(im).size() == 0) {
 			//no cubes are seen on screen
-			double[] difference = new double[] {this.dronePosition.getEntry(0) - this.previousDronePosition.getEntry(0), this.dronePosition.getEntry(1) - this.previousDronePosition.getEntry(1), this.dronePosition.getEntry(2) - this.previousDronePosition.getEntry(2)};
-			double[] continuingPath = new double[] {this.dronePosition.getEntry(0) + (200 * difference[0]), this.dronePosition.getEntry(1) + (200 * difference[1]), this.dronePosition.getEntry(2) + (200 * difference[2])};
-			RealVector nextPath = new ArrayRealVector(continuingPath);
-			this.followingPath = true;
-			this.getPath().addCoordinate(nextPath);
-			setPathTarget(nextPath);
-			return nextPath;
+			return getCurrentPathTarget();
 		}
 		
 		for (ImageRecognizerCube c : getImageRecognizerCubesFromImage(im)) {
