@@ -2,6 +2,7 @@ package be.kuleuven.cs.robijn.autopilot;
 
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.*;
+import be.kuleuven.cs.robijn.common.exceptions.FinishedException;
 import be.kuleuven.cs.robijn.autopilot.image.*;
 import be.kuleuven.cs.robijn.experiments.ExpPosition;
 import be.kuleuven.cs.robijn.tyres.FrontWheel;
@@ -57,7 +58,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 	/**
 	 * Wel roll ten gevolge van verschillende snelheid van vleugels (door de rotaties). 
 	 */
-	public AutopilotOutputs timePassed(AutopilotInputs inputs) throws IllegalStateException {
+	public AutopilotOutputs timePassed(AutopilotInputs inputs) throws IllegalStateException, FinishedException {
 		if (this.isFirstUpdate())
 			this.firstUpdate = false;
 		else {
@@ -851,8 +852,9 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					}
 					if (droneVelocity < 1) {
 						thrust = Math.min(2000,2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, Math.min(4300,Math.abs(leftBrakeForce - rightBrakeForce)), 0)[0] * drone.getTotalMass() + leftBrakeForce + rightBrakeForce);
-						if (targetPositionDroneCoordinates.getNorm() < 2)
-							System.out.println("SUCCES");
+						if (targetPositionDroneCoordinates.getNorm() < 2) {
+							throw new FinishedException();
+						}
 					}
 				}
 				if (droneVelocity < 1) {
@@ -860,7 +862,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 //					rightBrakeForce = 0;
 //					leftBrakeForce = 0;
 					if (targetPositionDroneCoordinates.getNorm() < 5)
-						System.out.println("SUCCES");
+						throw new FinishedException();
 				}
 			}
 			thrust = Math.max(0, thrust);
