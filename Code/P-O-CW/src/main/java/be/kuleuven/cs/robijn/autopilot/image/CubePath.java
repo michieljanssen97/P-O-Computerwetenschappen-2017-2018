@@ -76,4 +76,8 @@ public class CubePath {
 		coordinatesList.remove(path);
 	}
 	
+	public void addCoordinate(RealVector path) {
+		coordinatesList.add(path);
+	}
+	
 }

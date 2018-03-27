@@ -29,6 +29,7 @@ public class ImageRecognizer {
 	 */
 	public Image createImage(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView, RealVector dronePos, float heading, float pitch, float roll) {
 		Image im = new Image(image, nbRows, nbColumns, horizontalAngleOfView, verticalAngleOfView);
+		this.previousDronePosition = this.dronePosition;
 		this.dronePosition = dronePos;
 		this.heading = heading;
 		this.pitch = pitch;
@@ -464,9 +465,9 @@ public class ImageRecognizer {
 		if (nextPath != null)
 			setPathTarget(getClosestPathXYZ());
 		else {
-			double[] dronePos = getDronePositionCoordinates();
-			dronePos[2] = dronePos[2]-1000;
-			nextPath = new ArrayRealVector(dronePos);
+			double[] difference = new double[] {this.dronePosition.getEntry(0) - this.previousDronePosition.getEntry(0), this.dronePosition.getEntry(1) - this.previousDronePosition.getEntry(1), this.dronePosition.getEntry(2) - this.previousDronePosition.getEntry(2)};
+			double[] continuingPath = new double[] {this.dronePosition.getEntry(0) + (200 * difference[0]), this.dronePosition.getEntry(1) + (200 * difference[1]), this.dronePosition.getEntry(2) + (200 * difference[2])};
+			nextPath = new ArrayRealVector(continuingPath);
 			setPathTarget(nextPath);
 		}
 	}
@@ -480,14 +481,21 @@ public class ImageRecognizer {
 		
 		ImageRecognizerCube toFollow;
 		float toFollowDistance;
-		
 		float[] curPos = {(float)dronePosition.getEntry(0), (float)dronePosition.getEntry(1), (float)dronePosition.getEntry(2)};
 		float minimum = Float.POSITIVE_INFINITY;
 		ImageRecognizerCube closest = null;
+		
 		if (currentCubeColorCalculated && getEquivalentImageRecognizerCube(this.currentCubeHue, this.currentCubeSat) == null) {
+			//current cube is no longer seen on screen
 			followNewPathCoordinates();
 			return getCurrentPathTarget();
 		}
+		
+		if (getImageRecognizerCubesFromImage(im).size() == 0) {
+			//no cubes are seen on screen
+			return getCurrentPathTarget();
+		}
+		
 		for (ImageRecognizerCube c : getImageRecognizerCubesFromImage(im)) {
 			float distance = (float) Math.sqrt(Math.pow(curPos[0] - c.getX(), 2) + Math.pow(curPos[1] - c.getY(), 2) + Math.pow(curPos[2] - c.getZ(), 2));
 			if (distance < minimum){
@@ -495,11 +503,13 @@ public class ImageRecognizer {
 				closest = c;
 			}
 		}
-		if (minimum <= 50) {
+		
+		if (!currentCubeColorCalculated && minimum <= 50) {
 			setCurrentCubeHue(closest.getHue());
 			setCurrentCubeSat(closest.getSaturation());
 			this.currentCubeColorCalculated = true;
 		}
+		
 		toFollow = closest;
 		toFollowDistance = minimum;
 		
@@ -520,5 +530,7 @@ public class ImageRecognizer {
 		return new ArrayRealVector(coD, false);
 		
 	}
+	
+	private RealVector previousDronePosition = new ArrayRealVector();
 	
 }
