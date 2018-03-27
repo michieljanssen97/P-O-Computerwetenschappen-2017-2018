@@ -72,7 +72,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 				removeChild(box);
 			
 				//Stop the simulation if all boxes are handled
-				boolean isInEndPosition = (drone.getWorldPosition().subtract(new ArrayRealVector(new double[] {0, 0, 0}, false)).getNorm() < 3);
+				boolean isInEndPosition = (drone.getWorldPosition().getNorm() < 5);
 				if (drone.getVelocity().getNorm() > 1)
 					isInEndPosition = false;
 				if(boxesToFlyTo.isEmpty() && (isInEndPosition)) {
