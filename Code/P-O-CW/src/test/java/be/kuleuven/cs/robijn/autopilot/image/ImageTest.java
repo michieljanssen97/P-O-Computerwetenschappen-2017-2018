@@ -15,23 +15,23 @@ import javax.imageio.ImageIO;
 
 public class ImageTest {
   
-	private byte[] loadImageRGBBytes(String resourceName) throws IOException {
-		BufferedImage image = ImageIO.read(getClass().getClassLoader().getResource(resourceName));
-		byte[] rgbBytes = new byte[image.getWidth() * image.getHeight()*3];
-		for(int y = 0; y < image.getHeight(); y++){
-			for(int x = 0; x < image.getWidth(); x++){
-				int argb = image.getRGB(x, y);
-				byte r = (byte)((argb >> 16) & 0xFF);
-				byte g = (byte)((argb >>  8) & 0xFF);
-				byte b = (byte)((argb >>  0) & 0xFF);
-				int offset = ((y*image.getWidth()) + x) * 3;
-				rgbBytes[offset] = r;
-				rgbBytes[offset+1] = g;
-				rgbBytes[offset+2] = b;
-			}
-		}
-		return rgbBytes;
-	}
+//	private byte[] loadImageRGBBytes(String resourceName) throws IOException {
+//		BufferedImage image = ImageIO.read(getClass().getClassLoader().getResource(resourceName));
+//		byte[] rgbBytes = new byte[image.getWidth() * image.getHeight()*3];
+//		for(int y = 0; y < image.getHeight(); y++){
+//			for(int x = 0; x < image.getWidth(); x++){
+//				int argb = image.getRGB(x, y);
+//				byte r = (byte)((argb >> 16) & 0xFF);
+//				byte g = (byte)((argb >>  8) & 0xFF);
+//				byte b = (byte)((argb >>  0) & 0xFF);
+//				int offset = ((y*image.getWidth()) + x) * 3;
+//				rgbBytes[offset] = r;
+//				rgbBytes[offset+1] = g;
+//				rgbBytes[offset+2] = b;
+//			}
+//		}
+//		return rgbBytes;
+//	}
 
 //	@Test
 //	public void testRGBtoHSV() {
