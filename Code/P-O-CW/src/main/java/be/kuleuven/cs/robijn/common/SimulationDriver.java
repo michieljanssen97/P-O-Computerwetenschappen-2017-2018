@@ -2,6 +2,7 @@ package be.kuleuven.cs.robijn.common;
 
 import be.kuleuven.cs.robijn.autopilot.Autopilot;
 import be.kuleuven.cs.robijn.common.exceptions.CrashException;
+import be.kuleuven.cs.robijn.common.exceptions.FinishedException;
 import be.kuleuven.cs.robijn.common.stopwatch.RealTimeStopwatch;
 import be.kuleuven.cs.robijn.common.stopwatch.Stopwatch;
 import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
@@ -91,6 +92,8 @@ public class SimulationDriver {
         		outOfControl = true;
         		System.err.println("Autopilot failed!");
         		exc3.printStackTrace();
+        	} catch (FinishedException exc4) {
+        		simulationFinished = true;
         	}
         }
 
