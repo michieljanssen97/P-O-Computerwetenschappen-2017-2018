@@ -29,6 +29,7 @@ public class ImageRecognizer {
 	 */
 	public Image createImage(byte[] image, int nbRows, int nbColumns, float horizontalAngleOfView, float verticalAngleOfView, RealVector dronePos, float heading, float pitch, float roll) {
 		Image im = new Image(image, nbRows, nbColumns, horizontalAngleOfView, verticalAngleOfView);
+		this.previousDronePosition = this.dronePosition;
 		this.dronePosition = dronePos;
 		this.heading = heading;
 		this.pitch = pitch;
@@ -433,5 +434,7 @@ public class ImageRecognizer {
 	public void updateDronePosition(RealVector dronePos) {
 		this.dronePosition = dronePos;
 	}
+	
+	private RealVector previousDronePosition = new ArrayRealVector();
 	
 }
