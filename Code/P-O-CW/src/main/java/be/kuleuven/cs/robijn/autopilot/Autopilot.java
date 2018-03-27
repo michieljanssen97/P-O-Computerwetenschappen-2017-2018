@@ -96,6 +96,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		float hight = 10;
 		
 		if (this.getFlightMode() == FlightMode.ASCEND) { //ascend
+
 			thrust = this.getConfig().getMaxThrust();
 			
 			float takeOffSpeed = (float) Math.sqrt((-drone.getTotalGravitationalForce().getEntry(1))
@@ -503,7 +504,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			if (targetPositionDroneCoordinates.getEntry(0) == 0 && targetPositionDroneCoordinates.getEntry(2) < 0) {
 				thrust = 200;
 			}
-			else if ((- targetPositionDroneCoordinates.getEntry(2) < Math.tan(Math.PI/3) * Math.abs(targetPositionDroneCoordinates.getEntry(0)) && targetPositionDroneCoordinates.getEntry(2) < 0) || targetPositionDroneCoordinates.getEntry(2) > 0){
+			else if ((- targetPositionDroneCoordinates.getEntry(2) < Math.tan(Math.PI/3) * Math.abs(targetPositionDroneCoordinates.getEntry(0)) && targetPositionDroneCoordinates.getEntry(2) <= 0) || targetPositionDroneCoordinates.getEntry(2) > 0){
 //				System.out.println("SCHERPE BOCHT");
 				if (drone.getVelocity().getNorm() > 3)
 					thrust = 0;
@@ -569,7 +570,16 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					thrust = 0;
 				}
 			}
-			if ((targetPositionDroneCoordinates.getNorm() <= 20 + drone.getVelocity().getNorm())){
+			int factor;
+			if (droneVelocity < 10)
+				factor = 1;
+			else if (droneVelocity < 20)
+				factor = 2;
+			else if (droneVelocity < 30)
+				factor = 3;
+			else
+				factor = 4;
+			if ((targetPositionDroneCoordinates.getNorm() <= 20 + factor * drone.getVelocity().getNorm())){
 				thrust = 0;
 				if (droneVelocity >= 3) {
 					float breakforce = Math.min( 8600, (float) (droneVelocity*droneVelocity*480)/(2*(float)targetPositionDroneCoordinates.getNorm()));
@@ -594,11 +604,12 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					}
 				}
 				if (droneVelocity < 1) {
-					thrust = Math.min(2000,2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, Math.min(4300,Math.abs(leftBrakeForce - rightBrakeForce)), 0)[0] * drone.getTotalMass() + leftBrakeForce + rightBrakeForce);
+					thrust = Math.min(2000,2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, Math.min(4300,leftBrakeForce), Math.min(4300, rightBrakeForce))[0] * drone.getTotalMass() + leftBrakeForce + rightBrakeForce);
 //					rightBrakeForce = 0;
 //					leftBrakeForce = 0;
-					if (targetPositionDroneCoordinates.getNorm() < 5)
-						throw new FinishedException();
+
+//					if (targetPositionDroneCoordinates.getNorm() < 5)
+//						System.out.println("SUCCES");
 				}
 			}
 			thrust = Math.max(0, thrust);
