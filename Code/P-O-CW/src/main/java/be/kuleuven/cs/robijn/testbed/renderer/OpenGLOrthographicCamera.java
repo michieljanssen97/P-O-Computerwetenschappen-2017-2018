@@ -1,7 +1,8 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
-import be.kuleuven.cs.robijn.common.OrthographicCamera;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
+
+import be.kuleuven.cs.robijn.worldObjects.OrthographicCamera;
 
 public class OpenGLOrthographicCamera extends OrthographicCamera {
     private float width = 100f;

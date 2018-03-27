@@ -2,6 +2,8 @@ package be.kuleuven.cs.robijn.common;
 
 import org.apache.commons.math3.linear.ArrayRealVector;
 
+import be.kuleuven.cs.robijn.worldObjects.Box;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

@@ -1,4 +1,6 @@
-package be.kuleuven.cs.robijn.common;
+package be.kuleuven.cs.robijn.worldObjects;
+
+import be.kuleuven.cs.robijn.common.WorldObject;
 
 /**
  * Represents a camera in the 3D simulated world.

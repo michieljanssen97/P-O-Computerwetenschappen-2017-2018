@@ -1,7 +1,7 @@
 package be.kuleuven.cs.robijn.gui;
 
 import be.kuleuven.cs.robijn.common.*;
-
+import be.kuleuven.cs.robijn.worldObjects.Box;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -14,7 +14,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.converter.NumberStringConverter;
-
 import interfaces.AutopilotConfig;
 import interfaces.AutopilotConfigReader;
 import interfaces.AutopilotConfigWriter;
