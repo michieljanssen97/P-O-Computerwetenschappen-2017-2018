@@ -168,10 +168,13 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					finished = true;
 					
 					ImageRecognizer recognizer = this.getImageRecognizer();
-			        float horizontalAngleOfView = (float) Math.toDegrees(this.getConfig().getHorizontalAngleOfView());
-			        float verticalAngleOfView = (float) Math.toDegrees(this.getConfig().getVerticalAngleOfView());
-			        Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
-							horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
+					recognizer.updateDronePosition(drone.getWorldPosition());
+					
+//			        float horizontalAngleOfView = (float) Math.toDegrees(this.getConfig().getHorizontalAngleOfView());
+//			        float verticalAngleOfView = (float) Math.toDegrees(this.getConfig().getVerticalAngleOfView());
+//			        
+//			        Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
+//							horizontalAngleOfView, verticalAngleOfView, drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
 //					float distanceToCube;
 //					try{
 //						Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
@@ -223,12 +226,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 //						imageYRotation = (float) ((5.0/4.0)*imageYRotation + (1.0/4.0)*heading);
 //					}
 					
-					RealVector target;
-					if (recognizer.isFollowingPathCoordinates()) {
-						target = recognizer.getCurrentPathTarget();
-					} else {
-						target = recognizer.searchForCubeInPathArea(image);
-					}
+					RealVector target = recognizer.getCurrentPathTarget();
           
 					if (this.getFlightMode() == FlightMode.LAND) {
 						if (drone.getWorldPosition().getEntry(1) >= 5*hight) {
