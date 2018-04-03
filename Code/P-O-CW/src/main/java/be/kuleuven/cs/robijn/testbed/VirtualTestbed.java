@@ -1,17 +1,9 @@
 package be.kuleuven.cs.robijn.testbed;
 
 import be.kuleuven.cs.robijn.common.*;
-import be.kuleuven.cs.robijn.common.airports.Airport;
-import be.kuleuven.cs.robijn.common.airports.Gate;
-import be.kuleuven.cs.robijn.common.airports.Runway;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
 import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
-import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.RealVector;
 
 import java.util.HashMap;
 import java.util.List;

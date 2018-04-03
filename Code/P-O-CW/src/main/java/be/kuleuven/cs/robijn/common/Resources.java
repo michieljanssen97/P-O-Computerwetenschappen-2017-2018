@@ -1,9 +1,16 @@
 package be.kuleuven.cs.robijn.common;
 
+import org.lwjgl.BufferUtils;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.util.stream.Collectors;
 
 public class Resources {
@@ -32,6 +39,39 @@ public class Resources {
             return ImageIO.read(stream);
         }catch (IOException ex){
             throw new UncheckedIOException("Failed to load the resource under path '" + resourceName + "'.", ex);
+        }
+    }
+
+    /**
+     * Loads the file at path 'resourceName' from the application resources.
+     * The path should start with a '/' and is relative to the 'resources' folder in the project.
+     * @param resourceName the path of the resource being loaded
+     * @return the contents of the resource, as a byte buffer
+     */
+    public static ByteBuffer loadBinaryResource(String resourceName, boolean nativeCompatible){
+        InputStream in = getResourceStream(resourceName);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        try {
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = in.read(buffer, 0, buffer.length)) >= 0) {
+                out.write(buffer, 0, read);
+            }
+
+            byte[] data = out.toByteArray();
+            ByteBuffer byteBuffer;
+            if(nativeCompatible){
+                byteBuffer = ByteBuffer.allocateDirect(data.length).order(ByteOrder.nativeOrder());
+                byteBuffer.put(data);
+                byteBuffer.rewind();
+            }else{
+                byteBuffer = ByteBuffer.wrap(out.toByteArray());
+            }
+
+            return byteBuffer;
+        }catch (IOException e){
+            throw new UncheckedIOException(e);
         }
     }
 

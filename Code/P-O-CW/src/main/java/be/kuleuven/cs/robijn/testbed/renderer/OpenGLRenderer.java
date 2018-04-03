@@ -1,9 +1,10 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.*;
-import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.airports.Runway;
+import be.kuleuven.cs.robijn.testbed.renderer.bmfont.Label3D;
+import be.kuleuven.cs.robijn.testbed.renderer.bmfont.RenderableString;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
@@ -17,6 +18,7 @@ import org.lwjgl.opengl.GL;
 import java.awt.*;
 import java.lang.Math;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
@@ -97,6 +99,8 @@ public class OpenGLRenderer implements Renderer {
 
     private ArrayList<Line> linesToDraw = new ArrayList<>();
     private ArrayList<OpenGLFrameBuffer> frameBuffers = new ArrayList<>();
+
+    private HashMap<String, Texture> labelCache = new HashMap<>();
 
     private OpenGLRenderer(long windowHandle){
         this.windowHandle = windowHandle;
@@ -186,6 +190,8 @@ public class OpenGLRenderer implements Renderer {
             throw new IllegalArgumentException("Incompatible camera");
         }
 
+        updateLabelCache(worldRoot);
+
         //Use own framebuffer instead of default framebuffer
         glBindFramebuffer(GL_FRAMEBUFFER, ((OpenGLFrameBuffer)buffer).getId());
         //Set the size and position of the image we want to render in the buffer
@@ -259,6 +265,9 @@ public class OpenGLRenderer implements Renderer {
             model = gateModel;
         }else if(obj instanceof Runway){
             model = runwayModel;
+        }else if(obj instanceof Label3D){
+            renderLabel((Label3D)obj, viewProjectionMatrix, camera);
+            return;
         }else{
             return;
         }
@@ -292,6 +301,28 @@ public class OpenGLRenderer implements Renderer {
                 renderModel(icon, viewProjectionMatrix, icon.generateModelMatrix(camera, billboardPosition, orthoCam.getIconSize()));
             }
         }
+    }
+
+    private void updateLabelCache(WorldObject root){
+        root.getDescendantsStream()
+            .filter(o -> o instanceof Label3D)
+            .map(o -> (Label3D)o)
+            .forEach(label -> {
+                //TODO: support more than 1 font
+                if(!labelCache.containsKey(label.getText())){
+                    RenderableString renderableString = label.getFont().layoutString(label.getText());
+                    Texture bakedString = label.getFont().getRenderer().bake(renderableString);
+                    labelCache.put(label.getText(), bakedString);
+                }
+            });
+    }
+
+    private void renderLabel(Label3D label, Matrix4f viewProjectionMatrix, Camera camera) {
+        Texture textTexture = labelCache.get(label.getText());
+        Billboard billboard = Billboard.create(textTexture);
+        renderModel(billboard, viewProjectionMatrix, Billboard.generateModelMatrix(camera, label.getWorldPosition(), 1.0f));
+        billboard.getMesh().close();
+        billboard.getShader().close();
     }
 
     private void renderModel(Model model, Matrix4f viewProjectionMatrix, RealMatrix objectToWorldTransform){

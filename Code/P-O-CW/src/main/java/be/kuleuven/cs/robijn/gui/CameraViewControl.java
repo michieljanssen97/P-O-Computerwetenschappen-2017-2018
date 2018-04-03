@@ -1,6 +1,7 @@
 package be.kuleuven.cs.robijn.gui;
 
 import be.kuleuven.cs.robijn.common.*;
+import be.kuleuven.cs.robijn.testbed.renderer.bmfont.Label3D;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -75,6 +76,7 @@ public class CameraViewControl extends AnchorPane {
     @FXML
     private void initialize() {
         setupCameras();
+        setupLabels();
         setupDroneComboBox();
         setupDragging();
         setupResizing();
@@ -140,6 +142,18 @@ public class CameraViewControl extends AnchorPane {
                 newDrone.addChild(droneCamera);
             }
             setActiveCamera((String)perspectiveToggleGroup.getSelectedToggle().getUserData());
+        });
+    }
+
+    private void setupLabels(){
+        simulationProperty.addListener((observableValue, oldValue, newValue) -> {
+            WorldObject world = newValue.getTestBed().getWorldRepresentation();
+
+            for (Drone drone : world.getChildrenOfType(Drone.class)){
+                Label3D label = new Label3D(drone.getDroneID());
+                label.setRelativePosition(new ArrayRealVector(new double[]{0, 1, 0}, false));
+                drone.addChild(label);
+            }
         });
     }
 

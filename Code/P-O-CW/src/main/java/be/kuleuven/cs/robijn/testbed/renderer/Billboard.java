@@ -45,10 +45,9 @@ public class Billboard extends Model {
         super(mesh, texture, shader);
     }
 
-    public Matrix4f generateModelMatrix(Camera camera, RealVector position, float scale){
+    public static Matrix4f generateModelMatrix(Camera camera, RealVector position, float scale){
         Rotation cameraRotation = camera.getWorldRotation();
         Matrix4f modelMatrix = new Matrix4f();
-        modelMatrix.identity();
         modelMatrix.translate((float)position.getEntry(0), (float)position.getEntry(1), (float)position.getEntry(2));
         modelMatrix.rotate(new Quaternionf(-(float)cameraRotation.getQ1(), -(float)cameraRotation.getQ2(), -(float)cameraRotation.getQ3(), (float)cameraRotation.getQ0()));
         modelMatrix.scale(scale, scale, scale);
