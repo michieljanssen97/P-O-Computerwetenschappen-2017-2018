@@ -1,16 +1,11 @@
 package be.kuleuven.cs.robijn.common;
 
-import org.lwjgl.BufferUtils;
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.util.stream.Collectors;
 
 public class Resources {

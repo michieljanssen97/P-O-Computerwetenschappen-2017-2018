@@ -10,14 +10,32 @@ import org.joml.Quaternionf;
 
 public class Billboard extends Model {
     public static Billboard create(Texture texture){
+        if(texture.getDimensions() != 2){
+            throw new IllegalArgumentException("Can only create billboard from a 2D texture");
+        }
+
         //Generate mesh
-        float ratio = (float)texture.getWidth() / (float)texture.getHeight();
-        float[] vertices = new float[]{
-                -0.5f, -0.5f, 0,
-                -0.5f,  0.5f, 0,
-                 0.5f, -0.5f, 0,
-                 0.5f,  0.5f, 0
-        };
+        float ratio = (float)texture.getSize(0) / (float)texture.getSize(1);
+
+        float[] vertices;
+        if(ratio >= 1.0f){ //Wide texture
+            float x = ratio / 2.0f;
+            vertices = new float[]{
+                    -x, -0.5f, 0,
+                    -x,  0.5f, 0,
+                    x, -0.5f, 0,
+                    x,  0.5f, 0
+            };
+        }else{ //Tall texture
+            float y = 2.0f / ratio;
+            vertices = new float[]{
+                    -0.5f, -y, 0,
+                    -0.5f,  y, 0,
+                    0.5f, -y, 0,
+                    0.5f,  y, 0
+            };
+        }
+
         float[] textureCoords = new float[]{
                 0, 0,
                 0, 1,

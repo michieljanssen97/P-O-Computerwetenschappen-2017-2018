@@ -1,6 +1,7 @@
 package be.kuleuven.cs.robijn.gui;
 
 import be.kuleuven.cs.robijn.common.*;
+import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.testbed.renderer.bmfont.Label3D;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -22,6 +23,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.ArrayList;
 
 /**
  * GUI component that displays a 3D render of the world, along with several buttons for changing the view
@@ -153,6 +155,14 @@ public class CameraViewControl extends AnchorPane {
                 Label3D label = new Label3D(drone.getDroneID());
                 label.setRelativePosition(new ArrayRealVector(new double[]{0, 1, 0}, false));
                 drone.addChild(label);
+            }
+
+            ArrayList<Airport> childrenOfType = world.getChildrenOfType(Airport.class);
+            for (int i = 0; i < childrenOfType.size(); i++) {
+                Airport airport = childrenOfType.get(i);
+                Label3D label = new Label3D("Airport "+i);
+                label.setRelativePosition(new ArrayRealVector(new double[]{0, 1, 0}, false));
+                airport.addChild(label);
             }
         });
     }

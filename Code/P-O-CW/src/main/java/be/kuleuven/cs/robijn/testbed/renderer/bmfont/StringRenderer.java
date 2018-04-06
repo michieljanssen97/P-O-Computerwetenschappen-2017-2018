@@ -22,16 +22,19 @@ public class StringRenderer implements AutoCloseable {
     }
 
     public Texture bake(RenderableString string){
-        Texture result = Texture.createEmpty(string.getWidth(), string.getHeight(), true);
+        Texture result = Texture.createEmpty(new int[]{ string.getWidth(), string.getHeight() }, 2);
 
         //Create framebuffer
-        try(OpenGLFrameBuffer frameBuffer = OpenGLFrameBuffer.create(result, true)) {
+        try(OpenGLFrameBuffer frameBuffer = OpenGLFrameBuffer.create(result, false)) {
             glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.getId());
             glViewport(0, 0, frameBuffer.getWidth(), frameBuffer.getHeight());
 
             //Configure OpenGL
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+            glDisable(GL_DEPTH_TEST);
+            glDisable(GL_CULL_FACE);
+            glFrontFace(GL_CW);
 
             //Set texture
             glActiveTexture(GL_TEXTURE0);
@@ -91,10 +94,10 @@ public class StringRenderer implements AutoCloseable {
     }
 
     private static void setQuadTexCoords(float[] texCoords, int offset, BMFontFile.Char character, Texture atlas){
-        float u = transformToTexCoord(character.x, atlas.getWidth());
-        float v = transformToTexCoord(character.y, atlas.getHeight());
-        float s = transformToTexCoord(character.x + character.width, atlas.getWidth());
-        float t = transformToTexCoord(character.y + character.height, atlas.getHeight());
+        float u = transformToTexCoord(character.x, atlas.getSize(0));
+        float v = transformToTexCoord(character.y, atlas.getSize(1));
+        float s = transformToTexCoord(character.x + character.width, atlas.getSize(0));
+        float t = transformToTexCoord(character.y + character.height, atlas.getSize(1));
 
         setVector2f(texCoords, offset+(2*0), u, v);
         setVector2f(texCoords, offset+(2*1), s, v);
@@ -113,7 +116,7 @@ public class StringRenderer implements AutoCloseable {
     }
 
     private static void setVertex(float[] vertices, int offset, float x, float y, float totalWidth, float totalHeight){
-        setVector3f(vertices, offset, transformToNDC(x, totalWidth), transformToNDC(y, totalHeight), 0);
+        setVector3f(vertices, offset, transformToNDC(x, totalWidth), transformToNDC(y, totalHeight), 1);
     }
 
     private static void setVector3f(float[] coordinates, int offset, float x, float y, float z){

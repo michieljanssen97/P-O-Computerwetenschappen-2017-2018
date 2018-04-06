@@ -8,6 +8,6 @@ out vec2 fragTextureCoordinate;
 
 void main()
 {
-    fragTextureCoordinate = vec2(textureCoordinate.x, 1.0-textureCoordinate.y);
+    fragTextureCoordinate = vec2(textureCoordinate.x, textureCoordinate.y);
     gl_Position = vec4(vertexPosModelspace, 1.0);
 }

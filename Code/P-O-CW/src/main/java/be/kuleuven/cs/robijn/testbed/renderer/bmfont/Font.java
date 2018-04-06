@@ -21,7 +21,7 @@ public class Font implements AutoCloseable {
     }
 
     public static Font loadDefaultFont(){
-        return loadFont("opensans");
+        return loadFont("opensans_outline");
     }
 
     private final BMFontFile info;

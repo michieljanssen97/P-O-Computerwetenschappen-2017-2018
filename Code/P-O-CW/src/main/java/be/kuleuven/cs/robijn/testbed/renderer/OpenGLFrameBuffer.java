@@ -18,6 +18,10 @@ public class OpenGLFrameBuffer implements FrameBuffer {
     }
 
     public static OpenGLFrameBuffer create(Texture texture, boolean createDepthBuffer){
+        if(texture.getDimensions() != 2){
+            throw new IllegalArgumentException("Can only create framebuffer for a 2D texture");
+        }
+
         int fbo = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
@@ -25,7 +29,7 @@ public class OpenGLFrameBuffer implements FrameBuffer {
         if(createDepthBuffer){
             depthRenderBuffer = glGenRenderbuffers();
             glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, texture.getWidth(), texture.getHeight());
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, texture.getSize(0), texture.getSize(1));
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
         }
 
@@ -39,7 +43,7 @@ public class OpenGLFrameBuffer implements FrameBuffer {
             throw new RuntimeException("Frame buffer incomplete! (errorcode = "+framebufferStatus+")");
         }
 
-        return new OpenGLFrameBuffer(fbo, -1, depthRenderBuffer, texture.getWidth(), texture.getHeight(), texture.getBytesPerPixel());
+        return new OpenGLFrameBuffer(fbo, -1, depthRenderBuffer, texture.getSize(0), texture.getSize(1), texture.getBytesPerPixel());
     }
 
     public static OpenGLFrameBuffer create(int width, int height, boolean greyscale, boolean createDepthBuffer){

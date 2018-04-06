@@ -30,6 +30,13 @@
   </profiles>
 
   <dependencies>
+    <!-- https://github.com/google/guava -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>19.0</version>
+    </dependency>
+
     <dependency>
       <groupId>com.oracle</groupId>
       <artifactId>javafx</artifactId>

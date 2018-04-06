@@ -5,6 +5,10 @@ import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.airports.Runway;
 import be.kuleuven.cs.robijn.testbed.renderer.bmfont.Label3D;
 import be.kuleuven.cs.robijn.testbed.renderer.bmfont.RenderableString;
+import com.github.wouterdek.jrenderdoc.RenderDoc;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
@@ -17,14 +21,17 @@ import org.lwjgl.opengl.GL;
 
 import java.awt.*;
 import java.lang.Math;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
+import static org.lwjgl.glfw.GLFWNativeWGL.glfwGetWGLContext;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE1;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
 import static org.lwjgl.opengl.GL14.glBlendEquation;
@@ -100,7 +107,7 @@ public class OpenGLRenderer implements Renderer {
     private ArrayList<Line> linesToDraw = new ArrayList<>();
     private ArrayList<OpenGLFrameBuffer> frameBuffers = new ArrayList<>();
 
-    private HashMap<String, Texture> labelCache = new HashMap<>();
+    private final LabelRenderer labelRenderer = new LabelRenderer(this);
 
     private OpenGLRenderer(long windowHandle){
         this.windowHandle = windowHandle;
@@ -181,6 +188,8 @@ public class OpenGLRenderer implements Renderer {
         lineModel = new Model(lineMesh, null, lineProgram);
     }
 
+    private RenderDoc renderdoc;
+
     @Override
     public void render(WorldObject worldRoot, FrameBuffer buffer, Camera camera){
         if(!(buffer instanceof OpenGLFrameBuffer)){
@@ -190,7 +199,11 @@ public class OpenGLRenderer implements Renderer {
             throw new IllegalArgumentException("Incompatible camera");
         }
 
-        updateLabelCache(worldRoot);
+        if(renderdoc == null){
+            renderdoc = renderdoc.get();
+        }
+
+        labelRenderer.updateLabelCache(worldRoot);
 
         //Use own framebuffer instead of default framebuffer
         glBindFramebuffer(GL_FRAMEBUFFER, ((OpenGLFrameBuffer)buffer).getId());
@@ -266,7 +279,7 @@ public class OpenGLRenderer implements Renderer {
         }else if(obj instanceof Runway){
             model = runwayModel;
         }else if(obj instanceof Label3D){
-            renderLabel((Label3D)obj, viewProjectionMatrix, camera);
+            labelRenderer.renderLabel((Label3D)obj, viewProjectionMatrix, camera);
             return;
         }else{
             return;
@@ -303,29 +316,7 @@ public class OpenGLRenderer implements Renderer {
         }
     }
 
-    private void updateLabelCache(WorldObject root){
-        root.getDescendantsStream()
-            .filter(o -> o instanceof Label3D)
-            .map(o -> (Label3D)o)
-            .forEach(label -> {
-                //TODO: support more than 1 font
-                if(!labelCache.containsKey(label.getText())){
-                    RenderableString renderableString = label.getFont().layoutString(label.getText());
-                    Texture bakedString = label.getFont().getRenderer().bake(renderableString);
-                    labelCache.put(label.getText(), bakedString);
-                }
-            });
-    }
-
-    private void renderLabel(Label3D label, Matrix4f viewProjectionMatrix, Camera camera) {
-        Texture textTexture = labelCache.get(label.getText());
-        Billboard billboard = Billboard.create(textTexture);
-        renderModel(billboard, viewProjectionMatrix, Billboard.generateModelMatrix(camera, label.getWorldPosition(), 1.0f));
-        billboard.getMesh().close();
-        billboard.getShader().close();
-    }
-
-    private void renderModel(Model model, Matrix4f viewProjectionMatrix, RealMatrix objectToWorldTransform){
+    void renderModel(Model model, Matrix4f viewProjectionMatrix, RealMatrix objectToWorldTransform){
         //Setup per-object matrices
         model.getShader().setUniformMatrix("viewProjectionTransformation", false, viewProjectionMatrix);
         model.getShader().setUniformMatrix("modelTransformation", false, objectToWorldTransform);
@@ -333,7 +324,7 @@ public class OpenGLRenderer implements Renderer {
         renderModel(model);
     }
 
-    private void renderModel(Billboard model, Matrix4f viewProjectionMatrix, Matrix4f objectToWorldTransform){
+    void renderModel(Model model, Matrix4f viewProjectionMatrix, Matrix4f objectToWorldTransform){
         //Setup per-object matrices
         model.getShader().setUniformMatrix("viewProjectionTransformation", false, viewProjectionMatrix);
         model.getShader().setUniformMatrix("modelTransformation", false, objectToWorldTransform);
@@ -341,7 +332,7 @@ public class OpenGLRenderer implements Renderer {
         renderModel(model);
     }
 
-    private void renderModel(Model model){
+    void renderModel(Model model){
         //Bind object model mesh, texture, shader, ...
         glBindVertexArray(model.getMesh().getVertexArrayObjectId());
         glActiveTexture(GL_TEXTURE0);
@@ -474,6 +465,10 @@ public class OpenGLRenderer implements Renderer {
     @Override
     public OrthographicCamera createOrthographicCamera() {
         return new OpenGLOrthographicCamera();
+    }
+
+    public long getHGLRC(){
+        return glfwGetWGLContext(windowHandle);
     }
 
     @Override
