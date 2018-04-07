@@ -4,41 +4,30 @@ import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.airports.Runway;
 import be.kuleuven.cs.robijn.testbed.renderer.bmfont.Label3D;
-import be.kuleuven.cs.robijn.testbed.renderer.bmfont.RenderableString;
-import com.github.wouterdek.jrenderdoc.RenderDoc;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
-import org.joml.*;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
 import java.awt.*;
-import java.lang.Math;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
-import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.glfw.GLFWNativeWGL.glfwGetWGLContext;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE1;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
 import static org.lwjgl.opengl.GL14.glBlendEquation;
 import static org.lwjgl.opengl.GL20.glUseProgram;
-import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
-import static org.lwjgl.opengl.GL30.glBindFramebuffer;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL32.GL_FIRST_VERTEX_CONVENTION;
 import static org.lwjgl.opengl.GL32.glProvokingVertex;
 import static org.lwjgl.system.MemoryUtil.NULL;
@@ -188,8 +177,6 @@ public class OpenGLRenderer implements Renderer {
         lineModel = new Model(lineMesh, null, lineProgram);
     }
 
-    private RenderDoc renderdoc;
-
     @Override
     public void render(WorldObject worldRoot, FrameBuffer buffer, Camera camera){
         if(!(buffer instanceof OpenGLFrameBuffer)){
@@ -197,10 +184,6 @@ public class OpenGLRenderer implements Renderer {
         }
         if(!(camera instanceof OpenGLPerspectiveCamera) && !(camera instanceof OpenGLOrthographicCamera)){
             throw new IllegalArgumentException("Incompatible camera");
-        }
-
-        if(renderdoc == null){
-            renderdoc = renderdoc.get();
         }
 
         labelRenderer.updateLabelCache(worldRoot);

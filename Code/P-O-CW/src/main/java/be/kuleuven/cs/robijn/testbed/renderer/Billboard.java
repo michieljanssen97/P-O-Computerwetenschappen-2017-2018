@@ -10,6 +10,21 @@ import org.joml.Quaternionf;
 
 public class Billboard extends Model {
     public static Billboard create(Texture texture){
+        //Load mesh
+        Mesh mesh = createBillboardMesh(texture);
+
+        //Load shader
+        ShaderProgram shader;
+        try(Shader vertexShader = Shader.compileVertexShader(Resources.loadTextResource("/shaders/sprite/vertex.glsl"))){
+            try(Shader fragmentShader = Shader.compileFragmentShader(Resources.loadTextResource("/shaders/sprite/fragment.glsl"))){
+                shader = ShaderProgram.link(vertexShader, fragmentShader);
+            }
+        }
+
+        return new Billboard(mesh, texture, shader);
+    }
+
+    public static Mesh createBillboardMesh(Texture texture){
         if(texture.getDimensions() != 2){
             throw new IllegalArgumentException("Can only create billboard from a 2D texture");
         }
@@ -46,17 +61,7 @@ public class Billboard extends Model {
                 0, 2, 1,
                 3, 1, 2
         };
-        Mesh mesh = Mesh.loadMesh(vertices, textureCoords, null, indices);
-
-        //Load shader
-        ShaderProgram shader;
-        try(Shader vertexShader = Shader.compileVertexShader(Resources.loadTextResource("/shaders/sprite/vertex.glsl"))){
-            try(Shader fragmentShader = Shader.compileFragmentShader(Resources.loadTextResource("/shaders/sprite/fragment.glsl"))){
-                shader = ShaderProgram.link(vertexShader, fragmentShader);
-            }
-        }
-
-        return new Billboard(mesh, texture, shader);
+        return Mesh.loadMesh(vertices, textureCoords, null, indices);
     }
 
     private Billboard(Mesh mesh, Texture texture, ShaderProgram shader) {

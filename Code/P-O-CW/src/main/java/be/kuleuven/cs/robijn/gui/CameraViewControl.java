@@ -10,6 +10,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.AnchorPane;
@@ -19,6 +20,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.linear.ArrayRealVector;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.IOException;
@@ -153,7 +155,8 @@ public class CameraViewControl extends AnchorPane {
 
             for (Drone drone : world.getChildrenOfType(Drone.class)){
                 Label3D label = new Label3D(drone.getDroneID());
-                label.setRelativePosition(new ArrayRealVector(new double[]{0, 1, 0}, false));
+                label.setColors(3, 6, Color.WHITE);
+                label.setRelativePosition(new ArrayRealVector(new double[]{0, 2, 0}, false));
                 drone.addChild(label);
             }
 
@@ -161,9 +164,17 @@ public class CameraViewControl extends AnchorPane {
             for (int i = 0; i < childrenOfType.size(); i++) {
                 Airport airport = childrenOfType.get(i);
                 Label3D label = new Label3D("Airport "+i);
-                label.setRelativePosition(new ArrayRealVector(new double[]{0, 1, 0}, false));
+                label.setColors(3, 6, Color.WHITE);
+                label.setRelativePosition(new ArrayRealVector(new double[]{0, 2, 0}, false));
                 airport.addChild(label);
             }
+        });
+
+        selectedDroneProperty.addListener((observableValue, oldDrone, newDrone) -> {
+            if(oldDrone != null){
+                oldDrone.getFirstChildOfType(Label3D.class).setColors(3, 6, Color.WHITE);
+            }
+            newDrone.getFirstChildOfType(Label3D.class).setColors(3, 6, Color.ORANGE);
         });
     }
 

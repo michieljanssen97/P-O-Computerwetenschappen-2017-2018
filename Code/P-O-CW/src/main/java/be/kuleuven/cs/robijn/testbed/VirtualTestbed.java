@@ -2,6 +2,7 @@ package be.kuleuven.cs.robijn.testbed;
 
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
+import be.kuleuven.cs.robijn.testbed.renderer.bmfont.Label3D;
 import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 
@@ -122,7 +123,8 @@ public class VirtualTestbed implements TestBed {
 		PerspectiveCamera camera = getRenderer().createPerspectiveCamera();
 		camera.setHorizontalFOV(drone.getConfig().getHorizontalAngleOfView());
 		camera.setVerticalFOV(drone.getConfig().getVerticalAngleOfView());
-		camera.addVisibilityFilter(obj -> obj != drone); //Hide drone from itself
+        camera.addVisibilityFilter(obj -> obj != drone); //Hide drone from itself
+        camera.addVisibilityFilter(obj -> !(obj instanceof Label3D)); //Hide labels
 		camera.addVisibilityFilter(Camera.HIDE_DEBUG_OBJECTS);
 		drone.addChild(camera);
 		return camera;
