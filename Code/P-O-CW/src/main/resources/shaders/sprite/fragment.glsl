@@ -21,7 +21,7 @@ void main() {
 
     See for more info: https://www.khronos.org/opengl/wiki/Transparency_Sorting
     */
-    if(outColor.a < 0.5){
+    if(outColor.a < 0.5f){
         discard;
     }
 }

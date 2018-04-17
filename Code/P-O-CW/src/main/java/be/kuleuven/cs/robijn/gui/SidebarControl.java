@@ -3,19 +3,15 @@ package be.kuleuven.cs.robijn.gui;
 import be.kuleuven.cs.robijn.common.Resources;
 import be.kuleuven.cs.robijn.common.SimulationDriver;
 import be.kuleuven.cs.robijn.common.UpdateEventHandler;
+import be.kuleuven.cs.robijn.worldObjects.Drone;
 import interfaces.AutopilotInputs;
-import interfaces.Path;
+import interfaces.AutopilotOutputs;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import interfaces.AutopilotOutputs;
-import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -74,10 +70,6 @@ public class SidebarControl extends VBox {
 
     /// AUTOPILOT INFO
 
-    //Path
-    @FXML
-    private Button editPathButton;
-
     //Thrust
     @FXML
     private ProgressBar thrustBar;
@@ -118,6 +110,9 @@ public class SidebarControl extends VBox {
     private String positiveValueColor = "blue";
 
     private ObjectProperty<SimulationDriver> simulationProperty = new SimpleObjectProperty<>(this, "simulation");
+
+    private ObjectProperty<Drone> selectedDroneProperty = new SimpleObjectProperty<>(this, "selectedDrone");
+    private IntegerProperty selectedDroneIndexProperty = new SimpleIntegerProperty(this, "selectedDroneIndex");
 
     public SidebarControl(){
         //Load the layout associated with this GUI control.
@@ -169,53 +164,49 @@ public class SidebarControl extends VBox {
 
         simulationThrewExceptionLabel.visibleProperty().bind(simulationThrewExceptionProperty);
         simulationThrewExceptionLabel.managedProperty().bind(simulationThrewExceptionProperty);
-
-        editPathButton.setOnMouseClicked(e -> {
-            Path newPath = PathEditorControl.showDialog((Stage)this.editPathButton.getScene().getWindow());
-            if(newPath != null){
-                this.getSimulation().getAutoPilot().setPath(newPath);
-                this.getSimulation().notifyPathSet();
-            }
-        });
     }
 
-    private void updateLabels(AutopilotInputs inputs, AutopilotOutputs outputs){
-        if(inputs == null || outputs == null){
+    private void updateLabels(AutopilotInputs[] inputs, AutopilotOutputs[] outputs){
+        if(inputs == null || outputs == null || getSelectedDrone() == null){
             return;
         }
 
-        positionLabel.setText(String.format("X:%6.2f  Y:%6.2f  Z:%6.2f", inputs.getX(), inputs.getY(), inputs.getZ()));
+        int index = selectedDroneIndexProperty.get();
+        AutopilotInputs in = inputs[index];
+        AutopilotOutputs out = outputs[index];
+
+        positionLabel.setText(String.format("X:%6.2f  Y:%6.2f  Z:%6.2f", in.getX(), in.getY(), in.getZ()));
 
         //Heading
-        setIndicatorValue(headingIndicator, remap360to180(inputs.getHeading()), Math.PI*2d);
-        headingLabel.setText(String.format("%.2f", Math.toDegrees(inputs.getHeading())));
+        setIndicatorValue(headingIndicator, remap360to180(in.getHeading()), Math.PI*2d);
+        headingLabel.setText(String.format("%.2f", Math.toDegrees(in.getHeading())));
 
         //Pitch
-        setIndicatorValue(pitchIndicator, remap360to180(inputs.getPitch()), Math.PI*2d);
-        pitchLabel.setText(String.format("%.2f", Math.toDegrees(inputs.getPitch())));
+        setIndicatorValue(pitchIndicator, remap360to180(in.getPitch()), Math.PI*2d);
+        pitchLabel.setText(String.format("%.2f", Math.toDegrees(in.getPitch())));
 
         //Roll
-        setIndicatorValue(rollIndicator, remap360to180(inputs.getRoll()), Math.PI*2d);
-        rollLabel.setText(String.format("%.2f", Math.toDegrees(inputs.getRoll())));
+        setIndicatorValue(rollIndicator, remap360to180(in.getRoll()), Math.PI*2d);
+        rollLabel.setText(String.format("%.2f", Math.toDegrees(in.getRoll())));
 
         //Thrust
-        double thrustValue = outputs.getThrust()/getSimulation().getConfig().getMaxThrust();
+        double thrustValue = out.getThrust()/getSelectedDrone().getConfig().getMaxThrust();
         thrustBar.setProgress(thrustValue);
-        thrustLabel.setText(String.format("%15.2f", outputs.getThrust()));
+        thrustLabel.setText(String.format("%15.2f", out.getThrust()));
 
         //Wing inclination
-        setIndicatorValue(leftWingInclinationIndicator, outputs.getLeftWingInclination(), Math.PI/2d);
-        leftWingInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(outputs.getLeftWingInclination())));
+        setIndicatorValue(leftWingInclinationIndicator, out.getLeftWingInclination(), Math.PI/2d);
+        leftWingInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(out.getLeftWingInclination())));
 
-        setIndicatorValue(rightWingInclinationIndicator, outputs.getRightWingInclination(), Math.PI/2d);
-        rightWingInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(outputs.getRightWingInclination())));
+        setIndicatorValue(rightWingInclinationIndicator, out.getRightWingInclination(), Math.PI/2d);
+        rightWingInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(out.getRightWingInclination())));
 
         //Stabilizer inclination
-        setIndicatorValue(horStabInclinationIndicator, outputs.getHorStabInclination(), Math.PI/2d);
-        horStabInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(outputs.getHorStabInclination())));
+        setIndicatorValue(horStabInclinationIndicator, out.getHorStabInclination(), Math.PI/2d);
+        horStabInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(out.getHorStabInclination())));
 
-        setIndicatorValue(verStabInclinationIndicator, outputs.getVerStabInclination(), Math.PI/2d);
-        verStabInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(outputs.getVerStabInclination())));
+        setIndicatorValue(verStabInclinationIndicator, out.getVerStabInclination(), Math.PI/2d);
+        verStabInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(out.getVerStabInclination())));
     }
 
     //Remaps [0;(2*PI)] to [-PI;PI]
@@ -241,5 +232,21 @@ public class SidebarControl extends VBox {
 
     public ObjectProperty<SimulationDriver> getSimulationProperty() {
         return simulationProperty;
+    }
+
+    public Drone getSelectedDrone() {
+        return selectedDroneProperty.get();
+    }
+
+    public ObjectProperty<Drone> selectedDroneProperty() {
+        return selectedDroneProperty;
+    }
+
+    public int getSelectedDroneIndex() {
+        return selectedDroneIndexProperty.get();
+    }
+
+    public IntegerProperty selectedDroneIndexProperty() {
+        return selectedDroneIndexProperty;
     }
 }

@@ -7,11 +7,12 @@ import be.kuleuven.cs.robijn.worldObjects.OrthographicCamera;
 import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.SplitPane;
 import javafx.scene.effect.BoxBlur;
 import javafx.scene.layout.*;
@@ -21,12 +22,17 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.ArrayRealVector;
 
+import java.util.List;
+
 /**
  * Controller for the main window layout
  */
 public class MainController {
     @FXML
     private SplitPane contentRoot;
+
+    @FXML
+    private ListView<Drone> droneList;
 
     @FXML
     private AnchorPane overlayRoot;
@@ -43,75 +49,53 @@ public class MainController {
 
     private ObjectProperty<SimulationDriver> simulationProperty = new SimpleObjectProperty<>(this, "simulation");
 
+    private ObjectProperty<Drone> selectedDroneProperty = new SimpleObjectProperty<>(this, "selectedDrone");
+    private IntegerProperty selectedDroneIndexProperty = new SimpleIntegerProperty(this, "selectedDroneIndex");
+
     @FXML
     private void initialize(){
         //Setup simulation settings overlay
         initializeOverlay();
         initializeSimulationSettings();
 
+        setupDroneList();
+
         //Setup CameraViewControls
         camerasViewRoot.setViewSupplier(() -> {
             CameraViewControl cameraView = new CameraViewControl();
             cameraView.getSimulationProperty().bind(simulationProperty);
+            cameraView.getSelectedDronePropertyProperty().bind(selectedDroneProperty);
             return cameraView;
         });
         camerasViewRoot.initialize();
 
         //Setup sidebar
         sidebar.getSimulationProperty().bind(simulationProperty);
+        sidebar.selectedDroneProperty().bind(selectedDroneProperty);
+        sidebar.selectedDroneIndexProperty().bind(selectedDroneIndexProperty);
+    }
 
-        //Setup cameras in simulation world
-        simulationProperty.addListener(e -> {
-            WorldObject world = getSimulation().getTestBed().getWorldRepresentation();
+    private void setupDroneList(){
+        //Bind selected drone property to dronelist selection model
+        selectedDroneProperty.bind(droneList.getSelectionModel().selectedItemProperty());
+        selectedDroneIndexProperty.bind(droneList.getSelectionModel().selectedIndexProperty());
 
-            Drone drone = world.getFirstChildOfType(Drone.class);
+        //Add all drones
+        simulationProperty.addListener((observableValue, oldValue, newValue) -> {
+            List<Drone> drones = newValue.getTestBed().getWorldRepresentation().getChildrenOfType(Drone.class);
+            droneList.getItems().addAll(drones);
+            droneList.getSelectionModel().select(0);
+        });
 
-            PerspectiveCamera droneCamera = getSimulation().getTestBed().getRenderer().createPerspectiveCamera();
-            droneCamera.setHorizontalFOV((float)Math.toRadians(120));
-            droneCamera.setVerticalFOV((float)Math.toRadians(120));
-            droneCamera.setName(CameraViewControl.DRONE_CAMERA_ID);
-            droneCamera.setDronesHidden(true);
-            droneCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 0, 0}, false));
-            droneCamera.setDrawnDebugObjects(true);
-            drone.addChild(droneCamera);
 
-            PerspectiveCamera chaseCamera = getSimulation().getTestBed().getRenderer().createPerspectiveCamera();
-            chaseCamera.setHorizontalFOV((float)Math.toRadians(120));
-            chaseCamera.setVerticalFOV((float)Math.toRadians(120));
-            chaseCamera.setName(CameraViewControl.THIRDPERSON_CAMERA_ID);
-            chaseCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 0d, 7}, false));
-            chaseCamera.setDrawnDebugObjects(true);
-            getSimulation().addOnUpdateEventHandler(new UpdateEventHandler((inputs, outputs) -> {
-                //Put camera at rotation (0, 0, 0), at position of drone +7 on z-axis.
-                chaseCamera.setRelativePosition(drone.getRelativePosition().add(new ArrayRealVector(new double[]{0, 0, 7}, false)));
-                chaseCamera.setRelativeRotation(Rotation.IDENTITY);
-
-                //Perform rotatearound of camera around drone position along y-axis with plane yaw.
-                chaseCamera.rotateAround(drone.getWorldPosition(), new Rotation(new Vector3D(0, 1, 0), drone.getHeading()));
-            },UpdateEventHandler.HIGH_PRIORITY));
-            world.addChild(chaseCamera);
-
-            OrthographicCamera sideCamera = getSimulation().getTestBed().getRenderer().createOrthographicCamera();
-            sideCamera.setWidth(130);
-            sideCamera.setHeight(30);
-            sideCamera.setName(CameraViewControl.SIDE_CAMERA_ID);
-            sideCamera.setRelativePosition(new ArrayRealVector(new double[]{1000, 5, -55}, false));
-            sideCamera.setRelativeRotation(new Rotation(new Vector3D(0, 1, 0), Math.PI/2d));
-            sideCamera.setFarPlane(100000);
-            sideCamera.setDrawnDebugObjects(true);
-            world.addChild(sideCamera);
-
-            OrthographicCamera topCamera = getSimulation().getTestBed().getRenderer().createOrthographicCamera();
-            topCamera.setWidth(130);
-            topCamera.setHeight(40);
-            topCamera.setName(CameraViewControl.TOPDOWN_CAMERA_ID);
-            topCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 1000, -55}, false));
-            Rotation rot = new Rotation(new Vector3D(0, 0, 1), Math.PI/2d)
-                    .applyTo(new Rotation(new Vector3D(0, 1, 0), Math.PI/2d));
-            topCamera.setRelativeRotation(rot);
-            topCamera.setFarPlane(100000);
-            topCamera.setDrawnDebugObjects(true);
-            world.addChild(topCamera);
+        droneList.setCellFactory(view -> new ListCell<Drone>(){
+            @Override
+            protected void updateItem(Drone item, boolean empty) {
+                super.updateItem(item, empty);
+                if(!empty && item != null){
+                    setText(item.getDroneID());
+                }
+            }
         });
     }
 
@@ -159,7 +143,7 @@ public class MainController {
     private void initializeSimulationSettings(){
         simulationSettingsControl.addEventFilter(SimulationSettingsConfirmEvent.CONFIRM, e -> {
             setOverlayVisible(false);
-            setSimulation(new SimulationDriver(e.getBoxes(), e.getSettings(), new RealTimeStopwatch()));
+            setSimulation(new SimulationDriver(e.getSimulationSettings(), new RealTimeStopwatch()));
             startSimulation();
         });
     }

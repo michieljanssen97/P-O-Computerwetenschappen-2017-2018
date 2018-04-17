@@ -1,19 +1,14 @@
 package be.kuleuven.cs.robijn.gui;
 
+import be.kuleuven.cs.robijn.common.SimulationSettings;
 import javafx.event.Event;
 import javafx.event.EventTarget;
 import javafx.event.EventType;
-import interfaces.AutopilotConfig;
-
-import java.util.List;
-
-import be.kuleuven.cs.robijn.worldObjects.Box;
 
 public class SimulationSettingsConfirmEvent extends Event {
     public static EventType<SimulationSettingsConfirmEvent> CONFIRM = new EventType<>(Event.ANY, "CONFIRM");
 
-    private AutopilotConfig config;
-    private List<Box> boxes;
+    private SimulationSettings simulationSettings;
 
     public SimulationSettingsConfirmEvent() {
         super(CONFIRM);
@@ -23,19 +18,11 @@ public class SimulationSettingsConfirmEvent extends Event {
         super(source, target, CONFIRM);
     }
 
-    public void setSettings(AutopilotConfig config) {
-        this.config = config;
+    public SimulationSettings getSimulationSettings() {
+        return simulationSettings;
     }
 
-    public AutopilotConfig getSettings() {
-        return config;
-    }
-
-    public void setBoxes(List<Box> boxes) {
-        this.boxes = boxes;
-    }
-
-    public List<Box> getBoxes() {
-        return boxes;
+    public void setSimulationSettings(SimulationSettings simulationSettings) {
+        this.simulationSettings = simulationSettings;
     }
 }

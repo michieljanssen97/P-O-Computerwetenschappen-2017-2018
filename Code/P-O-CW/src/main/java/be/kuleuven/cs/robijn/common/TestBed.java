@@ -10,15 +10,15 @@ public interface TestBed {
      * Runs the physics and graphics simulation.
 	 * @param secondsSinceStart time since the start of the simulation, minus the time spent paused, in seconds.
 	 * @param secondsSinceLastUpdate time since the last update, minus the time spent paused, in seconds.
-     * @param output the drone parameters calculated by the autopilot
+     * @param output the drone parameters calculated by the autopilot. Must have one instance for each drone in the testbed.
 	 * @return a boolean that is true when the simulation is finished.
      */
-	boolean update(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs output);
+	boolean update(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs[] output);
 	
 	/**
-	 * Returns the latest world state as autopilot inputs.
+	 * Returns the latest world state as autopilot inputs for the drone wutg the specified index.
 	 */
-	AutopilotInputs getInputs();
+	AutopilotInputs getInputs(int index);
 	
     /**
      * Returns the renderer, which can be used to retrieve images of the simulation

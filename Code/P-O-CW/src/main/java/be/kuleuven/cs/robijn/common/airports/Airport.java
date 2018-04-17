@@ -1,5 +1,6 @@
 package be.kuleuven.cs.robijn.common.airports;
 
+import be.kuleuven.cs.robijn.common.SimulationSettings;
 import be.kuleuven.cs.robijn.common.WorldObject;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;

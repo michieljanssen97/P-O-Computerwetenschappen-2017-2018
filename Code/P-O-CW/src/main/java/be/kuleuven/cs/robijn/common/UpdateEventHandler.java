@@ -13,17 +13,16 @@ public class UpdateEventHandler implements Comparable<UpdateEventHandler>{
     public static final int MEDIUM_PRIORITY = 50;
     public static final int LOW_PRIORITY = 0;
 
-    private BiConsumer<AutopilotInputs, AutopilotOutputs> function;
+    private BiConsumer<AutopilotInputs[], AutopilotOutputs[]> function;
     private int priority;
 
-    public UpdateEventHandler(BiConsumer<AutopilotInputs, AutopilotOutputs> function, int priority){
-
+    public UpdateEventHandler(BiConsumer<AutopilotInputs[], AutopilotOutputs[]> function, int priority){
         this.function = function;
         this.priority = priority;
     }
 
 
-    public BiConsumer<AutopilotInputs, AutopilotOutputs> getFunction() {
+    public BiConsumer<AutopilotInputs[], AutopilotOutputs[]> getFunction() {
         return function;
     }
 
