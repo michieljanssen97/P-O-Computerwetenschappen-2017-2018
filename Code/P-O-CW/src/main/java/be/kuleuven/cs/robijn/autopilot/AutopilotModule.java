@@ -48,20 +48,12 @@ public class AutopilotModule {
             Gate toGate = p.getToGate();
             
             if(fromGate.hasPackage()){
-                throw new IllegalStateException(); //TODO of overslaan (wachten to volgende iteratie en opnieuw controleren totdat de fromGate wel vrij is), mag maar 1 package beschikbaar zijn om op te halen per Gate
+                throw new IllegalStateException(); //TODO of overslaan (wachten tot volgende iteratie en opnieuw controleren totdat de fromGate wel vrij is), mag maar 1 package beschikbaar zijn per Gate
             }
-            if(fromAirport.isDroneAvailable() && toGate.isFreeOfDrones()){
-                Drone drone = fromAirport.getFirstAvailableDrone();
-                toGate.setHasPackage(true);
-                toGate.setFreeOfDrones(false); // TODO Kan mss nog worden aangepast, pas op false zetten indien er een vliegtuig zal landen of erop staat
-                drone.setAvailable(false);
-                drone.setDestinationAirport(toAirport);
+            if(fromAirport.isDroneAvailable() && toGate.hasDrones()){
+            	p.assignPackagNecessities(fromAirport, fromGate, toAirport, toGate);
             	this.removeFromPackagesToAssignList(p);
-                //TODO Drone naar fromGate taxien + fromGate terug vrij na opstijgen
-                
-                if(p.isDelivered()){ 
-                    //TODO Zet op true indien vliegtuig met package is geland + drone.available = true zetten + die gates ook terug free zetten (zowel drone als package)
-                }
+                //TODO fromGate terug vrij (zowel drone als package) na opstijgen -> indien status autopilot == FLightMode.Ascend na FlightMode.Taxi}
             }
         }
     }

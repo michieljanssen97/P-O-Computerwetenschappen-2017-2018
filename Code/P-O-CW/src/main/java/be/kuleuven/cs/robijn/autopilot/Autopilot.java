@@ -1,7 +1,6 @@
 package be.kuleuven.cs.robijn.autopilot;
 
 import org.apache.commons.math3.linear.*;
-import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.common.exceptions.FinishedException;
 import be.kuleuven.cs.robijn.common.math.Angle;
 import be.kuleuven.cs.robijn.common.math.Angle.Type;

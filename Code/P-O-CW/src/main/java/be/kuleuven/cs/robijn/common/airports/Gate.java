@@ -6,19 +6,19 @@ import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 
 public class Gate extends WorldObject{
     private boolean hasPackage;
-    private Boolean freeOfDrones;
+    private Boolean hasDrones;
     
     public Gate() {
     	this.hasPackage = false;
-    	this.freeOfDrones = true;
+    	this.hasDrones = true;
     }
 
-    public boolean isFreeOfDrones(){
-        return this.freeOfDrones;
+    public boolean hasDrones(){
+        return this.hasDrones;
     }
     
-    public void setFreeOfDrones(Boolean status){
-        this.freeOfDrones = status;
+    public void setHasDrones(Boolean status){
+        this.hasDrones = status;
     }
 
     public Vector2D getSize(){

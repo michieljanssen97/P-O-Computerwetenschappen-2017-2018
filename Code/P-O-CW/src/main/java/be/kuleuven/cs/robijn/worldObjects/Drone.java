@@ -73,7 +73,7 @@ public class Drone extends WorldObject {
 		this.velocity = velocity;
 		this.initialVelocity = velocity;
 		
-		this.available = true;
+		this.assignedPackage = null;
 		this.destinationAirport = null;
 		
 		FrontWheel frontWheel = new FrontWheel(config);
@@ -114,7 +114,8 @@ public class Drone extends WorldObject {
 	
 	private final String droneID;
 	
-    private boolean available;
+    private Package assignedPackage;
+    
     private Airport destinationAirport;
 
 	public AutopilotConfig getConfig() {
@@ -230,14 +231,19 @@ public class Drone extends WorldObject {
 	}
 	
 	public boolean isAvailable(){
-        return this.available;
+        return this.assignedPackage != null;
     }
+	
+	public Package getAssignedPackage() {
+		return this.assignedPackage;
+	}
+	
+	public void setAssignedPackage(Package p) {
+		this.assignedPackage = p;
+	}
+
     
-    public void setAvailable(Boolean status){
-        this.available = status;
-    }
-    
-    public Airport getDestinationAirport(){
+    public Airport getDestinationAirport(){ //TODO laat drone dit als destination gebruiken -> Target in zijn autopilot aanpassen
         return destinationAirport;
     }
     

@@ -61,11 +61,11 @@ public class Airport extends WorldObject {
         return new ArrayList<Drone>(this.currentDrones);
     }
     
-    public void addDroneToCurrentDrones(Drone d){ //TODO gebruik deze
+    public void addDroneToCurrentDrones(Drone d){ //TODO gebruik deze indien status autopilot == FlightMode.Taxi na FLightMode.Land
         currentDrones.add(d);
     }
     
-    public void removeDroneFromCurrentDrones(Drone d){ //TODO gebruik deze
+    public void removeDroneFromCurrentDrones(Drone d){ //TODO gebruik deze indien status autopilot == FlightMode.Ascend na FlightMode.Taxi
         currentDrones.remove(d);
     }
     
