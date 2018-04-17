@@ -1,8 +1,10 @@
 package be.kuleuven.cs.robijn.common;
 
 import be.kuleuven.cs.robijn.common.stopwatch.ConstantIntervalStopwatch;
+import be.kuleuven.cs.robijn.worldObjects.Box;
 import interfaces.AutopilotConfig;
 import interfaces.AutopilotConfigReader;
+
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.junit.jupiter.api.Test;
 

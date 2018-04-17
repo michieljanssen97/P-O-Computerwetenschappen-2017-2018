@@ -8,6 +8,8 @@ import java.util.stream.DoubleStream;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.linear.ArrayRealVector;
 
+import be.kuleuven.cs.robijn.worldObjects.Box;
+
 public class WorldGenerator {
 	/**
 	 * Generate N boxes in the given testbed

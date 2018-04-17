@@ -6,24 +6,31 @@ import org.apache.commons.math3.linear.RealVector;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 import interfaces.AutopilotConfig;
 
-public class FrontWheel extends Tyre{
+public abstract class RearWheel extends Tyre{
 
-	public FrontWheel(AutopilotConfig config) throws IllegalArgumentException {
+	public RearWheel(AutopilotConfig config) throws IllegalArgumentException {
 		super(config);
-		
-		if (! isValidWheelZ(config.getFrontWheelZ())) {
+		if(! isValidWheelZ(config.getRearWheelZ())) {
 			throw new IllegalArgumentException();
 		}
-		this.wheelX = 0; //Zie opgave
-		this.wheelZ = config.getFrontWheelZ();
+		this.wheelZ = config.getRearWheelZ();
+		
+		if(! isValidWheelX(config.getRearWheelX(), config.getWingX())) {
+			throw new IllegalArgumentException();
+		}
+	}
 
+	@Override
+	public boolean isValidWheelZ(float wheelZ) {
+		return ((wheelZ > 0) && (wheelZ < Float.MAX_VALUE));
 	}
 
 	@Override
 	public boolean isValidWheelX(float wheelX, float wingX) {
-		return wheelX == 0; //Zie opgave
+		return (wheelX > 0) && (wheelX <= wingX);
 	}
-	
+
+	@Override
 	public RealVector getTyreForce(Drone drone, float wheelBrakeForce) {
 		if ((wheelBrakeForce > this.getRMax()) || (wheelBrakeForce < 0))
 			throw new IllegalArgumentException();
@@ -35,6 +42,11 @@ public class FrontWheel extends Tyre{
 					this.getTyreSlope()*this.getD(drone)
 					+ this.getDampSlope()*this.getVelocityD(drone), 0}, false);
 			totalForce = totalForce.add(forceTyre);
+			
+			RealVector frictionForce = drone.transformationToWorldCoordinates(new ArrayRealVector(new double[] {
+					-this.getFcMax() * forceTyre.getEntry(1) * this.getLateralVelocity(drone),
+					0, 0}, false));
+			totalForce = totalForce.add(frictionForce);
 			
 			RealVector brakeForce = new ArrayRealVector(new double[] {this.getVelocityTyre(drone).getEntry(0), 
 					0, this.getVelocityTyre(drone).getEntry(2)}, false);
@@ -52,8 +64,6 @@ public class FrontWheel extends Tyre{
 		
 		return totalForce;
 	}
-	
-	public boolean isValidWheelZ(float wheelZ) {
-		return ((wheelZ < 0) && (Float.isFinite(wheelZ)));
-	}
+
+
 }

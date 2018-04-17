@@ -1,6 +1,7 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
-import be.kuleuven.cs.robijn.common.PerspectiveCamera;
+import be.kuleuven.cs.robijn.worldObjects.Camera;
+import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
 
 public class OpenGLPerspectiveCamera extends PerspectiveCamera {
 	private float fovHorizontal = (float)Math.PI/2f;

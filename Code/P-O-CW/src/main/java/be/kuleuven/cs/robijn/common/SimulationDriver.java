@@ -23,6 +23,7 @@ public class SimulationDriver {
     private boolean simulationStarted = false;
     private boolean simulationFinished;
     private boolean simulationCrashed;
+    private boolean outOfControl;
     private boolean simulationThrewException;
 
     private AutopilotInputs[] latestAutopilotInputs;
@@ -138,12 +139,22 @@ public class SimulationDriver {
     public boolean isSimulationPaused() {
         return stopwatch.isPaused();
     }
+    
+    public void notifyPathSet() {
+    	this.pathSet = true;
+    }
+    
+    private boolean start = true;
 
     public boolean hasSimulationFinished() {return simulationFinished;}
 
     public boolean hasSimulationCrashed(){return simulationCrashed;}
 
     public boolean hasSimulationThrownException(){return simulationThrewException;}
+    
+    public boolean isOutOfControl(){return outOfControl;}
+    
+    public boolean isPathSet() {return pathSet;}
 
     public TestBed getTestBed(){
         return testBed;

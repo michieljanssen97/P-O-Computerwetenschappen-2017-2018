@@ -1,8 +1,9 @@
-package be.kuleuven.cs.robijn.common;
+package be.kuleuven.cs.robijn.worldObjects;
 
 import org.apache.commons.math3.geometry.euclidean.threed.*;
 import org.apache.commons.math3.linear.*;
 
+import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.exceptions.CrashException;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
 import be.kuleuven.cs.robijn.tyres.*;
@@ -638,6 +639,10 @@ public class Drone extends WorldObject {
 		return this.rollTransformation(this.pitchTransformation(this.headingTransformation(realVector)));
 	}
 	
+	public RealVector transformationToDroneWithoutRollCoordinates(RealVector realVector) {
+		return this.pitchTransformation(this.headingTransformation(realVector));
+	}
+	
 	public RealMatrix getRotationMatrix() {
 		float rollAngle = this.getRoll();
 		float pitchAngle = this.getPitch();
@@ -722,6 +727,10 @@ public class Drone extends WorldObject {
 	 */
 	public RealVector transformationToWorldCoordinates(RealVector realVector) {
 		return this.inverseHeadingTransformation(this.inversePitchTransformation(this.inverseRollTransformation(realVector)));
+	}
+	
+	public RealVector transformationFromDroneWithoutRollCoordinates(RealVector realVector) {
+		return this.inverseHeadingTransformation(this.inversePitchTransformation(realVector));
 	}
 	
 	
@@ -1046,7 +1055,7 @@ public class Drone extends WorldObject {
 	 * 		  | thrust > this.maxThrust()
 	 */
 	public RealVector getAcceleration(float thrust, float leftWingInclination, float rightWingInclination, float horStabInclination, float verStabInclination
-			, float frontBrakeForce, float leftBrakeForce, float rightBrakeForce)
+			, float frontBrakeForce, float leftRearBrakeForce, float rightRearBrakeForce)
 			throws IllegalArgumentException {
 		if (thrust > this.getMaxThrust())
 			throw new IllegalArgumentException();
@@ -1063,11 +1072,21 @@ public class Drone extends WorldObject {
 								.add(this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, -thrust}, false)));
 		
 		for (Tyre tyres: this.getChildrenOfType(Tyre.class)) {
-			totalForce = totalForce.add(tyres.getTyreForce(this, frontBrakeForce, leftBrakeForce, rightBrakeForce));
+			float wheelBrakeForce;
+			if(tyres instanceof RightRearWheel) { //TODO get rid of instanceof
+				wheelBrakeForce = rightRearBrakeForce;
+			}
+			else if(tyres instanceof LeftRearWheel) {
+				wheelBrakeForce = leftRearBrakeForce;
+			} else {
+				wheelBrakeForce = frontBrakeForce;
+			}
+			
+			totalForce = totalForce.add(tyres.getTyreForce(this, wheelBrakeForce));
 		}
 		
 		float totalMass = this.getEngineMass() + (2*this.getWingMass()) + this.getTailMass();
-		
+
 		return totalForce.mapMultiply(1/totalMass);
 	}
 	
@@ -1092,7 +1111,7 @@ public class Drone extends WorldObject {
 	 * 			The third element is the roll angular acceleration.
 	 */
 	public float[] getAngularAccelerations(float leftWingInclination, float rightWingInclination, float horStabInclination, float verStabInclination,
-			float frontBrakeForce, float leftBrakeForce, float rightBrakeForce) {
+			float frontBrakeForce, float leftRearBrakeForce, float rightRearBrakeForce) {
 		float inertiaMatrixXX = (float) (this.getTailMass()*Math.pow(this.getTailSize(),2) + this.getEngineMass()*Math.pow(this.getEngineDistance(), 2));
 		
 		float inertiaMatrixZZ = (float) (2*(this.getWingMass()*Math.pow(this.getWingX(),2)));
@@ -1149,7 +1168,17 @@ public class Drone extends WorldObject {
 								));
 		
 		for (Tyre tyres: this.getChildrenOfType(Tyre.class)) {
-			constants = constants.add(tyres.getTyreMoment(this, frontBrakeForce, leftBrakeForce, rightBrakeForce));
+			float wheelBrakeForce;
+			if(tyres instanceof RightRearWheel) { //TODO get rid of instanceof
+				wheelBrakeForce = rightRearBrakeForce;
+			}
+			else if(tyres instanceof LeftRearWheel) {
+				wheelBrakeForce = leftRearBrakeForce;
+			} else {
+				wheelBrakeForce = frontBrakeForce;
+			}
+			
+			constants = constants.add(tyres.getTyreMoment(this, wheelBrakeForce));
 		}
 		
 		RealVector solution = solver.solve(constants);

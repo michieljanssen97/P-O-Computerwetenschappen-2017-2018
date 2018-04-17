@@ -2,6 +2,9 @@ package be.kuleuven.cs.robijn.gui;
 
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.common.stopwatch.RealTimeStopwatch;
+import be.kuleuven.cs.robijn.worldObjects.Drone;
+import be.kuleuven.cs.robijn.worldObjects.OrthographicCamera;
+import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.*;

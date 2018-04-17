@@ -1,4 +1,8 @@
-package be.kuleuven.cs.robijn.common;
+package be.kuleuven.cs.robijn.worldObjects;
+
+import org.apache.commons.math3.linear.ArrayRealVector;
+
+import be.kuleuven.cs.robijn.common.WorldObject;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -6,7 +10,9 @@ import java.util.ArrayList;
 public class Box extends WorldObject {
 	private Color color = Color.RED;
 	
-	public Box() {}
+	public Box() {
+		this.setScale(new ArrayRealVector(new double[]{5, 5, 5}, false));
+	}
 
 	/**
 	 * Returns the color of this box.

@@ -6,6 +6,7 @@ import org.apache.commons.math3.linear.RealVector;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.common.exceptions.CrashException;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
+import be.kuleuven.cs.robijn.worldObjects.Drone;
 import interfaces.AutopilotConfig;
 
 public abstract class Tyre extends WorldObject {
@@ -150,7 +151,7 @@ public abstract class Tyre extends WorldObject {
 	public float getD(Drone drone) throws CrashException {
 		if (this.getPosition(drone).getEntry(1) <=0)
 			throw new CrashException();
-		float d = (float) (this.getTyreRadius() - this.getPosition(drone).getEntry(1)*Math.cos(drone.getRoll()));
+		float d = (float) (this.getTyreRadius() - this.getPosition(drone).getEntry(1));
 		if (d < 0)
 			d = 0;
 		return d;
@@ -173,12 +174,12 @@ public abstract class Tyre extends WorldObject {
 		return (float) drone.transformationToDroneCoordinates(this.getVelocityTyre(drone)).getEntry(0);
 	}
 	
-	public abstract RealVector getTyreForce(Drone drone, float frontBrakeForce, float leftBrakeForce, float rightBrakeForce);
+	public abstract RealVector getTyreForce(Drone drone, float wheelBrakeForce);
 	
-	public RealVector getTyreMoment(Drone drone, float frontBrakeForce, float leftBrakeForce, float rightBrakeForce) {
+	public RealVector getTyreMoment(Drone drone, float wheelBrakeForce) {
 		return VectorMath.crossProduct(
 				   drone.transformationToDroneCoordinates(this.getRelativePositionTyreGround(drone)), //distance
-				   drone.transformationToDroneCoordinates(this.getTyreForce(drone, frontBrakeForce, leftBrakeForce, rightBrakeForce)) //forces
+				   drone.transformationToDroneCoordinates(this.getTyreForce(drone, wheelBrakeForce)) //forces
 				   );
 	}
 }

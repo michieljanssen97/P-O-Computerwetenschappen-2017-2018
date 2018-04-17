@@ -344,7 +344,7 @@ public class Image {
 				}
 				float angleCos = (float) Math.sqrt(1 / (1 + Math.pow(ratio, 2)));
 				float planeAngle = (float) Math.acos(angleCos);
-				result = 1.32279f * (float) (0.5/Math.tan(degreesToRadians(angle)) + 0.5 / Math.sin(planeAngle));
+				result = 1.32279f * (float) (2.5/Math.tan(degreesToRadians(angle)) + 2.5 / Math.sin(planeAngle));
 				if (!Float.isFinite(result))
 					return 100;
 				else
@@ -353,7 +353,7 @@ public class Image {
 			else{
 				float pixels = getMaximumDistanceSpherePixels(hue, sat);
 				float angle = (pixels * getHorizontalAngle()) / getnbColumns();
-				result = 1.32279f * (float) (Math.sqrt(0.75) / Math.tan((degreesToRadians(angle))));
+				result = 1.32279f * (float) (Math.sqrt(18.75) / Math.tan((degreesToRadians(angle))));
 				if (!Float.isFinite(result))
 					return 100;
 				else
@@ -365,7 +365,7 @@ public class Image {
 			float ratio = getRatioPixelsIfTwoPlanesVisible(hue, sat);
 			float angleCos = (float) Math.sqrt(1 / (1 + Math.pow(ratio, 2)));
 			float planeAngle = (float) Math.acos(angleCos);
-			result = 1.32279f * (float) (0.5/Math.tan(degreesToRadians(angle)) + 0.5 / Math.sin(planeAngle));
+			result = 1.32279f * (float) (2.5/Math.tan(degreesToRadians(angle)) + 2.5 / Math.sin(planeAngle));
 			if (!Double.isFinite(result))
 				return 100;
 			else
@@ -373,7 +373,7 @@ public class Image {
 		} else if (sides == 1){
 			float pixels = getMinimumDistanceSpherePixels(hue, sat);
 			float angle = (pixels * getHorizontalAngle()) / getnbColumns();
-			result = 1.32279f * (float) (0.5 / Math.tan(degreesToRadians(angle)) + 0.5);
+			result = 1.32279f * (float) (2.5 / Math.tan(degreesToRadians(angle)) + 2.5);
 			if (!Double.isFinite(result))
 				return 100;
 			else

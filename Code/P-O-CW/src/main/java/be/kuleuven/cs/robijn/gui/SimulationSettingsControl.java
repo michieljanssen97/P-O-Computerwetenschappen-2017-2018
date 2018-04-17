@@ -1,11 +1,7 @@
 package be.kuleuven.cs.robijn.gui;
 
-import be.kuleuven.cs.robijn.common.Resources;
-import be.kuleuven.cs.robijn.common.SimulationSettings;
-import be.kuleuven.cs.robijn.common.SimulationSettings.AirportDefinition;
-import be.kuleuven.cs.robijn.common.SimulationSettings.DroneDefinition;
-import interfaces.AutopilotConfig;
-import interfaces.AutopilotConfigReader;
+import be.kuleuven.cs.robijn.common.*;
+import be.kuleuven.cs.robijn.worldObjects.Box;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.value.ChangeListener;
@@ -17,10 +13,10 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.converter.NumberStringConverter;
-
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import interfaces.AutopilotConfig;
+import interfaces.AutopilotConfigReader;
+import interfaces.AutopilotConfigWriter;
+import org.apache.commons.math3.linear.ArrayRealVector;
 
 /**
  * Controller for the simulation settings overlay

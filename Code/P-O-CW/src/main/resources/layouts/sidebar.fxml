@@ -39,7 +39,12 @@
                         <Insets top="5.0" />
                     </VBox.margin>
                 </Label>
-                <Label fx:id="simulationCrashedLabel" text="The autopilot is out of control!" style="-fx-font-weight: bold; -fx-text-fill: red;">
+                <Label fx:id="simulationCrashedLabel" text="The drone crashed!" style="-fx-font-weight: bold; -fx-text-fill: red;">
+                    <VBox.margin>
+                        <Insets top="5.0" />
+                    </VBox.margin>
+                </Label>
+                <Label fx:id="outOfControlLabel" text="The autopilot is out of control!" style="-fx-font-weight: bold; -fx-text-fill: red;">
                     <VBox.margin>
                         <Insets top="5.0" />
                     </VBox.margin>

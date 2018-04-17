@@ -1,4 +1,4 @@
-package be.kuleuven.cs.robijn.common;
+package be.kuleuven.cs.robijn.worldObjects;
 
 /**
  * Represents a camera that views the world through perspective projection

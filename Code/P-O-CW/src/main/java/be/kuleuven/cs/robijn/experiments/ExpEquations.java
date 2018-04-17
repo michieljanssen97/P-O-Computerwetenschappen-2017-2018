@@ -8,8 +8,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 
-import be.kuleuven.cs.robijn.common.Box;
-import be.kuleuven.cs.robijn.common.Drone;
+import be.kuleuven.cs.robijn.worldObjects.Box;
+import be.kuleuven.cs.robijn.worldObjects.Drone;
 
 public class ExpEquations {
 	
