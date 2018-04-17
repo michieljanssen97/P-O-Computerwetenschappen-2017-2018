@@ -98,6 +98,7 @@ public class SimulationSettingsControl extends AnchorPane {
 
     @FXML
     private void initialize(){
+        setupSpinners();
         setupAirportsTab();
         setupDronesTab();
 
@@ -134,6 +135,19 @@ public class SimulationSettingsControl extends AnchorPane {
     /****************/
     /*** AIRPORTS ***/
     /****************/
+
+    private void setupSpinners(){
+        enableApplySpinnerValueOnFocusLost(gateLengthSpinner);
+        enableApplySpinnerValueOnFocusLost(runwayLengthSpinner);
+    }
+
+    private void enableApplySpinnerValueOnFocusLost(Spinner spinner){
+        // hook in a formatter with the same properties as the factory
+        TextFormatter formatter = new TextFormatter(spinner.getValueFactory().getConverter(), spinner.getValueFactory().getValue());
+        spinner.getEditor().setTextFormatter(formatter);
+        // bidi-bind the values
+        spinner.getValueFactory().valueProperty().bindBidirectional(formatter.valueProperty());
+    }
 
     private void setupAirportsTab(){
         setupAirportsButtons();
