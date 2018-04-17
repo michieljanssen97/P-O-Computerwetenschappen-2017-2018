@@ -23,8 +23,18 @@
                         <fx:define>
                             <ToggleGroup fx:id="simulationRunningToggleGroup"/>
                         </fx:define>
-                        <ToggleButton fx:id="playButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false" text="Play" />
-                        <ToggleButton fx:id="pauseButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false" text="Pause">
+                        <ToggleButton fx:id="pauseButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false" text="Pause" />
+                        <ToggleButton fx:id="playButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false" text="Play" >
+                            <HBox.margin>
+                                <Insets left="5.0" />
+                            </HBox.margin>
+                        </ToggleButton>
+                        <ToggleButton fx:id="fastForwardButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false" text="Play (x2)" >
+                            <HBox.margin>
+                                <Insets left="5.0" />
+                            </HBox.margin>
+                        </ToggleButton>
+                        <ToggleButton fx:id="lightSpeedButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false" text="Play (x5)" >
                             <HBox.margin>
                                 <Insets left="5.0" />
                             </HBox.margin>

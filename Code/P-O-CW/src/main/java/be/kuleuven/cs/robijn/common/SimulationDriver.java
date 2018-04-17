@@ -140,6 +140,14 @@ public class SimulationDriver {
         return stopwatch.isPaused();
     }
 
+    public void setSimulationSpeedMultiplier(double speed) {
+        stopwatch.setSpeedMultiplier(speed);
+    }
+
+    public double getSimulationSpeedMultiplier() {
+        return stopwatch.getSpeedMultiplier();
+    }
+
     public boolean hasSimulationFinished() {return simulationFinished;}
 
     public boolean hasSimulationCrashed(){return simulationCrashed;}
