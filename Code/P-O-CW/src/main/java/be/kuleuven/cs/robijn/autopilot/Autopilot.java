@@ -188,24 +188,17 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					
 					Angle XRotation = Angle.getXRotation(target, drone.getWorldPosition());
 					Angle YRotation = Angle.getYRotation(target, drone.getWorldPosition());
-					if ((drone.getWorldPosition().getEntry(2) - target.getEntry(2)) < 0) {
-						YRotation = Angle.add(YRotation, (float)Math.PI);
-						XRotation = new Angle(-XRotation.getOrientation());
-					}
 					
 					XRotation = Angle.add(XRotation, - drone.getPitch());
 					YRotation = Angle.add(YRotation, - drone.getHeading());
 					
 					RealVector vel = drone.getVelocity().add(drone.getWorldPosition());
-					Angle YRotation2 = Angle.getYRotation(vel, drone.getWorldPosition());
-					if ((drone.getWorldPosition().getEntry(2) - vel.getEntry(2)) < 0) {
-						YRotation = Angle.add(YRotation, (float)Math.PI);
-					}
+					Angle YRotationVel = Angle.getYRotation(vel, drone.getWorldPosition());
 					
-					YRotation2 = Angle.add(YRotation2, - drone.getHeading());
+					YRotationVel = Angle.add(YRotationVel, - drone.getHeading());
 					
 					float targetHeadingAngularVelocity = ScalarMath.betweenBoundaries(
-							YRotation2.getOrientation()/settings.getTurningTime(),
+							YRotationVel.getOrientation()/settings.getTurningTime(),
 							settings.getMaxHeadingAngularVelocity()
 							);
 					float headingAngularVelocity = drone.getHeadingAngularVelocity();

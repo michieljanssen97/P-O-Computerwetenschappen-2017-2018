@@ -25,6 +25,8 @@ public class Angle {
 	
 	public float getAngle(Type type) throws IllegalArgumentException {
 		float angle = (float) (this.angle % (Math.PI*2));
+		if (angle < 0)
+			angle += 2*Math.PI;
 		switch(type) {
 			case DEGREES:
 				return (float) Math.toDegrees(angle);
@@ -40,7 +42,12 @@ public class Angle {
 	}
 	
 	public float getOrientation(Type type) {
-		return (float) (this.getAngle(type) - 2*Math.PI);
+		float angle = this.getAngle(type);
+		if (angle > Math.PI)
+			return (float) (angle - 2*Math.PI);
+		else {
+			return angle;
+		}
 	}
 	
 	public float getOrientation() {
