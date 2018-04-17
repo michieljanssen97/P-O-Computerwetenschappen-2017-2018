@@ -12,6 +12,7 @@ import org.joml.Matrix4f;
 
 import java.awt.*;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_1D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
@@ -23,27 +24,10 @@ public class LabelRenderer implements AutoCloseable {
     private ShaderProgram fontShader;
     private Texture colorMapTex;
     private ByteBuffer colorMapBuffer;
-    private final LoadingCache<Font, Cache<String, Model>> labelCache;
+    private final HashMap<Font, HashMap<String, Model>> labelCache = new HashMap<>();
 
     LabelRenderer(OpenGLRenderer renderer){
         this.renderer = renderer;
-
-        labelCache = CacheBuilder.newBuilder()
-                .concurrencyLevel(1)
-                .maximumSize(10)
-                .build(new CacheLoader<Font, Cache<String, Model>>() {
-                    @Override
-                    public Cache<String, Model> load(Font font) {
-                        return CacheBuilder.newBuilder()
-                                .concurrencyLevel(1)
-                                .maximumSize(100)
-                                .removalListener((RemovalListener<String, Model>) e -> {
-                                    e.getValue().getMesh().close();
-                                    e.getValue().getTexture().close();
-                                })
-                                .build();
-                    }
-                });
     }
 
     void updateLabelCache(WorldObject root){
@@ -51,21 +35,19 @@ public class LabelRenderer implements AutoCloseable {
                 .filter(o -> o instanceof Label3D)
                 .map(o -> (Label3D)o)
                 .forEach(label -> {
-                    Cache<String, Model> cache = labelCache.getUnchecked(label.getFont());
-                    boolean valueInCache = cache.getIfPresent(label.getText()) != null;
-                    if(!valueInCache){
-                        RenderableString renderableString = label.getFont().layoutString(label.getText());
+                    HashMap<String, Model> cache = labelCache.computeIfAbsent(label.getFont(), font -> new HashMap<>());
+                    cache.computeIfAbsent(label.getText(), text -> {
+                        RenderableString renderableString = label.getFont().layoutString(text);
                         Texture bakedStringTex = label.getFont().getRenderer().bake(renderableString);
-                        Model billboardModel = new Model(Billboard.createBillboardMesh(bakedStringTex), bakedStringTex, getFontShader());
-                        cache.put(label.getText(), billboardModel);
-                    }
+                        return new Model(Billboard.createBillboardMesh(bakedStringTex), bakedStringTex, getFontShader());
+                    });
                 });
     }
 
     void renderLabel(Label3D label, Matrix4f viewProjectionMatrix, Camera camera) {
         //RenderDoc.get().startFrameCapture(renderer.getHGLRC(), 0);
 
-        Model textModel = labelCache.getUnchecked(label.getFont()).getIfPresent(label.getText());
+        Model textModel = labelCache.get(label.getFont()).get(label.getText());
         Texture colorMap = getColorMap();
         ByteBuffer data = getColorMapBuffer();
 
@@ -83,7 +65,7 @@ public class LabelRenderer implements AutoCloseable {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_1D, colorMap.getTextureId());
 
-        float scale = 1.0f;
+        float scale;
         if(camera instanceof PerspectiveCamera){
             scale = (float)Math.pow(camera.getWorldPosition().subtract(label.getWorldPosition()).getNorm(), 0.65f);
             //scale /= 7.071068f; //Compensate for default viewing distance
