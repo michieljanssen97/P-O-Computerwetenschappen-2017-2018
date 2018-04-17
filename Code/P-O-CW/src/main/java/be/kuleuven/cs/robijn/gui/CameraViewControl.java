@@ -83,6 +83,7 @@ public class CameraViewControl extends AnchorPane {
         setupLabels();
         setupDroneComboBox();
         setupDragging();
+        setupZooming();
         setupResizing();
         setupPerspectiveChanging();
         setupRendering();
@@ -212,12 +213,33 @@ public class CameraViewControl extends AnchorPane {
         dragHelper.addOnDragEventHandler(e -> {
             if(activeCamera instanceof OrthographicCamera){
                 OrthographicCamera ortho = (OrthographicCamera)activeCamera;
+
+                float scale = activeCamera == topCamera ? topCamZoomHandler.getScale() : sideCamZoomHandler.getScale();
+
                 Rotation camRot = ortho.getRelativeRotation();
                 Vector3D right = camRot.applyTo(new Vector3D(1, 0, 0));
                 Vector3D up = camRot.applyTo(new Vector3D(0, 1, 0));
-                Vector3D delta = right.scalarMultiply(-e.getDeltaX()*dragSensitivity).add(up.scalarMultiply(e.getDeltaY()*dragSensitivity));
+                Vector3D delta = right.scalarMultiply(-e.getDeltaX()*dragSensitivity * scale).add(
+                                    up.scalarMultiply(e.getDeltaY()*dragSensitivity * scale));
                 ortho.setRelativePosition(ortho.getRelativePosition().add(new ArrayRealVector(new double[]{delta.getX(), delta.getY(), delta.getZ()}, false)));
             }
+        });
+    }
+
+    private OrthoCameraZoomHandler topCamZoomHandler;
+    private OrthoCameraZoomHandler sideCamZoomHandler;
+    private void setupZooming(){
+        simulationProperty.addListener((observableValue, oldValue, newValue) -> {
+            topCamZoomHandler = new OrthoCameraZoomHandler(topCamera);
+            sideCamZoomHandler = new OrthoCameraZoomHandler(sideCamera);
+
+            imageView.setOnScroll(event -> {
+                if(activeCamera == topCamera){
+                    topCamZoomHandler.handle(event);
+                }else if(activeCamera == sideCamera){
+                    sideCamZoomHandler.handle(event);
+                }
+            });
         });
     }
 
