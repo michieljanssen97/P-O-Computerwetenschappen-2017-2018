@@ -65,8 +65,19 @@ public class Angle {
 		return new Angle(angle);
 	}
 	
-	public static Angle add(Angle angle, float value) {
-		return new Angle(angle.getOrientation() + value);
+	public static Angle add(Angle angle, float value, Type type) throws IllegalArgumentException {
+		switch(type) {
+			case DEGREES:
+				return new Angle((float) (angle.getAngle() + Math.toRadians(value)));
+			case RADIANS:
+				return new Angle(angle.getAngle() + value);
+			default:
+				throw new IllegalArgumentException();
+		}
+	}
+	
+	public static Angle add(Angle angle, float value) throws IllegalArgumentException {
+		return Angle.add(angle, value, Type.RADIANS);
 	}
 	
 	public enum Type {
