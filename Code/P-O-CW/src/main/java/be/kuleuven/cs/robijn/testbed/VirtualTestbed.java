@@ -7,11 +7,14 @@ import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
 import org.apache.commons.math3.ode.FirstOrderIntegrator;
 import org.apache.commons.math3.ode.nonstiff.*;
 import be.kuleuven.cs.robijn.common.*;
+import be.kuleuven.cs.robijn.common.math.SystemDifferentialEquations;
 import be.kuleuven.cs.robijn.experiments.ExpEquations;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
 import be.kuleuven.cs.robijn.tyres.Tyre;
+import be.kuleuven.cs.robijn.worldObjects.Box;
+import be.kuleuven.cs.robijn.worldObjects.Drone;
+import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
 import interfaces.*;
-
 import be.kuleuven.cs.robijn.autopilot.Autopilot;
 
 import java.util.List;
@@ -61,32 +64,30 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 
 		float stopDistanceToCenterBox = 3;
 		
+		//Stop the simulation if all boxes are handled
+		RealVector pos = drone.getWorldPosition();
+		pos.setEntry(1, 0);
+		boolean isInEndPosition = (pos.getNorm() < 5);
+		if (drone.getVelocity().getNorm() > 1)
+			isInEndPosition = false;
+		if(boxesToFlyTo.isEmpty() && (isInEndPosition)) {
+			if (drawChartEquations) {
+				expequations.drawMain(type); //draw chart of 'type' when simulation stops
+			}
+			else if (Autopilot.isPositionDrawn()) {
+				Autopilot.exppos.drawMain("Our");
+			}
+			return true;
+		}
+		
 		//Check if the drone reached a cube
 		//true if the center of mass of the drone is in a specified distance of the center of a cube
-		if (box != null) {
-			if (calculateDistanceToDrone(box, drone) <= stopDistanceToCenterBox){
-				//The box should not be taken into account anymore, it is already reached
-				boxesToFlyTo.remove(box);
-			
-				//Remove the reached box from the testbed
-				removeChild(box);
-			
-				//Stop the simulation if all boxes are handled
-				RealVector pos = drone.getWorldPosition();
-				pos.setEntry(1, 0);
-				boolean isInEndPosition = (pos.getNorm() < 5);
-				if (drone.getVelocity().getNorm() > 1)
-					isInEndPosition = false;
-				if(boxesToFlyTo.isEmpty() && (isInEndPosition)) {
-					if (drawChartEquations) {
-						expequations.drawMain(type); //draw chart of 'type' when simulation stops
-					}
-					else if (Autopilot.isPositionDrawn()) {
-						Autopilot.exppos.drawMain("Our");
-					}
-					return true;
-				}
-			}
+		if (calculateDistanceToDrone(box, drone) <= stopDistanceToCenterBox){
+			//The box should not be taken into account anymore, it is already reached
+			boxesToFlyTo.remove(box);
+		
+			//Remove the reached box from the testbed
+			removeChild(box);
 		}
 
 		this.setElapsedTime(secondsSinceStart);

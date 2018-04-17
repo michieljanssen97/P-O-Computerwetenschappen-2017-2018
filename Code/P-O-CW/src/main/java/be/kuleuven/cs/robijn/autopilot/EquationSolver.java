@@ -5,7 +5,7 @@ import org.apache.commons.math3.analysis.solvers.BracketingNthOrderBrentSolver;
 import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
 import org.apache.commons.math3.exception.NoBracketingException;
 
-import be.kuleuven.cs.robijn.common.Drone;
+import be.kuleuven.cs.robijn.worldObjects.Drone;
 import interfaces.AutopilotConfig;
 
 public class EquationSolver {

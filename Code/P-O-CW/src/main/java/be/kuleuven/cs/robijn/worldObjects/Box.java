@@ -1,6 +1,8 @@
-package be.kuleuven.cs.robijn.common;
+package be.kuleuven.cs.robijn.worldObjects;
 
 import org.apache.commons.math3.linear.ArrayRealVector;
+
+import be.kuleuven.cs.robijn.common.WorldObject;
 
 import java.awt.*;
 import java.util.ArrayList;

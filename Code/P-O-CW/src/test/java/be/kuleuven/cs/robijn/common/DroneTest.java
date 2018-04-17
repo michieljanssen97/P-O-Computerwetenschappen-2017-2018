@@ -2,6 +2,8 @@ package be.kuleuven.cs.robijn.common;
 
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.math.*;
+import be.kuleuven.cs.robijn.worldObjects.Drone;
+
 import org.junit.jupiter.api.Test;
 import interfaces.*;
 

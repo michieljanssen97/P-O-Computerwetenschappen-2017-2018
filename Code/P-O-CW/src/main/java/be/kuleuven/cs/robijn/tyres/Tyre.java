@@ -6,6 +6,7 @@ import org.apache.commons.math3.linear.RealVector;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.common.exceptions.CrashException;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
+import be.kuleuven.cs.robijn.worldObjects.Drone;
 import interfaces.AutopilotConfig;
 
 public abstract class Tyre extends WorldObject {

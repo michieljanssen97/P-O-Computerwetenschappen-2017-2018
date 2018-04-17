@@ -1,7 +1,9 @@
 package be.kuleuven.cs.robijn.gui;
 
 import be.kuleuven.cs.robijn.common.*;
-
+import be.kuleuven.cs.robijn.worldObjects.Camera;
+import be.kuleuven.cs.robijn.worldObjects.OrthographicCamera;
+import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.embed.swing.SwingFXUtils;
@@ -13,6 +15,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;

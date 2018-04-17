@@ -1,10 +1,10 @@
 package be.kuleuven.cs.robijn.experiments;
 
-import be.kuleuven.cs.robijn.common.Box;
 import be.kuleuven.cs.robijn.common.Resources;
 import be.kuleuven.cs.robijn.common.SimulationDriver;
 import be.kuleuven.cs.robijn.common.WorldGenerator;
 import be.kuleuven.cs.robijn.common.stopwatch.ConstantIntervalStopwatch;
+import be.kuleuven.cs.robijn.worldObjects.Box;
 import interfaces.AutopilotConfig;
 import interfaces.AutopilotConfigReader;
 

@@ -1,4 +1,4 @@
-package be.kuleuven.cs.robijn.common;
+package be.kuleuven.cs.robijn.worldObjects;
 
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
