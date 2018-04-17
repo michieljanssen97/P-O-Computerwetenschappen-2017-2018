@@ -250,6 +250,14 @@ public class Drone extends WorldObject {
     public void setDestinationAirport(Airport dest){
         this.destinationAirport = dest;
     }
+    
+    
+    public double calculateDistanceToAirport(Airport airport) {
+    	RealVector currentPosition = this.getEnginePosition();
+    	RealVector airportPosition = airport.getPosition();
+    	
+    	return currentPosition.getDistance(airportPosition);
+    }
 	
     //  -----------------   //
     //                      //

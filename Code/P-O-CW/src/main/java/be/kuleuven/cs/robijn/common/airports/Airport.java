@@ -12,12 +12,16 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 
 public class Airport extends WorldObject {
+	
+	private static ArrayList<Airport> allAirportsList = new ArrayList<Airport>();
+	
+	private final RealVector position;
     private Vector2D size;
     private Gate[] gates;
     private Runway[] runways;
     private ArrayList<Drone> currentDrones = new ArrayList<Drone>();
 
-    public Airport(float length, float width, Vector2D centerToRunway0){
+    public Airport(float xPosition, float zPosition, float length, float width, Vector2D centerToRunway0){
         size = new Vector2D((2f*length) + width, 2f*width);
 
         RealVector gateSize = new ArrayRealVector(new double[]{width, 0, width}, false);
@@ -43,6 +47,17 @@ public class Airport extends WorldObject {
         this.setRelativeRotation(
             new Rotation(Vector3D.PLUS_J, Math.acos(new Vector2D(-1, 0).dotProduct(centerToRunway0)))
         );
+        Airport.allAirportsList.add(this);
+        
+        this.position = new ArrayRealVector(new Double[] {(double) xPosition, (double) zPosition});
+    }
+    
+    public static ArrayList<Airport>getAllAirports() {
+    	return Airport.allAirportsList;
+    }
+    
+    public RealVector getPosition() {
+    	return new ArrayRealVector(this.position);
     }
 
     public Vector2D getSize() {
@@ -70,13 +85,30 @@ public class Airport extends WorldObject {
     }
     
     public Drone getFirstAvailableDrone(){
-        for(Drone d : getCurrentDrones()){
+        for(Drone d : this.getCurrentDrones()){
             if (d.isAvailable()){
                 return d;
             }
         }
         
         return null;
+    }
+    
+    public static Drone getAvailableDrone(Airport airport) {
+    	Drone drone = airport.getFirstAvailableDrone();
+    	if(drone != null) {
+    		return drone;
+    	}
+    	
+    	double distance = Double.MAX_VALUE;
+    	for(Airport airp : Airport.getAllAirports()) {
+    		Drone tempDrone = airp.getFirstAvailableDrone();
+    		if(tempDrone.calculateDistanceToAirport(airport) < distance) { //Give higher priority to Drones at nearby Airports
+    			distance = tempDrone.calculateDistanceToAirport(airport);
+    			drone = tempDrone;
+    		}
+    	}    	
+    	return drone; //Is null if no drones are Available
     }
     
     public boolean isDroneAvailable() {

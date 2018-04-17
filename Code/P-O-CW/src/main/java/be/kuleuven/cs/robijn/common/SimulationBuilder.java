@@ -25,6 +25,8 @@ public class SimulationBuilder {
         HashMap<SimulationSettings.AirportDefinition, Airport> airports = new HashMap<>();
         for (SimulationSettings.AirportDefinition airportDef : settings.getAirports()){
             Airport newAirport = new Airport(
+            		airportDef.getCenterX(),
+            		airportDef.getCenterZ(),
                     settings.getRunwayLength(),
                     settings.getGateLength(),
                     new Vector2D(

@@ -6,7 +6,7 @@ import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 
 public class Gate extends WorldObject{
     private boolean hasPackage;
-    private Boolean hasDrones;
+    private boolean hasDrones;
     
     public Gate() {
     	this.hasPackage = false;

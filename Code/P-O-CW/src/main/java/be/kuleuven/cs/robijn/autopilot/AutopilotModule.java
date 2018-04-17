@@ -1,7 +1,5 @@
 package be.kuleuven.cs.robijn.autopilot;
 
-import java.util.ArrayList;
-
 import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
@@ -12,36 +10,18 @@ import interfaces.AutopilotOutputs;
 
 public class AutopilotModule {
     private final WorldObject world;
-    private ArrayList<Package> packageToAssignList = new ArrayList<Package>();
 
     public AutopilotModule(WorldObject world){
         this.world = world;
     }
     
-    
-    public void addToPackagesToAssignList(Package p){
-        packageToAssignList.add(p);
-    }
-    
-    public void removeFromPackagesToAssignList(Package p){
-        packageToAssignList.remove(p);
-    }
-       
-    public boolean stillPackagesToAssign(){
-        return (! packageToAssignList.isEmpty());
-    }
-    
-    public ArrayList<Package> getAllPackagesToAssign(){
-        return new ArrayList<Package>(this.packageToAssignList);
-    }
-    
     public void deliverPackage(Airport fromAirport, Gate fromGate, Airport toAirport, Gate toGate) {
         Package p = new Package(fromAirport, fromGate, toAirport, toGate);
-        this.addToPackagesToAssignList(p);
+        Package.addToPackagesToAssignList(p);
     }
 
     public void assignPackages() { //TODO zorg dat dit elke iteratie wordt opgeroepen
-        for(Package p : this.getAllPackagesToAssign()){
+        for(Package p : Package.getAllPackagesToAssign()){
             Airport fromAirport = p.getFromAirport();
             Gate fromGate = p.getFromGate();
             Airport toAirport = p.getToAirport();
@@ -50,12 +30,26 @@ public class AutopilotModule {
             if(fromGate.hasPackage()){
                 throw new IllegalStateException(); //TODO of overslaan (wachten tot volgende iteratie en opnieuw controleren totdat de fromGate wel vrij is), mag maar 1 package beschikbaar zijn per Gate
             }
-            if(fromAirport.isDroneAvailable() && toGate.hasDrones()){
-            	p.assignPackagNecessities(fromAirport, fromGate, toAirport, toGate);
-            	this.removeFromPackagesToAssignList(p);
+            if(isDroneAvailable() && ! toGate.hasDrones()){
+            	p.assignPackageNecessities(fromAirport, fromGate, toAirport, toGate);
+            	Package.removeFromPackagesToAssignList(p);
                 //TODO fromGate terug vrij (zowel drone als package) na opstijgen -> indien status autopilot == FLightMode.Ascend na FlightMode.Taxi}
             }
         }
+    }
+    
+    /**
+     * Check all Airports for an available Drone
+     */
+    public boolean isDroneAvailable(){
+    	boolean result = false;
+    	for(Airport airport : Airport.getAllAirports()) {
+    		if(airport.isDroneAvailable()) {
+    			result = true;
+    		}
+    	}
+    	
+    	return result;
     }
 
     public void startTimeHasPassed(Drone drone, AutopilotInputs inputs) {
