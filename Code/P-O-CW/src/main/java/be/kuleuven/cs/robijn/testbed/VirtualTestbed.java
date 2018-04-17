@@ -3,6 +3,9 @@ package be.kuleuven.cs.robijn.testbed;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
 import be.kuleuven.cs.robijn.testbed.renderer.bmfont.Label3D;
+import be.kuleuven.cs.robijn.worldObjects.Camera;
+import be.kuleuven.cs.robijn.worldObjects.Drone;
+import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
 import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 

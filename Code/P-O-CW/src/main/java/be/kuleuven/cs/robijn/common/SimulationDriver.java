@@ -139,12 +139,6 @@ public class SimulationDriver {
     public boolean isSimulationPaused() {
         return stopwatch.isPaused();
     }
-    
-    public void notifyPathSet() {
-    	this.pathSet = true;
-    }
-    
-    private boolean start = true;
 
     public boolean hasSimulationFinished() {return simulationFinished;}
 
@@ -153,8 +147,6 @@ public class SimulationDriver {
     public boolean hasSimulationThrownException(){return simulationThrewException;}
     
     public boolean isOutOfControl(){return outOfControl;}
-    
-    public boolean isPathSet() {return pathSet;}
 
     public TestBed getTestBed(){
         return testBed;

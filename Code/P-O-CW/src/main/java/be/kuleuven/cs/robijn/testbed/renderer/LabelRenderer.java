@@ -1,12 +1,12 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
-import be.kuleuven.cs.robijn.common.Camera;
-import be.kuleuven.cs.robijn.common.PerspectiveCamera;
 import be.kuleuven.cs.robijn.common.Resources;
 import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.testbed.renderer.bmfont.Font;
 import be.kuleuven.cs.robijn.testbed.renderer.bmfont.Label3D;
 import be.kuleuven.cs.robijn.testbed.renderer.bmfont.RenderableString;
+import be.kuleuven.cs.robijn.worldObjects.Camera;
+import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
 import com.google.common.cache.*;
 import org.joml.Matrix4f;
 

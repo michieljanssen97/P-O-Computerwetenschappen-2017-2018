@@ -1,6 +1,5 @@
 package be.kuleuven.cs.robijn.autopilot;
 
-import be.kuleuven.cs.robijn.common.Drone;
 import be.kuleuven.cs.robijn.common.SimulationBuilder;
 import be.kuleuven.cs.robijn.common.SimulationSettings;
 import be.kuleuven.cs.robijn.common.SimulationSettings.AirportDefinition;
@@ -9,6 +8,7 @@ import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.gui.ObservableAutoPilotConfig;
+import be.kuleuven.cs.robijn.worldObjects.Drone;
 import interfaces.AutopilotConfig;
 import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;

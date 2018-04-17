@@ -1,14 +1,14 @@
 package be.kuleuven.cs.robijn.gui;
 
-import be.kuleuven.cs.robijn.common.OrthographicCamera;
+import be.kuleuven.cs.robijn.worldObjects.OrthographicCamera;
 import javafx.event.EventHandler;
 import javafx.scene.input.ScrollEvent;
 
 public class OrthoCameraZoomHandler implements EventHandler<ScrollEvent> {
     private static final int MIN_WHEEL_OFFSET = 1;
-    private static final int MAX_WHEEL_OFFSET = 16;
-    private static final int DEFAULT_ORTHO_CAM_WIDTH = 130;
-    private static final int DEFAULT_ORTHO_CAM_HEIGHT = 30;
+    private static final int MAX_WHEEL_OFFSET = 25;
+    private static final int DEFAULT_ORTHO_CAM_WIDTH = 200;
+    private static final int DEFAULT_ORTHO_CAM_HEIGHT = 50;
 
     private OrthographicCamera camera;
     private int wheelOffset = 6;

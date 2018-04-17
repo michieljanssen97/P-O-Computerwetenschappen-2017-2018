@@ -1,7 +1,7 @@
 package be.kuleuven.cs.robijn.testbed;
 
-import be.kuleuven.cs.robijn.common.Drone;
 import be.kuleuven.cs.robijn.common.WorldObject;
+import be.kuleuven.cs.robijn.worldObjects.Drone;
 import interfaces.AutopilotOutputs;
 
 public class TestbedSimulation {

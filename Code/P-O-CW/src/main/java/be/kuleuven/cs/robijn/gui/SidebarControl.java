@@ -1,19 +1,17 @@
 package be.kuleuven.cs.robijn.gui;
 
-import be.kuleuven.cs.robijn.common.Drone;
 import be.kuleuven.cs.robijn.common.Resources;
 import be.kuleuven.cs.robijn.common.SimulationDriver;
 import be.kuleuven.cs.robijn.common.UpdateEventHandler;
-import interfaces.Autopilot;
+import be.kuleuven.cs.robijn.worldObjects.Drone;
 import interfaces.AutopilotInputs;
-import interfaces.Path;
+import interfaces.AutopilotOutputs;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import interfaces.AutopilotOutputs;
-import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

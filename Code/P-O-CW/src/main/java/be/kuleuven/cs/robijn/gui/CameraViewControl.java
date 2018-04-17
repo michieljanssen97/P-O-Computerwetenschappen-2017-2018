@@ -3,6 +3,7 @@ package be.kuleuven.cs.robijn.gui;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.testbed.renderer.bmfont.Label3D;
+import be.kuleuven.cs.robijn.worldObjects.*;
 import javafx.beans.binding.Bindings;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.OrthographicCamera;
