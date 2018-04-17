@@ -1,5 +1,10 @@
 package be.kuleuven.cs.robijn.autopilot;
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import org.apache.commons.math3.analysis.solvers.BracketingNthOrderBrentSolver;
+import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.common.exceptions.FinishedException;
@@ -133,6 +138,10 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		}
 
 		else if ((this.getFlightMode() == FlightMode.FULL_FLIGHT) || (this.getFlightMode() == FlightMode.LAND)) {
+			
+			if (this.getSpline() == null)
+				this.calculateSpline();
+				
 			FrontWheel wheel = drone.getFirstChildOfType(FrontWheel.class);
 			if (this.getConfig().getTyreRadius() >= wheel.getPosition(drone).getEntry(1)) {
 				this.setFlightMode(FlightMode.TAXI);
@@ -150,6 +159,28 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					recognizer.updateDronePosition(drone.getWorldPosition());
 
 					RealVector target = recognizer.getCurrentPathTarget();
+					UnivariateFunction func = (x) -> {return this.getSpline()[0].value(x) - drone.getWorldPosition().getEntry(0);};
+					UnivariateSolver sol = new BracketingNthOrderBrentSolver(1.0e-12, 1.0e-8, 5);
+					double solu;
+					if (Float.isNaN(test)) {
+						if (Math.abs(this.getSpline()[0].value(0) -drone.getWorldPosition().getEntry(0)) < 0.001)
+							solu = 0;
+						else
+							solu = sol.solve(100, func, 0, 0.1);
+					}
+					else {
+						if (Math.abs(this.getSpline()[0].value(test) -drone.getWorldPosition().getEntry(0)) < 0.001)
+							solu = test;
+						else {
+							solu = sol.solve(100, func, test, test + 0.1);
+							test = (float) solu;
+						}
+					}
+					UnivariateFunction dx = this.getSpline()[0].derivative();
+					UnivariateFunction dz = this.getSpline()[1].derivative();
+					float xx = (float) dx.value(solu);
+					float zz = (float) dz.value(solu);
+					target = drone.getWorldPosition().add(new ArrayRealVector(new double[] {xx, 0, zz}));
           
 					if (this.getFlightMode() == FlightMode.LAND) {
 						if (drone.getWorldPosition().getEntry(1) >= 5*settings.getHeight()) {
@@ -885,7 +916,26 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			throw new IllegalArgumentException();
 		this.previousRollAngularVelocity = previousRollAngularVelocity;
 	}
-
+	
+	private PolynomialSplineFunction[] spline = null;
+	
+	public PolynomialSplineFunction[] getSpline() {
+		return this.spline;
+	}
+	
+	public void setSpline(PolynomialSplineFunction[] spline) {
+		this.spline = spline;
+	}
+	
+	public void calculateSpline() {
+		SplineInterpolator interpolator = new SplineInterpolator();
+		this.setSpline(
+				new PolynomialSplineFunction[] {
+						interpolator.interpolate(new double[] {0, 1, 2, 3}, new double[] {0, 10, 990, 1000}),
+						interpolator.interpolate(new double[] {0, 1, 2, 3}, new double[] {0, -500, -500, 0})
+				});
+	}
+	
 	@Override
 	public AutopilotOutputs simulationStarted(AutopilotConfig config, AutopilotInputs inputs) {
 
@@ -947,4 +997,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 	public void simulationEnded() {
 		throw new IllegalArgumentException();
 	}
+	
+	private float test = Float.NaN;
 }
