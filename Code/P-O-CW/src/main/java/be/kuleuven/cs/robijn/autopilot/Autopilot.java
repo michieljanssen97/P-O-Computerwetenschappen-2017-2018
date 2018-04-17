@@ -147,17 +147,9 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					finished = true;
 					
 					ImageRecognizer recognizer = this.getImageRecognizer();
-					Angle horizontalAngleOfView = new Angle(this.getConfig().getHorizontalAngleOfView(), Type.DEGREES);
-			        Angle verticalAngleOfView = new Angle(this.getConfig().getVerticalAngleOfView(), Type.DEGREES);
-			        Image image = recognizer.createImage(inputs.getImage(), this.getConfig().getNbRows(), this.getConfig().getNbColumns(),
-							horizontalAngleOfView.getOrientation(), verticalAngleOfView.getOrientation(), drone.getWorldPosition(), drone.getHeading(), drone.getPitch(), drone.getRoll());
-					
-					RealVector target;
-					if (recognizer.isFollowingPathCoordinates()) {
-						target = recognizer.getCurrentPathTarget();
-					} else {
-						target = recognizer.searchForCubeInPathArea(image);
-					}
+					recognizer.updateDronePosition(drone.getWorldPosition());
+
+					RealVector target = recognizer.getCurrentPathTarget();
           
 					if (this.getFlightMode() == FlightMode.LAND) {
 						if (drone.getWorldPosition().getEntry(1) >= 5*settings.getHeight()) {
@@ -948,7 +940,6 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 
 	@Override
 	public void setPath(Path path) {
-		//TODO
 		this.getImageRecognizer().setPath(new CubePath(path.getX(), path.getY(), path.getZ()));
 	}
 
