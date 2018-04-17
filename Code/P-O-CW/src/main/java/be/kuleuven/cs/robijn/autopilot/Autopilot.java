@@ -343,10 +343,8 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 							+ drone.transformationToDroneCoordinates(drone.getLiftForceVerStab(verStabInclination)).getEntry(2)
 							+ drone.transformationToDroneCoordinates(drone.getTotalGravitationalForce()).getEntry(2)
 							- drone.getTotalMass()*acceleration);
-					if (thrust > drone.getMaxThrust())
-						thrust = drone.getMaxThrust();
-					else if (thrust < 0)
-						thrust = 0;
+					thrust = ScalarMath.upperBoundary(thrust, drone.getMaxThrust(), false);
+					thrust = ScalarMath.lowerBoundary(thrust, 0, false);
 					
 					this.setPreviousHeadingAngularAccelerationError(
 							drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination,
