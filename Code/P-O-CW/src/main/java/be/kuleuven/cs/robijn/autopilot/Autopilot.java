@@ -10,6 +10,7 @@ import be.kuleuven.cs.robijn.autopilot.image.*;
 import be.kuleuven.cs.robijn.experiments.ExpPosition;
 import be.kuleuven.cs.robijn.tyres.FrontWheel;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
+import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 import interfaces.*;
 
 /**

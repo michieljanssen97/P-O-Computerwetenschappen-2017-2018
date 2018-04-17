@@ -1,5 +1,6 @@
 package be.kuleuven.cs.robijn.common;
 
+import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 import interfaces.*;
 
 /**

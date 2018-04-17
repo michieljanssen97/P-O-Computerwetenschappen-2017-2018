@@ -3,7 +3,7 @@ package be.kuleuven.cs.robijn.worldObjects;
 import org.apache.commons.math3.geometry.euclidean.threed.*;
 import org.apache.commons.math3.linear.*;
 
-import be.kuleuven.cs.robijn.common.WorldObject;
+import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.exceptions.CrashException;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
 import be.kuleuven.cs.robijn.tyres.*;
@@ -73,6 +73,9 @@ public class Drone extends WorldObject {
 		this.velocity = velocity;
 		this.initialVelocity = velocity;
 		
+		this.available = true;
+		this.destinationAirport = null;
+		
 		FrontWheel frontWheel = new FrontWheel(config);
 		RightRearWheel rightRearWheel = new RightRearWheel(config);
 		LeftRearWheel leftRearWheel = new LeftRearWheel(config);
@@ -110,6 +113,9 @@ public class Drone extends WorldObject {
 	private final float tailMass;
 	
 	private final String droneID;
+	
+    private boolean available;
+    private Airport destinationAirport;
 
 	public AutopilotConfig getConfig() {
 		return config;
@@ -222,6 +228,22 @@ public class Drone extends WorldObject {
 	public float getTotalMass() {
 		return (this.getEngineMass() + this.getTailMass() + 2*this.getWingMass());
 	}
+	
+	public boolean isAvailable(){
+        return this.available;
+    }
+    
+    public void setAvailable(Boolean status){
+        this.available = status;
+    }
+    
+    public Airport getDestinationAirport(){
+        return destinationAirport;
+    }
+    
+    public void setDestinationAirport(Airport dest){
+        this.destinationAirport = dest;
+    }
 	
     //  -----------------   //
     //                      //

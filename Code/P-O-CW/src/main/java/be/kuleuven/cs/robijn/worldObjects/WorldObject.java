@@ -1,4 +1,4 @@
-package be.kuleuven.cs.robijn.common;
+package be.kuleuven.cs.robijn.worldObjects;
 
 import java.util.*;
 import java.util.stream.Stream;

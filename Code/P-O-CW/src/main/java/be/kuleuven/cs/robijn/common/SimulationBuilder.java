@@ -4,6 +4,8 @@ import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.airports.Runway;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
+import be.kuleuven.cs.robijn.worldObjects.WorldObject;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;

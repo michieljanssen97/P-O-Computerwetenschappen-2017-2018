@@ -6,6 +6,7 @@ import be.kuleuven.cs.robijn.testbed.renderer.bmfont.Label3D;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
+import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 

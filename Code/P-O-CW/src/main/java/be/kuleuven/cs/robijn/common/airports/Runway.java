@@ -1,7 +1,8 @@
 package be.kuleuven.cs.robijn.common.airports;
 
-import be.kuleuven.cs.robijn.common.WorldObject;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
+
+import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 
 public class Runway extends WorldObject{
     public Vector2D getSize(){

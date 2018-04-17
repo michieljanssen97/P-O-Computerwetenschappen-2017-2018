@@ -3,6 +3,7 @@ package be.kuleuven.cs.robijn.common;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.OrthographicCamera;
 import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
+import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 
 /**
  * Produces images of the 3D world being simulated.

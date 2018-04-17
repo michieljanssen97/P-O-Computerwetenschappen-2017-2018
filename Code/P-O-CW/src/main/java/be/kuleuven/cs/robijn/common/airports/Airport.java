@@ -1,7 +1,10 @@
 package be.kuleuven.cs.robijn.common.airports;
 
-import be.kuleuven.cs.robijn.common.SimulationSettings;
-import be.kuleuven.cs.robijn.common.WorldObject;
+import be.kuleuven.cs.robijn.worldObjects.Drone;
+import be.kuleuven.cs.robijn.worldObjects.WorldObject;
+
+import java.util.ArrayList;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
@@ -12,6 +15,7 @@ public class Airport extends WorldObject {
     private Vector2D size;
     private Gate[] gates;
     private Runway[] runways;
+    private ArrayList<Drone> currentDrones = new ArrayList<Drone>();
 
     public Airport(float length, float width, Vector2D centerToRunway0){
         size = new Vector2D((2f*length) + width, 2f*width);
@@ -51,5 +55,31 @@ public class Airport extends WorldObject {
 
     public Runway[] getRunways() {
         return runways;
+    }
+    
+    public ArrayList<Drone> getCurrentDrones() {
+        return new ArrayList<Drone>(this.currentDrones);
+    }
+    
+    public void addDroneToCurrentDrones(Drone d){ //TODO gebruik deze
+        currentDrones.add(d);
+    }
+    
+    public void removeDroneFromCurrentDrones(Drone d){ //TODO gebruik deze
+        currentDrones.remove(d);
+    }
+    
+    public Drone getFirstAvailableDrone(){
+        for(Drone d : getCurrentDrones()){
+            if (d.isAvailable()){
+                return d;
+            }
+        }
+        
+        return null;
+    }
+    
+    public boolean isDroneAvailable() {
+        return this.getFirstAvailableDrone() != null;
     }
 }
