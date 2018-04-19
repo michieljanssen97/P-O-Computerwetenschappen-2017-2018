@@ -41,13 +41,18 @@ public class Angle {
 		return this.getAngle(Type.RADIANS);
 	}
 	
-	public float getOrientation(Type type) {
-		float angle = this.getAngle(type);
+	public float getOrientation(Type type) throws IllegalArgumentException {
+		float angle = this.getAngle(Type.RADIANS);
 		if (angle > Math.PI)
-			return (float) (angle - 2*Math.PI);
-		else {
+			angle = (float) (angle - 2*Math.PI);
+		switch(type) {
+		case DEGREES:
+			return (float) Math.toDegrees(angle);
+		case RADIANS:
 			return angle;
-		}
+		default:
+			throw new IllegalArgumentException();
+	}
 	}
 	
 	public float getOrientation() {
