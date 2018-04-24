@@ -103,7 +103,7 @@ public class Airport extends WorldObject {
     	double distance = Double.MAX_VALUE;
     	for(Airport airp : Airport.getAllAirports()) {
     		Drone tempDrone = airp.getFirstAvailableDrone();
-    		if(tempDrone.calculateDistanceToAirport(airport) < distance) { //Give higher priority to Drones at nearby Airports
+    		if(tempDrone.calculateDistanceToAirport(airport) < distance) { //Give higher priority to Drones at nearby Airports, moet mss nog anders wegens orientatie van de luchthavens
     			distance = tempDrone.calculateDistanceToAirport(airport);
     			drone = tempDrone;
     		}

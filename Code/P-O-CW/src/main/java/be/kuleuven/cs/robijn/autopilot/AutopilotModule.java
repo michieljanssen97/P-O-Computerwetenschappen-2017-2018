@@ -19,38 +19,7 @@ public class AutopilotModule {
         Package p = new Package(fromAirport, fromGate, toAirport, toGate);
         Package.addToPackagesToAssignList(p);
     }
-
-    public void assignPackages() { //TODO zorg dat dit elke iteratie wordt opgeroepen
-        for(Package p : Package.getAllPackagesToAssign()){
-            Airport fromAirport = p.getFromAirport();
-            Gate fromGate = p.getFromGate();
-            Airport toAirport = p.getToAirport();
-            Gate toGate = p.getToGate();
-            
-            if(fromGate.hasPackage()){
-                throw new IllegalStateException(); //TODO of overslaan (wachten tot volgende iteratie en opnieuw controleren totdat de fromGate wel vrij is), mag maar 1 package beschikbaar zijn per Gate
-            }
-            if(isDroneAvailable() && ! toGate.hasDrones()){
-            	p.assignPackageNecessities(fromAirport, fromGate, toAirport, toGate);
-            	Package.removeFromPackagesToAssignList(p);
-                //TODO fromGate terug vrij (zowel drone als package) na opstijgen -> indien status autopilot == FLightMode.Ascend na FlightMode.Taxi}
-            }
-        }
-    }
     
-    /**
-     * Check all Airports for an available Drone
-     */
-    public boolean isDroneAvailable(){
-    	boolean result = false;
-    	for(Airport airport : Airport.getAllAirports()) {
-    		if(airport.isDroneAvailable()) {
-    			result = true;
-    		}
-    	}
-    	
-    	return result;
-    }
 
     public void startTimeHasPassed(Drone drone, AutopilotInputs inputs) {
         //TODO
