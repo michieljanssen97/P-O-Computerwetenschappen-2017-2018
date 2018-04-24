@@ -53,11 +53,6 @@ public class Autopilot extends WorldObject {
 			throw new IllegalArgumentException();
 		this.previousElapsedTime = previousElapsedTime;
 	}
-	private final ImageRecognizer recognizer = new ImageRecognizer();
-	
-	public ImageRecognizer getImageRecognizer() {
-		return this.recognizer;
-	}
 	
 	/**
 	 * Wel roll ten gevolge van verschillende snelheid van vleugels (door de rotaties). 
@@ -140,18 +135,15 @@ public class Autopilot extends WorldObject {
 				this.setFlightMode(FlightMode.TAXI);
 			}
 			else {
-				if ((this.getFlightMode() == FlightMode.FULL_FLIGHT) && (recognizer.getPath().getPathSize() == 0))
-					this.setFlightMode(FlightMode.LAND);
+//				if (this.getFlightMode() == FlightMode.FULL_FLIGHT)
+//					this.setFlightMode(FlightMode.LAND);
 				boolean finished = false;
 				int iterations = 1;
 				while ((! finished) && (iterations < 5)) {
 					iterations += 1;
 					finished = true;
 					
-					ImageRecognizer recognizer = this.getImageRecognizer();
-					recognizer.updateDronePosition(drone.getWorldPosition());
-
-					RealVector target = recognizer.getCurrentPathTarget();
+					RealVector target = new ArrayRealVector(new double[] {0, 50, -2000}, false);
 					
 //					Angle angle = new Angle((float) Math.atan(drone.getWorldPosition().getEntry(2)/(drone.getWorldPosition().getEntry(0)-500)));
 //					System.out.println(angle.getOrientation());
@@ -696,23 +688,6 @@ public class Autopilot extends WorldObject {
 		this.currentFlightMode = mode;
 	}
 	
-	private RealVector target = null;
-
-	
-	public RealVector getTarget() {
-		return this.target;
-	}
-	
-	public static boolean isValidTarget(RealVector target) {
-		return (target != null);
-	}
-	
-	public void setTarget(RealVector target) throws IllegalArgumentException {
-		if (! isValidTarget(target))
-			throw new IllegalArgumentException();
-		this.target = target;
-	}
-	
     public static boolean isPositionDrawn() {
     	return drawChartPositions;
     }
@@ -996,10 +971,6 @@ public class Autopilot extends WorldObject {
 		if (! isValidInitialZVelocity(initialZVelocity))
 			throw new IllegalArgumentException();
 		this.initialZVelocity = initialZVelocity;
-	}
-
-	public void setPath(Path path) {
-		this.getImageRecognizer().setPath(new CubePath(path.getX(), path.getY(), path.getZ()));
 	}
 
 	public void simulationEnded() throws IllegalArgumentException {
