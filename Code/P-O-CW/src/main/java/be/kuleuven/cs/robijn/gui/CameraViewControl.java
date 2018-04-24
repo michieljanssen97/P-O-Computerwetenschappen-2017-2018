@@ -358,6 +358,7 @@ public class CameraViewControl extends AnchorPane {
         imageBackingBuffer = ((DataBufferByte) awtImage.getRaster().getDataBuffer()).getData();
     }
 
+    private RenderTask lastRender;
     private void update(){
         //If no camera is active, don't render.
         if(activeCamera == null){
@@ -388,11 +389,15 @@ public class CameraViewControl extends AnchorPane {
             orthoCam.setIconSize(8f);
         }
 
-        //Render to framebuffer, copy from framebuffer to image, convert image to javafx image, display javafx image
-        renderer.render(world, frameBuffer, activeCamera);
-        frameBuffer.readPixels(imageBackingBuffer);
-        image = SwingFXUtils.toFXImage(awtImage, image);
-        imageView.setImage(image);
+        //The view always lags behind 1 frame so that the GPU work can be done while the Java code continues and so
+        //we don't have to wait.
+        if(lastRender != null){
+            lastRender.waitUntilFinished();
+            frameBuffer.readPixels(imageBackingBuffer);
+            image = SwingFXUtils.toFXImage(awtImage, image);
+            imageView.setImage(image);
+        }
+        lastRender = renderer.startRender(world, frameBuffer, activeCamera);
     }
 
     private void setCameraAspectRatio(Camera camera, double aspectRatio){

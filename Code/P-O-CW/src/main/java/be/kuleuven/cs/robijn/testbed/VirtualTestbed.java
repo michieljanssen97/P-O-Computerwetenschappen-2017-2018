@@ -115,7 +115,7 @@ public class VirtualTestbed implements TestBed {
 		if(droneCamera == null){
 			droneCamera = createDroneCamera(drone);
 		}
-		renderer.render(world, frameBuffer, droneCamera);
+		renderer.startRender(world, frameBuffer, droneCamera);
 		frameBuffer.readPixels(targetArray);
 
 		//Swap blue and red bytes (BGR -> RGB)
