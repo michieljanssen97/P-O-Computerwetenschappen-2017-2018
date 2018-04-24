@@ -6,4 +6,6 @@ public interface Stopwatch {
     double getSecondsSinceLastUpdate();
     void setPaused(boolean paused);
     boolean isPaused();
+    void setSpeedMultiplier(double speed);
+    double getSpeedMultiplier();
 }
