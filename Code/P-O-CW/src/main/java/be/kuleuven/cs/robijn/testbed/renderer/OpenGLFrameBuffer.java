@@ -14,6 +14,39 @@ import static org.lwjgl.opengl.GL32.*;
 
 public class OpenGLFrameBuffer implements FrameBuffer {
     public static OpenGLFrameBuffer create(int width, int height){
+        return create(width, height, false, true);
+    }
+
+    public static OpenGLFrameBuffer create(Texture texture, boolean createDepthBuffer){
+        if(texture.getDimensions() != 2){
+            throw new IllegalArgumentException("Can only create framebuffer for a 2D texture");
+        }
+
+        int fbo = glGenFramebuffers();
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+        int depthRenderBuffer = -1;
+        if(createDepthBuffer){
+            depthRenderBuffer = glGenRenderbuffers();
+            glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, texture.getSize(0), texture.getSize(1));
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
+        }
+
+        //Set texture as GL_COLOR_ATTACHMENT0
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture.getTextureId(), 0);
+        //Render to GL_COLOR_ATTACHMENT0
+        glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+        int framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE) {
+            throw new RuntimeException("Frame buffer incomplete! (errorcode = "+framebufferStatus+")");
+        }
+
+        return new OpenGLFrameBuffer(fbo, -1, depthRenderBuffer, texture.getSize(0), texture.getSize(1), texture.getBytesPerPixel());
+    }
+
+    public static OpenGLFrameBuffer create(int width, int height, boolean greyscale, boolean createDepthBuffer){
         if(width <= 0 || height <= 0){
             throw new IllegalArgumentException("Invalid framebuffer width or height");
         }
@@ -23,28 +56,37 @@ public class OpenGLFrameBuffer implements FrameBuffer {
 
         int renderBuffer = glGenRenderbuffers();
         glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
-        //Render as RGB, read as BGR. See OpenGLRenderer.createProjectionMatrix() for an explanation.
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB8, width, height);
+
+        int bytesPerPixel;
+        if(greyscale){
+            bytesPerPixel = 1; //Only red channel
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_R8, width, height);
+        }else{
+            //Render as RGB, read as BGR. See OpenGLRenderer.createProjectionMatrix() for an explanation.
+            bytesPerPixel = 3; //Because RGB
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB8, width, height);
+        }
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderBuffer);
 
-        int depthRenderBuffer = glGenRenderbuffers();
-        glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
+        int depthRenderBuffer = -1;
+        if(createDepthBuffer){
+            depthRenderBuffer = glGenRenderbuffers();
+            glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
+        }
 
         int framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE) {
             throw new RuntimeException("Frame buffer incomplete! (errorcode = "+framebufferStatus+")");
         }
 
-        int bytesPerPixel = 3; //Because RGB
-        ByteBuffer buf = BufferUtils.createByteBuffer(bytesPerPixel*width*height);
-
-        return new OpenGLFrameBuffer(fbo, renderBuffer, width, height, bytesPerPixel, buf);
+        return new OpenGLFrameBuffer(fbo, renderBuffer, depthRenderBuffer, width, height, bytesPerPixel);
     }
 
     private int frameBufferId;
     private int renderBufferId;
+    private int depthBufferId;
     private int width;
     private int height;
     private int bytesPerPixel;
@@ -52,17 +94,13 @@ public class OpenGLFrameBuffer implements FrameBuffer {
 
     private boolean isClosed = false;
 
-    private OpenGLFrameBuffer(int frameBufferId, int renderBufferId, int width, int height, int bytesPerPixel, ByteBuffer buffer){
-        if(buffer.capacity() < width*height*bytesPerPixel){
-            throw new IllegalArgumentException("buffer is too small");
-        }
-
+    private OpenGLFrameBuffer(int frameBufferId, int renderBufferId, int depthBufferId, int width, int height, int bytesPerPixel){
         this.frameBufferId = frameBufferId;
         this.renderBufferId = renderBufferId;
+        this.depthBufferId = depthBufferId;
         this.width = width;
         this.height = height;
         this.bytesPerPixel = bytesPerPixel;
-        this.buf = buffer;
     }
 
     public int getId(){
@@ -87,7 +125,11 @@ public class OpenGLFrameBuffer implements FrameBuffer {
             throw new IllegalArgumentException("target buffer is too small");
         }
 
-        //Wait until GPU has finished rendering triangle
+        if(buf == null){
+            buf = BufferUtils.createByteBuffer(bytesPerPixel*width*height);
+        }
+
+        //Wait until GPU has finished rendering
         long sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
         if(sync == 0){
             throw new RuntimeException("glFenceSync failed");
@@ -102,12 +144,15 @@ public class OpenGLFrameBuffer implements FrameBuffer {
             throw new RuntimeException("waiting for gpu failed: "+waitResult);
         }
 
+        //Read from this buffer
+        glBindFramebuffer(GL_FRAMEBUFFER, this.getId());
+
         //Make sure we write to the begin of the buffer
         buf.position(0);
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
         //Read frame from GPU to RAM
         //Render as RGB, read as BGR. See OpenGLRenderer.createProjectionMatrix() for an explanation.
-        glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, buf);
+        glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, buf); //TODO: can't handle special bpp counts
 
         //Move cursor in buffer back to the begin and copy the contents to the java image
         buf.position(0);
@@ -121,8 +166,11 @@ public class OpenGLFrameBuffer implements FrameBuffer {
         }
 
         //Cleanup LWJGL resources
-        glDeleteRenderbuffers(frameBufferId);
-        glDeleteFramebuffers(renderBufferId);
+        glDeleteRenderbuffers(renderBufferId);
+        if(depthBufferId != -1){
+            glDeleteRenderbuffers(depthBufferId);
+        }
+        glDeleteFramebuffers(frameBufferId);
 
         this.buf = null;
         this.isClosed = true;

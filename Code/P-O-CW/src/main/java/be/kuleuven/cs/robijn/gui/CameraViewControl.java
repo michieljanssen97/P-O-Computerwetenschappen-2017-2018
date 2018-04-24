@@ -1,6 +1,10 @@
 package be.kuleuven.cs.robijn.gui;
 
 import be.kuleuven.cs.robijn.common.*;
+import be.kuleuven.cs.robijn.common.airports.Airport;
+import be.kuleuven.cs.robijn.testbed.renderer.bmfont.Label3D;
+import be.kuleuven.cs.robijn.worldObjects.*;
+import javafx.beans.binding.Bindings;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.OrthographicCamera;
 import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
@@ -9,34 +13,33 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.*;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
-
+import javafx.util.Callback;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.RealVector;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.Objects;
+import java.util.ArrayList;
 
 /**
  * GUI component that displays a 3D render of the world, along with several buttons for changing the view
  */
 public class CameraViewControl extends AnchorPane {
     //The object names for the cameras that provide the different perspectives.
-    public static final String DRONE_CAMERA_ID = "gui_drone_camera";
-    public static final String THIRDPERSON_CAMERA_ID = "gui_thirdperson_camera";
     public static final String SIDE_CAMERA_ID = "gui_side_camera";
     public static final String TOPDOWN_CAMERA_ID = "gui_topdown_camera";
+    public static final String DRONE_CAMERA_ID = "gui_drone_camera";
+    public static final String THIRDPERSON_CAMERA_ID = "gui_thirdperson_camera";
 
     @FXML
     private ScrollPane imageViewHost;
@@ -47,7 +50,14 @@ public class CameraViewControl extends AnchorPane {
     @FXML
     private ToggleGroup perspectiveToggleGroup;
 
+    @FXML
+    private ComboBox<Drone> droneComboBox;
+
     private ObjectProperty<SimulationDriver> simulationProperty = new SimpleObjectProperty<>(this, "simulation");
+    //Drone that is selected in sidebar
+    private ObjectProperty<Drone> selectedDroneProperty = new SimpleObjectProperty<>(this, "selectedDrone");
+    //Drone that is selected in combobox
+    private ObjectProperty<Drone> activeDroneProperty = new SimpleObjectProperty<>(this, "activeDrone");
 
     private FrameBuffer frameBuffer;
     private BufferedImage awtImage;
@@ -73,24 +83,187 @@ public class CameraViewControl extends AnchorPane {
 
     @FXML
     private void initialize() {
+        setupCameras();
+        setupLabels();
+        setupDroneComboBox();
+        setupDragging();
+        setupZooming();
+        setupResizing();
+        setupPerspectiveChanging();
+        setupRendering();
+    }
+
+    private OrthographicCamera sideCamera, topCamera;
+    private PerspectiveCamera droneCamera, chaseCamera;
+
+    private void setupCameras(){
+        simulationProperty.addListener((observableValue, oldValue, newValue) -> {
+            WorldObject world = newValue.getTestBed().getWorldRepresentation();
+
+            activeCamera = sideCamera = getSimulation().getTestBed().getRenderer().createOrthographicCamera();
+            sideCamera.setWidth(130);
+            sideCamera.setHeight(30);
+            sideCamera.setName(CameraViewControl.SIDE_CAMERA_ID);
+            sideCamera.setRelativePosition(new ArrayRealVector(new double[]{1000, 5, -55}, false));
+            sideCamera.setRelativeRotation(new Rotation(new Vector3D(0, 1, 0), Math.PI/2d));
+            sideCamera.setFarPlane(100000);
+            world.addChild(sideCamera);
+
+            topCamera = getSimulation().getTestBed().getRenderer().createOrthographicCamera();
+            topCamera.setWidth(130);
+            topCamera.setHeight(40);
+            topCamera.setName(CameraViewControl.TOPDOWN_CAMERA_ID);
+            topCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 1000, -55}, false));
+            Rotation rot = new Rotation(new Vector3D(0, 0, 1), Math.PI/2d)
+                    .applyTo(new Rotation(new Vector3D(0, 1, 0), Math.PI/2d));
+            topCamera.setRelativeRotation(rot);
+            topCamera.setFarPlane(100000);
+            world.addChild(topCamera);
+
+            chaseCamera = getSimulation().getTestBed().getRenderer().createPerspectiveCamera();
+            chaseCamera.setHorizontalFOV((float)Math.toRadians(120));
+            chaseCamera.setVerticalFOV((float)Math.toRadians(120));
+            chaseCamera.setName(CameraViewControl.THIRDPERSON_CAMERA_ID);
+            chaseCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 0d, 7}, false));
+            getSimulation().addOnUpdateEventHandler(new UpdateEventHandler((inputs, outputs) -> {
+                Drone drone = activeDroneProperty.get();
+                if(drone != null){
+                    //Put camera at rotation (0, 0, 0), at position of drone +7 on z-axis.
+                    chaseCamera.setRelativePosition(drone.getRelativePosition().add(new ArrayRealVector(new double[]{0, 0, 7}, false)));
+                    chaseCamera.setRelativeRotation(Rotation.IDENTITY);
+
+                    //Perform rotatearound of camera around drone position along y-axis with plane yaw.
+                    chaseCamera.rotateAround(drone.getWorldPosition(), new Rotation(new Vector3D(0, 1, 0), drone.getHeading()));
+                }
+            },UpdateEventHandler.HIGH_PRIORITY));
+            world.addChild(chaseCamera);
+        });
+
+        activeDroneProperty.addListener((observableValue, oldDrone, newDrone) -> {
+            droneCamera = newDrone.getChildByName(DRONE_CAMERA_ID, PerspectiveCamera.class);
+            if(droneCamera == null){
+                droneCamera = getSimulation().getTestBed().getRenderer().createPerspectiveCamera();
+                droneCamera.setHorizontalFOV((float)Math.toRadians(120));
+                droneCamera.setVerticalFOV((float)Math.toRadians(120));
+                droneCamera.setName(CameraViewControl.DRONE_CAMERA_ID);
+                droneCamera.addVisibilityFilter(obj -> obj != newDrone); //Hide drone from itself
+                droneCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 0, 0}, false));
+                newDrone.addChild(droneCamera);
+            }
+            setActiveCamera((String)perspectiveToggleGroup.getSelectedToggle().getUserData());
+        });
+    }
+
+    private void setupLabels(){
+        simulationProperty.addListener((observableValue, oldValue, newValue) -> {
+            WorldObject world = newValue.getTestBed().getWorldRepresentation();
+
+            for (Drone drone : world.getChildrenOfType(Drone.class)){
+                Label3D label = new Label3D(drone.getDroneID());
+                label.setColors(3, 6, Color.WHITE);
+                label.setRelativePosition(new ArrayRealVector(new double[]{0, 2, 0}, false));
+                drone.addChild(label);
+            }
+
+            ArrayList<Airport> childrenOfType = world.getChildrenOfType(Airport.class);
+            for (int i = 0; i < childrenOfType.size(); i++) {
+                Airport airport = childrenOfType.get(i);
+                Label3D label = new Label3D("Airport "+i);
+                label.setColors(3, 6, Color.WHITE);
+                label.setRelativePosition(new ArrayRealVector(new double[]{0, 2, 0}, false));
+                airport.addChild(label);
+            }
+        });
+
+        selectedDroneProperty.addListener((observableValue, oldDrone, newDrone) -> {
+            if(oldDrone != null){
+                oldDrone.getFirstChildOfType(Label3D.class).setColors(3, 6, Color.WHITE);
+            }
+            newDrone.getFirstChildOfType(Label3D.class).setColors(3, 6, Color.ORANGE);
+        });
+    }
+
+    private void setActiveCamera(String cameraId){
+        switch(cameraId){
+            case SIDE_CAMERA_ID:
+                activeCamera = sideCamera;
+                break;
+            case TOPDOWN_CAMERA_ID:
+                activeCamera = topCamera;
+                break;
+            case DRONE_CAMERA_ID:
+                activeCamera = droneCamera;
+                break;
+            case THIRDPERSON_CAMERA_ID:
+                activeCamera = chaseCamera;
+                break;
+        }
+    }
+
+    private void setupResizing(){
         //Stretch imageView to fill scrollview, which has its size controlled by the SplittablePane
         imageViewHost.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         imageViewHost.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         imageView.fitWidthProperty().bind(this.widthProperty());
         imageView.fitHeightProperty().bind(this.heightProperty());
 
+        //When the image viewport changes, resize the framebuffer and image buffers
+        imageView.fitWidthProperty().addListener(e -> onSizeChanged());
+        imageView.fitHeightProperty().addListener(e -> onSizeChanged());
+    }
+
+    private void setupDragging(){
         dragHelper = new DragHelper(imageView);
         dragHelper.addOnDragEventHandler(e -> {
             if(activeCamera instanceof OrthographicCamera){
                 OrthographicCamera ortho = (OrthographicCamera)activeCamera;
+
+                float scale = activeCamera == topCamera ? topCamZoomHandler.getScale() : sideCamZoomHandler.getScale();
+
                 Rotation camRot = ortho.getRelativeRotation();
                 Vector3D right = camRot.applyTo(new Vector3D(1, 0, 0));
                 Vector3D up = camRot.applyTo(new Vector3D(0, 1, 0));
-                Vector3D delta = right.scalarMultiply(-e.getDeltaX()*dragSensitivity).add(up.scalarMultiply(e.getDeltaY()*dragSensitivity));
+                Vector3D delta = right.scalarMultiply(-e.getDeltaX()*dragSensitivity * scale).add(
+                                    up.scalarMultiply(e.getDeltaY()*dragSensitivity * scale));
                 ortho.setRelativePosition(ortho.getRelativePosition().add(new ArrayRealVector(new double[]{delta.getX(), delta.getY(), delta.getZ()}, false)));
             }
         });
+    }
 
+    private OrthoCameraZoomHandler topCamZoomHandler;
+    private OrthoCameraZoomHandler sideCamZoomHandler;
+    private void setupZooming(){
+        simulationProperty.addListener((observableValue, oldValue, newValue) -> {
+            topCamZoomHandler = new OrthoCameraZoomHandler(topCamera);
+            sideCamZoomHandler = new OrthoCameraZoomHandler(sideCamera);
+
+            imageView.setOnScroll(event -> {
+                if(activeCamera == topCamera){
+                    topCamZoomHandler.handle(event);
+                }else if(activeCamera == sideCamera){
+                    sideCamZoomHandler.handle(event);
+                }
+            });
+        });
+    }
+
+    private void setupPerspectiveChanging(){
+        //There must always be an active perspective, so if no perspective is selected, select the first one
+        perspectiveToggleGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
+            if(newValue == null){
+                perspectiveToggleGroup.selectToggle(perspectiveToggleGroup.getToggles().get(0));
+            }
+        });
+
+        //Change camera on toggle button press
+        perspectiveToggleGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
+            if(newValue != null){
+                setActiveCamera((String)newValue.getUserData());
+            }
+        });
+    }
+
+    private void setupRendering(){
         //When the simulation starts, setup the rendering
         simulationProperty.addListener((observable, oldValue, newValue) -> {
             //Setup framebuffers and image buffers
@@ -98,18 +271,58 @@ public class CameraViewControl extends AnchorPane {
 
             //When the simulation is updated, update the displayed image
             newValue.addOnUpdateEventHandler(new UpdateEventHandler((inputs, outputs) -> {
-               update();
-            },UpdateEventHandler.LOW_PRIORITY));
+                update();
+            }, UpdateEventHandler.LOW_PRIORITY));
+        });
+    }
+
+    private void setupDroneComboBox(){
+        //droneComboBox is visible only when drone or chase camera is selected
+        droneComboBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> {
+            Toggle selectedToggle = perspectiveToggleGroup.getSelectedToggle();
+            if(selectedToggle != null){
+                String cameraId = (String)selectedToggle.getUserData();
+                return cameraId.equals(DRONE_CAMERA_ID) || cameraId.equals(THIRDPERSON_CAMERA_ID);
+            }
+            return false;
+        }, perspectiveToggleGroup.selectedToggleProperty()));
+
+        //Display the drone ID in the combobox
+        Callback<ListView<Drone>, ListCell<Drone>> cellFactory = data -> new ListCell<Drone>(){
+            public void updateItem(Drone item, boolean empty) {
+                super.updateItem(item, empty);
+                if(empty){
+                    setText("");
+                }else if (item == null) {
+                    setText("Active drone");
+                } else {
+                    setText(item.getDroneID());
+                }
+            }
+        };
+        droneComboBox.setCellFactory(cellFactory);
+        droneComboBox.setButtonCell(cellFactory.call(null));
+
+        //Add all the drones to the combobox + a null value for selectedDroneProperty
+        simulationProperty.addListener((observableValue, oldValue, newValue) -> {
+            droneComboBox.getItems().add(null);
+            droneComboBox.getItems().addAll(
+                    newValue.getTestBed().getWorldRepresentation().getChildrenOfType(Drone.class)
+            );
         });
 
-        //When the image viewport changes, resize the framebuffer and image buffers
-        imageView.fitWidthProperty().addListener(e -> onSizeChanged());
-        imageView.fitHeightProperty().addListener(e -> onSizeChanged());
-
-        //There must always be an active perspective, so if no perspective is selected, select the first one
-        perspectiveToggleGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
+        //On droneCombobox select, change activecamera
+        droneComboBox.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
             if(newValue == null){
-                perspectiveToggleGroup.selectToggle(perspectiveToggleGroup.getToggles().get(0));
+                activeDroneProperty.set(selectedDroneProperty.get());
+            }else{
+                activeDroneProperty.set(newValue);
+            }
+        });
+
+        selectedDroneProperty.addListener((observableValue, oldValue, newValue) -> {
+            if(droneComboBox.getSelectionModel().getSelectedItem() == null){
+                activeDroneProperty.set(newValue);
             }
         });
     }
@@ -146,6 +359,11 @@ public class CameraViewControl extends AnchorPane {
     }
 
     private void update(){
+        //If no camera is active, don't render.
+        if(activeCamera == null){
+            return;
+        }
+
         //If framebuffer is not setup, try doing so. If that fails, skip this update
         if(frameBuffer == null){
             setupImages();
@@ -159,12 +377,6 @@ public class CameraViewControl extends AnchorPane {
         WorldObject world = testBed.getWorldRepresentation();
 
         //Get the active camera and set its camera FOV to match the image width to height ratio so the image isnt warped/stretched.
-        String selectedCameraId = (String)perspectiveToggleGroup.getSelectedToggle().getUserData();
-        activeCamera = world.getDescendantsStream()
-                .filter(o -> Objects.equals(o.getName(), selectedCameraId))
-                .map(o -> (Camera)o)
-                .findFirst().get();
-
         double aspect = ((double)frameBuffer.getWidth())/((double)frameBuffer.getHeight());
         setCameraAspectRatio(activeCamera, aspect);
 
@@ -218,5 +430,21 @@ public class CameraViewControl extends AnchorPane {
 
     public ObjectProperty<SimulationDriver> getSimulationProperty() {
         return simulationProperty;
+    }
+
+    public Drone getSelectedDroneProperty() {
+        return selectedDroneProperty.get();
+    }
+
+    public ObjectProperty<Drone> getSelectedDronePropertyProperty() {
+        return selectedDroneProperty;
+    }
+
+    public Drone getActiveDroneProperty() {
+        return activeDroneProperty.get();
+    }
+
+    public ObjectProperty<Drone> getActiveDronePropertyProperty() {
+        return activeDroneProperty;
     }
 }

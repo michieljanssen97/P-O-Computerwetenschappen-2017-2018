@@ -17,7 +17,7 @@ import interfaces.*;
  * 
  * @author Pieter Vandensande
  */
-public class Autopilot extends WorldObject implements interfaces.Autopilot {
+public class Autopilot extends WorldObject {
 	private static boolean drawChartPositions = false;
 	public static ExpPosition exppos = new ExpPosition();
 	public FlightMode currentFlightMode = FlightMode.ASCEND;
@@ -953,15 +953,11 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		this.previousRollAngularVelocity = previousRollAngularVelocity;
 	}
 	
-	@Override
-	public AutopilotOutputs simulationStarted(AutopilotConfig config, AutopilotInputs inputs) {
-
+	public void initialise(AutopilotConfig config) {
 		if (! isValidConfig(config))
 			throw new IllegalArgumentException();
 		RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, 0}, false);
 		Drone drone = new Drone(config, initialVelocity);
-		drone.setRelativePosition(new ArrayRealVector(new double[] {0, -config.getWheelY() + config.getTyreRadius(), 0}, false));
-		//drone.setRelativePosition(new ArrayRealVector(new double[] {0, 100, 0}, false));
 		this.addChild(drone);
 		this.config = config;
 		RealVector previousPosition = drone.getWorldPosition();
@@ -1000,18 +996,13 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		if (! isValidInitialZVelocity(initialZVelocity))
 			throw new IllegalArgumentException();
 		this.initialZVelocity = initialZVelocity;
-
-		return timePassed(inputs);
 	}
 
-
-	@Override
 	public void setPath(Path path) {
 		this.getImageRecognizer().setPath(new CubePath(path.getX(), path.getY(), path.getZ()));
 	}
 
-	@Override
-	public void simulationEnded() {
+	public void simulationEnded() throws IllegalArgumentException {
 		throw new IllegalArgumentException();
 	}
 }

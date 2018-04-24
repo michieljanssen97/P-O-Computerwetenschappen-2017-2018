@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="800.0" prefWidth="900.0" fx:controller="be.kuleuven.cs.robijn.gui.ConfigEditorDialog" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <AnchorPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0">
+            <children>
+                <HBox prefHeight="25.0" prefWidth="698.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <children>
+                        <Button fx:id="loadConfigFileButton" mnemonicParsing="false" text="Load file…">
+                            <HBox.margin>
+                                <Insets />
+                            </HBox.margin>
+                        </Button>
+                        <Button fx:id="saveConfigFileButton" mnemonicParsing="false" text="Save as…">
+                            <HBox.margin>
+                                <Insets left="10.0" />
+                            </HBox.margin>
+                        </Button>
+                        <Button fx:id="loadConfigDefaultsButton" mnemonicParsing="false" text="Reset default values">
+                            <HBox.margin>
+                                <Insets left="10.0" />
+                            </HBox.margin>
+                        </Button>
+                    </children>
+                </HBox>
+                <TableView fx:id="stringPropertiesTable" prefHeight="50.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0" />
+                <TableView fx:id="numberPropertiesTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="85.0" />
+            </children>
+        </AnchorPane>
+        <Button fx:id="okButton" minWidth="60.0" mnemonicParsing="false" text="OK" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0" />
+        <Button fx:id="cancelButton" minWidth="60.0" mnemonicParsing="false" text="Cancel" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="85.0" />
+    </children>
+</AnchorPane>

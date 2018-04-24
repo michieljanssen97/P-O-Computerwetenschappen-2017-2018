@@ -1,9 +1,9 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.*;
-import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.airports.Runway;
+import be.kuleuven.cs.robijn.testbed.renderer.bmfont.Label3D;
 import be.kuleuven.cs.robijn.worldObjects.Box;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
@@ -15,26 +15,24 @@ import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
-import org.joml.*;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
 import java.awt.*;
-import java.lang.Math;
 import java.util.ArrayList;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
-import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
+import static org.lwjgl.glfw.GLFWNativeWGL.glfwGetWGLContext;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
 import static org.lwjgl.opengl.GL14.glBlendEquation;
 import static org.lwjgl.opengl.GL20.glUseProgram;
-import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
-import static org.lwjgl.opengl.GL30.glBindFramebuffer;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL32.GL_FIRST_VERTEX_CONVENTION;
 import static org.lwjgl.opengl.GL32.glProvokingVertex;
 import static org.lwjgl.system.MemoryUtil.NULL;
@@ -102,6 +100,8 @@ public class OpenGLRenderer implements Renderer {
 
     private ArrayList<Line> linesToDraw = new ArrayList<>();
     private ArrayList<OpenGLFrameBuffer> frameBuffers = new ArrayList<>();
+
+    private final LabelRenderer labelRenderer = new LabelRenderer(this);
 
     private OpenGLRenderer(long windowHandle){
         this.windowHandle = windowHandle;
@@ -191,6 +191,8 @@ public class OpenGLRenderer implements Renderer {
             throw new IllegalArgumentException("Incompatible camera");
         }
 
+        labelRenderer.updateLabelCache(worldRoot);
+
         //Use own framebuffer instead of default framebuffer
         glBindFramebuffer(GL_FRAMEBUFFER, ((OpenGLFrameBuffer)buffer).getId());
         //Set the size and position of the image we want to render in the buffer
@@ -221,12 +223,10 @@ public class OpenGLRenderer implements Renderer {
         Matrix4f viewProjectionMatrix = new Matrix4f(projectionMatrix).mul(viewMatrix);
 
         //Render ground if needed
-        if(camera.isGroundDrawn()){
-            WorldObject groundObj = new WorldObject();
-            groundObj.setScale(new ArrayRealVector(new double[]{10000, 1, 10000}, false));
-            RealMatrix transform = groundObj.getObjectToWorldTransform();
-            renderModel(groundModel, viewProjectionMatrix, transform);
-        }
+        WorldObject groundObj = new WorldObject();
+        groundObj.setScale(new ArrayRealVector(new double[]{10000, 1, 10000}, false));
+        RealMatrix transform = groundObj.getObjectToWorldTransform();
+        renderModel(groundModel, viewProjectionMatrix, transform);
 
         //Render objects
         for (WorldObject child : worldRoot.getChildren()){
@@ -234,7 +234,9 @@ public class OpenGLRenderer implements Renderer {
         }
 
         //Render debug objects if needed
-        if(camera.areDebugObjectsDrawn()){
+        WorldObject dummyLine = new WorldObject();
+        dummyLine.setName("debug-line");
+        if(camera.isVisible(dummyLine)){
             for (Line line : linesToDraw){
                 renderLine(line, viewProjectionMatrix);
             }
@@ -247,6 +249,10 @@ public class OpenGLRenderer implements Renderer {
             renderChildren(child, viewProjectionMatrix, camera);
         }
 
+        if(!camera.isVisible(obj)){
+            return;
+        }
+
         Model model = null;
         if(obj instanceof Box){
             model = boxModel;
@@ -254,12 +260,15 @@ public class OpenGLRenderer implements Renderer {
             float[] rgbValues = new float[3];
             boxColor.getRGBColorComponents(rgbValues);
             model.getShader().setUniformFloat("color", rgbValues);
-        }else if(obj instanceof Drone && !camera.areDronesHidden()){
+        }else if(obj instanceof Drone){
             model = droneModel;
         }else if(obj instanceof Gate){
             model = gateModel;
         }else if(obj instanceof Runway){
             model = runwayModel;
+        }else if(obj instanceof Label3D){
+            labelRenderer.renderLabel((Label3D)obj, viewProjectionMatrix, camera);
+            return;
         }else{
             return;
         }
@@ -279,7 +288,7 @@ public class OpenGLRenderer implements Renderer {
                 Billboard icon = null;
                 if(obj instanceof Box){
                     icon = boxIcon;
-                }else if(obj instanceof Drone && !camera.areDronesHidden()){
+                }else if(obj instanceof Drone){
                     icon = droneIcon;
                 }else{
                     return;
@@ -295,7 +304,7 @@ public class OpenGLRenderer implements Renderer {
         }
     }
 
-    private void renderModel(Model model, Matrix4f viewProjectionMatrix, RealMatrix objectToWorldTransform){
+    void renderModel(Model model, Matrix4f viewProjectionMatrix, RealMatrix objectToWorldTransform){
         //Setup per-object matrices
         model.getShader().setUniformMatrix("viewProjectionTransformation", false, viewProjectionMatrix);
         model.getShader().setUniformMatrix("modelTransformation", false, objectToWorldTransform);
@@ -303,7 +312,7 @@ public class OpenGLRenderer implements Renderer {
         renderModel(model);
     }
 
-    private void renderModel(Billboard model, Matrix4f viewProjectionMatrix, Matrix4f objectToWorldTransform){
+    void renderModel(Model model, Matrix4f viewProjectionMatrix, Matrix4f objectToWorldTransform){
         //Setup per-object matrices
         model.getShader().setUniformMatrix("viewProjectionTransformation", false, viewProjectionMatrix);
         model.getShader().setUniformMatrix("modelTransformation", false, objectToWorldTransform);
@@ -311,7 +320,7 @@ public class OpenGLRenderer implements Renderer {
         renderModel(model);
     }
 
-    private void renderModel(Model model){
+    void renderModel(Model model){
         //Bind object model mesh, texture, shader, ...
         glBindVertexArray(model.getMesh().getVertexArrayObjectId());
         glActiveTexture(GL_TEXTURE0);
@@ -444,6 +453,10 @@ public class OpenGLRenderer implements Renderer {
     @Override
     public OrthographicCamera createOrthographicCamera() {
         return new OpenGLOrthographicCamera();
+    }
+
+    public long getHGLRC(){
+        return glfwGetWGLContext(windowHandle);
     }
 
     @Override

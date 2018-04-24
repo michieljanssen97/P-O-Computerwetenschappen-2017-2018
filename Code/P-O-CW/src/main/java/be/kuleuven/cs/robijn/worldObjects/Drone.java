@@ -15,7 +15,7 @@ import interfaces.*;
  * @author Pieter Vandensande en Roy De Prins
  */
 public class Drone extends WorldObject {
-	
+	private final AutopilotConfig config;
 	
     //  -----------------   //
     //                      //
@@ -36,6 +36,7 @@ public class Drone extends WorldObject {
  */
 	public Drone(AutopilotConfig config, RealVector velocity) 
 					throws IllegalArgumentException {
+		this.config = config;
 		this.droneID = config.getDroneID();
 		if (! isValidWingX(config.getWingX()))
 			throw new IllegalArgumentException();
@@ -109,7 +110,11 @@ public class Drone extends WorldObject {
 	private final float tailMass;
 	
 	private final String droneID;
-	
+
+	public AutopilotConfig getConfig() {
+		return config;
+	}
+
 	public float getGravity() {
 		return this.gravity;
 	}

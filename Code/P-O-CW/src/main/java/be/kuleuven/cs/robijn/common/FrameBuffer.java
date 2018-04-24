@@ -23,4 +23,7 @@ public interface FrameBuffer extends AutoCloseable {
      * @throws IllegalArgumentException when 'data' is null or not large enough.
      */
     void readPixels(byte[] data);
+
+    @Override
+    void close();
 }

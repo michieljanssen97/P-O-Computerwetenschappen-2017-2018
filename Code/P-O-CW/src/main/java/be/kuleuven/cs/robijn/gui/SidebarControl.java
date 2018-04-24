@@ -3,19 +3,17 @@ package be.kuleuven.cs.robijn.gui;
 import be.kuleuven.cs.robijn.common.Resources;
 import be.kuleuven.cs.robijn.common.SimulationDriver;
 import be.kuleuven.cs.robijn.common.UpdateEventHandler;
+import be.kuleuven.cs.robijn.worldObjects.Drone;
 import interfaces.AutopilotInputs;
-import interfaces.Path;
+import interfaces.AutopilotOutputs;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import interfaces.AutopilotOutputs;
-import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -24,10 +22,17 @@ import java.io.UncheckedIOException;
  * Controller for the sidebar.
  */
 public class SidebarControl extends VBox {
+    private static final double FASTFORWARD_MULTIPLIER = 2.0d;
+    private static final double LIGHTSPEED_MULTIPLIER = 5.0d;
+
+    @FXML
+    private ToggleButton pauseButton;
     @FXML
     private ToggleButton playButton;
     @FXML
-    private ToggleButton pauseButton;
+    private ToggleButton fastForwardButton;
+    @FXML
+    private ToggleButton lightSpeedButton;
 
     @FXML
     private ToggleGroup simulationRunningToggleGroup;
@@ -74,10 +79,6 @@ public class SidebarControl extends VBox {
 
     /// AUTOPILOT INFO
 
-    //Path
-    @FXML
-    private Button editPathButton;
-
     //Thrust
     @FXML
     private ProgressBar thrustBar;
@@ -119,6 +120,9 @@ public class SidebarControl extends VBox {
 
     private ObjectProperty<SimulationDriver> simulationProperty = new SimpleObjectProperty<>(this, "simulation");
 
+    private ObjectProperty<Drone> selectedDroneProperty = new SimpleObjectProperty<>(this, "selectedDrone");
+    private IntegerProperty selectedDroneIndexProperty = new SimpleIntegerProperty(this, "selectedDroneIndex");
+
     public SidebarControl(){
         //Load the layout associated with this GUI control.
         FXMLLoader fxmlLoader = new FXMLLoader(Resources.getResourceURL("/layouts/sidebar.fxml"));
@@ -135,9 +139,30 @@ public class SidebarControl extends VBox {
     @FXML
     private void initialize(){
         //Bind the play/pause buttons to the simulation pause variable.
-        simulationRunningProperty.bindBidirectional(playButton.selectedProperty());
-        simulationRunningProperty.setValue(true);
+        simulationRunningProperty.bind(
+                playButton.selectedProperty()
+                    .or(fastForwardButton.selectedProperty())
+                    .or(lightSpeedButton.selectedProperty())
+        );
+        playButton.selectedProperty().setValue(true);
         simulationRunningProperty.addListener(e -> getSimulation().setSimulationPaused(!simulationRunningProperty.get()));
+
+        //Bind the play/fastforward/lightspeed buttons to the simulation speed multiplier
+        playButton.selectedProperty().addListener((property, wasSelected, isSelected) -> {
+            if(isSelected){
+                getSimulation().setSimulationSpeedMultiplier(1.0d);
+            }
+        });
+        fastForwardButton.selectedProperty().addListener((property, wasSelected, isSelected) -> {
+            if(isSelected){
+                getSimulation().setSimulationSpeedMultiplier(FASTFORWARD_MULTIPLIER);
+            }
+        });
+        lightSpeedButton.selectedProperty().addListener((property, wasSelected, isSelected) -> {
+            if(isSelected){
+                getSimulation().setSimulationSpeedMultiplier(LIGHTSPEED_MULTIPLIER);
+            }
+        });
 
         simulationProperty.addListener(e -> {
             if(getSimulation() == null){
@@ -155,8 +180,10 @@ public class SidebarControl extends VBox {
         		.or(simulationCrashedProperty)
         		.or(simulationThrewExceptionProperty)
         		.or(outOfControlProperty);
-        playButton.disableProperty().bind(canPlay);
         pauseButton.disableProperty().bind(canPlay);
+        playButton.disableProperty().bind(canPlay);
+        fastForwardButton.disableProperty().bind(canPlay);
+        lightSpeedButton.disableProperty().bind(canPlay);
 
         simulationFinishedLabel.visibleProperty().bind(simulationFinishedProperty);
         simulationFinishedLabel.managedProperty().bind(simulationFinishedProperty);
@@ -169,69 +196,49 @@ public class SidebarControl extends VBox {
 
         simulationThrewExceptionLabel.visibleProperty().bind(simulationThrewExceptionProperty);
         simulationThrewExceptionLabel.managedProperty().bind(simulationThrewExceptionProperty);
-
-        editPathButton.setOnMouseClicked(e -> {
-            Path newPath = PathEditorControl.showDialog((Stage)this.editPathButton.getScene().getWindow());
-        	if (newPath != null) {
-	        	newPath = new Path() {
-					@Override
-					public float[] getX() {
-						return new float[] {0, 1000, 1000, 1000, 1000, 1000, 1000};
-					}
-					@Override
-					public float[] getY() {
-						return new float[] {100, 100, 100, 100, 50, 10, 0};
-					}
-					@Override
-					public float[] getZ() {
-						return new float[] {-1353, -3658, -2658, -1908, -1336, -573, 0};
-					}
-	    		};
-        	}
-            if(newPath != null){
-                this.getSimulation().getAutoPilot().setPath(newPath);
-                this.getSimulation().notifyPathSet();
-            }
-        });
     }
 
-    private void updateLabels(AutopilotInputs inputs, AutopilotOutputs outputs){
-        if(inputs == null || outputs == null){
+    private void updateLabels(AutopilotInputs[] inputs, AutopilotOutputs[] outputs){
+        if(inputs == null || outputs == null || getSelectedDrone() == null){
             return;
         }
 
-        positionLabel.setText(String.format("X:%6.2f  Y:%6.2f  Z:%6.2f", inputs.getX(), inputs.getY(), inputs.getZ()));
+        int index = selectedDroneIndexProperty.get();
+        AutopilotInputs in = inputs[index];
+        AutopilotOutputs out = outputs[index];
+
+        positionLabel.setText(String.format("X:%6.2f  Y:%6.2f  Z:%6.2f", in.getX(), in.getY(), in.getZ()));
 
         //Heading
-        setIndicatorValue(headingIndicator, remap360to180(inputs.getHeading()), Math.PI*2d);
-        headingLabel.setText(String.format("%.2f", Math.toDegrees(inputs.getHeading())));
+        setIndicatorValue(headingIndicator, remap360to180(in.getHeading()), Math.PI*2d);
+        headingLabel.setText(String.format("%.2f", Math.toDegrees(in.getHeading())));
 
         //Pitch
-        setIndicatorValue(pitchIndicator, remap360to180(inputs.getPitch()), Math.PI*2d);
-        pitchLabel.setText(String.format("%.2f", Math.toDegrees(inputs.getPitch())));
+        setIndicatorValue(pitchIndicator, remap360to180(in.getPitch()), Math.PI*2d);
+        pitchLabel.setText(String.format("%.2f", Math.toDegrees(in.getPitch())));
 
         //Roll
-        setIndicatorValue(rollIndicator, remap360to180(inputs.getRoll()), Math.PI*2d);
-        rollLabel.setText(String.format("%.2f", Math.toDegrees(inputs.getRoll())));
+        setIndicatorValue(rollIndicator, remap360to180(in.getRoll()), Math.PI*2d);
+        rollLabel.setText(String.format("%.2f", Math.toDegrees(in.getRoll())));
 
         //Thrust
-        double thrustValue = outputs.getThrust()/getSimulation().getConfig().getMaxThrust();
+        double thrustValue = out.getThrust()/getSelectedDrone().getConfig().getMaxThrust();
         thrustBar.setProgress(thrustValue);
-        thrustLabel.setText(String.format("%15.2f", outputs.getThrust()));
+        thrustLabel.setText(String.format("%15.2f", out.getThrust()));
 
         //Wing inclination
-        setIndicatorValue(leftWingInclinationIndicator, outputs.getLeftWingInclination(), Math.PI/2d);
-        leftWingInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(outputs.getLeftWingInclination())));
+        setIndicatorValue(leftWingInclinationIndicator, out.getLeftWingInclination(), Math.PI/2d);
+        leftWingInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(out.getLeftWingInclination())));
 
-        setIndicatorValue(rightWingInclinationIndicator, outputs.getRightWingInclination(), Math.PI/2d);
-        rightWingInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(outputs.getRightWingInclination())));
+        setIndicatorValue(rightWingInclinationIndicator, out.getRightWingInclination(), Math.PI/2d);
+        rightWingInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(out.getRightWingInclination())));
 
         //Stabilizer inclination
-        setIndicatorValue(horStabInclinationIndicator, outputs.getHorStabInclination(), Math.PI/2d);
-        horStabInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(outputs.getHorStabInclination())));
+        setIndicatorValue(horStabInclinationIndicator, out.getHorStabInclination(), Math.PI/2d);
+        horStabInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(out.getHorStabInclination())));
 
-        setIndicatorValue(verStabInclinationIndicator, outputs.getVerStabInclination(), Math.PI/2d);
-        verStabInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(outputs.getVerStabInclination())));
+        setIndicatorValue(verStabInclinationIndicator, out.getVerStabInclination(), Math.PI/2d);
+        verStabInclinationLabel.setText(String.format("%8.4f", Math.toDegrees(out.getVerStabInclination())));
     }
 
     //Remaps [0;(2*PI)] to [-PI;PI]
@@ -257,5 +264,21 @@ public class SidebarControl extends VBox {
 
     public ObjectProperty<SimulationDriver> getSimulationProperty() {
         return simulationProperty;
+    }
+
+    public Drone getSelectedDrone() {
+        return selectedDroneProperty.get();
+    }
+
+    public ObjectProperty<Drone> selectedDroneProperty() {
+        return selectedDroneProperty;
+    }
+
+    public int getSelectedDroneIndex() {
+        return selectedDroneIndexProperty.get();
+    }
+
+    public IntegerProperty selectedDroneIndexProperty() {
+        return selectedDroneIndexProperty;
     }
 }

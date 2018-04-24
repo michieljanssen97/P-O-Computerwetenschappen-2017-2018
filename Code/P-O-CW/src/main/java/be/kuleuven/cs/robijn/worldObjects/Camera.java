@@ -2,10 +2,19 @@ package be.kuleuven.cs.robijn.worldObjects;
 
 import be.kuleuven.cs.robijn.common.WorldObject;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Predicate;
+
 /**
  * Represents a camera in the 3D simulated world.
  */
 public abstract class Camera extends WorldObject {
+    public static final Predicate<WorldObject> HIDE_DEBUG_OBJECTS = obj -> obj.getName().startsWith("debug");
+
+    private final ArrayList<Predicate<WorldObject>> visibilityFilters = new ArrayList<>();
+
     /**
      * Returns the distance from the camera to the near plane.
      * Any object closer than this distance to the camera will not be visible.
@@ -31,37 +40,37 @@ public abstract class Camera extends WorldObject {
     public abstract void setFarPlane(float zFar);
 
     /**
-     * Sets whether or not drones are invisible on images rendered through this camera
-     * @param renderDrones if true, drones will be invisible. If false, drones are visible
+     * Adds a visibility filter to this camera.
+     * When the world is rendered, each object is passed to every filter.
+     * If any filter returns false, the object is not rendered for this camera.
+     * @param filter the predicate function that decides the visibility of each object.
      */
-    public abstract void setDronesHidden(boolean renderDrones);
+    public void addVisibilityFilter(Predicate<WorldObject> filter){
+        visibilityFilters.add(filter);
+    }
 
     /**
-     * Returns whether or not drones are invisible on images rendered through this camera.
-     * False by default.
+     * Removes a filter from this camera.
+     * @param filter the predicate function.
      */
-    public abstract boolean areDronesHidden();
+    public void removeVisibilityFilter(Predicate<WorldObject> filter){
+        visibilityFilters.remove(filter);
+    }
 
     /**
-     * Sets whether or not the ground is visible on images rendered through this camera
-     * @param drawGround if true, the ground will be visible. If false, the ground will be invisible
+     * Returns an immutable version of the list of filters used for this camera.
      */
-    public abstract void setDrawGround(boolean drawGround);
+    public List<Predicate<WorldObject>> getVisibilityFilters(){
+        return Collections.unmodifiableList(visibilityFilters);
+    }
 
     /**
-     * Returns whether or not the ground is visible on images rendered through this camera.
-     * False by default.
+     * Returns true if the specified object is visible to this camera.
+     * @param object the object to check.
+     * @return true if the object is visible, false otherwise.
      */
-    public abstract boolean isGroundDrawn();
-
-    /**
-     * Returns whether or not any objects specified using RenderDebug are drawn.
-     */
-    public abstract boolean areDebugObjectsDrawn();
-
-    /**
-     * Sets whether or not any objects specified using RenderDebug are drawn.
-     * False by default.
-     */
-    public abstract void setDrawnDebugObjects(boolean draw);
+    public boolean isVisible(WorldObject object){
+        return visibilityFilters.stream().allMatch(p -> p.test(object));
+    }
 }
+

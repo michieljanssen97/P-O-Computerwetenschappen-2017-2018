@@ -23,8 +23,18 @@
                         <fx:define>
                             <ToggleGroup fx:id="simulationRunningToggleGroup"/>
                         </fx:define>
-                        <ToggleButton fx:id="playButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false" text="Play" />
-                        <ToggleButton fx:id="pauseButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false" text="Pause">
+                        <ToggleButton fx:id="pauseButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false" text="Pause" />
+                        <ToggleButton fx:id="playButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false" text="Play" >
+                            <HBox.margin>
+                                <Insets left="5.0" />
+                            </HBox.margin>
+                        </ToggleButton>
+                        <ToggleButton fx:id="fastForwardButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false" text="Play (x2)" >
+                            <HBox.margin>
+                                <Insets left="5.0" />
+                            </HBox.margin>
+                        </ToggleButton>
+                        <ToggleButton fx:id="lightSpeedButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false" text="Play (x5)" >
                             <HBox.margin>
                                 <Insets left="5.0" />
                             </HBox.margin>
@@ -142,23 +152,6 @@
         </Label>
         <VBox prefHeight="61.0" prefWidth="192.0">
             <children>
-                <!--<Label text="Progress">
-                    <VBox.margin>
-                        <Insets />
-                    </VBox.margin>
-                </Label>
-                <ProgressBar prefWidth="200.0" progress="0.0">
-                    <VBox.margin>
-                        <Insets top="3.0" />
-                    </VBox.margin>
-                </ProgressBar>-->
-                <Label text="Path" style="-fx-font-weight: bold;">
-                    <VBox.margin>
-                        <Insets />
-                    </VBox.margin>
-                </Label>
-                <Button fx:id="editPathButton" text="Set path"/>
-
                 <Label text="Thrust" style="-fx-font-weight: bold;">
                     <VBox.margin>
                         <Insets top="7"/>
