@@ -16,7 +16,7 @@ import interfaces.*;
  * 
  * @author Pieter Vandensande
  */
-public class Autopilot extends WorldObject {
+public class Autopilot {
 	private static boolean drawChartPositions = false;
 	public static ExpPosition exppos = new ExpPosition();
 	public FlightMode currentFlightMode = FlightMode.ASCEND;
@@ -63,8 +63,6 @@ public class Autopilot extends WorldObject {
 			this.moveDrone(inputs.getElapsedTime() - this.getPreviousElapsedTime(), inputs);
 		}
         this.setPreviousElapsedTime(inputs.getElapsedTime());  
-        
-        Drone drone = this.getFirstChildOfType(Drone.class);
         
         float horStabInclination = 0;
 		float verStabInclination = 0;
@@ -142,7 +140,7 @@ public class Autopilot extends WorldObject {
 					iterations += 1;
 					finished = true;
 					
-					RealVector target = new ArrayRealVector(new double[] {0, 50, -2000}, false);
+					RealVector target = new ArrayRealVector(new double[] {10, 50, -500}, false);
 					
 //					Angle angle = new Angle((float) Math.atan(drone.getWorldPosition().getEntry(2)/(drone.getWorldPosition().getEntry(0)-500)));
 //					System.out.println(angle.getOrientation());
@@ -710,7 +708,6 @@ public class Autopilot extends WorldObject {
 			throws IllegalArgumentException, IllegalStateException {
 		if (secondsSinceLastUpdate < 0)
 			throw new IllegalArgumentException();
-		Drone drone = this.getFirstChildOfType(Drone.class);
 		if (drone == null)
 			throw new IllegalStateException("this virtual testbed has no drone");
 		
@@ -927,12 +924,10 @@ public class Autopilot extends WorldObject {
 		this.previousRollAngularVelocity = previousRollAngularVelocity;
 	}
 	
-	public void initialise(AutopilotConfig config) {
+	public void initialise(AutopilotConfig config, Drone drone) {
 		if (! isValidConfig(config))
 			throw new IllegalArgumentException();
-		RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, 0}, false);
-		Drone drone = new Drone(config, initialVelocity);
-		this.addChild(drone);
+		this.drone = drone;
 		this.config = config;
 		RealVector previousPosition = drone.getWorldPosition();
 		if (!isValidPreviousPosition(previousPosition))
@@ -975,4 +970,6 @@ public class Autopilot extends WorldObject {
 	public void simulationEnded() throws IllegalArgumentException {
 		throw new IllegalArgumentException();
 	}
+	
+	private Drone drone;
 }

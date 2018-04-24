@@ -18,7 +18,7 @@ public class AutopilotModule {
         this.world = world;
         for (Drone drone: world.getChildrenOfType(Drone.class)) {
         	Autopilot autopilot = new Autopilot();
-        	autopilot.initialise(drone.getConfig());
+        	autopilot.initialise(drone.getConfig(), drone);
         	autopilots.put(drone, autopilot);
         }
     }
