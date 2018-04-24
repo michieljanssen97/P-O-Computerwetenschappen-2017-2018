@@ -7,6 +7,7 @@ import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.common.exceptions.CrashException;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
+import be.kuleuven.cs.robijn.worldObjects.GroundPlane;
 import interfaces.AutopilotConfig;
 
 public abstract class Tyre extends WorldObject {
@@ -154,6 +155,11 @@ public abstract class Tyre extends WorldObject {
 		float d = (float) (this.getTyreRadius() - this.getPosition(drone).getEntry(1));
 		if (d < 0)
 			d = 0;
+		else {
+			GroundPlane g = this.getParent().getParent().getFirstChildOfType(GroundPlane.class);
+			if (g.isGrass(this.getPosition(drone).getEntry(0), this.getPosition(drone).getEntry(2)))
+				throw new CrashException();
+		}
 		return d;
 	}
 	
