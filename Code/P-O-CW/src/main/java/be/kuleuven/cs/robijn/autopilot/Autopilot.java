@@ -1,7 +1,6 @@
 package be.kuleuven.cs.robijn.autopilot;
 
 import org.apache.commons.math3.linear.*;
-import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.common.exceptions.FinishedException;
 import be.kuleuven.cs.robijn.common.math.Angle;
 import be.kuleuven.cs.robijn.common.math.Angle.Type;
@@ -140,7 +139,7 @@ public class Autopilot {
 					iterations += 1;
 					finished = true;
 					
-					RealVector target = new ArrayRealVector(new double[] {10, 50, -500}, false);
+					RealVector target = new ArrayRealVector(new double[] {10, 50, -1000}, false);
 					
 //					Angle angle = new Angle((float) Math.atan(drone.getWorldPosition().getEntry(2)/(drone.getWorldPosition().getEntry(0)-500)));
 //					System.out.println(angle.getOrientation());
@@ -278,8 +277,10 @@ public class Autopilot {
 					}
 					
 					Angle targetRoll;
-					if ((Math.abs(YRotation.getOrientation(Type.DEGREES)) > 30)  && (drone.getWorldPosition().getDistance(target) < 500))
-						targetRoll = new Angle(0);
+					if ((YRotation.getOrientation(Type.DEGREES) > 30)  && (drone.getWorldPosition().getDistance(target) < 500))
+						targetRoll = new Angle(10, Type.DEGREES);
+					else if ((YRotation.getOrientation(Type.DEGREES) < -30)  && (drone.getWorldPosition().getDistance(target) < 500))
+						targetRoll = new Angle(-10, Type.DEGREES);
 					else if (YRotation.getOrientation(Type.DEGREES) > 30)
 						targetRoll = new Angle(40, Type.DEGREES);
 					else if (YRotation.getOrientation(Type.DEGREES) < -30)
@@ -535,7 +536,7 @@ public class Autopilot {
 			if (drone.getVelocity().getNorm() > 0.01) {
 				float accel = (float) (drone.getVelocity().getNorm() - 0.01);
 				float force = drone.getTotalMass() * accel;
-				float omega = drone.getHeadingAngularVelocity();
+				//float omega = drone.getHeadingAngularVelocity();
 //				if (Math.abs(omega) < Math.PI / 18) {
 //					rightBrakeForce = Math.min(force / 2, 500);
 //					leftBrakeForce = Math.min(force / 2, 500);
