@@ -172,6 +172,22 @@ public class SidebarControl extends VBox {
 
         editPathButton.setOnMouseClicked(e -> {
             Path newPath = PathEditorControl.showDialog((Stage)this.editPathButton.getScene().getWindow());
+        	if (newPath != null) {
+	        	newPath = new Path() {
+					@Override
+					public float[] getX() {
+						return new float[] {0, 1000, 1000, 1000, 1000, 1000, 1000};
+					}
+					@Override
+					public float[] getY() {
+						return new float[] {100, 100, 100, 100, 50, 10, 0};
+					}
+					@Override
+					public float[] getZ() {
+						return new float[] {-1353, -3658, -2658, -1908, -1336, -573, 0};
+					}
+	    		};
+        	}
             if(newPath != null){
                 this.getSimulation().getAutoPilot().setPath(newPath);
                 this.getSimulation().notifyPathSet();

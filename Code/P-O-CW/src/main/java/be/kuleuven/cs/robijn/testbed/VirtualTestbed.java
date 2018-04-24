@@ -67,7 +67,8 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		//Stop the simulation if all boxes are handled
 		RealVector pos = drone.getWorldPosition();
 		pos.setEntry(1, 0);
-		boolean isInEndPosition = (pos.getNorm() < 5);
+		RealVector target = new ArrayRealVector(new double[] {1000, 0, 300}, false);
+		boolean isInEndPosition = (pos.getDistance(target) < 5);
 		if (drone.getVelocity().getNorm() > 1)
 			isInEndPosition = false;
 		if(boxesToFlyTo.isEmpty() && (isInEndPosition)) {
@@ -82,7 +83,7 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 		
 		//Check if the drone reached a cube
 		//true if the center of mass of the drone is in a specified distance of the center of a cube
-		if (calculateDistanceToDrone(box, drone) <= stopDistanceToCenterBox){
+		if ((box != null) && (calculateDistanceToDrone(box, drone) <= stopDistanceToCenterBox)){
 			//The box should not be taken into account anymore, it is already reached
 			boxesToFlyTo.remove(box);
 		
@@ -278,6 +279,11 @@ public class VirtualTestbed extends WorldObject implements TestBed {
 			drone.setHeadingAngularVelocity(headingAngularVelocity + headingAngularAcceleration*secondsSinceLastUpdate);
 			drone.setPitchAngularVelocity(pitchAngularVelocity + pitchAngularAcceleration*secondsSinceLastUpdate);
 			drone.setRollAngularVelocity(rollAngularVelocity + rollAngularAcceleration*secondsSinceLastUpdate);
+			
+			for (Tyre tyres: drone.getChildrenOfType(Tyre.class)) {
+				@SuppressWarnings("unused")
+				float d = tyres.getD(drone);
+			}
 		}
 	}
 
