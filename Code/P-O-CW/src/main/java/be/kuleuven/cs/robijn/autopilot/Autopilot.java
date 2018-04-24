@@ -263,7 +263,14 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 						finished = false;
 						settings.setTurningtime(settings.getTurningTime() + 0.5f);
 						settings.setXMovementTime(settings.getXMovementTime() + 0.5f);
-						continue;
+						if (iterations != 5)
+							continue;
+						if (Math.abs(functionCalculator.functionForHeading().value(solver.getMinInclinationVerStab())) 
+								< Math.abs(functionCalculator.functionForHeading().value(solver.getMaxInclinationVerStab())))
+							verStabInclination = (float) (solver.getMinInclinationVerStab() + Math.toRadians(settings.getCorrectionFactor()));
+						else {
+							verStabInclination = (float) (solver.getMaxInclinationVerStab() - Math.toRadians(settings.getCorrectionFactor()));
+						}
 					}
 					
 					float wingInclination = solver.solverForYVelocity(verStabInclination, false);
@@ -271,7 +278,14 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 						finished = false;
 						settings.setTurningtime(settings.getTurningTime() + 0.5f);
 						settings.setXMovementTime(settings.getXMovementTime() + 0.5f);
-						continue;
+						if (iterations != 5)
+							continue;
+						if (Math.abs(functionCalculator.functionForYVelocity(verStabInclination).value(solver.getMinInclinationWing())) 
+								< Math.abs(functionCalculator.functionForYVelocity(verStabInclination).value(solver.getMaxInclinationWing())))
+							wingInclination = (float) (solver.getMinInclinationWing() + Math.toRadians(settings.getCorrectionFactor()));
+						else {
+							wingInclination = (float) (solver.getMaxInclinationWing() - Math.toRadians(settings.getCorrectionFactor()));
+						}
 					}
 					
 					Angle targetRoll;
@@ -291,7 +305,9 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 							finished = false;
 							settings.setTurningtime(settings.getTurningTime() + 0.5f);
 							settings.setXMovementTime(settings.getXMovementTime() + 0.5f);
-							continue;
+							if (iterations != 5)
+								continue;
+							targetRoll = new Angle(drone.getRoll());
 						}
 				        if ((targetRoll.getAngle() > settings.getMaxRoll()) && (targetRoll.getAngle() < Math.PI))
 				        	targetRoll = new Angle(settings.getMaxRoll());
@@ -321,7 +337,16 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 						finished = false;
 						settings.setTurningtime(settings.getTurningTime() + 0.5f);
 						settings.setXMovementTime(settings.getXMovementTime() + 0.5f);
-						continue;
+						if (iterations != 5)
+							continue;
+						float minRollInclination = Math.max(solver.getMinInclinationWing() - wingInclination, wingInclination - solver.getMaxInclinationWing());
+						float maxRollInclination = Math.min(solver.getMaxInclinationWing() - wingInclination, wingInclination - solver.getMinInclinationWing());
+						if (Math.abs(functionCalculator.functionForRoll(wingInclination).value(minRollInclination)) 
+								< Math.abs(functionCalculator.functionForRoll(wingInclination).value(maxRollInclination)))
+							rollInclination = new Angle(-3, Type.DEGREES);
+						else {
+							rollInclination = new Angle(3, Type.DEGREES);
+						}
 					}
 					
 					float solution = solver.solverForYVelocityWithRoll(verStabInclination, rollInclination.getOrientation(), false);
@@ -329,7 +354,19 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 						finished = false;
 						settings.setTurningtime(settings.getTurningTime() + 0.5f);
 						settings.setXMovementTime(settings.getXMovementTime() + 0.5f);
-						continue;
+						if (iterations != 5)
+							continue;
+						float minNewWingInclination = solver.getMinInclinationWing() + Math.abs(rollInclination.getOrientation());
+						float maxNewWingInclination = solver.getMaxInclinationWing() - Math.abs(rollInclination.getOrientation());
+						if (Math.abs(functionCalculator.functionForYVelocityWithRoll(verStabInclination, rollInclination.getOrientation())
+								.value(minNewWingInclination)) 
+								< Math.abs(functionCalculator.functionForYVelocityWithRoll(verStabInclination, rollInclination.getOrientation())
+										.value(maxNewWingInclination))) {
+							solution = (float) (minNewWingInclination + Math.toRadians(settings.getCorrectionFactor()));
+						}
+						else {
+							solution = (float) (maxNewWingInclination + Math.toRadians(settings.getCorrectionFactor()));
+						}
 					}
 					leftWingInclination = solution - rollInclination.getOrientation();
 					rightWingInclination = solution + rollInclination.getOrientation();
@@ -339,7 +376,14 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 						finished = false;
 						settings.setTurningtime(settings.getTurningTime() + 0.5f);
 						settings.setXMovementTime(settings.getXMovementTime() + 0.5f);
-						continue;
+						if (iterations != 5)
+							continue;
+						if (Math.abs(functionCalculator.functionForPitch().value(solver.getMinInclinationHorStab())) 
+								< Math.abs(functionCalculator.functionForPitch().value(solver.getMaxInclinationHorStab())))
+							horStabInclination = (float) (solver.getMinInclinationHorStab() + Math.toRadians(settings.getCorrectionFactor()));
+						else {
+							horStabInclination = (float) (solver.getMaxInclinationHorStab() - Math.toRadians(settings.getCorrectionFactor()));
+						}
 					}
 					
 					float zVelocity = (float) drone.transformationToDroneCoordinates(drone.getVelocity()).getEntry(2);
