@@ -24,6 +24,7 @@ public class GroundPlane extends WorldObject{
 			RealVector airportPos = air.getWorldPosition();
 			Vector2D airportSize = air.getSize();
 			
+			//TODO fix if condition, depends on rotation
 			if ( (groundPosX >= airportPos.getEntry(0)-(airportSize.getX()/2)) && 
 					(groundPosX <= airportPos.getEntry(0)+(airportSize.getX()/2)) && 
 					(groundPosZ >= airportPos.getEntry(2)-(airportSize.getY()/2)) && 
