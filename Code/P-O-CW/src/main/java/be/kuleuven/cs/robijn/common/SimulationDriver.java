@@ -34,7 +34,7 @@ public class SimulationDriver {
     private final TreeSet<UpdateEventHandler> updateEventHandlers = new TreeSet<>();
     
     public SimulationDriver(SimulationSettings settings){
-        this(settings, new ConstantIntervalStopwatch(1.0d));
+        this(settings, new ConstantIntervalStopwatch(0.1d));
     }
     
     public SimulationDriver(SimulationSettings settings, Stopwatch stopwatch){
