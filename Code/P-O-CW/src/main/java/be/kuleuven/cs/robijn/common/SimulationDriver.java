@@ -38,7 +38,7 @@ public class SimulationDriver {
     private TreeSet<UpdateEventHandler> updateEventHandlers = new TreeSet<>();
 
     public SimulationDriver(List<Box> boxes, AutopilotConfig config){
-        this(boxes, config, new ConstantIntervalStopwatch());
+        this(boxes, config, new ConstantIntervalStopwatch(0.1d));
     }
 
     public SimulationDriver(List<Box> boxes, AutopilotConfig config, Stopwatch stopwatch){

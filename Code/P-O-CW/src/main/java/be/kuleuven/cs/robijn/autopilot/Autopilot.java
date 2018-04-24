@@ -275,12 +275,16 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 					}
 					
 					Angle targetRoll;
-					if ((Math.abs(YRotation.getOrientation(Type.DEGREES)) > 20)  && (drone.getWorldPosition().getDistance(target) < 500))
+					if ((Math.abs(YRotation.getOrientation(Type.DEGREES)) > 30)  && (drone.getWorldPosition().getDistance(target) < 500))
 						targetRoll = new Angle(0);
-					if (YRotation.getOrientation(Type.DEGREES) > 20)
+					else if (YRotation.getOrientation(Type.DEGREES) > 30)
 						targetRoll = new Angle(40, Type.DEGREES);
-					else if (YRotation.getOrientation(Type.DEGREES) < -20)
+					else if (YRotation.getOrientation(Type.DEGREES) < -30)
 						targetRoll = new Angle(-40, Type.DEGREES);
+					else if (YRotation.getOrientation(Type.DEGREES) > 20)
+						targetRoll = new Angle(20, Type.DEGREES);
+					else if (YRotation.getOrientation(Type.DEGREES) < -20)
+						targetRoll = new Angle(-20, Type.DEGREES);
 					else {
 						targetRoll = new Angle(solver.solverForXVelocity(verStabInclination, wingInclination));
 						if (Float.isNaN(targetRoll.getOrientation())) {
