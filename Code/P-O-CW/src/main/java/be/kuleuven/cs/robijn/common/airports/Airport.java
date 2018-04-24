@@ -37,7 +37,7 @@ public class Airport extends WorldObject {
         runways[1].setScale(runwaySize);
         this.addChildren(runways);
         
-        double angle = Math.atan2( -centerToRunway0.getY(), -centerToRunway0.getX());
+        double angle = Math.atan2( centerToRunway0.getY(), -centerToRunway0.getX());
         this.setRelativeRotation(
             new Rotation(Vector3D.PLUS_J, angle)
         );
