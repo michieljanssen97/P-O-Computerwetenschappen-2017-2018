@@ -13,7 +13,7 @@ public class Package extends WorldObject{
 	private final Gate fromGate;
     private final Airport toAirport;
     private final Gate toGate;
-    private boolean delivered; //TODO Zet op true indien vliegtuig met package is geland -> indien status autopilot == FlightMode.Taxi na FlightMode.Land
+    private boolean delivered;
     private Drone assignedDrone;
     
 
@@ -24,6 +24,7 @@ public class Package extends WorldObject{
         this.toGate = toGate;
         this.delivered = false;
         this.assignedDrone = null;
+        addToPackagesToAssignList(this);
     }
     
     public static void addToPackagesToAssignList(Package p){
@@ -84,12 +85,10 @@ public class Package extends WorldObject{
             Gate toGate = p.getToGate();
             
             if(fromGate.hasPackage()){
-                throw new IllegalStateException(); //TODO of overslaan (wachten tot volgende iteratie en opnieuw controleren totdat de fromGate wel vrij is), mag maar 1 package beschikbaar zijn per Gate
+                throw new IllegalStateException(); //mag maar 1 package beschikbaar zijn per Gate
             }
             if(isDroneAvailable() && ! toGate.hasDrones()){
             	p.assignPackageNecessities(fromAirport, fromGate, toAirport, toGate);
-            	removeFromPackagesToAssignList(p);
-                //TODO fromGate terug vrij (zowel drone als package) na opstijgen -> indien status autopilot == FLightMode.Ascend na FlightMode.Taxi}
             }
         }
     }
@@ -119,5 +118,6 @@ public class Package extends WorldObject{
         toGate.setHasDrones(false); // TODO Kan mss nog worden aangepast, pas op false zetten indien er een vliegtuig zal landen of erop staat
         drone.setAssignedPackage(this);
         drone.setDestinationAirport(toAirport); //TODO niet indien drone NIET op fromAirport is, moet eerst naar fromAirport vliegen an dan mag dit pas
+    	removeFromPackagesToAssignList(this);
     }
 }

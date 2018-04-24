@@ -15,7 +15,7 @@ public class Airport extends WorldObject {
 	
 	private static ArrayList<Airport> allAirportsList = new ArrayList<Airport>();
 	
-	private final RealVector position;
+	private final RealVector position; //The middle of the airport
     private Vector2D size;
     private Gate[] gates;
     private Runway[] runways;
@@ -76,11 +76,11 @@ public class Airport extends WorldObject {
         return new ArrayList<Drone>(this.currentDrones);
     }
     
-    public void addDroneToCurrentDrones(Drone d){ //TODO gebruik deze indien status autopilot == FlightMode.Taxi na FLightMode.Land
+    public void addDroneToCurrentDrones(Drone d){
         currentDrones.add(d);
     }
     
-    public void removeDroneFromCurrentDrones(Drone d){ //TODO gebruik deze indien status autopilot == FlightMode.Ascend na FlightMode.Taxi
+    public void removeDroneFromCurrentDrones(Drone d){
         currentDrones.remove(d);
     }
     
@@ -114,4 +114,31 @@ public class Airport extends WorldObject {
     public boolean isDroneAvailable() {
         return this.getFirstAvailableDrone() != null;
     }
+
+    /*
+     * Get the airport at the given position
+     */
+	public static Airport getAirportAt(RealVector position) {
+		for(Airport airport : allAirportsList) {
+			if(airport.isInsideAirport(position)) {
+				return airport;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Check if the given location is on (or above) the given airport
+	 */
+	public boolean isInsideAirport(RealVector position) {
+		RealVector airportPosition = this.getPosition();
+		Vector2D size = this.getSize();
+		if( (position.getEntry(0) < airportPosition.getEntry(0) - (size.getX()/2)) &&
+				(position.getEntry(0) > airportPosition.getEntry(0) + (size.getX()/2)) &&
+				(position.getEntry(2) < airportPosition.getEntry(1) - (size.getY()/2)) &&
+				(position.getEntry(2) > airportPosition.getEntry(1) + (size.getY()/2))) {
+			return false;
+		}
+		return true;
+	}
 }

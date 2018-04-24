@@ -2,7 +2,6 @@ package be.kuleuven.cs.robijn.worldObjects;
 
 import org.apache.commons.math3.geometry.euclidean.threed.*;
 import org.apache.commons.math3.linear.*;
-
 import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.exceptions.CrashException;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
@@ -258,6 +257,34 @@ public class Drone extends WorldObject {
     	
     	return currentPosition.getDistance(airportPosition);
     }
+    
+	public void setToAirport() {
+		Airport currentAirport = Airport.getAirportAt(this.getWorldPosition());
+		currentAirport.addDroneToCurrentDrones(this);
+	}
+	
+	public void removeFromAirport() {
+		Airport currentAirport = Airport.getAirportAt(this.getWorldPosition());
+		currentAirport.removeDroneFromCurrentDrones(this);
+	}
+	
+	public void setPackageDelivered() {
+		if(this.assignedPackage != null) {
+			this.assignedPackage.setDelivered();
+		}
+	}
+	
+	public void setArrived() {
+		this.setToAirport();
+		this.setPackageDelivered();
+	}
+	
+	public void setTookOff() { //TODO gebruik dit wanneer opgestegen, autopilot == FLightMode.Ascend na FlightMode.Taxi
+		Airport airport = Airport.getAirportAt(this.getWorldPosition());
+		airport.removeDroneFromCurrentDrones(this);
+		
+		this.assignedPackage.getFromGate().setHasDrones(false);
+	}
 	
     //  -----------------   //
     //                      //
@@ -312,7 +339,6 @@ public class Drone extends WorldObject {
 			throw new IllegalArgumentException();
 		this.heading = heading;
 	}
-
 	
     //  -----------------   //
     //                      //

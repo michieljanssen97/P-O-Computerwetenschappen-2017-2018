@@ -16,8 +16,7 @@ public class AutopilotModule {
     }
     
     public void deliverPackage(Airport fromAirport, Gate fromGate, Airport toAirport, Gate toGate) {
-        Package p = new Package(fromAirport, fromGate, toAirport, toGate);
-        Package.addToPackagesToAssignList(p);
+        new Package(fromAirport, fromGate, toAirport, toGate);
     }
     
 

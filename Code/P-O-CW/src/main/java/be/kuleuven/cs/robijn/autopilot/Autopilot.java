@@ -21,6 +21,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 	private static boolean drawChartPositions = false;
 	public static ExpPosition exppos = new ExpPosition();
 	public FlightMode currentFlightMode = FlightMode.ASCEND;
+	public Drone drone;
 	
 	public AutopilotConfig getConfig() {
 		return this.config;
@@ -28,6 +29,10 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 	
 	public static boolean isValidConfig(AutopilotConfig config) {
 		return (config != null);
+	}
+	
+	public FlightMode getCurrentFlightMode() {
+		return this.currentFlightMode;
 	}
 	
 	private AutopilotConfig config;
@@ -83,7 +88,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 		
 		AutopilotSettings settings = new AutopilotSettings();
 		
-		if (this.getFlightMode() == FlightMode.ASCEND) { //ascend
+		if (this.getFlightMode() == FlightMode.ASCEND) {
 
 			thrust = this.getConfig().getMaxThrust();
 			
@@ -136,6 +141,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			FrontWheel wheel = drone.getFirstChildOfType(FrontWheel.class);
 			if (this.getConfig().getTyreRadius() >= wheel.getPosition(drone).getEntry(1)) {
 				this.setFlightMode(FlightMode.TAXI);
+				this.drone.setArrived();
 			}
 			else {
 				if ((this.getFlightMode() == FlightMode.FULL_FLIGHT) && (recognizer.getPath().getPathSize() == 0))
@@ -893,6 +899,7 @@ public class Autopilot extends WorldObject implements interfaces.Autopilot {
 			throw new IllegalArgumentException();
 		RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, 0}, false);
 		Drone drone = new Drone(config, initialVelocity);
+		this.drone = drone;
 		drone.setRelativePosition(new ArrayRealVector(new double[] {0, -config.getWheelY() + config.getTyreRadius(), 0}, false));
 		//drone.setRelativePosition(new ArrayRealVector(new double[] {0, 100, 0}, false));
 		this.addChild(drone);
