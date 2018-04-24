@@ -24,6 +24,7 @@ public class VirtualTestbed implements TestBed {
 	private OpenGLRenderer renderer;
 	private FrameBuffer frameBuffer;
 	private final HashMap<Drone, byte[]> latestCameraImage = new HashMap<>();
+	private final boolean AUTOPILOT_CAMERA_ENABLED = false;
 
 	public VirtualTestbed(SimulationSettings settings) {
 		world = new WorldObject();
@@ -37,7 +38,10 @@ public class VirtualTestbed implements TestBed {
 		inputs = new AutopilotInputs[settings.getDrones().length];
 		for (int i = 0; i < settings.getDrones().length; i++) {
 			Drone drone = drones.get(i);
-			byte[] image = renderCameraView(drone);
+			byte[] image = null;
+			if(AUTOPILOT_CAMERA_ENABLED){
+				image = renderCameraView(drone);
+			}
 			inputs[i] = new VirtualTestbed.TestbedAutopilotInputs(drone, image, 0);
 		}
 

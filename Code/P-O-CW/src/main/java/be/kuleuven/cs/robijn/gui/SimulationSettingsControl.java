@@ -13,6 +13,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.converter.NumberStringConverter;
 import interfaces.AutopilotConfig;
@@ -20,9 +21,7 @@ import interfaces.AutopilotConfigReader;
 import interfaces.AutopilotConfigWriter;
 import org.apache.commons.math3.linear.ArrayRealVector;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.*;
 
 /**
  * Controller for the simulation settings overlay
@@ -160,14 +159,63 @@ public class SimulationSettingsControl extends AnchorPane {
         removeAirportButton.setOnAction(e -> airportsTable.getItems().removeAll(airportsTable.getSelectionModel().getSelectedItems()));
         removeAirportButton.disableProperty().bind(airportsTable.getSelectionModel().selectedIndexProperty().isEqualTo(-1));
 
-        loadAirportsConfigFileButton.setVisible(false); //Not implemented yet
         loadAirportsConfigFileButton.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Load airport config");
+            fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Airport definitions file (*.airport)", "*.airport"));
+            Stage parentStage = (Stage)loadAirportsConfigFileButton.getScene().getWindow();
+            File chosenFile = fileChooser.showOpenDialog(parentStage);
 
+            if(chosenFile != null){
+                try {
+                    DataInputStream in = new DataInputStream(new FileInputStream(chosenFile));
+
+                    int airportCount = in.readInt();
+                    AirportDefinition[] airports = new AirportDefinition[airportCount];
+
+                    for (int i = 0; i < airportCount; i++) {
+                        airports[i] = new AirportDefinition();
+                        airports[i].read(in);
+                    }
+
+                    airportsTable.getItems().clear();
+                    airportsTable.getItems().addAll(airports);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Failed to load file");
+                    alert.setHeaderText("Could not load airports file");
+                    alert.setContentText("An error occured while loading the file! ("+ex.getMessage()+")");
+                    alert.showAndWait();
+                }
+            }
         });
 
-        saveAirportsConfigFileButton.setVisible(false); //Not implemented yet
         saveAirportsConfigFileButton.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save airport config");
+            fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Airport definitions file (*.airport)", "*.airport"));
+            Stage parentStage = (Stage)saveAirportsConfigFileButton.getScene().getWindow();
+            File chosenFile = fileChooser.showSaveDialog(parentStage);
+            if(!chosenFile.getName().endsWith(".airport")){
+                chosenFile = new File(chosenFile.getParentFile(), chosenFile.getName()+".airport");
+            }
 
+            if(chosenFile != null){
+                try {
+                    DataOutputStream out = new DataOutputStream(new FileOutputStream(chosenFile));
+
+                    int airportCount = airportsTable.getItems().size();
+                    out.writeInt(airportCount);
+
+                    for (int i = 0; i < airportCount; i++) {
+                        AirportDefinition airport = (AirportDefinition) airportsTable.getItems().get(i);
+                        airport.write(out);
+                    }
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
         });
 
         generateAirportsButton.setVisible(false); //Not implemented yet

@@ -5,6 +5,8 @@ public class ConstantIntervalStopwatch implements Stopwatch{
     private double timePassed;
     private boolean paused = false;
 
+    private double timeMultiplier = 1.0; //Each interval is multiplied by this value to get the actual value
+
     public ConstantIntervalStopwatch(){
         this(0.03d);
     }
@@ -30,7 +32,7 @@ public class ConstantIntervalStopwatch implements Stopwatch{
     @Override
     public void tick() {
         if(!paused){
-            timePassed += interval;
+            timePassed += (interval * timeMultiplier);
         }
     }
 
@@ -52,5 +54,15 @@ public class ConstantIntervalStopwatch implements Stopwatch{
     @Override
     public boolean isPaused() {
         return paused;
+    }
+
+    @Override
+    public void setSpeedMultiplier(double speed) {
+        this.timeMultiplier = speed;
+    }
+
+    @Override
+    public double getSpeedMultiplier() {
+        return timeMultiplier;
     }
 }
