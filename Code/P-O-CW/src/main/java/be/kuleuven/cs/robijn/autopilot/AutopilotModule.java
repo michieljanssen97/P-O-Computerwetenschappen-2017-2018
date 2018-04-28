@@ -1,5 +1,7 @@
 package be.kuleuven.cs.robijn.autopilot;
 
+import java.util.HashMap;
+
 import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.Gate;
@@ -9,9 +11,16 @@ import interfaces.AutopilotOutputs;
 
 public class AutopilotModule {
     private final WorldObject world;
+    private final HashMap<Drone, AutopilotOutputs> latestOutputs = new HashMap<>();
+    private final HashMap<Drone, Autopilot> autopilots = new HashMap<>();
 
     public AutopilotModule(WorldObject world){
         this.world = world;
+        for (Drone drone: world.getChildrenOfType(Drone.class)) {
+        	Autopilot autopilot = new Autopilot();
+        	autopilot.initialise(drone.getConfig(), drone);
+        	autopilots.put(drone, autopilot);
+        }
     }
 
     public void deliverPackage(Airport fromAirport, Gate fromGate, Airport toAirport, Gate toGate) {
@@ -19,55 +28,16 @@ public class AutopilotModule {
     }
 
     public void startTimeHasPassed(Drone drone, AutopilotInputs inputs) {
-        //TODO
+    	Autopilot autopilot = autopilots.get(drone);
+        AutopilotOutputs outputs = autopilot.timePassed(inputs);
+        latestOutputs.put(drone, outputs);
     }
 
     public AutopilotOutputs completeTimeHasPassed(Drone drone) {
-        //TODO
-        return new AutopilotOutputs() {
-            @Override
-            public float getThrust() {
-                return 0;
-            }
-
-            @Override
-            public float getLeftWingInclination() {
-                return 0;
-            }
-
-            @Override
-            public float getRightWingInclination() {
-                return 0;
-            }
-
-            @Override
-            public float getHorStabInclination() {
-                return 0;
-            }
-
-            @Override
-            public float getVerStabInclination() {
-                return 0;
-            }
-
-            @Override
-            public float getFrontBrakeForce() {
-                return 0;
-            }
-
-            @Override
-            public float getLeftBrakeForce() {
-                return 0;
-            }
-
-            @Override
-            public float getRightBrakeForce() {
-                return 0;
-            }
-        };
+        return latestOutputs.get(drone);
     }
 
-    public void simulationEnded() {
-        //TODO
+    public void simulationEnded() throws IllegalArgumentException {
+        throw new IllegalArgumentException();
     }
 }

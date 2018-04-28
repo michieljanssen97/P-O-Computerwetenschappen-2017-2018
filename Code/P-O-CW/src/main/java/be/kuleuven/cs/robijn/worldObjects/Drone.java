@@ -1028,7 +1028,6 @@ public class Drone extends WorldObject {
 		float AOA = this.calculateAOA(this.getNormalVer(verStabInclination), projectedVelocity, this.getAttackVectorVer(verStabInclination));
 		
 		float liftForce = (float) (AOA * this.getVerStabLiftSlope() * Math.pow(projectedVelocity.getNorm(),2));
-		
 		if ((liftForce >= 50) && ((AOA > this.getMaxAOA()) || (AOA < -this.getMaxAOA())))
 			throw new IllegalArgumentException();
 		

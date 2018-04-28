@@ -143,7 +143,7 @@ public class MainController {
     private void initializeSimulationSettings(){
         simulationSettingsControl.addEventFilter(SimulationSettingsConfirmEvent.CONFIRM, e -> {
             setOverlayVisible(false);
-            setSimulation(new SimulationDriver(e.getSimulationSettings(), new RealTimeStopwatch()));
+            setSimulation(new SimulationDriver(e.getSimulationSettings()));
             startSimulation();
         });
     }
