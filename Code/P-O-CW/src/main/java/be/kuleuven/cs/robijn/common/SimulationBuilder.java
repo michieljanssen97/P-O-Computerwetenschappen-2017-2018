@@ -27,8 +27,11 @@ public class SimulationBuilder {
     	
         //Add airports
         HashMap<SimulationSettings.AirportDefinition, Airport> airports = new HashMap<>();
-        for (SimulationSettings.AirportDefinition airportDef : settings.getAirports()){
+        SimulationSettings.AirportDefinition[] airportDefs = settings.getAirports();
+        for (int i = 0; i < airportDefs.length; i++) {
+            SimulationSettings.AirportDefinition airportDef = airportDefs[i];
             Airport newAirport = new Airport(
+                    i,
                     settings.getRunwayLength(),
                     settings.getGateLength(),
                     new Vector2D(

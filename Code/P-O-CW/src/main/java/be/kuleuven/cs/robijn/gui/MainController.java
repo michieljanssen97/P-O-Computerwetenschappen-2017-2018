@@ -39,6 +39,9 @@ public class MainController {
     private final BooleanProperty overlayVisible = new SimpleBooleanProperty(this, "overlayVisible");
 
     @FXML
+    private PackageListControl packageListControl;
+
+    @FXML
     private SimulationSettingsControl simulationSettingsControl;
 
     @FXML
@@ -59,6 +62,7 @@ public class MainController {
         initializeSimulationSettings();
 
         setupDroneList();
+        setupPackageList();
 
         //Setup CameraViewControls
         camerasViewRoot.setViewSupplier(() -> {
@@ -87,7 +91,6 @@ public class MainController {
             droneList.getSelectionModel().select(0);
         });
 
-
         droneList.setCellFactory(view -> new ListCell<Drone>(){
             @Override
             protected void updateItem(Drone item, boolean empty) {
@@ -97,6 +100,10 @@ public class MainController {
                 }
             }
         });
+    }
+
+    private void setupPackageList(){
+        packageListControl.simulationProperty().bind(getSimulationProperty());
     }
 
     /////////////////
