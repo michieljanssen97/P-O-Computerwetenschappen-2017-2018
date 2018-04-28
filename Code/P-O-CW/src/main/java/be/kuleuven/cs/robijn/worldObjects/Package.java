@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.Gate;
+import be.kuleuven.cs.robijn.common.airports.Runway;
 
 public class Package extends WorldObject{
 	
@@ -77,7 +78,7 @@ public class Package extends WorldObject{
     	this.assignedDrone = d;
     }
     
-    public void assignPackages() { //TODO zorg dat dit elke iteratie wordt opgeroepen
+    public static void assignPackages() {
         for(Package p : getAllPackagesToAssign()){
             Airport fromAirport = p.getFromAirport();
             Gate fromGate = p.getFromGate();
@@ -87,9 +88,25 @@ public class Package extends WorldObject{
             if(fromGate.hasPackage()){
                 throw new IllegalStateException(); //mag maar 1 package beschikbaar zijn per Gate
             }
-            if(Airport.isDroneAvailableInWorld() && ! toGate.hasDrones()){
-            	p.assignPackageNecessities(fromAirport, fromGate, toAirport, toGate);
+            
+            Drone drone = Airport.getAvailableDrone(fromAirport);
+            if(drone != null) {
+            	if(drone.getCurrentAirport() != fromAirport) {
+	            	//TODO laat drone naar fromAirport vliegen
+	            	drone.assignNecessitiesLater(p, fromAirport, fromGate, toAirport, toGate);
+	            	removeFromPackagesToAssignList(p);
+            	}
+	            else {
+	        		Runway toTakeOff = fromAirport.getRunwayToTakeOff();
+	        		Runway toLand = toAirport.getRunwayToLand();
+	            	if (Runway.areRunwaysAvailable(toTakeOff, toLand)){
+		            	p.assignPackageNecessities(drone, fromAirport, fromGate, toAirport, toGate, toTakeOff, toLand);
+		            	removeFromPackagesToAssignList(p);
+	            	}
+	            }
             }
+            
+            
         }
     }
   
@@ -97,13 +114,17 @@ public class Package extends WorldObject{
     /**
      * Zet alle pointers
      */
-    public void assignPackageNecessities(Airport fromAirport, Gate fromGate, Airport toAirport, Gate toGate) {
-        Drone drone = Airport.getAvailableDrone(fromAirport);
+    public void assignPackageNecessities(Drone drone, Airport fromAirport, Gate fromGate, Airport toAirport, Gate toGate, Runway takeOffRunway, Runway landRunway) {
+    	//TODO naar fromGate taxiën, en van daaruit naar takeOffRunWay
         this.setAssignedDrone(drone);
         toGate.setHasPackage(true);
-        toGate.setHasDrones(false); // TODO Kan mss nog worden aangepast, pas op false zetten indien er een vliegtuig zal landen of erop staat
+        fromAirport.getRunwayToLand().setHasDrones(false); // TODO Kan mss nog worden aangepast, pas op false zetten indien er een vliegtuig zal landen of erop staat
         drone.setAssignedPackage(this);
-        drone.setDestinationAirport(toAirport); //TODO niet indien drone NIET op fromAirport is, moet eerst naar fromAirport vliegen an dan mag dit pas
-    	removeFromPackagesToAssignList(this);
+        
+        takeOffRunway.setHasDrones(true);
+        drone.setTakeOffRunway(takeOffRunway);
+        
+    	landRunway.setHasDrones(true);
+        drone.setDestinationRunway(landRunway);
     }
 }

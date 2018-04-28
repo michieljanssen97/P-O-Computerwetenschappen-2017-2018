@@ -18,7 +18,7 @@ import interfaces.*;
 public class Autopilot {
 	private static boolean drawChartPositions = false;
 	public static ExpPosition exppos = new ExpPosition();
-	public FlightMode currentFlightMode = FlightMode.ASCEND;
+	public FlightMode currentFlightMode = FlightMode.ASCEND; //TODO zal WAIT moeten worden
 	public Drone drone;
 	
 	public AutopilotConfig getConfig() {

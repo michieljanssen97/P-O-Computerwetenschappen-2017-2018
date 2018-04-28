@@ -7,6 +7,7 @@ import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
 import be.kuleuven.cs.robijn.worldObjects.WorldObject;
+import be.kuleuven.cs.robijn.worldObjects.Package;
 import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 
@@ -51,6 +52,7 @@ public class VirtualTestbed implements TestBed {
 	@Override
 	public boolean update(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs[] outputs) {
 		//Update drones
+		Package.assignPackages();
 		for(int i = 0; i < drones.size(); i++){
 			Drone drone = drones.get(i);
 			simulation.updateDrone(drone, secondsSinceStart, secondsSinceLastUpdate, outputs[i]);

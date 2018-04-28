@@ -164,4 +164,12 @@ public class Airport extends WorldObject {
 		}
 		return true;
 	}
+
+	public Runway getRunwayToLand() { //TODO kan mss anders
+		return this.getRunways()[0];
+	}
+
+	public Runway getRunwayToTakeOff() {
+		return this.getRunways()[1];
+	}
 }

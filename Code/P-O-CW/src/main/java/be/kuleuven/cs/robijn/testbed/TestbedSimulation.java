@@ -57,13 +57,18 @@ public class TestbedSimulation {
 	 *         This virtual testbed has no drone.
 	 *         drone == null
 	 */
-	public void moveDrone(Drone drone, float secondsSinceLastUpdate, AutopilotOutputs output) throws IllegalArgumentException, IllegalStateException {
+	public void moveDrone(Drone drone, float secondsSinceLastUpdate, AutopilotOutputs output) throws IllegalArgumentException, IllegalStateException {		
 		boolean useDiffEquations = true;
 		
 		if (secondsSinceLastUpdate < 0)
 			throw new IllegalArgumentException();
 		if (drone == null)
 			throw new IllegalStateException("this virtual testbed has no drone");
+		
+		if(drone.hasPackageToAssign()) {
+			drone.packageCanBeAssigned();
+		}
+		
 		RealVector position = drone.getWorldPosition();
 		RealVector velocity = drone.getVelocity();
 		RealVector acceleration = drone.getAcceleration(output.getThrust(),
