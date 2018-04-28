@@ -1,6 +1,11 @@
 package be.kuleuven.cs.robijn.autopilot;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Airport;
@@ -10,17 +15,28 @@ import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 
 public class AutopilotModule {
-    private final WorldObject world;
-    private final HashMap<Drone, AutopilotOutputs> latestOutputs = new HashMap<>();
+    private final WorldObject world; //Must not be modified by Autopilot or race conditions might occur!
     private final HashMap<Drone, Autopilot> autopilots = new HashMap<>();
+    private final HashMap<Drone, Future<AutopilotOutputs>> autopilotTasks = new HashMap<>();
+    private final ExecutorService threadPool;
 
     public AutopilotModule(WorldObject world){
         this.world = world;
-        for (Drone drone: world.getChildrenOfType(Drone.class)) {
+
+        // Create a new autopilot for each drone in the world.
+        ArrayList<Drone> drones = world.getChildrenOfType(Drone.class);
+        for (Drone drone : drones) {
         	Autopilot autopilot = new Autopilot();
         	autopilot.initialise(drone.getConfig(), drone);
         	autopilots.put(drone, autopilot);
         }
+
+        // Create a threadpool for the autopilots to run on in parallel.
+        threadPool = Executors.newFixedThreadPool(drones.size(), runnable -> {
+            Thread thread = new Thread(runnable, "Autopilot Thread");
+            thread.setDaemon(true);
+            return thread;
+        });
     }
 
     public void deliverPackage(Airport fromAirport, Gate fromGate, Airport toAirport, Gate toGate) {
@@ -28,16 +44,24 @@ public class AutopilotModule {
     }
 
     public void startTimeHasPassed(Drone drone, AutopilotInputs inputs) {
+        // Get the autopilot that controls this drone
     	Autopilot autopilot = autopilots.get(drone);
-        AutopilotOutputs outputs = autopilot.timePassed(inputs);
-        latestOutputs.put(drone, outputs);
+    	// Run the autopilot update on a separate thread in the threadpool
+    	Future<AutopilotOutputs> task = threadPool.submit(() -> autopilot.timePassed(inputs));
+    	// Store the task.
+        autopilotTasks.put(drone, task);
     }
 
     public AutopilotOutputs completeTimeHasPassed(Drone drone) {
-        return latestOutputs.get(drone);
+        try {
+            // Wait until the autopilot update is done and return the result.
+            return autopilotTasks.get(drone).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void simulationEnded() throws IllegalArgumentException {
-        throw new IllegalArgumentException();
+        threadPool.shutdown();
     }
 }
