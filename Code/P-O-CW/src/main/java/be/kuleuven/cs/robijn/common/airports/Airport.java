@@ -59,6 +59,15 @@ public class Airport extends WorldObject {
     public RealVector getPosition() {
     	return new ArrayRealVector(this.position);
     }
+    
+    public int getXPositionMiddle() {
+    	return (int) this.getPosition().getEntry(0);
+    }
+    
+    public int getZPositionMiddle() {
+    	return (int) this.getPosition().getEntry(1);
+    }
+    
 
     public Vector2D getSize() {
         return size;
@@ -82,6 +91,21 @@ public class Airport extends WorldObject {
     
     public void removeDroneFromCurrentDrones(Drone d){
         currentDrones.remove(d);
+    }
+    
+    /**
+     * Check all Airports for an available Drone
+     */
+    public static boolean isDroneAvailableInWorld(){
+    	boolean result = false;
+    	for(Airport airport : Airport.getAllAirports()) {
+    		if(airport.isDroneAvailableOnThisAirport()) {
+    			result = true;
+    			break;
+    		}
+    	}
+    	
+    	return result;
     }
     
     public Drone getFirstAvailableDrone(){
@@ -111,7 +135,7 @@ public class Airport extends WorldObject {
     	return drone; //Is null if no drones are Available
     }
     
-    public boolean isDroneAvailable() {
+    public boolean isDroneAvailableOnThisAirport() {
         return this.getFirstAvailableDrone() != null;
     }
 
@@ -130,13 +154,12 @@ public class Airport extends WorldObject {
 	/**
 	 * Check if the given location is on (or above) the given airport
 	 */
-	public boolean isInsideAirport(RealVector position) {
-		RealVector airportPosition = this.getPosition();
+	public boolean isInsideAirport(RealVector position) { //TODO hou rekening met orientatie van de airport tov wereldassenstelsel
 		Vector2D size = this.getSize();
-		if( (position.getEntry(0) < airportPosition.getEntry(0) - (size.getX()/2)) &&
-				(position.getEntry(0) > airportPosition.getEntry(0) + (size.getX()/2)) &&
-				(position.getEntry(2) < airportPosition.getEntry(1) - (size.getY()/2)) &&
-				(position.getEntry(2) > airportPosition.getEntry(1) + (size.getY()/2))) {
+		if( (position.getEntry(0) < this.getXPositionMiddle() - (size.getX()/1.5)) || // delen door 1.5 ipv 2 om iets meer speling te hebben
+				(position.getEntry(0) > this.getXPositionMiddle() + (size.getX()/1.5)) ||
+				(position.getEntry(2) < this.getZPositionMiddle() - (size.getY()/1.5)) ||
+				(position.getEntry(2) > this.getZPositionMiddle() + (size.getY()/1.5))) {
 			return false;
 		}
 		return true;

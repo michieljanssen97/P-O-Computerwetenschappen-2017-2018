@@ -87,26 +87,12 @@ public class Package extends WorldObject{
             if(fromGate.hasPackage()){
                 throw new IllegalStateException(); //mag maar 1 package beschikbaar zijn per Gate
             }
-            if(isDroneAvailable() && ! toGate.hasDrones()){
+            if(Airport.isDroneAvailableInWorld() && ! toGate.hasDrones()){
             	p.assignPackageNecessities(fromAirport, fromGate, toAirport, toGate);
             }
         }
     }
-    
-    /**
-     * Check all Airports for an available Drone
-     */
-    public boolean isDroneAvailable(){
-    	boolean result = false;
-    	for(Airport airport : Airport.getAllAirports()) {
-    		if(airport.isDroneAvailable()) {
-    			result = true;
-    			break;
-    		}
-    	}
-    	
-    	return result;
-    }
+  
     
     /**
      * Zet alle pointers
