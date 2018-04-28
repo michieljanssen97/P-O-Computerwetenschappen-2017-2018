@@ -126,6 +126,7 @@ public class AsyncOpenGLRenderer implements Renderer {
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
+        executor.shutdown();
     }
 
     private class AsyncFrameBuffer implements FrameBuffer {
