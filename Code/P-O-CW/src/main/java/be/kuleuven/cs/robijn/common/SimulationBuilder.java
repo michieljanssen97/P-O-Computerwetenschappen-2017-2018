@@ -4,6 +4,7 @@ import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.airports.Runway;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
+import be.kuleuven.cs.robijn.worldObjects.GroundPlane;
 import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
@@ -21,6 +22,10 @@ public class SimulationBuilder {
      * @param root the worldobject to add the objects to.
      */
     public static void buildSimulation(SimulationSettings settings, WorldObject root){
+    	//Add groundplane to calculate grass and tarmac
+    	GroundPlane groundPlane = new GroundPlane();
+    	root.addChild(groundPlane);
+    	
         //Add airports
         HashMap<SimulationSettings.AirportDefinition, Airport> airports = new HashMap<>();
         for (SimulationSettings.AirportDefinition airportDef : settings.getAirports()){
@@ -37,6 +42,7 @@ public class SimulationBuilder {
             newAirport.setRelativePosition(new ArrayRealVector(new double[]{airportDef.getCenterX(), 0, airportDef.getCenterZ()}));
             root.addChild(newAirport);
             airports.put(airportDef, newAirport);
+            groundPlane.addAirport(newAirport);
         }
 
         //Setup drones
@@ -72,5 +78,6 @@ public class SimulationBuilder {
             );
             newDrone.setRelativeRotation(rotation); //TODO: make sure this isn't broken by Drone
         }
+        
     }
 }

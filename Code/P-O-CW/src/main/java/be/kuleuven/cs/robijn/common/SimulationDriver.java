@@ -2,6 +2,8 @@ package be.kuleuven.cs.robijn.common;
 
 import be.kuleuven.cs.robijn.autopilot.AutopilotModuleAdapter;
 import be.kuleuven.cs.robijn.common.exceptions.CrashException;
+import be.kuleuven.cs.robijn.common.stopwatch.ConstantIntervalStopwatch;
+import be.kuleuven.cs.robijn.common.stopwatch.RealTimeStopwatch;
 import be.kuleuven.cs.robijn.common.stopwatch.Stopwatch;
 import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
 import interfaces.AutopilotInputs;
@@ -20,7 +22,6 @@ public class SimulationDriver {
     private final AutopilotModuleAdapter autoPilotModule;
     private final Stopwatch stopwatch;
 
-    private boolean simulationStarted = false;
     private boolean simulationFinished;
     private boolean simulationCrashed;
     private boolean outOfControl;
@@ -31,7 +32,11 @@ public class SimulationDriver {
 
     //List of eventhandlers that are invoked when the simulation has updated.
     private final TreeSet<UpdateEventHandler> updateEventHandlers = new TreeSet<>();
-
+    
+    public SimulationDriver(SimulationSettings settings){
+        this(settings, new ConstantIntervalStopwatch(0.1d));
+    }
+    
     public SimulationDriver(SimulationSettings settings, Stopwatch stopwatch){
         this.settings = settings;
         this.stopwatch = stopwatch;
@@ -42,6 +47,7 @@ public class SimulationDriver {
         autoPilotModule = new AutopilotModuleAdapter();
         initializeAutopilotModule(settings);
         initializeAutopilotInputs();
+        stopwatch.reset();
     }
 
     private void initializeAutopilotModule(SimulationSettings settings){
@@ -86,7 +92,7 @@ public class SimulationDriver {
             //Run the autopilotmodule update
             try {
                 //autoPilotModule.deliverPackage(); // Called for every (new?) package?
-
+            	
                 for(int i = 0; i < settings.getDrones().length; i++){
                     autoPilotModule.startTimeHasPassed(i, latestAutopilotInputs[i]);
                 }

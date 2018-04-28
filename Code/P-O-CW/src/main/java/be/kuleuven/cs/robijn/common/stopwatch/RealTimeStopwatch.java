@@ -3,6 +3,7 @@ package be.kuleuven.cs.robijn.common.stopwatch;
 public class RealTimeStopwatch implements Stopwatch {
     private long lastTickTimestamp = System.currentTimeMillis();
     private long totalMilliSeconds;
+    private long milliSecondsSinceLastUpdate;
 
     private double timeMultiplier = 1.0; //Each second in real time is multiplied by this value to get the actual value
 
@@ -13,13 +14,14 @@ public class RealTimeStopwatch implements Stopwatch {
         if(!paused){
             long now = System.currentTimeMillis();
             totalMilliSeconds += ((double)(now - lastTickTimestamp)) * timeMultiplier;
+            milliSecondsSinceLastUpdate = (long)((now - lastTickTimestamp) * timeMultiplier);
             lastTickTimestamp = now;
         }
     }
 
     @Override
     public double getSecondsSinceLastUpdate() {
-        return (lastTickTimestamp/1000d) * timeMultiplier;
+        return milliSecondsSinceLastUpdate/1000d;
     }
 
     @Override
@@ -49,4 +51,11 @@ public class RealTimeStopwatch implements Stopwatch {
     public double getSpeedMultiplier() {
         return timeMultiplier;
     }
+
+	@Override
+	public void reset() {
+		lastTickTimestamp = System.currentTimeMillis();
+		totalMilliSeconds = 0;
+		milliSecondsSinceLastUpdate = 0;
+	}
 }

@@ -65,4 +65,9 @@ public class ConstantIntervalStopwatch implements Stopwatch{
     public double getSpeedMultiplier() {
         return timeMultiplier;
     }
+
+	@Override
+	public void reset() {
+		timePassed = 0;
+	}
 }

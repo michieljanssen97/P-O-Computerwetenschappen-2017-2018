@@ -34,8 +34,7 @@ import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
 import static org.lwjgl.opengl.GL14.glBlendEquation;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.GL32.GL_FIRST_VERTEX_CONVENTION;
-import static org.lwjgl.opengl.GL32.glProvokingVertex;
+import static org.lwjgl.opengl.GL32.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class OpenGLRenderer implements Renderer {
@@ -184,7 +183,7 @@ public class OpenGLRenderer implements Renderer {
     }
 
     @Override
-    public void render(WorldObject worldRoot, FrameBuffer buffer, Camera camera){
+    public RenderTask startRender(WorldObject worldRoot, FrameBuffer buffer, Camera camera){
         if(!(buffer instanceof OpenGLFrameBuffer)){
             throw new IllegalArgumentException("Incompatible framebuffer");
         }
@@ -242,6 +241,16 @@ public class OpenGLRenderer implements Renderer {
                 renderLine(line, viewProjectionMatrix);
             }
         }
+
+        //Add a fence sync object so we can check when the rendering finishes.
+        long sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+        if(sync == 0){
+            throw new RuntimeException("glFenceSync failed");
+        }
+
+        OpenGLRenderTask task = new OpenGLRenderTask(sync);
+        ((OpenGLFrameBuffer) buffer).setCurrentRenderTask(task);
+        return task;
     }
 
     private void renderChildren(WorldObject obj, Matrix4f viewProjectionMatrix, Camera camera){

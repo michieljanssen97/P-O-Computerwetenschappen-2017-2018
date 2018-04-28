@@ -1,6 +1,7 @@
 package be.kuleuven.cs.robijn.common.stopwatch;
 
 public interface Stopwatch {
+	void reset();
     void tick();
     double getSecondsSinceStart();
     double getSecondsSinceLastUpdate();

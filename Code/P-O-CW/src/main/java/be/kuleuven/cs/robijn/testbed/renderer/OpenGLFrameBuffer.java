@@ -1,6 +1,7 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.FrameBuffer;
+import be.kuleuven.cs.robijn.common.RenderTask;
 import org.lwjgl.BufferUtils;
 
 import java.nio.ByteBuffer;
@@ -92,6 +93,7 @@ public class OpenGLFrameBuffer implements FrameBuffer {
     private int bytesPerPixel;
     private ByteBuffer buf;
 
+    private OpenGLRenderTask lastRenderTask;
     private boolean isClosed = false;
 
     private OpenGLFrameBuffer(int frameBufferId, int renderBufferId, int depthBufferId, int width, int height, int bytesPerPixel){
@@ -115,6 +117,14 @@ public class OpenGLFrameBuffer implements FrameBuffer {
         return height;
     }
 
+    void setCurrentRenderTask(OpenGLRenderTask task){
+        this.lastRenderTask = task;
+    }
+
+    public boolean isReady(){
+        return lastRenderTask == null || lastRenderTask.isDone();
+    }
+
     @Override
     public void readPixels(byte[] data) {
         if(this.isClosed){
@@ -130,18 +140,8 @@ public class OpenGLFrameBuffer implements FrameBuffer {
         }
 
         //Wait until GPU has finished rendering
-        long sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-        if(sync == 0){
-            throw new RuntimeException("glFenceSync failed");
-        }
-        int waitResult;
-        do {
-            waitResult = glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, 2000);
-        } while(waitResult == GL_TIMEOUT_EXPIRED);
-        glDeleteSync(sync);
-
-        if(waitResult != GL_CONDITION_SATISFIED && waitResult != GL_ALREADY_SIGNALED){
-            throw new RuntimeException("waiting for gpu failed: "+waitResult);
+        if(lastRenderTask != null){
+            lastRenderTask.waitUntilFinished();
         }
 
         //Read from this buffer

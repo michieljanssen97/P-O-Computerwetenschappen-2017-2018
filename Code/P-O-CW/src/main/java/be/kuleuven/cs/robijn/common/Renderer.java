@@ -35,7 +35,7 @@ public interface Renderer extends AutoCloseable {
      * @param frameBuffer the framebuffer to store the rendered image in.
      * @param camera the camera from which the world is viewed.
      */
-    void render(WorldObject worldRoot, FrameBuffer frameBuffer, Camera camera);
+    RenderTask startRender(WorldObject worldRoot, FrameBuffer frameBuffer, Camera camera);
 
     void clearDebugObjects();
 }
