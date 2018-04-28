@@ -174,8 +174,8 @@ public class VirtualTestbed implements TestBed {
 			this.image = image;
 
 			this.x = (float)drone.getWorldPosition().getEntry(0);
-			this.y = (float)drone.getWorldPosition().getEntry(0);
-			this.z = (float)drone.getWorldPosition().getEntry(0);
+			this.y = (float)drone.getWorldPosition().getEntry(1);
+			this.z = (float)drone.getWorldPosition().getEntry(2);
 
 			this.heading = drone.getHeading();
 			this.pitch = drone.getPitch();
