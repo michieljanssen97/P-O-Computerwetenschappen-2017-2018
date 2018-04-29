@@ -1,7 +1,8 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
-import org.apache.commons.math3.geometry.Vector;
+import be.kuleuven.cs.robijn.common.BoundingBox;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.linear.ArrayRealVector;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL15.*;
@@ -111,10 +112,15 @@ public class Mesh implements AutoCloseable {
             if(z < minZ){  minZ = z; }
             if(z > maxZ){  maxZ = z; }
         }
+
         BoundingBox boundingBox = new BoundingBox(
-                new Vector3D(minX, minY, minZ),
                 new Vector3D(maxX - minX, maxY - minY, maxZ - minZ)
         );
+        boundingBox.setRelativePosition(new ArrayRealVector(new double[]{
+                (maxX - minX) / 2d,
+                (maxY - minY) / 2d,
+                (maxZ - minZ) / 2d,
+        }, false));
 
         return new Mesh(vertexArrayId, faceIndices.length, boundingBox);
     }
@@ -139,7 +145,7 @@ public class Mesh implements AutoCloseable {
     }
 
     public BoundingBox getBoundingBox() {
-        return boundingBox;
+        return new BoundingBox(boundingBox);
     }
 
     public Vector3D getRenderOffset(){

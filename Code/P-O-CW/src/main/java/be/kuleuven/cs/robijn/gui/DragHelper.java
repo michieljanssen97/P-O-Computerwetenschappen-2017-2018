@@ -26,7 +26,9 @@ public class DragHelper {
             double deltaX = e.getX() - lastX;
             double deltaY = e.getY() - lastY;
 
-            handler.accept(new ExtendedDragEvent(e, deltaX, deltaY));
+            if(Math.abs(deltaX) > 1E-5 && Math.abs(deltaY) > 1E-5){
+                handler.accept(new ExtendedDragEvent(e, deltaX, deltaY));
+            }
 
             lastX = e.getX();
             lastY = e.getY();

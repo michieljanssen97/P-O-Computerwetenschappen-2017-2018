@@ -60,7 +60,24 @@ public class PackageListControl extends AnchorPane {
         });
     }
 
-    private void addRandomPackage(){
+    public void addPackage(Gate originGate, Gate targetGate){
+        AirportPackage newPackage = getSimulation().addPackage(originGate, targetGate);
+        packageList.getItems().add(newPackage);
+    }
+
+    public void addRandomPackage(Gate originGate){
+        Gate[] gates = getSimulation().getTestBed().getWorldRepresentation()
+                .getDescendantsStream()
+                .filter(obj -> obj instanceof Gate && originGate != obj)
+                .map(o -> (Gate)o)
+                .toArray(Gate[]::new);
+
+        Gate destinationGate = gates[random.nextInt(gates.length)];
+
+        addPackage(originGate, destinationGate);
+    }
+
+    public void addRandomPackage(){
         Gate[] gates = getSimulation().getTestBed().getWorldRepresentation()
                 .getDescendantsStream()
                 .filter(obj -> obj instanceof Gate)
@@ -79,8 +96,7 @@ public class PackageListControl extends AnchorPane {
 
         Gate originGate = originGateCandidates.get(0);
 
-        AirportPackage newPackage = getSimulation().addPackage(originGate, destinationGate);
-        packageList.getItems().add(newPackage);
+        addPackage(originGate, destinationGate);
     }
 
     SimulationDriver getSimulation(){

@@ -66,7 +66,7 @@ public class MainController {
 
         //Setup CameraViewControls
         camerasViewRoot.setViewSupplier(() -> {
-            CameraViewControl cameraView = new CameraViewControl();
+            CameraViewControl cameraView = new CameraViewControl(this);
             cameraView.getSimulationProperty().bind(simulationProperty);
             cameraView.getSelectedDronePropertyProperty().bind(selectedDroneProperty);
             return cameraView;
@@ -77,6 +77,10 @@ public class MainController {
         sidebar.getSimulationProperty().bind(simulationProperty);
         sidebar.selectedDroneProperty().bind(selectedDroneProperty);
         sidebar.selectedDroneIndexProperty().bind(selectedDroneIndexProperty);
+    }
+
+    public void selectDrone(Drone drone){
+        droneList.getSelectionModel().select(drone);
     }
 
     private void setupDroneList(){
@@ -100,6 +104,10 @@ public class MainController {
                 }
             }
         });
+    }
+
+    public PackageListControl getPackageListControl(){
+        return packageListControl;
     }
 
     private void setupPackageList(){
