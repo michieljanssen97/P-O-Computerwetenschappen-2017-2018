@@ -344,7 +344,7 @@ public class CameraViewControl extends AnchorPane {
                 Gate gate = (Gate)clickedObj;
                 String gateUID = gate.getAirport().getId() + ":" + gate.getId();
 
-                MenuItem addRandomPackageMenuItem = new MenuItem("Add random package");
+                MenuItem addRandomPackageMenuItem = new MenuItem("Add package from " + gateUID + " to random");
                 addRandomPackageMenuItem.setDisable(gate.hasPackage());
                 addRandomPackageMenuItem.setOnAction(e2 -> {
                     mainController.getPackageListControl().addRandomPackage(gate);
