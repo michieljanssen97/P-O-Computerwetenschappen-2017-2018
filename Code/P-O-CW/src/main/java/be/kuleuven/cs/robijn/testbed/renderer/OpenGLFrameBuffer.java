@@ -5,6 +5,8 @@ import be.kuleuven.cs.robijn.common.RenderTask;
 import org.lwjgl.BufferUtils;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL12.GL_BGR;
@@ -126,12 +128,15 @@ public class OpenGLFrameBuffer implements FrameBuffer {
     }
 
     @Override
-    public void readPixels(byte[] data) {
+    public Future<byte[]> readPixels(byte[] data) {
         if(this.isClosed){
             throw new IllegalStateException("Cannot read pixels from a closed framebuffer!");
         }
 
-        if(data.length < width*height*bytesPerPixel){
+        int dataLength = width*height*bytesPerPixel;
+        if(data == null){
+            data = new byte[dataLength];
+        }else if(data.length < dataLength){
             throw new IllegalArgumentException("target buffer is too small");
         }
 
@@ -157,6 +162,8 @@ public class OpenGLFrameBuffer implements FrameBuffer {
         //Move cursor in buffer back to the begin and copy the contents to the java image
         buf.position(0);
         buf.get(data);
+
+        return CompletableFuture.completedFuture(data);
     }
 
     @Override

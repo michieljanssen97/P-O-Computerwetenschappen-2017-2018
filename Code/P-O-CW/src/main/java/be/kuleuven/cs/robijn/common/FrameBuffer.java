@@ -1,5 +1,7 @@
 package be.kuleuven.cs.robijn.common;
 
+import java.util.concurrent.Future;
+
 /**
  * Represents a buffer that contains the pixels produced by the renderer
  */
@@ -22,7 +24,7 @@ public interface FrameBuffer extends AutoCloseable {
      * @param data the array to store the values in.
      * @throws IllegalArgumentException when 'data' is null or not large enough.
      */
-    void readPixels(byte[] data);
+    Future<byte[]> readPixels(byte[] data);
 
     @Override
     void close();

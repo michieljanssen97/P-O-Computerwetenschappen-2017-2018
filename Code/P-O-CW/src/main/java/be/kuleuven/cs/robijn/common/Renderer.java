@@ -4,6 +4,8 @@ import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.OrthographicCamera;
 import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
 
+import java.util.concurrent.Semaphore;
+
 /**
  * Produces images of the 3D world being simulated.
  */
@@ -29,12 +31,20 @@ public interface Renderer extends AutoCloseable {
     OrthographicCamera createOrthographicCamera();
 
     /**
+     * Loads the font with the specified name.
+     * @param fontName the font name, or null to load the default font.
+     * @return the font instance.
+     */
+    Font loadFont(String fontName);
+
+    /**
      * Renders a new image of the world in its current state to the framebuffer, as viewed through the camera.
      * @param worldRoot the root of the tree of world objects to be rendered.
      * @param frameBuffer the framebuffer to store the rendered image in.
      * @param camera the camera from which the world is viewed.
+     * @param lock a semaphore to acquire before accessing world state.
      */
-    RenderTask startRender(WorldObject worldRoot, FrameBuffer frameBuffer, Camera camera);
+    RenderTask startRender(WorldObject worldRoot, FrameBuffer frameBuffer, Camera camera, Semaphore lock);
 
     void clearDebugObjects();
 }
