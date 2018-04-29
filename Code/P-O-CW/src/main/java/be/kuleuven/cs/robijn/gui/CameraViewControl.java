@@ -2,10 +2,10 @@ package be.kuleuven.cs.robijn.gui;
 
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.common.airports.Airport;
+import be.kuleuven.cs.robijn.worldObjects.Label3D;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
 import be.kuleuven.cs.robijn.testbed.renderer.RenderDebug;
-import be.kuleuven.cs.robijn.testbed.renderer.bmfont.Label3D;
 import be.kuleuven.cs.robijn.worldObjects.*;
 import javafx.beans.binding.Bindings;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
@@ -38,6 +38,9 @@ import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Vector;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.Semaphore;
 
 /**
  * GUI component that displays a 3D render of the world, along with several buttons for changing the view
@@ -498,7 +501,9 @@ public class CameraViewControl extends AnchorPane {
         imageBackingBuffer = ((DataBufferByte) awtImage.getRaster().getDataBuffer()).getData();
     }
 
-    private RenderTask lastRender;
+    private RenderTask renderTask;
+    private Future<byte[]> imageCopyTask;
+
     private void update(){
         //If no camera is active, don't render.
         if(activeCamera == null){
@@ -531,13 +536,26 @@ public class CameraViewControl extends AnchorPane {
 
         //The view always lags behind 1 frame so that the GPU work can be done while the Java code continues and so
         //we don't have to wait.
-        if(lastRender != null){
-            lastRender.waitUntilFinished();
-            frameBuffer.readPixels(imageBackingBuffer);
+
+        // The general workflow is as follows:
+        //  1. Render image on GPU
+        //  2. Copy image from GPU to RAM
+        //  3. Load image into JavaFX
+
+        if(imageCopyTask != null && imageCopyTask.isDone()){
             image = SwingFXUtils.toFXImage(awtImage, image);
             imageView.setImage(image);
+            imageCopyTask = null;
         }
-        lastRender = renderer.startRender(world, frameBuffer, activeCamera);
+
+        if(renderTask != null && renderTask.isDone()){
+            imageCopyTask = frameBuffer.readPixels(imageBackingBuffer);
+            renderTask = null;
+        }
+
+        if(renderTask == null || renderTask.isDone()){
+            renderTask = renderer.startRender(world, frameBuffer, activeCamera, testBed.getWorldStateLock());
+        }
     }
 
     private void setCameraAspectRatio(Camera camera, double aspectRatio){
