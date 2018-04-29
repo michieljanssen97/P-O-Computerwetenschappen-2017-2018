@@ -3,6 +3,8 @@ package be.kuleuven.cs.robijn.common;
 import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 import interfaces.*;
 
+import java.util.concurrent.Semaphore;
+
 /**
  * Provides a simulation environment for the drone to fly in.
  */
@@ -31,4 +33,10 @@ public interface TestBed {
 	 * Returns the internal representation of the world used for rendering and physics updates
 	 */
 	WorldObject getWorldRepresentation();
+
+	/**
+	 * Returns a semaphore that should be acquired before reading or writing to the testbed world state.
+	 * This includes usage of the renderer.
+	 */
+	Semaphore getWorldStateLock();
 }

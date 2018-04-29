@@ -2,8 +2,6 @@ package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.RenderTask;
 
-import java.nio.IntBuffer;
-
 import static org.lwjgl.opengl.GL32.*;
 import static org.lwjgl.opengl.GL32.GL_ALREADY_SIGNALED;
 import static org.lwjgl.opengl.GL32.GL_CONDITION_SATISFIED;
@@ -21,9 +19,10 @@ public class OpenGLRenderTask implements RenderTask {
             return true;
         }
 
-        IntBuffer signaled = IntBuffer.allocate(1);
-        glGetSynciv(syncObject, GL_SYNC_STATUS, null, signaled);
-        isDone = signaled.get() == GL_SIGNALED;
+        int[] length = new int[1];
+        int[] signaled = new int[1];
+        glGetSynciv(syncObject, GL_SYNC_STATUS, length, signaled);
+        isDone = signaled[0] == GL_SIGNALED;
         return isDone;
     }
 

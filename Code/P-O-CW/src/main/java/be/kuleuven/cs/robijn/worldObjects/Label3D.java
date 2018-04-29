@@ -1,4 +1,7 @@
-package be.kuleuven.cs.robijn.testbed.renderer.bmfont;
+package be.kuleuven.cs.robijn.worldObjects;
+
+
+import be.kuleuven.cs.robijn.common.Font;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -30,9 +33,6 @@ public class Label3D extends WorldObject {
     }
 
     public Font getFont() {
-        if(font == null){
-            font = Font.loadDefaultFont();
-        }
         return font;
     }
 

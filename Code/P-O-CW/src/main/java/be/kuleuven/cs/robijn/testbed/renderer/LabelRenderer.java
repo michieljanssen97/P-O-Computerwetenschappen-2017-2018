@@ -1,14 +1,14 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.Resources;
-import be.kuleuven.cs.robijn.testbed.renderer.bmfont.Font;
-import be.kuleuven.cs.robijn.testbed.renderer.bmfont.Label3D;
+
+import be.kuleuven.cs.robijn.testbed.renderer.bmfont.BMFont;
+import be.kuleuven.cs.robijn.worldObjects.Label3D;
 import be.kuleuven.cs.robijn.testbed.renderer.bmfont.RenderableString;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
 import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 
-import com.google.common.cache.*;
 import org.joml.Matrix4f;
 
 import java.awt.*;
@@ -25,7 +25,7 @@ public class LabelRenderer implements AutoCloseable {
     private ShaderProgram fontShader;
     private Texture colorMapTex;
     private ByteBuffer colorMapBuffer;
-    private final HashMap<Font, HashMap<String, Model>> labelCache = new HashMap<>();
+    private final HashMap<BMFont, HashMap<String, Model>> labelCache = new HashMap<>();
 
     LabelRenderer(OpenGLRenderer renderer){
         this.renderer = renderer;
@@ -36,10 +36,14 @@ public class LabelRenderer implements AutoCloseable {
                 .filter(o -> o instanceof Label3D)
                 .map(o -> (Label3D)o)
                 .forEach(label -> {
-                    HashMap<String, Model> cache = labelCache.computeIfAbsent(label.getFont(), font -> new HashMap<>());
+                    if(label.getFont() == null || !(label.getFont() instanceof BMFont)){
+                        label.setFont(renderer.loadFont(null));
+                    }
+                    BMFont font = (BMFont)label.getFont();
+                    HashMap<String, Model> cache = labelCache.computeIfAbsent(font, f -> new HashMap<>());
                     cache.computeIfAbsent(label.getText(), text -> {
-                        RenderableString renderableString = label.getFont().layoutString(text);
-                        Texture bakedStringTex = label.getFont().getRenderer().bake(renderableString);
+                        RenderableString renderableString = font.layoutString(text);
+                        Texture bakedStringTex = font.getRenderer().bake(renderableString);
                         return new Model(Billboard.createBillboardMesh(bakedStringTex), bakedStringTex, getFontShader());
                     });
                 });

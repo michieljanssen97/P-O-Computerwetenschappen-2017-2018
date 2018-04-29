@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StringLayoutEngine {
-    private final Font font;
+    private final BMFont font;
 
-    StringLayoutEngine(Font font){
+    StringLayoutEngine(BMFont font){
         this.font = font;
     }
 
