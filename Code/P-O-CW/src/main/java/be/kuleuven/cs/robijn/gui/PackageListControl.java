@@ -60,6 +60,10 @@ public class PackageListControl extends AnchorPane {
         });
     }
 
+    public void setSelectedPackage(AirportPackage pkg){
+        packageList.getSelectionModel().select(pkg);
+    }
+
     public void addPackage(Gate originGate, Gate targetGate){
         AirportPackage newPackage = getSimulation().addPackage(originGate, targetGate);
         newPackage.addDeliveryEventHandler(p -> packageList.getItems().remove(p));

@@ -21,6 +21,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
@@ -292,40 +293,7 @@ public class CameraViewControl extends AnchorPane {
     }
 
     private void setupContextMenu() {
-        imageView.setOnMouseClicked(e -> {
-            if(simulationProperty.get() == null || activeCamera == null || frameBuffer == null){
-                return;
-            }
-
-            if(e.getClickCount() != 2){
-                return;
-            }
-
-            TestBed testBed = simulationProperty.get().getTestBed();
-            Renderer renderer = testBed.getRenderer();
-            WorldObject world = testBed.getWorldRepresentation();
-
-            RealVector worldPos = renderer.screenPointToWorldSpace(activeCamera, frameBuffer, (int)e.getX(), (int)e.getY());
-            WorldObject clickedObj = getObjectAtPosition(renderer, world, worldPos);
-
-            if(clickedObj instanceof Drone){
-                mainController.selectDrone((Drone) clickedObj);
-            }
-        });
-
         final ContextMenu airportMenu = new ContextMenu();
-        /*final Airport[] selectedAirportContainer = new Airport[1];
-        final MenuItem addPackageMenuItem = new MenuItem("Add package...");
-        addPackageMenuItem.setOnAction(e -> {
-            Airport selectedAirport = selectedAirportContainer[0];
-
-        });
-        final MenuItem addRandomPackageMenuItem = new MenuItem("Add random package");
-        addRandomPackageMenuItem.setOnAction(e -> {
-            Airport selectedAirport = selectedAirportContainer[0];
-            mainController.getPackageListControl().addRandomPackage(selectedAirport);
-        });
-        airportMenu.getItems().addAll(addPackageMenuItem, addRandomPackageMenuItem);*/
 
         final Gate[] destinationGate = new Gate[1];
         imageView.setOnContextMenuRequested(e -> {
@@ -401,6 +369,38 @@ public class CameraViewControl extends AnchorPane {
                         color
                 );
             });*/
+        });
+
+        imageView.setOnMouseClicked(e -> {
+            if(simulationProperty.get() == null || activeCamera == null || frameBuffer == null){
+                return;
+            }
+
+            if(e.getButton() == MouseButton.PRIMARY){
+                airportMenu.hide();
+            }
+
+            if(e.getClickCount() != 2){
+                return;
+            }
+
+            TestBed testBed = simulationProperty.get().getTestBed();
+            Renderer renderer = testBed.getRenderer();
+            WorldObject world = testBed.getWorldRepresentation();
+
+            RealVector worldPos = renderer.screenPointToWorldSpace(activeCamera, frameBuffer, (int)e.getX(), (int)e.getY());
+            WorldObject clickedObj = getObjectAtPosition(renderer, world, worldPos);
+
+            if(clickedObj instanceof Drone){
+                mainController.selectDrone((Drone) clickedObj);
+            }
+
+            if(clickedObj instanceof Gate){
+                Gate gate = (Gate)clickedObj;
+                if(gate.hasPackage()){
+                    mainController.getPackageListControl().setSelectedPackage(gate.getPackage());
+                }
+            }
         });
     }
 
