@@ -100,6 +100,7 @@ public class OpenGLRenderer implements Renderer {
 
     private Model runwayModel = null;
     private Model gateModel = null;
+    private Model withPackageGateModel = null;
 
     private Billboard droneIcon;
     private Billboard boxIcon;
@@ -149,7 +150,9 @@ public class OpenGLRenderer implements Renderer {
         Mesh gateMesh = OBJLoader.loadFromResources("/models/plane/plane.obj");
         gateMesh.setRenderOffset(new Vector3D(0, .006, 0));
         Texture gateTexture = Texture.load(Resources.loadImageResource("/models/gate/texture.png"));
+        Texture withPackageGateTexture = Texture.load(Resources.loadImageResource("/models/gate/with_package_texture.png"));
         gateModel = new Model(gateMesh, gateTexture, texturedProgram);
+        withPackageGateModel = new Model(gateMesh, withPackageGateTexture, texturedProgram);
 
         //Load runway model
         Mesh runwayMesh = OBJLoader.loadFromResources("/models/plane/plane.obj");
@@ -290,7 +293,8 @@ public class OpenGLRenderer implements Renderer {
         }else if(obj instanceof Drone){
             model = droneModel;
         }else if(obj instanceof Gate){
-            model = gateModel;
+            Gate gate = (Gate)obj;
+            model = gate.hasPackage() ? withPackageGateModel : gateModel;
         }else if(obj instanceof Runway){
             model = runwayModel;
         }else if(obj instanceof Label3D){

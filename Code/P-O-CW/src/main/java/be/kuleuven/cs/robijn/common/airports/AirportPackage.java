@@ -1,9 +1,13 @@
 package be.kuleuven.cs.robijn.common.airports;
 
+import java.util.ArrayList;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class AirportPackage {
     private final Gate origin, destination;
+    private ArrayList<Consumer<AirportPackage>> deliveryEventHandlers = new ArrayList<>();
+    private boolean hasBeenDelivered;
 
     public AirportPackage(Gate origin, Gate destination){
         if(origin == null || destination == null){
@@ -20,6 +24,23 @@ public class AirportPackage {
 
     public Gate getDestination() {
         return destination;
+    }
+
+    public void addDeliveryEventHandler(Consumer<AirportPackage> deliveryHandler){
+        deliveryEventHandlers.add(deliveryHandler);
+    }
+
+    public void markAsDelivered(){
+        if(!hasBeenDelivered){
+            hasBeenDelivered = true;
+            for(Consumer<AirportPackage> handler : deliveryEventHandlers){
+                handler.accept(this);
+            }
+        }
+    }
+
+    public boolean hasBeenDelivered(){
+        return hasBeenDelivered;
     }
 
     @Override

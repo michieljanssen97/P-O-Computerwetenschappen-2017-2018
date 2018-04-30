@@ -62,6 +62,7 @@ public class PackageListControl extends AnchorPane {
 
     public void addPackage(Gate originGate, Gate targetGate){
         AirportPackage newPackage = getSimulation().addPackage(originGate, targetGate);
+        newPackage.addDeliveryEventHandler(p -> packageList.getItems().remove(p));
         packageList.getItems().add(newPackage);
     }
 
