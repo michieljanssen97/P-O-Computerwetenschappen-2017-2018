@@ -17,32 +17,29 @@
             </VBox.margin>
         </Label>
         <VBox prefHeight="25.0" prefWidth="100.0">
+            <fx:define>
+                <ToggleGroup fx:id="simulationRunningToggleGroup"/>
+            </fx:define>
             <children>
                 <HBox prefHeight="25.0" prefWidth="200.0">
-                    <children>
-                        <fx:define>
-                            <ToggleGroup fx:id="simulationRunningToggleGroup"/>
-                        </fx:define>
-                        <ToggleButton fx:id="pauseButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false" text="Pause" />
-                        <ToggleButton fx:id="playButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false" text="Play" >
-                            <HBox.margin>
-                                <Insets left="5.0" />
-                            </HBox.margin>
-                        </ToggleButton>
-                        <ToggleButton fx:id="fastForwardButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false" text="Play (x2)" >
-                            <HBox.margin>
-                                <Insets left="5.0" />
-                            </HBox.margin>
-                        </ToggleButton>
-                        <ToggleButton fx:id="lightSpeedButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false" text="Play (x5)" >
-                            <HBox.margin>
-                                <Insets left="5.0" />
-                            </HBox.margin>
-                        </ToggleButton>
-                    </children>
-                    <VBox.margin>
-                        <Insets />
-                    </VBox.margin>
+                    <ToggleButton fx:id="pauseButton" toggleGroup="$simulationRunningToggleGroup"
+                                  mnemonicParsing="false" text="Pause"/>
+                    <ToggleButton fx:id="playButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false"
+                                  text="Play">
+                        <HBox.margin>
+                            <Insets left="5.0"/>
+                        </HBox.margin>
+                    </ToggleButton>
+                </HBox>
+                <HBox prefHeight="25.0" prefWidth="200.0">
+                    <ToggleButton fx:id="fastForwardButton" toggleGroup="$simulationRunningToggleGroup"
+                                  mnemonicParsing="false" text="Play (x2)"/>
+                    <ToggleButton fx:id="lightSpeedButton" toggleGroup="$simulationRunningToggleGroup"
+                                  mnemonicParsing="false" text="Play (x5)">
+                        <HBox.margin>
+                            <Insets left="5.0"/>
+                        </HBox.margin>
+                    </ToggleButton>
                 </HBox>
                 <Label fx:id="simulationFinishedLabel" text="Simulation has finished." style="-fx-font-weight: bold;">
                     <VBox.margin>

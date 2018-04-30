@@ -153,7 +153,6 @@ public class SimulationDriver {
         }
 
         AirportPackage pack = new AirportPackage(sourceGate, targetGate);
-        sourceGate.setPackage(pack);
         newPackages.add(pack);
         return pack;
     }

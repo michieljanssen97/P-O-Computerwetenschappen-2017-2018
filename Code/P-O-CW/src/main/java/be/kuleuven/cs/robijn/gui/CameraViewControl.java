@@ -329,7 +329,7 @@ public class CameraViewControl extends AnchorPane {
                     addPackageMenuItemLabel = "Add package from " + gateUID + " to " + destinationGateUID;
                 }
                 MenuItem addPackageMenuItem = new MenuItem(addPackageMenuItemLabel);
-                addPackageMenuItem.setDisable(destinationGate[0] == null || gate.hasPackage());
+                addPackageMenuItem.setDisable(destinationGate[0] == null || gate.hasPackage() || destinationGate[0] == gate);
                 addPackageMenuItem.setOnAction(e2 -> {
                     mainController.getPackageListControl().addPackage(gate, destinationGate[0]);
                 });
@@ -392,7 +392,11 @@ public class CameraViewControl extends AnchorPane {
             WorldObject clickedObj = getObjectAtPosition(renderer, world, worldPos);
 
             if(clickedObj instanceof Drone){
-                mainController.selectDrone((Drone) clickedObj);
+                Drone drone = (Drone) clickedObj;
+                mainController.selectDrone(drone);
+                if(drone.getPackage() != null){
+                    mainController.getPackageListControl().setSelectedPackage(drone.getPackage());
+                }
             }
 
             if(clickedObj instanceof Gate){

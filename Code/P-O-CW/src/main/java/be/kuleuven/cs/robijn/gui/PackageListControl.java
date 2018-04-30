@@ -2,21 +2,23 @@ package be.kuleuven.cs.robijn.gui;
 
 import be.kuleuven.cs.robijn.common.Resources;
 import be.kuleuven.cs.robijn.common.SimulationDriver;
-import be.kuleuven.cs.robijn.common.airports.Airport;
+import be.kuleuven.cs.robijn.common.SimulationSettings;
 import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import be.kuleuven.cs.robijn.common.airports.Gate;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.AnchorPane;
+import javafx.util.converter.NumberStringConverter;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -26,7 +28,7 @@ public class PackageListControl extends AnchorPane {
     private ObjectProperty<SimulationDriver> simulationProperty = new SimpleObjectProperty<>(this, "simulation");
 
     @FXML
-    private ListView<AirportPackage> packageList;
+    private TableView<AirportPackage> packageTable;
 
     @FXML
     private Button addRandomPackageButton;
@@ -51,6 +53,8 @@ public class PackageListControl extends AnchorPane {
 
     @FXML
     private void initialize(){
+        setupTable();
+
         addRandomPackageButton.setOnAction(e -> {
             addRandomPackage();
         });
@@ -61,13 +65,25 @@ public class PackageListControl extends AnchorPane {
     }
 
     public void setSelectedPackage(AirportPackage pkg){
-        packageList.getSelectionModel().select(pkg);
+        packageTable.getSelectionModel().select(pkg);
+    }
+
+    private void onPackageUpdate(AirportPackage pkg){
+        switch (pkg.getState()){
+            case AT_GATE:
+            case IN_TRANSIT:
+                packageTable.refresh();
+                break;
+            case DELIVERED:
+                packageTable.getItems().remove(pkg);
+                break;
+        }
     }
 
     public void addPackage(Gate originGate, Gate targetGate){
         AirportPackage newPackage = getSimulation().addPackage(originGate, targetGate);
-        newPackage.addDeliveryEventHandler(p -> packageList.getItems().remove(p));
-        packageList.getItems().add(newPackage);
+        newPackage.addStateUpdateEventHandler(this::onPackageUpdate);
+        packageTable.getItems().add(newPackage);
     }
 
     public void addRandomPackage(Gate originGate){
@@ -102,6 +118,55 @@ public class PackageListControl extends AnchorPane {
         Gate originGate = originGateCandidates.get(0);
 
         addPackage(originGate, destinationGate);
+    }
+
+    private void setupTable(){
+        packageTable.setEditable(false);
+
+        //Column 1 is origin
+        TableColumn<AirportPackage, String> originColumn = new TableColumn<>();
+        originColumn.setText("Origin");
+        originColumn.setCellValueFactory(cd -> Bindings.createStringBinding(() -> cd.getValue().getOrigin().getUID()));
+        originColumn.setPrefWidth(53);
+        packageTable.getColumns().add(originColumn);
+
+        //Column 2 is destination
+        TableColumn<AirportPackage, String> destinationColumn = new TableColumn<>();
+        destinationColumn.setText("Destination");
+        destinationColumn.setCellValueFactory(cd -> Bindings.createStringBinding(() -> cd.getValue().getDestination().getUID()));
+        destinationColumn.setPrefWidth(55);
+        packageTable.getColumns().add(destinationColumn);
+
+        //Column 3 is state
+        TableColumn<AirportPackage, String> stateColumn = new TableColumn<>();
+        stateColumn.setText("State");
+        stateColumn.setCellValueFactory(cd -> Bindings.createStringBinding(() -> cd.getValue().getState().toString()));
+        stateColumn.setPrefWidth(85);
+        packageTable.getColumns().add(stateColumn);
+
+        //Column 4 is current gate
+        TableColumn<AirportPackage, String> gateColumn = new TableColumn<>();
+        gateColumn.setText("Gate");
+        gateColumn.setCellValueFactory(cd -> Bindings.createStringBinding(() -> {
+            if(cd.getValue().getState() == AirportPackage.State.AT_GATE){
+                return cd.getValue().getCurrentGate().getUID();
+            }
+            return "";
+        }));
+        gateColumn.setPrefWidth(42);
+        packageTable.getColumns().add(gateColumn);
+
+        //Column 4 is current gate
+        TableColumn<AirportPackage, String> transporterColumn = new TableColumn<>();
+        transporterColumn.setText("Transporter");
+        transporterColumn.setCellValueFactory(cd -> Bindings.createStringBinding(() -> {
+            if(cd.getValue().getState() == AirportPackage.State.IN_TRANSIT){
+                return cd.getValue().getCurrentTransporter().getDroneID();
+            }
+            return "";
+        }));
+        transporterColumn.setPrefWidth(95);
+        packageTable.getColumns().add(transporterColumn);
     }
 
     SimulationDriver getSimulation(){

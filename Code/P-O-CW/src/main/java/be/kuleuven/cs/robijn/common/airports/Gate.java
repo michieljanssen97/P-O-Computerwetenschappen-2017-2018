@@ -1,7 +1,9 @@
 package be.kuleuven.cs.robijn.common.airports;
 
 import be.kuleuven.cs.robijn.common.WorldObject;
+import be.kuleuven.cs.robijn.worldObjects.Drone;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
+import org.apache.commons.math3.linear.RealVector;
 
 public class Gate extends WorldObject{
     private final Airport parent;
@@ -25,6 +27,10 @@ public class Gate extends WorldObject{
         return id;
     }
 
+    public String getUID(){
+        return parent.getId() + ":" + getId();
+    }
+
     public AirportPackage getPackage() {
         return queuedPackage;
     }
@@ -35,5 +41,15 @@ public class Gate extends WorldObject{
 
     public void setPackage(AirportPackage pack){
         this.queuedPackage = pack;
+    }
+
+    public boolean isDroneAbove(Drone drone) {
+        RealVector dronePos = drone.getWorldPosition();
+        RealVector gatePos = this.getWorldPosition();
+        RealVector droneToGateVect = gatePos.subtract(dronePos);
+        Vector2D gateSize = this.getSize();
+
+        return Math.abs(droneToGateVect.getEntry(0)) < gateSize.getX() &&
+                Math.abs(droneToGateVect.getEntry(2)) < gateSize.getY();
     }
 }
