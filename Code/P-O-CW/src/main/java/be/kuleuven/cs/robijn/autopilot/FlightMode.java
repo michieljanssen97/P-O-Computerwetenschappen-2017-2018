@@ -7,5 +7,6 @@ public enum FlightMode {//TODO use enums, instead of modes that are integers in 
 	LAND,
 	STOPPED,
 	TURN,
-	WAIT;
+	WAIT,
+	BRAKE;
 }
