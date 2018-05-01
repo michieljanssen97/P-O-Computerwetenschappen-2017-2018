@@ -52,6 +52,12 @@ public class Autopilot {
 		this.previousElapsedTime = previousElapsedTime;
 	}
 	
+	private Targets targets;
+	
+	public void setTargets(RealVector[] targets) {
+		this.targets.setTargets(targets);
+	}
+	
 	/**
 	 * Wel roll ten gevolge van verschillende snelheid van vleugels (door de rotaties). 
 	 */
@@ -138,10 +144,10 @@ public class Autopilot {
 					finished = true;
 					
 					RealVector target = null;
-					if (this.getNbTargets() == 0)
+					if (this.targets.getNbTargets() == 0)
 						this.setFlightMode(FlightMode.LAND);
 					else {
-						target = this.getFirstTarget();
+						target = this.targets.getFirstTarget();
 					}
 					
 //					Angle angle = new Angle((float) Math.atan(drone.getWorldPosition().getEntry(2)/(drone.getWorldPosition().getEntry(0)-500)));
@@ -713,29 +719,11 @@ public class Autopilot {
 	public void setFlightMode(FlightMode mode) throws IllegalArgumentException {
 		this.currentFlightMode = mode;
 	}
-	
-	public RealVector[] getTargets() {
-		return this.targets;
-	}
-	
-	public RealVector getFirstTarget() {
-		return this.getTargets()[0];
-	}
-	
-	public int getNbTargets() {
-		return this.getTargets().length;
-	}
-	
-	public void setTargets(RealVector[] targets) {
-		this.targets = targets;
-	}
-	
-	private RealVector[] targets = new RealVector[] {new ArrayRealVector(new double[0], false)};
-	
-    public static boolean isPositionDrawn() {
+    
+	public static boolean isPositionDrawn() {
     	return drawChartPositions;
     }
-    
+	
 	/**
 	 * Method to move the drone of this autopilot,
 	 * the position, velocity and acceleration get updated,
@@ -1012,6 +1000,7 @@ public class Autopilot {
 		if (! isValidInitialZVelocity(initialZVelocity))
 			throw new IllegalArgumentException();
 		this.initialZVelocity = initialZVelocity;
+		this.targets = new Targets(drone);
 	}
 
 	public void simulationEnded() throws IllegalArgumentException {
