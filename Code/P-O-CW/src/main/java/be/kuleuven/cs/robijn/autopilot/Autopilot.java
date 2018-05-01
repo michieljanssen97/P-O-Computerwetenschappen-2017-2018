@@ -18,7 +18,7 @@ import interfaces.*;
 public class Autopilot {
 	private static boolean drawChartPositions = false;
 	public static ExpPosition exppos = new ExpPosition();
-	public FlightMode currentFlightMode = FlightMode.ASCEND;
+	public FlightMode currentFlightMode = FlightMode.READY;
 	
 	public AutopilotConfig getConfig() {
 		return this.config;
@@ -124,7 +124,7 @@ public class Autopilot {
 			}
 		}
 
-		else if ((this.getFlightMode() == FlightMode.FULL_FLIGHT) || (this.getFlightMode() == FlightMode.LAND)) {
+		else if (this.getFlightMode() == FlightMode.FULL_FLIGHT) {
 				
 			FrontWheel wheel = drone.getFirstChildOfType(FrontWheel.class);
 			if (this.getConfig().getTyreRadius() >= wheel.getPosition(drone).getEntry(1)) {
@@ -137,7 +137,7 @@ public class Autopilot {
 					iterations += 1;
 					finished = true;
 					
-					RealVector target = new ArrayRealVector(new double[] {1000, 50, -1000}, false);
+					RealVector target = this.getFirstTarget();
 					
 //					Angle angle = new Angle((float) Math.atan(drone.getWorldPosition().getEntry(2)/(drone.getWorldPosition().getEntry(0)-500)));
 //					System.out.println(angle.getOrientation());
@@ -532,7 +532,6 @@ public class Autopilot {
 			}
 			thrust = Math.max(0, thrust);
         }
-		
 		if (this.getFlightMode() == FlightMode.WAIT) {
 			if (drone.getVelocity().getNorm() > 0.01) {
 				float accel = (float) (drone.getVelocity().getNorm() - 0.01);
@@ -709,6 +708,20 @@ public class Autopilot {
 	public void setFlightMode(FlightMode mode) throws IllegalArgumentException {
 		this.currentFlightMode = mode;
 	}
+	
+	public RealVector[] getTargets() {
+		return this.targets;
+	}
+	
+	public RealVector getFirstTarget() {
+		return this.getTargets()[0];
+	}
+	
+	public void setTargets(RealVector[] targets) {
+		this.targets = targets;
+	}
+	
+	private RealVector[] targets = new RealVector[] {new ArrayRealVector(new double[0], false)};
 	
     public static boolean isPositionDrawn() {
     	return drawChartPositions;
