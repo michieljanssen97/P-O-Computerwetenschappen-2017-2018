@@ -125,14 +125,10 @@ public class Autopilot {
 		float frontBrakeForce = 0;
 		
 		AutopilotSettings settings = new AutopilotSettings();
-<<<<<<< HEAD
-=======
+
 		
 		Drone[] collidableDrones = calculateFirstDroneCollision();
-//		System.out.println(collidableDrones);
->>>>>>> taxi_and_collision
 
-		Drone[] collidableDrones = calculateFirstDroneCollision();
 
 		if (collidableDrones != null) {
 
