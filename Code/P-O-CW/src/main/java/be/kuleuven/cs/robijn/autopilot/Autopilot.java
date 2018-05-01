@@ -143,6 +143,7 @@ public class Autopilot {
 					iterations += 1;
 					finished = true;
 					
+					//RealVector target = new ArrayRealVector(new double[] {0, 50, -1000}, false);
 					RealVector target = null;
 					if (this.targets.getNbTargets() == 0)
 						this.setFlightMode(FlightMode.LAND);
