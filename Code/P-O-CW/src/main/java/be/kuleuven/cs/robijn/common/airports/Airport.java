@@ -116,8 +116,8 @@ public class Airport extends WorldObject {
         return null;
     }
     
-    public static Drone getAvailableDrone(Airport airport) {
-    	Drone drone = airport.getFirstAvailableDrone();
+    public Drone getAvailableDrone() {
+    	Drone drone = this.getFirstAvailableDrone();
     	if(drone != null) {
     		return drone;
     	}
@@ -125,8 +125,8 @@ public class Airport extends WorldObject {
     	double distance = Double.MAX_VALUE;
     	for(Airport airp : Airport.getAllAirports()) {
     		Drone tempDrone = airp.getFirstAvailableDrone();
-    		if(tempDrone.calculateDistanceToAirport(airport) < distance) { //Give higher priority to Drones at nearby Airports, moet mss nog anders wegens orientatie van de luchthavens
-    			distance = tempDrone.calculateDistanceToAirport(airport);
+    		if(tempDrone.calculateDistanceToAirport(this) < distance) { //Give higher priority to Drones at nearby Airports, moet mss nog anders wegens orientatie van de luchthavens
+    			distance = tempDrone.calculateDistanceToAirport(this);
     			drone = tempDrone;
     		}
     	}    	

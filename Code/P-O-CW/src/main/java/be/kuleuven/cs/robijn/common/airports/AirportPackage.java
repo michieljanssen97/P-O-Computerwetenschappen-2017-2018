@@ -193,7 +193,7 @@ public class AirportPackage {
                 throw new IllegalStateException(); //mag maar 1 package beschikbaar zijn per Gate
             }
             
-            Drone drone = Airport.getAvailableDrone(fromAirport);
+            Drone drone = fromAirport.getAvailableDrone();
             if(drone != null) {
             	if(drone.getCurrentAirport() != fromAirport) {
 	            	//TODO laat drone naar fromAirport vliegen
