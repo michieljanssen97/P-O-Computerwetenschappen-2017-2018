@@ -124,7 +124,7 @@ public class Autopilot {
 			}
 		}
 
-		else if (this.getFlightMode() == FlightMode.FULL_FLIGHT) {
+		else if ((this.getFlightMode() == FlightMode.FULL_FLIGHT) || (this.getFlightMode() == FlightMode.LAND)) {
 				
 			FrontWheel wheel = drone.getFirstChildOfType(FrontWheel.class);
 			if (this.getConfig().getTyreRadius() >= wheel.getPosition(drone).getEntry(1)) {
@@ -137,7 +137,12 @@ public class Autopilot {
 					iterations += 1;
 					finished = true;
 					
-					RealVector target = this.getFirstTarget();
+					RealVector target = null;
+					if (this.getNbTargets() == 0)
+						this.setFlightMode(FlightMode.LAND);
+					else {
+						target = this.getFirstTarget();
+					}
 					
 //					Angle angle = new Angle((float) Math.atan(drone.getWorldPosition().getEntry(2)/(drone.getWorldPosition().getEntry(0)-500)));
 //					System.out.println(angle.getOrientation());
@@ -154,32 +159,32 @@ public class Autopilot {
 //					target = new ArrayRealVector(new double[] {target.getEntry(0)*Math.cos(cor) - target.getEntry(2)*Math.sin(cor),
 //								100, target.getEntry(2)*Math.cos(cor) + target.getEntry(0)*Math.sin(cor)}, false);
 				
-//					if (this.getFlightMode() == FlightMode.LAND) {
-//						if (drone.getWorldPosition().getEntry(1) >= 5*settings.getHeight()) {
-//							RealVector vector = drone.getVelocity();
-//							vector.setEntry(1, 0);
-//							float length = (float) vector.getNorm();
-//							vector = drone.getVelocity();
-//							vector.setEntry(1, -Math.tan(Math.toRadians(10))*length);
-//							target = drone.getWorldPosition().add(vector);
-//						}
-//						else if ((settings.getHeight() <= drone.getWorldPosition().getEntry(1)) && (drone.getWorldPosition().getEntry(1) < 5*settings.getHeight())) {
-//							RealVector vector = drone.getVelocity();
-//							vector.setEntry(1, 0);
-//							float length = (float) vector.getNorm();
-//							vector = drone.getVelocity();
-//							vector.setEntry(1, -Math.tan(Math.toRadians(5))*length);
-//							target = drone.getWorldPosition().add(vector);
-//						}
-//						else {
-//							RealVector vector = drone.getVelocity();
-//							vector.setEntry(1, 0);
-//							float length = (float) vector.getNorm();
-//							vector = drone.getVelocity();
-//							vector.setEntry(1, -Math.tan(Math.toRadians(1))*length);
-//							target = drone.getWorldPosition().add(vector);
-//						}
-//					}
+					if (this.getFlightMode() == FlightMode.LAND) {
+						if (drone.getWorldPosition().getEntry(1) >= 5*settings.getHeight()) {
+							RealVector vector = drone.getVelocity();
+							vector.setEntry(1, 0);
+							float length = (float) vector.getNorm();
+							vector = drone.getVelocity();
+							vector.setEntry(1, -Math.tan(Math.toRadians(10))*length);
+							target = drone.getWorldPosition().add(vector);
+						}
+						else if ((settings.getHeight() <= drone.getWorldPosition().getEntry(1)) && (drone.getWorldPosition().getEntry(1) < 5*settings.getHeight())) {
+							RealVector vector = drone.getVelocity();
+							vector.setEntry(1, 0);
+							float length = (float) vector.getNorm();
+							vector = drone.getVelocity();
+							vector.setEntry(1, -Math.tan(Math.toRadians(5))*length);
+							target = drone.getWorldPosition().add(vector);
+						}
+						else {
+							RealVector vector = drone.getVelocity();
+							vector.setEntry(1, 0);
+							float length = (float) vector.getNorm();
+							vector = drone.getVelocity();
+							vector.setEntry(1, -Math.tan(Math.toRadians(1))*length);
+							target = drone.getWorldPosition().add(vector);
+						}
+					}
 					
 					Angle XRotation = Angle.getXRotation(target, drone.getWorldPosition());
 					Angle YRotation = Angle.getYRotation(target, drone.getWorldPosition());
@@ -715,6 +720,10 @@ public class Autopilot {
 	
 	public RealVector getFirstTarget() {
 		return this.getTargets()[0];
+	}
+	
+	public int getNbTargets() {
+		return this.getTargets().length;
 	}
 	
 	public void setTargets(RealVector[] targets) {
