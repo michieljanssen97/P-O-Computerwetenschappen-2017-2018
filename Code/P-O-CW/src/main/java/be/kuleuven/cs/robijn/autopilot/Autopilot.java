@@ -277,12 +277,15 @@ public class Autopilot {
 					}
 					
 					Angle targetRoll;
-					if ((YRotation.getOrientation(Type.DEGREES) > 30)  && (drone.getWorldPosition().getDistance(target) < 500))
-						targetRoll = new Angle(10, Type.DEGREES);
-					else if ((YRotation.getOrientation(Type.DEGREES) < -30)  && (drone.getWorldPosition().getDistance(target) < 500))
-						targetRoll = new Angle(-10, Type.DEGREES);
+					Angle roll = new Angle(drone.getRoll());
+					if ((Math.abs(YRotation.getOrientation(Type.DEGREES)) > 30) && (drone.getWorldPosition().getDistance(target) < 500))
+						targetRoll = new Angle(0, Type.DEGREES);
+					else if ((YRotation.getOrientation(Type.DEGREES) > 30) && (roll.getOrientation(Type.DEGREES) < 20))
+						targetRoll = new Angle(20, Type.DEGREES);
 					else if (YRotation.getOrientation(Type.DEGREES) > 30)
 						targetRoll = new Angle(40, Type.DEGREES);
+					else if ((YRotation.getOrientation(Type.DEGREES) < -30) && (roll.getOrientation(Type.DEGREES) > -20))
+						targetRoll = new Angle(-20, Type.DEGREES);
 					else if (YRotation.getOrientation(Type.DEGREES) < -30)
 						targetRoll = new Angle(-40, Type.DEGREES);
 					else if (YRotation.getOrientation(Type.DEGREES) > 20)
