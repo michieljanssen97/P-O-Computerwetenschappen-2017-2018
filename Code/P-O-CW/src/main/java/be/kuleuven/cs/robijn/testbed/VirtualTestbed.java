@@ -36,10 +36,10 @@ public class VirtualTestbed implements TestBed {
 
 		//Create airports and drones
 		SimulationBuilder.buildSimulation(settings, world);
-		drones = world.getChildrenOfType(Drone.class);
+		drones = WorldObject.getChildrenOfType(Drone.class);
 
 		//Set initial autopilotinputs
-		List<Drone> drones = world.getChildrenOfType(Drone.class);
+		List<Drone> drones = WorldObject.getChildrenOfType(Drone.class);
 		inputs = new AutopilotInputs[settings.getDrones().length];
 		for (int i = 0; i < settings.getDrones().length; i++) {
 			Drone drone = drones.get(i);
@@ -133,7 +133,7 @@ public class VirtualTestbed implements TestBed {
 			frameBuffer = renderer.createFrameBuffer(drone.getConfig().getNbColumns(), drone.getConfig().getNbRows());
 		}
 
-		Camera droneCamera = drone.getFirstChildOfType(Camera.class);
+		Camera droneCamera = WorldObject.getFirstChildOfType(Camera.class);
 		if(droneCamera == null){
 			droneCamera = createDroneCamera(drone);
 		}

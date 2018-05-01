@@ -129,7 +129,7 @@ public class TestbedSimulation {
 			drone.setPitchAngularVelocity((float) y[9]);
 			drone.setRollAngularVelocity((float) y[11]);
 			
-			for (Tyre tyres: drone.getChildrenOfType(Tyre.class)) {
+			for (Tyre tyres: WorldObject.getChildrenOfType(Tyre.class)) {
 				@SuppressWarnings("unused")
 				float d = tyres.getD(drone);
 			}
@@ -162,7 +162,7 @@ public class TestbedSimulation {
 			drone.setPitchAngularVelocity(pitchAngularVelocity + pitchAngularAcceleration*secondsSinceLastUpdate);
 			drone.setRollAngularVelocity(rollAngularVelocity + rollAngularAcceleration*secondsSinceLastUpdate);
 			
-			for (Tyre tyres: drone.getChildrenOfType(Tyre.class)) {
+			for (Tyre tyres: WorldObject.getChildrenOfType(Tyre.class)) {
 				@SuppressWarnings("unused")
 				float d = tyres.getD(drone);
 			}

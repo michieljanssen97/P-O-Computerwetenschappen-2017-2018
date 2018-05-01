@@ -25,7 +25,7 @@ public class AutopilotModule {
         this.world = world;
 
         // Create a new autopilot for each drone in the world.
-        ArrayList<Drone> drones = world.getChildrenOfType(Drone.class);
+        ArrayList<Drone> drones = WorldObject.getChildrenOfType(Drone.class);
         for (Drone drone : drones) {
         	Autopilot autopilot = new Autopilot();
         	autopilot.initialise(drone.getConfig(), drone);

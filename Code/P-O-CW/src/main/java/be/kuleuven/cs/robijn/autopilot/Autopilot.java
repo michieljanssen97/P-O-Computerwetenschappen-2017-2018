@@ -8,6 +8,7 @@ import be.kuleuven.cs.robijn.common.math.ScalarMath;
 import be.kuleuven.cs.robijn.experiments.ExpPosition;
 import be.kuleuven.cs.robijn.tyres.FrontWheel;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
+import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 import interfaces.*;
 
 /**
@@ -131,7 +132,7 @@ public class Autopilot {
 
 		else if ((this.getFlightMode() == FlightMode.FULL_FLIGHT) || (this.getFlightMode() == FlightMode.LAND)) {
 				
-			FrontWheel wheel = drone.getFirstChildOfType(FrontWheel.class);
+			FrontWheel wheel = WorldObject.getFirstChildOfType(FrontWheel.class);
 			if (this.getConfig().getTyreRadius() >= wheel.getPosition(drone).getEntry(1)) {
 				this.setFlightMode(FlightMode.TAXI);
 				this.drone.setArrived();

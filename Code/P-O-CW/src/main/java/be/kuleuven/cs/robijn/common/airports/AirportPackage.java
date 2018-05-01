@@ -89,12 +89,11 @@ public class AirportPackage {
 		Runway landRunway = toAirport.getRunwayToLand();
 		
 		
-    	//TODO naar fromGate taxiën, en van daaruit naar takeOffRunWay
-        fromAirport.getRunwayToLand().setHasDrones(false); // Drone is geland
+    	//TODO naar fromGate taxiën (packet ophalen), en van daaruit naar takeOffRunWay om op te stijgen
         takeOffRunway.setHasDrones(true);
         currentTransporter.setTakeOffRunway(takeOffRunway);
         
-    	landRunway.setHasDrones(true);
+    	landRunway.setHasDrones(true); //TODO mss pas later locken, vanaf inzetten landing ofzo -> Wel rekening houden dat hij dan niet vrij kan zijn, erboven blijven cirkelen, enz...
         currentTransporter.setDestinationRunway(landRunway);
 
         for(Consumer<AirportPackage> handler : stateUpdateEventHandlers){

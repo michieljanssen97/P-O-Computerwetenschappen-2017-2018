@@ -65,8 +65,8 @@ public class AutopilotModuleAdapter implements interfaces.AutopilotModule {
             settings.setDrones(droneDefinitions.toArray(new DroneDefinition[droneDefinitions.size()]));
             SimulationBuilder.buildSimulation(settings, world);
 
-            airports = world.getChildrenOfType(Airport.class);
-            drones = world.getChildrenOfType(Drone.class);
+            airports = WorldObject.getChildrenOfType(Airport.class);
+            drones = WorldObject.getChildrenOfType(Drone.class);
             module = new AutopilotModule(world);
         }
     }

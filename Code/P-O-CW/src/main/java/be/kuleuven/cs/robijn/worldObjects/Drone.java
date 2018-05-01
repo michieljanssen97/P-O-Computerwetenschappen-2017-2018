@@ -1133,7 +1133,7 @@ public class Drone extends WorldObject {
 								.add(liftForce)
 								.add(this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, -thrust}, false)));
 		
-		for (Tyre tyres: this.getChildrenOfType(Tyre.class)) {
+		for (Tyre tyres: WorldObject.getChildrenOfType(Tyre.class)) {
 			float wheelBrakeForce;
 			if(tyres instanceof RightRearWheel) {
 				wheelBrakeForce = rightRearBrakeForce;
@@ -1229,7 +1229,7 @@ public class Drone extends WorldObject {
 									)
 								));
 		
-		for (Tyre tyres: this.getChildrenOfType(Tyre.class)) {
+		for (Tyre tyres: WorldObject.getChildrenOfType(Tyre.class)) {
 			float wheelBrakeForce;
 			if(tyres instanceof RightRearWheel) {
 				wheelBrakeForce = rightRearBrakeForce;
