@@ -105,6 +105,12 @@
                                                 <Insets left="10.0"/>
                                             </HBox.margin>
                                         </Button>
+                                        <Button fx:id="autoAssignDronesButton" mnemonicParsing="false"
+                                                text="Auto-assign drones">
+                                            <HBox.margin>
+                                                <Insets left="10.0"/>
+                                            </HBox.margin>
+                                        </Button>
                                         <Button fx:id="loadDroneSetupFileButton" mnemonicParsing="false" text="Load file…">
                                             <HBox.margin>
                                                 <Insets left="10.0"/>
