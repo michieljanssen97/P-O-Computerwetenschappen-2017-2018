@@ -16,7 +16,17 @@ public class WorldObject {
     private RealVector position = new ArrayRealVector(new double[]{0, 0, 0}, false);
     private Rotation rotation = new Rotation(new Vector3D(1, 0, 0), 0);
     private RealVector scale = new ArrayRealVector(new double[]{1, 1, 1}, false);
+    private RealMatrix objectToWorldTransform = null;
     private String name = "";
+
+    public WorldObject(){}
+
+    public WorldObject(WorldObject toCopy){
+        setRelativePosition(toCopy.getRelativePosition());
+        setRelativeRotation(toCopy.getRelativeRotation());
+        setScale(toCopy.getScale());
+        setName(toCopy.getName());
+    }
 
     ////////////////////////
     /// OBJECT HIERARCHY ///
@@ -207,6 +217,7 @@ public class WorldObject {
         }
 
         this.position = vector;
+        this.objectToWorldTransform = null;
     }
 
     /**
@@ -227,6 +238,7 @@ public class WorldObject {
         }
 
         this.rotation = rotation;
+        this.objectToWorldTransform = null;
     }
 
     /**
@@ -254,21 +266,38 @@ public class WorldObject {
         }
 
         this.scale = scale;
+        this.objectToWorldTransform = null;
     }
 
     /// WORLD TRANSFORM ///
+
+    private boolean isObjectToWorldTransformDirty(){
+        return objectToWorldTransform == null || (getParent() != null && getParent().isObjectToWorldTransformDirty());
+    }
 
     /**
      * Returns an affine transformation matrix that transforms local coordinates to world coordinates.
      * @return a non-null 4x4 homogeneous transformation matrix
      */
     public RealMatrix getObjectToWorldTransform(){
+        if(isObjectToWorldTransformDirty()){
+            RealMatrix objectToParentTransform = getObjectToParentTransform();
+            if(getParent() == null) {
+                objectToWorldTransform = objectToParentTransform;
+            }else{
+                objectToWorldTransform = getParent().getObjectToWorldTransform().multiply(objectToParentTransform);
+            }
+        }
+        return objectToWorldTransform;
+    }
+
+    public RealMatrix getObjectToParentTransform(){
         //Create local affine scale matrix
         RealMatrix scaleMatrix = new Array2DRowRealMatrix(new double[][]{
-            {getScale().getEntry(0), 0, 0, 0},
-            {0, getScale().getEntry(1), 0, 0},
-            {0, 0, getScale().getEntry(2), 0},
-            {0, 0, 0, 1}
+                {getScale().getEntry(0), 0, 0, 0},
+                {0, getScale().getEntry(1), 0, 0},
+                {0, 0, getScale().getEntry(2), 0},
+                {0, 0, 0, 1}
         }, false);
 
         //Create local affine transformation matrix
@@ -279,17 +308,13 @@ public class WorldObject {
         //Create local affine translation matrix
         RealVector localTranslation = getRelativePosition();
         RealMatrix translationMatrix = new Array2DRowRealMatrix(new double[][]{
-            {1, 0, 0, localTranslation.getEntry(0)},
-            {0, 1, 0, localTranslation.getEntry(1)},
-            {0, 0, 1, localTranslation.getEntry(2)},
-            {0, 0, 0, 1}
+                {1, 0, 0, localTranslation.getEntry(0)},
+                {0, 1, 0, localTranslation.getEntry(1)},
+                {0, 0, 1, localTranslation.getEntry(2)},
+                {0, 0, 0, 1}
         }, false);
 
-        RealMatrix objectToParentTransform = translationMatrix.multiply(rotationMatrix.multiply(scaleMatrix));
-        if(getParent() != null) {
-            return getParent().getObjectToWorldTransform().multiply(objectToParentTransform);
-        }
-        return objectToParentTransform;
+        return translationMatrix.multiply(rotationMatrix.multiply(scaleMatrix));
     }
 
     /**
@@ -360,6 +385,14 @@ public class WorldObject {
 
     private RealVector vector3DToRealVector(Vector3D vector){
         return new ArrayRealVector(new double[]{vector.getX(), vector.getY(), vector.getZ(), 1});
+    }
+
+    @Override
+    public String toString() {
+        if(this.getName() != null && !this.getName().equals("")){
+            return this.getClass().getName() + ": " + getName();
+        }
+        return super.toString();
     }
 }
 

@@ -12,34 +12,34 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 
 public class Airport extends WorldObject {
-	
 	private static ArrayList<Airport> allAirportsList = new ArrayList<Airport>();
-	
-	private final RealVector position; //The middle of the airport
+
+    private final int id;
     private Vector2D size;
     private Gate[] gates;
     private Runway[] runways;
     private ArrayList<Drone> currentDrones = new ArrayList<Drone>();
 
-    public Airport(float xPosition, float zPosition, float length, float width, Vector2D centerToRunway0){
+    public Airport(int id, float length, float width, Vector2D centerToRunway0){
+        this.id = id;
         size = new Vector2D((2f*length) + width, 2f*width);
 
         RealVector gateSize = new ArrayRealVector(new double[]{width, 0, width}, false);
         gates = new Gate[2];
-        gates[0] = new Gate();
+        gates[0] = new Gate(this, 0);
         gates[0].setRelativePosition(new ArrayRealVector(new double[]{0, 0, width/2f}, false));
         gates[0].setScale(gateSize);
-        gates[1] = new Gate();
+        gates[1] = new Gate(this, 1);
         gates[1].setRelativePosition(new ArrayRealVector(new double[]{0, 0, -width/2f}, false));
         gates[1].setScale(gateSize);
         this.addChildren(gates);
 
         RealVector runwaySize = new ArrayRealVector(new double[]{length, 0, width*2f}, false);
         runways = new Runway[2];
-        runways[0] = new Runway();
+        runways[0] = new Runway(this, 0);
         runways[0].setRelativePosition(new ArrayRealVector(new double[]{-(length+width)/2f, 0, 0}, false));
         runways[0].setScale(runwaySize);
-        runways[1] = new Runway();
+        runways[1] = new Runway(this, 1);
         runways[1].setRelativePosition(new ArrayRealVector(new double[]{(length+width)/2f, 0, 0}, false));
         runways[1].setScale(runwaySize);
         this.addChildren(runways);
@@ -48,26 +48,24 @@ public class Airport extends WorldObject {
             new Rotation(Vector3D.PLUS_J, Math.acos(new Vector2D(-1, 0).dotProduct(centerToRunway0)))
         );
         Airport.allAirportsList.add(this);
-        
-        this.position = new ArrayRealVector(new Double[] {(double) xPosition, (double) zPosition});
     }
     
     public static ArrayList<Airport>getAllAirports() {
     	return Airport.allAirportsList;
     }
     
-    public RealVector getPosition() {
-    	return new ArrayRealVector(this.position);
-    }
-    
     public int getXPositionMiddle() {
-    	return (int) this.getPosition().getEntry(0);
+    	return (int) this.getWorldPosition().getEntry(0);
     }
     
     public int getZPositionMiddle() {
-    	return (int) this.getPosition().getEntry(1);
+    	return (int) this.getWorldPosition().getEntry(1);
     }
     
+
+    public int getId() {
+        return id;
+    }
 
     public Vector2D getSize() {
         return size;

@@ -3,6 +3,9 @@ package be.kuleuven.cs.robijn.gui;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.worldObjects.Label3D;
+import be.kuleuven.cs.robijn.common.airports.Gate;
+import be.kuleuven.cs.robijn.common.math.VectorMath;
+import be.kuleuven.cs.robijn.testbed.renderer.RenderDebug;
 import be.kuleuven.cs.robijn.worldObjects.*;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -11,22 +14,28 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealVector;
 
 import java.awt.*;
+import java.awt.Menu;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
+import java.util.Optional;
+import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
@@ -67,8 +76,11 @@ public class CameraViewControl extends AnchorPane {
 
     private DragHelper dragHelper;
     private double dragSensitivity = 0.1;
+    private final MainController mainController;
 
-    public CameraViewControl(){
+    public CameraViewControl(MainController parent){
+        this.mainController = parent;
+
         //Load the layout associated with this GUI control
         FXMLLoader fxmlLoader = new FXMLLoader(Resources.getResourceURL("/layouts/camera_view.fxml"));
         fxmlLoader.setRoot(this);
@@ -91,6 +103,7 @@ public class CameraViewControl extends AnchorPane {
         setupResizing();
         setupPerspectiveChanging();
         setupRendering();
+        setupContextMenu();
     }
 
     private OrthographicCamera sideCamera, topCamera;
@@ -274,6 +287,137 @@ public class CameraViewControl extends AnchorPane {
                 update();
             }, UpdateEventHandler.LOW_PRIORITY));
         });
+    }
+
+    private void setupContextMenu() {
+        final ContextMenu airportMenu = new ContextMenu();
+
+        final Gate[] destinationGate = new Gate[1];
+        imageView.setOnContextMenuRequested(e -> {
+            if(simulationProperty.get() == null || activeCamera == null || frameBuffer == null){
+                return;
+            }
+
+            TestBed testBed = simulationProperty.get().getTestBed();
+            Renderer renderer = testBed.getRenderer();
+            WorldObject world = testBed.getWorldRepresentation();
+
+            RealVector worldPos = renderer.screenPointToWorldSpace(activeCamera, frameBuffer, (int)e.getX(), (int)e.getY());
+            WorldObject clickedObj = getObjectAtPosition(renderer, world, worldPos);
+
+            if(clickedObj instanceof Gate){
+                Gate gate = (Gate)clickedObj;
+                String gateUID = gate.getAirport().getId() + ":" + gate.getId();
+
+                MenuItem addRandomPackageMenuItem = new MenuItem("Add package from " + gateUID + " to random");
+                addRandomPackageMenuItem.setDisable(gate.hasPackage());
+                addRandomPackageMenuItem.setOnAction(e2 -> {
+                    mainController.getPackageListControl().addRandomPackage(gate);
+                });
+
+                MenuItem setDestinationMenuItem = new MenuItem("Set " + gateUID + " as destination");
+                setDestinationMenuItem.setOnAction(e2 -> {
+                    destinationGate[0] = gate;
+                });
+
+                String addPackageMenuItemLabel = "Add package from " + gateUID + " to <none>";
+                if(destinationGate[0] != null){
+                    String destinationGateUID = destinationGate[0].getAirport().getId() + ":" + destinationGate[0].getId();
+                    addPackageMenuItemLabel = "Add package from " + gateUID + " to " + destinationGateUID;
+                }
+                MenuItem addPackageMenuItem = new MenuItem(addPackageMenuItemLabel);
+                addPackageMenuItem.setDisable(destinationGate[0] == null || gate.hasPackage() || destinationGate[0] == gate);
+                addPackageMenuItem.setOnAction(e2 -> {
+                    mainController.getPackageListControl().addPackage(gate, destinationGate[0]);
+                });
+
+                airportMenu.getItems().clear();
+                airportMenu.getItems().addAll(addPackageMenuItem, setDestinationMenuItem, addRandomPackageMenuItem);
+
+                airportMenu.show(imageView, e.getScreenX(), e.getScreenY());
+            }
+
+            /*world.getDescendantsStream().filter(c -> c instanceof Airport).forEach(c -> {
+                Color color = ColorGenerator.random();
+
+                BoundingBox box = renderer.getBoundingBoxFor(c);
+                Vector3D boxPos = VectorMath.realTo3D(box.getWorldPosition());
+                double dX = (box.getBoxDimensions().getX() / 2d) + 0.01f;
+                double dY = (box.getBoxDimensions().getY() / 2d) + 0.01f;
+                double dZ = (box.getBoxDimensions().getZ() / 2d) + 0.01f;
+                RenderDebug.drawLine(
+                        new Vector3D(boxPos.getX() - dX, boxPos.getY() + dY, boxPos.getZ() - dZ),
+                        new Vector3D(boxPos.getX() + dX, boxPos.getY() + dY, boxPos.getZ() - dZ),
+                        color
+                    );
+                RenderDebug.drawLine(
+                        new Vector3D(boxPos.getX() - dX, boxPos.getY() + dY, boxPos.getZ() + dZ),
+                        new Vector3D(boxPos.getX() + dX, boxPos.getY() + dY, boxPos.getZ() + dZ),
+                        color
+                );
+                RenderDebug.drawLine(
+                        new Vector3D(boxPos.getX() - dX, boxPos.getY() + dY, boxPos.getZ() - dZ),
+                        new Vector3D(boxPos.getX() - dX, boxPos.getY() + dY, boxPos.getZ() + dZ),
+                        color
+                );
+                RenderDebug.drawLine(
+                        new Vector3D(boxPos.getX() + dX, boxPos.getY() + dY, boxPos.getZ() - dZ),
+                        new Vector3D(boxPos.getX() + dX, boxPos.getY() + dY, boxPos.getZ() + dZ),
+                        color
+                );
+            });*/
+        });
+
+        imageView.setOnMouseClicked(e -> {
+            if(simulationProperty.get() == null || activeCamera == null || frameBuffer == null){
+                return;
+            }
+
+            if(e.getButton() == MouseButton.PRIMARY){
+                airportMenu.hide();
+            }
+
+            if(e.getClickCount() != 2){
+                return;
+            }
+
+            TestBed testBed = simulationProperty.get().getTestBed();
+            Renderer renderer = testBed.getRenderer();
+            WorldObject world = testBed.getWorldRepresentation();
+
+            RealVector worldPos = renderer.screenPointToWorldSpace(activeCamera, frameBuffer, (int)e.getX(), (int)e.getY());
+            WorldObject clickedObj = getObjectAtPosition(renderer, world, worldPos);
+
+            if(clickedObj instanceof Drone){
+                Drone drone = (Drone) clickedObj;
+                mainController.selectDrone(drone);
+                if(drone.getPackage() != null){
+                    mainController.getPackageListControl().setSelectedPackage(drone.getPackage());
+                }
+            }
+
+            if(clickedObj instanceof Gate){
+                Gate gate = (Gate)clickedObj;
+                if(gate.hasPackage()){
+                    mainController.getPackageListControl().setSelectedPackage(gate.getPackage());
+                }
+            }
+        });
+    }
+
+    private WorldObject getObjectAtPosition(Renderer renderer, WorldObject root, RealVector worldPos){
+        WorldObject curObj = root;
+        while(true){
+            Optional<WorldObject> matchingChild = curObj.getChildren().stream()
+                    .filter(w -> renderer.getBoundingBoxFor(w).contains(VectorMath.realTo3D(worldPos), 0.1f))
+                    .findFirst();
+            if(!matchingChild.isPresent()){
+                break;
+            }else{
+                curObj = matchingChild.get();
+            }
+        }
+        return curObj;
     }
 
     private void setupDroneComboBox(){

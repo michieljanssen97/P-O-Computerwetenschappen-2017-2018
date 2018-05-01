@@ -6,10 +6,8 @@ import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 
 public class Runway extends WorldObject{
 	private boolean hasDrone = false;
-	
-    public Vector2D getSize(){
-        return new Vector2D(this.getScale().getEntry(0), this.getScale().getEntry(2));
-    }
+    private final Airport parent;
+    private final int id;
     
     public boolean hasDrones(){
         return this.hasDrone;
@@ -21,4 +19,21 @@ public class Runway extends WorldObject{
 	public static boolean areRunwaysAvailable(Runway runway1, Runway runway2) {
 		return !runway1.hasDrones() && !runway2.hasDrones();
 	}
+
+    public Runway(Airport parent, int id) {
+        this.parent = parent;
+        this.id = id;
+    }
+
+    public Vector2D getSize(){
+        return new Vector2D(this.getScale().getEntry(0), this.getScale().getEntry(2));
+    }
+
+    public Airport getAirport() {
+        return parent;
+    }
+
+    public int getId(){
+        return id;
+    }
 }

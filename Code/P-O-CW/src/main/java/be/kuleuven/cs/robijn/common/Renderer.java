@@ -4,6 +4,7 @@ import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.OrthographicCamera;
 import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
 import be.kuleuven.cs.robijn.worldObjects.WorldObject;
+import org.apache.commons.math3.linear.RealVector;
 
 import java.util.concurrent.Semaphore;
 
@@ -46,6 +47,29 @@ public interface Renderer extends AutoCloseable {
      * @param lock a semaphore to acquire before accessing world state.
      */
     RenderTask startRender(WorldObject worldRoot, FrameBuffer frameBuffer, Camera camera, Semaphore lock);
+
+    /**
+     * Converts a screen-space vector into a world-space vector.
+     * @param camera the camera with which the image was made.
+     * @param frameBuffer the framebuffer to which the image was rendered.
+     * @param screenX the X position on the screen (0 <= screenX < frameBuffer.getWidth())
+     * @param screenY the Y position on the screen (0 <= screenY < frameBuffer.getHeight())
+     * @return a 3D vector representing the position in world space that is visible at the specified screen space vector.
+     */
+    RealVector screenPointToWorldSpace(Camera camera, FrameBuffer frameBuffer, int screenX, int screenY);
+
+    /**
+     * Converts a screen-space vector into a world-space vector.
+     * @param camera the camera with which the image was made.
+     * @param frameBuffer the framebuffer to which the image was rendered.
+     * @param screenX the X position on the screen (0 <= screenX < frameBuffer.getWidth())
+     * @param screenY the Y position on the screen (0 <= screenY < frameBuffer.getHeight())
+     * @param z how far from the camera should the returned point be? (0 <= z <= 1, maps to [nearZ; farZ])
+     * @return a 3D vector representing the position in world space that is visible at the specified screen space vector.
+     */
+    RealVector screenPointToWorldSpace(Camera camera, FrameBuffer frameBuffer, int screenX, int screenY, float z);
+
+    BoundingBox getBoundingBoxFor(WorldObject obj);
 
     void clearDebugObjects();
 }

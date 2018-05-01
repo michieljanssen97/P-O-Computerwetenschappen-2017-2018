@@ -1,5 +1,6 @@
 package be.kuleuven.cs.robijn.worldObjects;
 
+import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import org.apache.commons.math3.geometry.euclidean.threed.*;
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.airports.Airport;
@@ -112,7 +113,7 @@ public class Drone extends WorldObject {
 	
 	private final String droneID;
 	
-    private Package assignedPackage = null;
+    private AirportPackage assignedPackage = null;
     
     private Runway destinationRunway = null;
     
@@ -233,15 +234,6 @@ public class Drone extends WorldObject {
 	public boolean isAvailable(){
         return this.assignedPackage == null;
     }
-	
-	public Package getAssignedPackage() {
-		return this.assignedPackage;
-	}
-	
-	public void setAssignedPackage(Package p) {
-		this.assignedPackage = p;
-	}
-
     
     public Runway getDestinationRunway(){ //TODO laat drone dit als destination gebruiken -> Target in zijn autopilot aanpassen
         return destinationRunway;
@@ -262,7 +254,7 @@ public class Drone extends WorldObject {
     
     public double calculateDistanceToAirport(Airport airport) {
     	RealVector currentPosition = this.getEnginePosition();
-    	RealVector airportPosition = airport.getPosition();
+    	RealVector airportPosition = airport.getWorldPosition();
     	
     	return currentPosition.getDistance(airportPosition);
     }
@@ -277,16 +269,16 @@ public class Drone extends WorldObject {
 		currentAirport.removeDroneFromCurrentDrones(this);
 	}
 	
-	public void setPackageDelivered() {
-		if(this.assignedPackage != null) {
-			this.assignedPackage.setDelivered();
-		}
-	}
-	
 	public void setArrived() {
 		this.setToAirport();
 		this.setPackageDelivered();
 		//TODO drone van runway naar toGate taxiën + bij aankomst: this.getDestinationRunway().setHasDrones(false);
+	}
+	
+	public void setPackageDelivered() {
+		if(this.assignedPackage != null) {
+			this.assignedPackage.markAsDelivered();
+		}
 	}
 	
 	public void setTookOff() { //TODO gebruik dit wanneer opgestegen, autopilot == FLightMode.Ascend na FlightMode.Taxi
@@ -1255,7 +1247,6 @@ public class Drone extends WorldObject {
 		
 		return new float[] {(float)solution.getEntry(0), (float)solution.getEntry(1), (float)solution.getEntry(2)};
 	}
-	
 
 	public Airport getCurrentAirport() {
 		for(Airport airport : Airport.getAllAirports()) {
@@ -1271,13 +1262,13 @@ public class Drone extends WorldObject {
 	/**
 	 * Variables necessary when drone is not at the airport of which to pick up a package
 	 */
-	Package tempPackage = null;
+	AirportPackage tempPackage = null;
 	Airport fromAirport = null;
 	Gate fromGate = null;
 	Airport toAirport = null;
 	Gate toGate = null;
 	
-	public void assignNecessitiesLater(Package p, Airport fromAirport, Gate fromGate, Airport toAirport, Gate toGate) {
+	public void assignNecessitiesLater(AirportPackage p, Airport fromAirport, Gate fromGate, Airport toAirport, Gate toGate) {
 		this.tempPackage = p;
 		this.fromAirport = fromAirport;
 		this.fromGate = fromGate;
@@ -1290,7 +1281,7 @@ public class Drone extends WorldObject {
 		Runway toLand = toAirport.getRunwayToLand();
 		
 		if(this.getCurrentAirport().equals(this.fromAirport) && Runway.areRunwaysAvailable(toTakeOff, toLand)) {
-			this.tempPackage.assignPackageNecessities(this, this.fromAirport, this.fromGate, this.toAirport, this.toGate, toTakeOff, toLand);
+			this.tempPackage.markAsInTransit(this);
 			this.tempPackage = null;
 			this.fromAirport = null;
 			this.fromGate = null;
@@ -1302,5 +1293,22 @@ public class Drone extends WorldObject {
 	public boolean hasPackageToAssign() {
 		return this.tempPackage != null;
 	}
+
+	/**
+	 * Returns the package that the drone is currently carrying
+	 */
+	public AirportPackage getPackage() {
+		return this.assignedPackage;
+	}
+
+	/**
+	 * You probably want to use AirportPackage.markAsInTransit() instead!
+	 */
+	public void setPackage(AirportPackage newPkg){
+		this.assignedPackage = newPkg;
+	}
 	
+	public void assignPackages() {
+		this.assignedPackage.assignPackages();
+	}
 }

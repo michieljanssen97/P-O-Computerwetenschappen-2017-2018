@@ -1,5 +1,6 @@
 package be.kuleuven.cs.robijn.testbed;
 
+import be.kuleuven.cs.robijn.common.airports.Gate;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
@@ -13,6 +14,8 @@ import be.kuleuven.cs.robijn.worldObjects.Drone;
 import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 import interfaces.AutopilotOutputs;
 
+import java.util.Optional;
+
 public class TestbedSimulation {
     private final WorldObject world;
     private float elapsedTime = 0;
@@ -22,12 +25,12 @@ public class TestbedSimulation {
     }
 
     public void updateDrone(Drone drone, float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs output){
-
 		this.setElapsedTime(secondsSinceStart);
 		this.moveDrone(drone, secondsSinceLastUpdate, output);
+		this.checkForPackages(drone);
     }
-    
-    public void setElapsedTime(float elapsedTime) throws IllegalArgumentException {
+
+	public void setElapsedTime(float elapsedTime) throws IllegalArgumentException {
 		if (! isValidElapsedTime(elapsedTime))
 			throw new IllegalArgumentException();
 		this.elapsedTime = elapsedTime;
@@ -47,8 +50,8 @@ public class TestbedSimulation {
 	 * and the angular velocities get updated
 	 * using the outputs from the autopilot (thrust, leftWingInclination,
 	 * rightWingInclination, horStabInclination, verStabInclination).
-	 * 
-	 * @param  dt
+	 *
+	 * @param  secondsSinceLastUpdate
 	 * 		   Time duration (in seconds) to move this drone.
 	 * @throws IllegalArgumentException
 	 * 		   The given time duration is negative.
@@ -162,6 +165,27 @@ public class TestbedSimulation {
 			for (Tyre tyres: drone.getChildrenOfType(Tyre.class)) {
 				@SuppressWarnings("unused")
 				float d = tyres.getD(drone);
+			}
+		}
+	}
+
+	private void checkForPackages(Drone drone) {
+		//Drone must be on the ground and moving slower than 1 m/s
+		if(drone.getVelocity().getNorm() > 1 || drone.getWorldPosition().getEntry(1) > 1.5){
+			return;
+		}
+
+		//What gate is the drone currently at
+		Optional<Gate> gate = world.getDescendantsStream()
+				.filter(c -> c instanceof Gate).map(c -> (Gate)c)
+				.filter(g -> g.isDroneAbove(drone))
+				.findFirst();
+
+		if(gate.isPresent()){
+			if(drone.getPackage() != null && drone.getPackage().getDestination() == gate.get()){
+				drone.getPackage().markAsDelivered();
+			}else if(drone.getPackage() == null && gate.get().hasPackage()){
+				gate.get().getPackage().markAsInTransit(drone);
 			}
 		}
 	}
