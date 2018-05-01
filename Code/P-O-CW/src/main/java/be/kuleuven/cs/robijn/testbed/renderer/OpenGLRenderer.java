@@ -120,8 +120,10 @@ public class OpenGLRenderer implements Renderer {
         }
 
         //Load drone
-        Mesh droneMesh = OBJLoader.loadFromResources("/models/drone/drone.obj");
-        Texture droneTexture = Texture.load(Resources.loadImageResource("/models/drone/texture.jpg"));
+        //Mesh droneMesh = OBJLoader.loadFromResources("/models/drone/drone.obj");
+        //Texture droneTexture = Texture.load(Resources.loadImageResource("/models/drone/texture.jpg"));
+        Mesh droneMesh = OBJLoader.loadFromResources("/models/drone/predator.obj");
+        Texture droneTexture = Texture.load(Resources.loadImageResource("/models/drone/predator.png"));
         droneModel = new Model(droneMesh, droneTexture, texturedProgram);
 
         //Load shader for box model
