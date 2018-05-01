@@ -78,7 +78,7 @@ public class CameraViewControl extends AnchorPane {
     private Camera activeCamera;
 
     private DragHelper dragHelper;
-    private double dragSensitivity = 0.1;
+    private double dragSensitivity = 200;
     private final MainController mainController;
 
     public CameraViewControl(MainController parent){
@@ -234,13 +234,13 @@ public class CameraViewControl extends AnchorPane {
             if(activeCamera instanceof OrthographicCamera){
                 OrthographicCamera ortho = (OrthographicCamera)activeCamera;
 
-                float scale = activeCamera == topCamera ? topCamZoomHandler.getScale() : sideCamZoomHandler.getScale();
+                double dx = (e.getDeltaX() / imageView.getFitWidth()) * ortho.getWidth();
+                double dy = (e.getDeltaY() / imageView.getFitHeight()) * ortho.getHeight();
 
                 Rotation camRot = ortho.getRelativeRotation();
                 Vector3D right = camRot.applyTo(new Vector3D(1, 0, 0));
                 Vector3D up = camRot.applyTo(new Vector3D(0, 1, 0));
-                Vector3D delta = right.scalarMultiply(-e.getDeltaX()*dragSensitivity * scale).add(
-                                    up.scalarMultiply(e.getDeltaY()*dragSensitivity * scale));
+                Vector3D delta = right.scalarMultiply(-dx).add(up.scalarMultiply(dy));
                 ortho.setRelativePosition(ortho.getRelativePosition().add(new ArrayRealVector(new double[]{delta.getX(), delta.getY(), delta.getZ()}, false)));
             }
         });
