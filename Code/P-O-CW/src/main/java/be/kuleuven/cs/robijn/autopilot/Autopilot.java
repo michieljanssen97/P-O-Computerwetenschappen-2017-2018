@@ -10,6 +10,7 @@ import be.kuleuven.cs.robijn.experiments.ExpPosition;
 import be.kuleuven.cs.robijn.tyres.FrontWheel;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 import interfaces.*;
+import java.util.*;
 
 /**
  * A class of autopilots.
@@ -52,7 +53,57 @@ public class Autopilot {
 			throw new IllegalArgumentException();
 		this.previousElapsedTime = previousElapsedTime;
 	}
-	
+
+	private WorldObject world;
+	private List<Drone> drones = new ArrayList<>();
+
+
+	public Drone[] calculateFirstDroneCollision(){
+		world = new WorldObject();
+		drones = world.getChildrenOfType(Drone.class);
+		Map<Drone[], Double> collisionDroneMap = new HashMap<>();
+		Double collisionTime;
+
+		for(int i = 0; i < drones.size(); i++){
+			for(int j = i+1; j < drones.size(); j++){
+
+				double deltaPosX = drones.get(i).getWorldPosition().getEntry(0)-drones.get(j).getWorldPosition().getEntry(0);
+				double deltaPosY = drones.get(i).getWorldPosition().getEntry(1)-drones.get(j).getWorldPosition().getEntry(1);
+				double deltaPosZ = drones.get(i).getWorldPosition().getEntry(2)-drones.get(j).getWorldPosition().getEntry(2);
+
+
+				double deltaVelX = drones.get(i).getVelocity().getEntry(0)-drones.get(j).getVelocity().getEntry(0);
+				double deltaVelY = drones.get(i).getVelocity().getEntry(1)-drones.get(j).getVelocity().getEntry(1);
+				double deltaVelZ = drones.get(i).getVelocity().getEntry(2)-drones.get(j).getVelocity().getEntry(2);
+
+				double deltaRR = Math.pow(deltaPosX, 2) + Math.pow(deltaPosY, 2) + Math.pow(deltaPosZ, 2);
+				double deltaVV = Math.pow(deltaVelX, 2) + Math.pow(deltaVelY, 2) + Math.pow(deltaVelZ, 2);
+				double deltaVR = (deltaVelX*deltaPosX)  + (deltaVelY*deltaPosY) +  (deltaVelZ*deltaPosZ);
+				double d = Math.pow(deltaVR, 2) - (deltaVV)*(deltaRR - Math.pow(5, 2));
+
+
+				if (deltaVR >= 0){
+					collisionTime =  Double.POSITIVE_INFINITY;
+				} else if (d < 0){
+					collisionTime = Double.POSITIVE_INFINITY;
+				} else {
+					collisionTime =  - ((deltaVR + Math.sqrt(d))/(deltaVV));
+				}
+				if (collisionTime != Double.POSITIVE_INFINITY) {
+					Drone[] collisionArray = {drones.get(i), drones.get(j)};
+					collisionDroneMap.put(collisionArray, collisionTime);
+				}
+			}
+		}
+		if (collisionDroneMap.isEmpty()) {
+			return null;
+		} else {
+			Drone[] firstCollisionDroneArray = Collections.min(collisionDroneMap.entrySet(), Map.Entry.comparingByValue()).getKey();
+			return firstCollisionDroneArray;
+		}
+	}
+
+
 	/**
 	 * Wel roll ten gevolge van verschillende snelheid van vleugels (door de rotaties). 
 	 */
@@ -75,6 +126,18 @@ public class Autopilot {
 		
 		AutopilotSettings settings = new AutopilotSettings();
 		
+		Drone[] collidableDrones = calculateFirstDroneCollision();
+		System.out.println(collidableDrones);
+
+
+		if (collidableDrones != null) {
+
+			float newPitch = collidableDrones[0].getPitch() - (float) Math.PI/12 ;
+
+			collidableDrones[0].setPitch(newPitch);
+
+		}
+
 		if (this.getFlightMode() == FlightMode.ASCEND) { //ascend
 
 			thrust = this.getConfig().getMaxThrust();
