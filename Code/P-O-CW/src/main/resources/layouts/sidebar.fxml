@@ -17,54 +17,67 @@
             </VBox.margin>
         </Label>
         <VBox prefHeight="25.0" prefWidth="100.0">
-            <fx:define>
-                <ToggleGroup fx:id="simulationRunningToggleGroup"/>
-            </fx:define>
-            <children>
-                <HBox prefHeight="25.0" prefWidth="200.0">
-                    <ToggleButton fx:id="pauseButton" toggleGroup="$simulationRunningToggleGroup"
-                                  mnemonicParsing="false" text="Pause"/>
-                    <ToggleButton fx:id="playButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false"
-                                  text="Play">
-                        <HBox.margin>
-                            <Insets left="5.0"/>
-                        </HBox.margin>
-                    </ToggleButton>
-                </HBox>
-                <HBox prefHeight="25.0" prefWidth="200.0">
-                    <ToggleButton fx:id="fastForwardButton" toggleGroup="$simulationRunningToggleGroup"
-                                  mnemonicParsing="false" text="Play (x2)"/>
-                    <ToggleButton fx:id="lightSpeedButton" toggleGroup="$simulationRunningToggleGroup"
-                                  mnemonicParsing="false" text="Play (x5)">
-                        <HBox.margin>
-                            <Insets left="5.0"/>
-                        </HBox.margin>
-                    </ToggleButton>
-                </HBox>
-                <Label fx:id="simulationFinishedLabel" text="Simulation has finished." style="-fx-font-weight: bold;">
-                    <VBox.margin>
-                        <Insets top="5.0" />
-                    </VBox.margin>
-                </Label>
-                <Label fx:id="simulationCrashedLabel" text="The drone crashed!" style="-fx-font-weight: bold; -fx-text-fill: red;">
-                    <VBox.margin>
-                        <Insets top="5.0" />
-                    </VBox.margin>
-                </Label>
-                <Label fx:id="outOfControlLabel" text="The autopilot is out of control!" style="-fx-font-weight: bold; -fx-text-fill: red;">
-                    <VBox.margin>
-                        <Insets top="5.0" />
-                    </VBox.margin>
-                </Label>
-                <Label fx:id="simulationThrewExceptionLabel" text="An exception occurred!" style="-fx-font-weight: bold; -fx-text-fill: red;">
-                    <VBox.margin>
-                        <Insets top="5.0" />
-                    </VBox.margin>
-                </Label>
-            </children>
             <VBox.margin>
-                <Insets left="15.0" right="15.0" top="5.0" />
+                <Insets left="15.0" right="15.0" top="5.0"/>
             </VBox.margin>
+            <GridPane prefHeight="50.0" prefWidth="200.0" maxWidth="205">
+                <fx:define>
+                    <ToggleGroup fx:id="simulationRunningToggleGroup"/>
+                </fx:define>
+                <columnConstraints>
+                    <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0"/>
+                    <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0"/>
+                </columnConstraints>
+                <ToggleButton fx:id="pauseButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false"
+                              text="Pause" maxWidth="100" alignment="CENTER"
+                              GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.fillWidth="true">
+                    <GridPane.margin>
+                        <Insets right="2.5"/>
+                    </GridPane.margin>
+                </ToggleButton>
+                <ToggleButton fx:id="playButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false"
+                              text="Play" maxWidth="100" alignment="CENTER"
+                              GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.fillWidth="true">
+                    <GridPane.margin>
+                        <Insets left="2.5"/>
+                    </GridPane.margin>
+                </ToggleButton>
+                <Slider fx:id="simulationSpeedSlider" blockIncrement="0.5" majorTickUnit="1.0" min="0.0" max="4.0"
+                        value="1.0"
+                        minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true"
+                        GridPane.columnSpan="2" GridPane.rowIndex="1">
+                    <GridPane.margin>
+                        <Insets top="5.0"/>
+                    </GridPane.margin>
+                </Slider>
+
+                <VBox.margin>
+                    <Insets top="5.0"/>
+                </VBox.margin>
+            </GridPane>
+            <Label fx:id="simulationFinishedLabel" text="Simulation has finished." style="-fx-font-weight: bold;">
+                <VBox.margin>
+                    <Insets top="5.0"/>
+                </VBox.margin>
+            </Label>
+            <Label fx:id="simulationCrashedLabel" text="The drone crashed!"
+                   style="-fx-font-weight: bold; -fx-text-fill: red;">
+                <VBox.margin>
+                    <Insets top="5.0"/>
+                </VBox.margin>
+            </Label>
+            <Label fx:id="outOfControlLabel" text="The autopilot is out of control!"
+                   style="-fx-font-weight: bold; -fx-text-fill: red;">
+                <VBox.margin>
+                    <Insets top="5.0"/>
+                </VBox.margin>
+            </Label>
+            <Label fx:id="simulationThrewExceptionLabel" text="An exception occurred!"
+                   style="-fx-font-weight: bold; -fx-text-fill: red;">
+                <VBox.margin>
+                    <Insets top="5.0"/>
+                </VBox.margin>
+            </Label>
         </VBox>
         <Label text="Testbed">
             <font>
