@@ -64,7 +64,7 @@ public class VirtualTestbed implements TestBed {
 				if(AUTOPILOT_CAMERA_ENABLED){
 					image = renderCameraView(drone);
 				}
-				inputs[i] = new VirtualTestbed.TestbedAutopilotInputs(drone, image, secondsSinceLastUpdate);
+				inputs[i] = new VirtualTestbed.TestbedAutopilotInputs(drone, image, secondsSinceStart);
 			}
 
 			return simulation.isSimulationFinished();

@@ -43,7 +43,7 @@ public class ConstantIntervalStopwatch implements Stopwatch{
 
     @Override
     public double getSecondsSinceLastUpdate() {
-        return interval;
+        return (interval*timeMultiplier);
     }
 
     @Override
