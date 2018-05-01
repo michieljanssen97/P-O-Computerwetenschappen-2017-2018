@@ -1,6 +1,7 @@
 package be.kuleuven.cs.robijn.common.airports;
 
 import be.kuleuven.cs.robijn.worldObjects.Drone;
+import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -66,7 +67,7 @@ public class AirportPackage {
     }
 
     /**
-     * Sets the state of the package to IN_TRANSIT, adn sets the transporter.
+     * Sets the state of the package to IN_TRANSIT, and sets the transporter.
      * @param transporter the drone that is carrying the package
      */
     public void markAsInTransit(Drone transporter){
@@ -81,25 +82,24 @@ public class AirportPackage {
         currentGate = null;
         currentTransporter = transporter;
         currentTransporter.setPackage(this);
-
-        for(Consumer<AirportPackage> handler : stateUpdateEventHandlers){
-            handler.accept(this);
-        }
         
-        
-        Gate fromGate = this.getOrigin();
-        Gate toGate = this.getDestination();
-        Airport fromAirport = fromGate.getAirport();
-        Airport toAirport = toGate.getAirport();
+        Airport fromAirport = this.getOrigin().getAirport();
+        Airport toAirport = this.getDestination().getAirport();
 		Runway takeOffRunway = fromAirport.getRunwayToTakeOff();
 		Runway landRunway = toAirport.getRunwayToLand();
+		
+		
     	//TODO naar fromGate taxiën, en van daaruit naar takeOffRunWay
-        fromAirport.getRunwayToLand().setHasDrones(false); // TODO Kan mss nog worden aangepast, pas op false zetten indien er een vliegtuig zal landen of erop staat
+        fromAirport.getRunwayToLand().setHasDrones(false); // Drone is geland
         takeOffRunway.setHasDrones(true);
         currentTransporter.setTakeOffRunway(takeOffRunway);
         
     	landRunway.setHasDrones(true);
         currentTransporter.setDestinationRunway(landRunway);
+
+        for(Consumer<AirportPackage> handler : stateUpdateEventHandlers){
+            handler.accept(this);
+        }
     }
 
     /**
@@ -172,9 +172,9 @@ public class AirportPackage {
         return builder.toString();
     } 
     
-    public ArrayList<AirportPackage> getAllPackagesToAssign(){
+    public static ArrayList<AirportPackage> getAllPackagesToAssign(){
     	ArrayList<AirportPackage> packageList = new ArrayList<AirportPackage>();
-    	for (Gate gate : getCurrentGate().getChildrenOfType(Gate.class)) {
+    	for (Gate gate : WorldObject.getChildrenOfType(Gate.class)) {
     		if(gate.hasPackage()) {
     			packageList.add(gate.getPackage());
     		}
@@ -182,8 +182,8 @@ public class AirportPackage {
         return packageList;
     }
 
-    public void assignPackages() {
-        for(AirportPackage p : this.getAllPackagesToAssign()){
+    public static void assignPackages() {
+        for(AirportPackage p : getAllPackagesToAssign()){
             Gate fromGate = p.getOrigin();
             Gate toGate = p.getDestination();
             Airport fromAirport = fromGate.getAirport();
@@ -197,7 +197,7 @@ public class AirportPackage {
             if(drone != null) {
             	if(drone.getCurrentAirport() != fromAirport) {
 	            	//TODO laat drone naar fromAirport vliegen
-	            	drone.assignNecessitiesLater(p, fromAirport, fromGate, toAirport, toGate);
+	            	drone.assignNecessitiesLater(p, fromGate, toGate);
             	}
 	            else {
 	        		Runway toTakeOff = fromAirport.getRunwayToTakeOff();
@@ -211,20 +211,4 @@ public class AirportPackage {
             
         }
     }  
-    
-//    /**
-//     * Zet alle pointers
-//     */
-//    public void assignPackageNecessities(Drone drone, Airport fromAirport, Gate fromGate, Airport toAirport, Gate toGate, Runway takeOffRunway, Runway landRunway) {
-//    	//TODO naar fromGate taxiën, en van daaruit naar takeOffRunWay
-//        this.setAssignedDrone(drone);
-//        fromAirport.getRunwayToLand().setHasDrones(false); // TODO Kan mss nog worden aangepast, pas op false zetten indien er een vliegtuig zal landen of erop staat
-//        drone.setAssignedPackage(this);
-//        
-//        takeOffRunway.setHasDrones(true);
-//        drone.setTakeOffRunway(takeOffRunway);
-//        
-//    	landRunway.setHasDrones(true);
-//        drone.setDestinationRunway(landRunway);
-//    }
 }

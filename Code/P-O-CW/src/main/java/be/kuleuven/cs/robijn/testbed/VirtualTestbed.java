@@ -59,7 +59,7 @@ public class VirtualTestbed implements TestBed {
 			worldStateLock.acquire();
 
 			//Update drones
-			drones.get(0).assignPackages();
+			AirportPackage.assignPackages();
 			for(int i = 0; i < drones.size(); i++){
 				Drone drone = drones.get(i);
 				simulation.updateDrone(drone, secondsSinceStart, secondsSinceLastUpdate, outputs[i]);

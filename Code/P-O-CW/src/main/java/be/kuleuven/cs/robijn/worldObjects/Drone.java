@@ -1263,29 +1263,23 @@ public class Drone extends WorldObject {
 	 * Variables necessary when drone is not at the airport of which to pick up a package
 	 */
 	AirportPackage tempPackage = null;
-	Airport fromAirport = null;
 	Gate fromGate = null;
-	Airport toAirport = null;
 	Gate toGate = null;
 	
-	public void assignNecessitiesLater(AirportPackage p, Airport fromAirport, Gate fromGate, Airport toAirport, Gate toGate) {
+	public void assignNecessitiesLater(AirportPackage p, Gate fromGate, Gate toGate) {
 		this.tempPackage = p;
-		this.fromAirport = fromAirport;
 		this.fromGate = fromGate;
-		this.toAirport = toAirport;
 		this.toGate = toGate;
 	}
 	
 	public void packageCanBeAssigned() {
-		Runway toTakeOff = fromAirport.getRunwayToTakeOff();
-		Runway toLand = toAirport.getRunwayToLand();
+		Runway toTakeOff = fromGate.getAirport().getRunwayToTakeOff();
+		Runway toLand = toGate.getAirport().getRunwayToLand();
 		
-		if(this.getCurrentAirport().equals(this.fromAirport) && Runway.areRunwaysAvailable(toTakeOff, toLand)) {
+		if(this.getCurrentAirport().equals(this.fromGate.getAirport()) && Runway.areRunwaysAvailable(toTakeOff, toLand)) {
 			this.tempPackage.markAsInTransit(this);
 			this.tempPackage = null;
-			this.fromAirport = null;
 			this.fromGate = null;
-			this.toAirport = null;
 			this.toGate = null;
 		}
 	}
@@ -1306,9 +1300,5 @@ public class Drone extends WorldObject {
 	 */
 	public void setPackage(AirportPackage newPkg){
 		this.assignedPackage = newPkg;
-	}
-	
-	public void assignPackages() {
-		this.assignedPackage.assignPackages();
 	}
 }
