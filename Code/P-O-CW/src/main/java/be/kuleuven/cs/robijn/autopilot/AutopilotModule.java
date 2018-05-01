@@ -64,4 +64,7 @@ public class AutopilotModule {
     public void simulationEnded() throws IllegalArgumentException {
         threadPool.shutdown();
     }
+    
+    public void flyRoute(Gate fromGate, Gate toGate) {
+    }
 }

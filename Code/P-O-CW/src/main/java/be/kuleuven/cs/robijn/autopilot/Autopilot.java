@@ -52,7 +52,7 @@ public class Autopilot {
 		this.previousElapsedTime = previousElapsedTime;
 	}
 	
-	private Targets targets;
+	private Targets targets = new Targets();
 	
 	public void setTargets(RealVector[] targets) {
 		this.targets.setTargets(targets);
@@ -147,6 +147,7 @@ public class Autopilot {
 					if (this.targets.getNbTargets() == 0)
 						this.setFlightMode(FlightMode.LAND);
 					else {
+						this.targets.setDronePosition(drone.getWorldPosition());
 						target = this.targets.getFirstTarget();
 					}
 					
@@ -1000,7 +1001,6 @@ public class Autopilot {
 		if (! isValidInitialZVelocity(initialZVelocity))
 			throw new IllegalArgumentException();
 		this.initialZVelocity = initialZVelocity;
-		this.targets = new Targets(drone);
 	}
 
 	public void simulationEnded() throws IllegalArgumentException {
