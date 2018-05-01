@@ -2,10 +2,12 @@ package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.common.Font;
+import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.airports.Runway;
 import be.kuleuven.cs.robijn.testbed.renderer.bmfont.BMFont;
 import be.kuleuven.cs.robijn.worldObjects.Label3D;
+import be.kuleuven.cs.robijn.common.math.VectorMath;
 import be.kuleuven.cs.robijn.worldObjects.Box;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
@@ -20,6 +22,7 @@ import org.apache.commons.math3.linear.RealVector;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
+import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
@@ -97,6 +100,7 @@ public class OpenGLRenderer implements Renderer {
 
     private Model runwayModel = null;
     private Model gateModel = null;
+    private Model withPackageGateModel = null;
 
     private Billboard droneIcon;
     private Billboard boxIcon;
@@ -148,7 +152,9 @@ public class OpenGLRenderer implements Renderer {
         Mesh gateMesh = OBJLoader.loadFromResources("/models/plane/plane.obj");
         gateMesh.setRenderOffset(new Vector3D(0, .006, 0));
         Texture gateTexture = Texture.load(Resources.loadImageResource("/models/gate/texture.png"));
+        Texture withPackageGateTexture = Texture.load(Resources.loadImageResource("/models/gate/with_package_texture.png"));
         gateModel = new Model(gateMesh, gateTexture, texturedProgram);
+        withPackageGateModel = new Model(gateMesh, withPackageGateTexture, texturedProgram);
 
         //Load runway model
         Mesh runwayMesh = OBJLoader.loadFromResources("/models/plane/plane.obj");
@@ -230,9 +236,7 @@ public class OpenGLRenderer implements Renderer {
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
             //Setup per-camera matrices
-            Matrix4f viewMatrix = createViewMatrix(camera);
-            Matrix4f projectionMatrix = createProjectionMatrix(camera);
-            Matrix4f viewProjectionMatrix = new Matrix4f(projectionMatrix).mul(viewMatrix);
+            Matrix4f viewProjectionMatrix = createViewProjectionMatrix(camera);
 
             //Render ground if needed
             WorldObject groundObj = new WorldObject();
@@ -291,7 +295,8 @@ public class OpenGLRenderer implements Renderer {
         }else if(obj instanceof Drone){
             model = droneModel;
         }else if(obj instanceof Gate){
-            model = gateModel;
+            Gate gate = (Gate)obj;
+            model = gate.hasPackage() ? withPackageGateModel : gateModel;
         }else if(obj instanceof Runway){
             model = runwayModel;
         }else if(obj instanceof Label3D){
@@ -307,7 +312,7 @@ public class OpenGLRenderer implements Renderer {
         if(camera instanceof OpenGLOrthographicCamera){
             OpenGLOrthographicCamera orthoCam = (OpenGLOrthographicCamera) camera;
 
-            Vector3D size = model.getMesh().getBoundingBox().getBoxSize();
+            Vector3D size = model.getMesh().getBoundingBox().getBoxDimensions();
             double avgAxis = (size.getX() + size.getY() + size.getZ()) / 3d;
             double minRatio = Math.min(avgAxis/orthoCam.getWidth(), avgAxis/orthoCam.getHeight());
             if(minRatio < orthoCam.getRenderIconsThresholdRatio()){
@@ -399,6 +404,35 @@ public class OpenGLRenderer implements Renderer {
         glDrawElements(GL_LINES, lineModel.getMesh().getIndexCount(), GL_UNSIGNED_INT, 0);
     }
 
+    @Override
+    public RealVector screenPointToWorldSpace(Camera camera, FrameBuffer frameBuffer, int screenX, int screenY){
+        float z = ((OpenGLFrameBuffer)frameBuffer).readDepth(screenX, screenY);
+        return screenPointToWorldSpace(camera, frameBuffer, screenX, screenY, z);
+    }
+
+    @Override
+    public RealVector screenPointToWorldSpace(Camera camera, FrameBuffer frameBuffer, int screenX, int screenY, float z){
+        Matrix4f transform = createViewProjectionMatrix(camera).invert();
+
+        // Map to [0;1]
+        float x = ((float)screenX) / (float)frameBuffer.getWidth();
+        float y = ((float)screenY) / (float)frameBuffer.getHeight();
+        // Map to [-1;1]
+        x = (x*2.0f)-1.0f;
+        y = (y*2.0f)-1.0f;
+        z = (z*2.0f)-1.0f;
+
+        Vector4f worldSpace = transform.transform(x, y, z, 1, new Vector4f());
+        worldSpace = worldSpace.div(worldSpace.w);
+        return new ArrayRealVector(new double[]{worldSpace.x, worldSpace.y, worldSpace.z}, false);
+    }
+
+    private Matrix4f createViewProjectionMatrix(Camera camera){
+        Matrix4f viewMatrix = createViewMatrix(camera);
+        Matrix4f projectionMatrix = createProjectionMatrix(camera);
+        return new Matrix4f(projectionMatrix).mul(viewMatrix);
+    }
+
     /**
      * Returns a linear transformation matrix for transforming vertices from world space to camera space.
      * @return a non-null matrix
@@ -456,6 +490,44 @@ public class OpenGLRenderer implements Renderer {
         //Flipping the y-axis of the vertices also flips the winding order, this is fixed above in render()
         projectionMatrix.scale(1, -1 ,1);
         return projectionMatrix;
+    }
+
+    public BoundingBox getBoundingBoxFor(WorldObject obj){
+        BoundingBox b = getBoundingBoxOrNull(obj);
+        return b == null ? new BoundingBox(Vector3D.ZERO) : b;
+    }
+
+    private BoundingBox getBoundingBoxOrNull(WorldObject obj){
+        BoundingBox selfBox;
+
+        if(obj instanceof Box){
+            selfBox = boxModel.getMesh().getBoundingBox();
+        }else if(obj instanceof Drone){
+            selfBox = droneModel.getMesh().getBoundingBox();
+        }else if(obj instanceof Gate){
+            selfBox = gateModel.getMesh().getBoundingBox();
+        }else if(obj instanceof Runway){
+            selfBox = runwayModel.getMesh().getBoundingBox();
+        }else{
+            selfBox = null;
+        }
+
+        if (selfBox != null) {
+            selfBox.setRelativePosition(obj.getWorldPosition());
+            selfBox.scaleDimensions(obj.getScale());
+        }
+
+        return obj.getChildren().stream()
+                .map(this::getBoundingBoxOrNull)
+                .reduce(selfBox, (b1, b2) -> {
+                    if(b1 == null){
+                        return b2;
+                    }
+                    if(b2 == null){
+                        return b1;
+                    }
+                    return b1.merge(b2);
+                });
     }
 
     public void addLineToDraw(Line line){

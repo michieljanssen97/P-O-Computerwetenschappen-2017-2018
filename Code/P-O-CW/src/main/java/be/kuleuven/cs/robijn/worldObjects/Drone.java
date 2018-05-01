@@ -1,5 +1,6 @@
 package be.kuleuven.cs.robijn.worldObjects;
 
+import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import org.apache.commons.math3.geometry.euclidean.threed.*;
 import org.apache.commons.math3.linear.*;
 
@@ -1183,5 +1184,21 @@ public class Drone extends WorldObject {
 		RealVector solution = solver.solve(constants);
 		
 		return new float[] {(float)solution.getEntry(0), (float)solution.getEntry(1), (float)solution.getEntry(2)};
-	}	
+	}
+
+	private AirportPackage pkg;
+
+	/**
+	 * Returns the package that the drone is currently carrying
+	 */
+	public AirportPackage getPackage() {
+		return pkg;
+	}
+
+	/**
+	 * You probably want to use AirportPackage.markAsInTransit() instead!
+	 */
+	public void setPackage(AirportPackage newPkg){
+		this.pkg = newPkg;
+	}
 }

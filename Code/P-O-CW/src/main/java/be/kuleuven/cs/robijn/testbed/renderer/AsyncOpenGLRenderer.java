@@ -4,6 +4,7 @@ import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.OrthographicCamera;
 import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
+import org.apache.commons.math3.linear.RealVector;
 
 import java.util.concurrent.*;
 
@@ -112,6 +113,31 @@ public class AsyncOpenGLRenderer implements Renderer {
                 isDone = true;
             }
         };
+    }
+
+    @Override
+    public RealVector screenPointToWorldSpace(Camera camera, FrameBuffer asyncFrameBuffer, int screenX, int screenY) {
+        try {
+            FrameBuffer frameBuffer = ((AsyncFrameBuffer)asyncFrameBuffer).getFrameBuffer();
+            return executor.submit(() -> renderer.screenPointToWorldSpace(camera, frameBuffer, screenX, screenY)).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public RealVector screenPointToWorldSpace(Camera camera, FrameBuffer asyncFrameBuffer, int screenX, int screenY, float z) {
+        try {
+            FrameBuffer frameBuffer = ((AsyncFrameBuffer)asyncFrameBuffer).getFrameBuffer();
+            return executor.submit(() -> renderer.screenPointToWorldSpace(camera, frameBuffer, screenX, screenY)).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public BoundingBox getBoundingBoxFor(WorldObject obj) {
+        return renderer.getBoundingBoxFor(obj);
     }
 
     @Override
