@@ -6,7 +6,7 @@ import javafx.scene.input.ScrollEvent;
 
 public class OrthoCameraZoomHandler implements EventHandler<ScrollEvent> {
     private static final int MIN_WHEEL_OFFSET = 1;
-    private static final int MAX_WHEEL_OFFSET = 25;
+    private static final int MAX_WHEEL_OFFSET = 60;
     private static final int DEFAULT_ORTHO_CAM_WIDTH = 200;
     private static final int DEFAULT_ORTHO_CAM_HEIGHT = 50;
 

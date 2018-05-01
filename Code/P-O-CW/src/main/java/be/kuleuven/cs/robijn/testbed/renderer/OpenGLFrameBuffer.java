@@ -111,6 +111,14 @@ public class OpenGLFrameBuffer implements FrameBuffer {
         return frameBufferId;
     }
 
+    public int getRenderBufferId() {
+        return renderBufferId;
+    }
+
+    public int getDepthBufferId() {
+        return depthBufferId;
+    }
+
     public int getWidth(){
         return width;
     }
@@ -164,6 +172,36 @@ public class OpenGLFrameBuffer implements FrameBuffer {
         buf.get(data);
 
         return CompletableFuture.completedFuture(data);
+    }
+
+    public float readDepth(int x, int y){
+        if(this.isClosed){
+            throw new IllegalStateException("Cannot read pixels from a closed framebuffer!");
+        }
+
+        if(depthBufferId == -1){
+            throw new IllegalStateException("This framebuffer has no depth buffer");
+        }
+
+        if(x < 0 || y < 0 || x >= getWidth() || y >= getHeight()){
+            throw new IllegalArgumentException("Pixel position is out of bounds");
+        }
+
+        //Wait until GPU has finished rendering
+        if(lastRenderTask != null){
+            lastRenderTask.waitUntilFinished();
+        }
+
+        //Read from this buffer
+        glBindFramebuffer(GL_FRAMEBUFFER, this.getId());
+
+        //No padding
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+        //Read frame from GPU to RAM
+        float[] value = new float[1];
+        glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, value);
+        return value[0];
     }
 
     @Override

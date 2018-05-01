@@ -32,7 +32,7 @@
                                 <HBox prefHeight="25.0" prefWidth="698.0" AnchorPane.leftAnchor="0.0"
                                       AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" alignment="CENTER_LEFT">
                                     <Label text="Runway length:"/>
-                                    <Spinner fx:id="runwayLengthSpinner" min="1.0" max="1000.0" initialValue="3" prefWidth="80.0">
+                                    <Spinner fx:id="runwayLengthSpinner" min="1.0" max="1000.0" initialValue="60" prefWidth="80.0">
                                         <editable>true</editable>
                                         <HBox.margin>
                                             <Insets left="5.0"/>
@@ -43,7 +43,7 @@
                                             <Insets left="20.0"/>
                                         </HBox.margin>
                                     </Label>
-                                    <Spinner fx:id="gateLengthSpinner" min="1.0" max="1000.0" initialValue="3" prefWidth="80.0">
+                                    <Spinner fx:id="gateLengthSpinner" min="1.0" max="1000.0" initialValue="15" prefWidth="80.0">
                                         <editable>true</editable>
                                         <HBox.margin>
                                             <Insets left="5.0"/>
@@ -101,6 +101,12 @@
                                         </Button>
                                         <Button fx:id="removeDroneButton" mnemonicParsing="false"
                                                 text="Remove drone">
+                                            <HBox.margin>
+                                                <Insets left="10.0"/>
+                                            </HBox.margin>
+                                        </Button>
+                                        <Button fx:id="autoAssignDronesButton" mnemonicParsing="false"
+                                                text="Auto-assign drones">
                                             <HBox.margin>
                                                 <Insets left="10.0"/>
                                             </HBox.margin>

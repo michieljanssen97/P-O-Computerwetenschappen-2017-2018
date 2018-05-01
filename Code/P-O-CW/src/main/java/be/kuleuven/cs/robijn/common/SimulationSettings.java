@@ -8,6 +8,7 @@ import interfaces.AutopilotConfigWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Objects;
 
 public class SimulationSettings {
     private float runwayLength;
@@ -125,6 +126,39 @@ public class SimulationSettings {
 
         public void setCenterToRunway0Z(float centerToRunway0Z) {
             this.centerToRunway0Z = centerToRunway0Z;
+        }
+    }
+
+    public static class GateDefinition{
+        private AirportDefinition airport;
+        private int id;
+
+        public GateDefinition(AirportDefinition airport, int id){
+            this.airport = airport;
+            this.id = id;
+        }
+
+        public AirportDefinition getAirport() {
+            return airport;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            GateDefinition that = (GateDefinition) o;
+            return id == that.id &&
+                    Objects.equals(airport, that.airport);
+        }
+
+        @Override
+        public int hashCode() {
+
+            return Objects.hash(airport, id);
         }
     }
 
