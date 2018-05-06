@@ -3,6 +3,9 @@ package be.kuleuven.cs.robijn.gui;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.common.SimulationSettings.AirportDefinition;
 import be.kuleuven.cs.robijn.common.SimulationSettings.DroneDefinition;
+import be.kuleuven.cs.robijn.common.SimulationSettings.GateDefinition;
+import be.kuleuven.cs.robijn.common.airports.Airport;
+import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.worldObjects.Box;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
@@ -22,6 +25,10 @@ import interfaces.AutopilotConfigWriter;
 import org.apache.commons.math3.linear.ArrayRealVector;
 
 import java.io.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Controller for the simulation settings overlay
@@ -54,7 +61,7 @@ public class SimulationSettingsControl extends AnchorPane {
     private Button generateAirportsButton;
 
     @FXML
-    private TableView airportsTable;
+    private TableView<AirportDefinition> airportsTable;
 
     /// DRONES SETUP
 
@@ -63,6 +70,9 @@ public class SimulationSettingsControl extends AnchorPane {
 
     @FXML
     private Button removeDroneButton;
+
+    @FXML
+    private Button autoAssignDronesButton;
 
     @FXML
     private Button loadDroneSetupFileButton;
@@ -74,7 +84,7 @@ public class SimulationSettingsControl extends AnchorPane {
     private Button loadDroneSetupDefaultsButton;
 
     @FXML
-    private TableView dronesTable;
+    private TableView<DroneDefinition> dronesTable;
 
     /// MISC
 
@@ -112,10 +122,7 @@ public class SimulationSettingsControl extends AnchorPane {
         //Fire a SimulationSettingsConfirmEvent when the user clicks the OK button
         //This event is observed in the MainController, where the overlay is hidden and the simulation is started.
         okButton.setOnAction(e -> {
-            boolean allDronesValid = dronesTable.getItems().stream().allMatch(d -> {
-                DroneDefinition drone = (DroneDefinition)d;
-                return drone.isValid();
-            });
+            boolean allDronesValid = dronesTable.getItems().stream().allMatch(DroneDefinition::isValid);
             if(!allDronesValid){
                 Alert alert = new Alert(
                         Alert.AlertType.ERROR,
@@ -136,16 +143,8 @@ public class SimulationSettingsControl extends AnchorPane {
     /****************/
 
     private void setupSpinners(){
-        enableApplySpinnerValueOnFocusLost(gateLengthSpinner);
-        enableApplySpinnerValueOnFocusLost(runwayLengthSpinner);
-    }
-
-    private void enableApplySpinnerValueOnFocusLost(Spinner spinner){
-        // hook in a formatter with the same properties as the factory
-        TextFormatter formatter = new TextFormatter(spinner.getValueFactory().getConverter(), spinner.getValueFactory().getValue());
-        spinner.getEditor().setTextFormatter(formatter);
-        // bidi-bind the values
-        spinner.getValueFactory().valueProperty().bindBidirectional(formatter.valueProperty());
+        JavaFXUtilities.enableApplySpinnerValueOnFocusLost(gateLengthSpinner);
+        JavaFXUtilities.enableApplySpinnerValueOnFocusLost(runwayLengthSpinner);
     }
 
     private void setupAirportsTab(){
@@ -209,7 +208,7 @@ public class SimulationSettingsControl extends AnchorPane {
                     out.writeInt(airportCount);
 
                     for (int i = 0; i < airportCount; i++) {
-                        AirportDefinition airport = (AirportDefinition) airportsTable.getItems().get(i);
+                        AirportDefinition airport = airportsTable.getItems().get(i);
                         airport.write(out);
                     }
                 } catch (IOException e1) {
@@ -218,9 +217,12 @@ public class SimulationSettingsControl extends AnchorPane {
             }
         });
 
-        generateAirportsButton.setVisible(false); //Not implemented yet
         generateAirportsButton.setOnAction(e -> {
-
+            Stage parentStage = (Stage)generateAirportsButton.getScene().getWindow();
+            AirportDefinition[] airports = GenerateAirportsDialog.showDialog(parentStage);
+            airportsTable.getItems().clear();
+            airportsTable.getItems().addAll(airports);
+            airportsTable.refresh();
         });
     }
 
@@ -235,7 +237,7 @@ public class SimulationSettingsControl extends AnchorPane {
         xColumn.setCellFactory(TextFieldTableCell.forTableColumn(new NumberStringConverter()));
         xColumn.setCellValueFactory(cd -> Bindings.createFloatBinding(() -> cd.getValue().getCenterX()));
         xColumn.setOnEditCommit((e) -> {
-            AirportDefinition curAirport = (AirportDefinition)airportsTable.getItems().get(e.getTablePosition().getRow());
+            AirportDefinition curAirport = airportsTable.getItems().get(e.getTablePosition().getRow());
             curAirport.setCenterX(e.getNewValue().floatValue());
         });
         airportsTable.getColumns().add(xColumn);
@@ -247,7 +249,7 @@ public class SimulationSettingsControl extends AnchorPane {
         zColumn.setCellFactory(TextFieldTableCell.forTableColumn(new NumberStringConverter()));
         zColumn.setCellValueFactory(cd -> Bindings.createFloatBinding(() -> cd.getValue().getCenterZ()));
         zColumn.setOnEditCommit((e) -> {
-            AirportDefinition curAirport = (AirportDefinition)airportsTable.getItems().get(e.getTablePosition().getRow());
+            AirportDefinition curAirport = airportsTable.getItems().get(e.getTablePosition().getRow());
             curAirport.setCenterZ(e.getNewValue().floatValue());
         });
         airportsTable.getColumns().add(zColumn);
@@ -259,7 +261,7 @@ public class SimulationSettingsControl extends AnchorPane {
         rotVectXColumn.setCellFactory(TextFieldTableCell.forTableColumn(new NumberStringConverter()));
         rotVectXColumn.setCellValueFactory(cd -> Bindings.createFloatBinding(() -> cd.getValue().getCenterToRunway0X()));
         rotVectXColumn.setOnEditCommit((e) -> {
-            AirportDefinition curAirport = (AirportDefinition)airportsTable.getItems().get(e.getTablePosition().getRow());
+            AirportDefinition curAirport = airportsTable.getItems().get(e.getTablePosition().getRow());
             curAirport.setCenterToRunway0X(e.getNewValue().floatValue());
         });
         airportsTable.getColumns().add(rotVectXColumn);
@@ -271,7 +273,7 @@ public class SimulationSettingsControl extends AnchorPane {
         rotVectZColumn.setCellFactory(TextFieldTableCell.forTableColumn(new NumberStringConverter()));
         rotVectZColumn.setCellValueFactory(cd -> Bindings.createFloatBinding(() -> cd.getValue().getCenterToRunway0Z()));
         rotVectZColumn.setOnEditCommit((e) -> {
-            AirportDefinition curAirport = (AirportDefinition)airportsTable.getItems().get(e.getTablePosition().getRow());
+            AirportDefinition curAirport = airportsTable.getItems().get(e.getTablePosition().getRow());
             curAirport.setCenterToRunway0Z(e.getNewValue().floatValue());
         });
         airportsTable.getColumns().add(rotVectZColumn);
@@ -298,6 +300,38 @@ public class SimulationSettingsControl extends AnchorPane {
 
         removeDroneButton.setOnAction(e -> dronesTable.getItems().removeAll(dronesTable.getSelectionModel().getSelectedItems()));
         removeDroneButton.disableProperty().bind(dronesTable.getSelectionModel().selectedIndexProperty().isEqualTo(-1));
+
+        autoAssignDronesButton.setOnAction(e -> {
+            HashSet<GateDefinition> freeGates = new HashSet<>();
+
+            //Add all gates
+            freeGates.addAll(airportsTable.getItems().stream().flatMap(a -> {
+                return Stream.of(new GateDefinition(a, 0), new GateDefinition(a, 1));
+            }).collect(Collectors.toList()));
+
+            //Remove non-free gates
+            for (DroneDefinition d : dronesTable.getItems()) {
+                if(d.getAirport() != null){
+                    freeGates.remove(new GateDefinition(d.getAirport(), d.getGate()));
+                }
+            }
+
+            //Assign every non-assigned drone to a free gate
+            for (DroneDefinition d : dronesTable.getItems()) {
+                if(d.getAirport() == null){
+                    Optional<GateDefinition> gate = freeGates.stream().findFirst();
+                    if(gate.isPresent()){
+                        d.setAirport(gate.get().getAirport());
+                        d.setGate(gate.get().getId());
+                        freeGates.remove(gate.get());
+                    }else{
+                        break;
+                    }
+                }
+            }
+            
+            dronesTable.refresh();
+        });
 
         loadDroneSetupFileButton.setVisible(false); //Not implemented yet
         loadDroneSetupFileButton.setOnAction(e -> {
