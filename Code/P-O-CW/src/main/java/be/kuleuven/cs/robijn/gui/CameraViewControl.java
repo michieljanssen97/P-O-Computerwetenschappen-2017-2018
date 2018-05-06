@@ -117,8 +117,8 @@ public class CameraViewControl extends AnchorPane {
             WorldObject world = newValue.getTestBed().getWorldRepresentation();
 
             activeCamera = sideCamera = getSimulation().getTestBed().getRenderer().createOrthographicCamera();
-            sideCamera.setWidth(130);
-            sideCamera.setHeight(30);
+            sideCamera.setWidth(OrthoCameraZoomHandler.DEFAULT_ORTHO_CAM_WIDTH);
+            sideCamera.setHeight(OrthoCameraZoomHandler.DEFAULT_ORTHO_CAM_HEIGHT);
             sideCamera.setName(CameraViewControl.SIDE_CAMERA_ID);
             sideCamera.setRelativePosition(new ArrayRealVector(new double[]{1000, 5, -55}, false));
             sideCamera.setRelativeRotation(new Rotation(new Vector3D(0, 1, 0), Math.PI/2d));
@@ -126,8 +126,8 @@ public class CameraViewControl extends AnchorPane {
             world.addChild(sideCamera);
 
             topCamera = getSimulation().getTestBed().getRenderer().createOrthographicCamera();
-            topCamera.setWidth(130);
-            topCamera.setHeight(40);
+            topCamera.setWidth(OrthoCameraZoomHandler.DEFAULT_ORTHO_CAM_WIDTH);
+            topCamera.setHeight(OrthoCameraZoomHandler.DEFAULT_ORTHO_CAM_HEIGHT);
             topCamera.setName(CameraViewControl.TOPDOWN_CAMERA_ID);
             topCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 1000, -55}, false));
             Rotation rot = new Rotation(new Vector3D(0, 0, 1), Math.PI/2d)
