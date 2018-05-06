@@ -1266,7 +1266,7 @@ public class Drone extends WorldObject {
 	Gate fromGate = null;
 	Gate toGate = null;
 	
-	public void assignNecessitiesLater(AirportPackage p, Gate fromGate, Gate toGate) {
+	public void assignNecessitiesLater(AirportPackage p, Gate fromGate, Gate toGate) { //TODO package moet eigenlijk al uit de getAllPackagesToAssign() lijst
 		this.tempPackage = p;
 		this.fromGate = fromGate;
 		this.toGate = toGate;
@@ -1284,7 +1284,7 @@ public class Drone extends WorldObject {
 		}
 	}
 	
-	public boolean hasPackageToAssign() {
+	public boolean hasPackageWaiting() {
 		return this.tempPackage != null;
 	}
 
@@ -1300,5 +1300,9 @@ public class Drone extends WorldObject {
 	 */
 	public void setPackage(AirportPackage newPkg){
 		this.assignedPackage = newPkg;
+	}
+	
+	public boolean hasPackage() {
+		return this.getPackage() != null;
 	}
 }

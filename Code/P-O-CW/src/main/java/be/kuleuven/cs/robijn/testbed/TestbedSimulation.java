@@ -68,7 +68,7 @@ public class TestbedSimulation {
 		if (drone == null)
 			throw new IllegalStateException("this virtual testbed has no drone");
 		
-		if(drone.hasPackageToAssign()) {
+		if(drone.hasPackageWaiting()) {
 			drone.packageCanBeAssigned();
 		}
 		

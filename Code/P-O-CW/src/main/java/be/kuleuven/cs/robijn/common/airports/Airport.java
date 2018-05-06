@@ -122,11 +122,11 @@ public class Airport extends WorldObject {
     		return drone;
     	}
     	
-    	double distance = Double.MAX_VALUE;
+    	double minDistance = Double.MAX_VALUE;
     	for(Airport airp : Airport.getAllAirports()) {
     		Drone tempDrone = airp.getFirstAvailableDrone();
-    		if(tempDrone.calculateDistanceToAirport(this) < distance) { //Give higher priority to Drones at nearby Airports, moet mss nog anders wegens orientatie van de luchthavens
-    			distance = tempDrone.calculateDistanceToAirport(this);
+    		if(tempDrone != null && tempDrone.calculateDistanceToAirport(this) < minDistance) { //Give higher priority to Drones at nearby Airports, moet mss nog anders wegens orientatie van de luchthavens
+    			minDistance = tempDrone.calculateDistanceToAirport(this);
     			drone = tempDrone;
     		}
     	}    	
