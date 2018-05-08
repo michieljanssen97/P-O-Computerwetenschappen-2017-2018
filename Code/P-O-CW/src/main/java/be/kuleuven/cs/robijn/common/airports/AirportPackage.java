@@ -14,11 +14,16 @@ public class AirportPackage {
     private State packageState;
     private Gate currentGate;
     private Drone currentTransporter;
+    private boolean isAssignedLater = false;
 
     public AirportPackage(Gate origin, Gate destination){
         if(origin == null || destination == null){
             throw new IllegalArgumentException();
         }
+        
+      if(origin.hasPackage()){
+    	  throw new IllegalStateException(); //mag maar 1 package beschikbaar zijn per Gate
+      }
 
         this.origin = origin;
         this.destination = destination;
@@ -174,7 +179,7 @@ public class AirportPackage {
     public static ArrayList<AirportPackage> getAllPackagesToAssign(){
     	ArrayList<AirportPackage> packageList = new ArrayList<AirportPackage>();
     	for (Gate gate : WorldObject.getChildrenOfType(Gate.class)) {
-    		if(gate.hasPackage()) {
+    		if(gate.hasPackage() && gate.getPackage().isAssignedLater == false) {
     			packageList.add(gate.getPackage());
     		}
     	}
@@ -188,14 +193,11 @@ public class AirportPackage {
             Airport fromAirport = fromGate.getAirport();
             Airport toAirport = toGate.getAirport();
             
-            if(fromGate.hasPackage()){
-                throw new IllegalStateException(); //mag maar 1 package beschikbaar zijn per Gate
-            }
-            
             Drone drone = fromAirport.getAvailableDrone();
             if(drone != null) {
             	if(drone.getCurrentAirport() != fromAirport) {
 	            	//TODO laat drone naar fromAirport vliegen
+            		p.isAssignedLater = true;
 	            	drone.assignNecessitiesLater(p, fromGate, toGate);
             	}
 	            else {

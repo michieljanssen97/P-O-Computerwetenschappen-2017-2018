@@ -82,6 +82,7 @@ public class Drone extends WorldObject {
 		this.addChild(rightRearWheel);
 		this.addChild(leftRearWheel);
 		
+		this.setToAirport(); //TODO zorg dat drones pas na airports worden aangemaakt!!!!!!
 	}
 	
     //     -----------------     //
@@ -1266,7 +1267,7 @@ public class Drone extends WorldObject {
 	Gate fromGate = null;
 	Gate toGate = null;
 	
-	public void assignNecessitiesLater(AirportPackage p, Gate fromGate, Gate toGate) { //TODO package moet eigenlijk al uit de getAllPackagesToAssign() lijst
+	public void assignNecessitiesLater(AirportPackage p, Gate fromGate, Gate toGate) {
 		this.tempPackage = p;
 		this.fromGate = fromGate;
 		this.toGate = toGate;

@@ -79,7 +79,7 @@ public class Airport extends WorldObject {
         return runways;
     }
     
-    public ArrayList<Drone> getCurrentDrones() {
+    public ArrayList<Drone> getCurrentDrones() { //TODO gebruik als drones spawnen op een airport
         return new ArrayList<Drone>(this.currentDrones);
     }
     
