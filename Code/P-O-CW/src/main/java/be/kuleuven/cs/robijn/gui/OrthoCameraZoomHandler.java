@@ -34,10 +34,28 @@ public class OrthoCameraZoomHandler implements EventHandler<ScrollEvent> {
         }
 
         // Calculate new scroll wheel offset and clamp value between max and min value
-        wheelOffset += mouseDelta / 40;
-        wheelOffset = Math.max(wheelOffset, MIN_WHEEL_OFFSET);
-        wheelOffset = Math.min(wheelOffset, MAX_WHEEL_OFFSET);
+        int newWheelOffset = wheelOffset + (int)(mouseDelta / 40);
+        trySetWheelOffset(newWheelOffset);
+    }
 
+    public void zoomIn(){
+        trySetWheelOffset(wheelOffset - 1);
+    }
+
+    public void zoomOut(){
+        trySetWheelOffset(wheelOffset + 1);
+    }
+
+    private void trySetWheelOffset(int newWheelOffset){
+        newWheelOffset = Math.max(newWheelOffset, MIN_WHEEL_OFFSET);
+        newWheelOffset = Math.min(newWheelOffset, MAX_WHEEL_OFFSET);
+        if(wheelOffset != newWheelOffset){
+            wheelOffset = newWheelOffset;
+            applyScale();
+        }
+    }
+
+    private void applyScale(){
         // Calculate scaling factor
         scale = (float)Math.pow(ZOOM_MULTIPLIER_STEP, -wheelOffset);
 

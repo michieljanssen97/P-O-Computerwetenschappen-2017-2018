@@ -16,11 +16,13 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
@@ -254,13 +256,40 @@ public class CameraViewControl extends AnchorPane {
             sideCamZoomHandler = new OrthoCameraZoomHandler(sideCamera);
 
             imageView.setOnScroll(event -> {
-                if(activeCamera == topCamera){
-                    topCamZoomHandler.handle(event);
-                }else if(activeCamera == sideCamera){
-                    sideCamZoomHandler.handle(event);
+                OrthoCameraZoomHandler handler = getActiveZoomHandler();
+                if(handler != null){
+                    handler.handle(event);
                 }
             });
+
+            imageView.setOnMouseEntered(e1 -> {
+                Parent p = imageView.getParent();
+                while(p.getParent() != null){
+                    p = p.getParent();
+                }
+
+                p.setOnKeyPressed(event -> {
+                    OrthoCameraZoomHandler handler = getActiveZoomHandler();
+                    if(handler != null) {
+                        if(event.getCode() == KeyCode.ADD){
+                            handler.zoomIn();
+                        }else if(event.getCode() == KeyCode.SUBTRACT){
+                            handler.zoomOut();
+                        }
+                    }
+                });
+            });
         });
+    }
+
+    private OrthoCameraZoomHandler getActiveZoomHandler(){
+        if(activeCamera == topCamera){
+            return topCamZoomHandler;
+        }else if(activeCamera == sideCamera){
+            return sideCamZoomHandler;
+        }else{
+            return null;
+        }
     }
 
     private void setupPerspectiveChanging(){
