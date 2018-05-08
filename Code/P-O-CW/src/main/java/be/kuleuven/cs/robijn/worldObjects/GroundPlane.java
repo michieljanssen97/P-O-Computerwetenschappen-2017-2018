@@ -38,10 +38,10 @@ public class GroundPlane extends WorldObject{
 			Vector2D rightUpCorner = airport2DPos.add(down).add(right);
 			
 			//The rectangle consists out of four vectors. If the tyre position is left of all four vectors, it's located within the rectangle's area.
-			if ( Math.atan2(leftDownCorner.getY()-leftUpCorner.getY(), leftDownCorner.getX() - leftUpCorner.getX()) > Math.atan2(tyrePos.getY()-leftUpCorner.getY(), tyrePos.getX()-leftUpCorner.getX()) &&
-					Math.atan2(rightDownCorner.getY()-leftDownCorner.getY(), rightDownCorner.getX() - leftDownCorner.getX()) > Math.atan2(tyrePos.getY()-leftDownCorner.getY(), tyrePos.getX()-leftDownCorner.getX()) &&
-					Math.atan2(rightUpCorner.getY()-rightDownCorner.getY(), rightUpCorner.getX() - rightDownCorner.getX()) > Math.atan2(tyrePos.getY()-rightDownCorner.getY(), tyrePos.getX()-rightDownCorner.getX()) &&
-					Math.atan2(leftUpCorner.getY()-rightUpCorner.getY(), leftUpCorner.getX() - rightUpCorner.getX()) > Math.atan2(tyrePos.getY()-rightUpCorner.getY(), tyrePos.getX()-rightUpCorner.getX()) )
+			if ( Math.atan2(leftDownCorner.getY()-leftUpCorner.getY(), leftDownCorner.getX() - leftUpCorner.getX()) >= Math.atan2(tyrePos.getY()-leftUpCorner.getY(), tyrePos.getX()-leftUpCorner.getX()) &&
+					Math.atan2(rightDownCorner.getY()-leftDownCorner.getY(), rightDownCorner.getX() - leftDownCorner.getX()) >= Math.atan2(tyrePos.getY()-leftDownCorner.getY(), tyrePos.getX()-leftDownCorner.getX()) &&
+					Math.atan2(rightUpCorner.getY()-rightDownCorner.getY(), rightUpCorner.getX() - rightDownCorner.getX()) >= Math.atan2(tyrePos.getY()-rightDownCorner.getY(), tyrePos.getX()-rightDownCorner.getX()) &&
+					Math.atan2(leftUpCorner.getY()-rightUpCorner.getY(), leftUpCorner.getX() - rightUpCorner.getX()) >= Math.atan2(tyrePos.getY()-rightUpCorner.getY(), tyrePos.getX()-rightUpCorner.getX()) )
 				return false;
 		}
 		return true;
