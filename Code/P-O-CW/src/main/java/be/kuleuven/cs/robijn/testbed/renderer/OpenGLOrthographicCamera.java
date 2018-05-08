@@ -9,7 +9,6 @@ public class OpenGLOrthographicCamera extends OrthographicCamera {
     private float height = 100f;
     private float zNear = 0.1f;
     private float zFar = 100000f;
-    private double renderIconsThresholdRatio = 0;
     private float iconSize = 1.0f;
     private Vector2D iconOffset = new Vector2D(0, 0);
 
@@ -37,16 +36,6 @@ public class OpenGLOrthographicCamera extends OrthographicCamera {
             throw new IllegalArgumentException("'height' must be a positive number, not NaN or infinite");
         }
         this.height = height;
-    }
-
-    @Override
-    public double getRenderIconsThresholdRatio() {
-        return renderIconsThresholdRatio;
-    }
-
-    @Override
-    public void setRenderIconsThresholdRatio(double threshold) {
-        this.renderIconsThresholdRatio = threshold;
     }
 
     @Override
