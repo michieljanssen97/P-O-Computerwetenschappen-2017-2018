@@ -143,16 +143,8 @@ public class SimulationSettingsControl extends AnchorPane {
     /****************/
 
     private void setupSpinners(){
-        enableApplySpinnerValueOnFocusLost(gateLengthSpinner);
-        enableApplySpinnerValueOnFocusLost(runwayLengthSpinner);
-    }
-
-    private void enableApplySpinnerValueOnFocusLost(Spinner spinner){
-        // hook in a formatter with the same properties as the factory
-        TextFormatter formatter = new TextFormatter(spinner.getValueFactory().getConverter(), spinner.getValueFactory().getValue());
-        spinner.getEditor().setTextFormatter(formatter);
-        // bidi-bind the values
-        spinner.getValueFactory().valueProperty().bindBidirectional(formatter.valueProperty());
+        JavaFXUtilities.enableApplySpinnerValueOnFocusLost(gateLengthSpinner);
+        JavaFXUtilities.enableApplySpinnerValueOnFocusLost(runwayLengthSpinner);
     }
 
     private void setupAirportsTab(){
@@ -225,9 +217,12 @@ public class SimulationSettingsControl extends AnchorPane {
             }
         });
 
-        generateAirportsButton.setVisible(false); //Not implemented yet
         generateAirportsButton.setOnAction(e -> {
-
+            Stage parentStage = (Stage)generateAirportsButton.getScene().getWindow();
+            AirportDefinition[] airports = GenerateAirportsDialog.showDialog(parentStage);
+            airportsTable.getItems().clear();
+            airportsTable.getItems().addAll(airports);
+            airportsTable.refresh();
         });
     }
 

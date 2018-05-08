@@ -5,13 +5,14 @@ import javafx.event.EventHandler;
 import javafx.scene.input.ScrollEvent;
 
 public class OrthoCameraZoomHandler implements EventHandler<ScrollEvent> {
-    private static final int MIN_WHEEL_OFFSET = 1;
-    private static final int MAX_WHEEL_OFFSET = 60;
-    private static final int DEFAULT_ORTHO_CAM_WIDTH = 200;
-    private static final int DEFAULT_ORTHO_CAM_HEIGHT = 50;
+    private static final int MIN_WHEEL_OFFSET = -20;
+    private static final int MAX_WHEEL_OFFSET = 40;
+    public static final int DEFAULT_ORTHO_CAM_WIDTH = 200;
+    public static final int DEFAULT_ORTHO_CAM_HEIGHT = 50;
+    private static final float ZOOM_MULTIPLIER_STEP = 0.9f;
 
     private OrthographicCamera camera;
-    private int wheelOffset = 6;
+    private int wheelOffset = 0;
     private float scale = 1.0f;
 
     public OrthoCameraZoomHandler(OrthographicCamera camera){
@@ -33,12 +34,30 @@ public class OrthoCameraZoomHandler implements EventHandler<ScrollEvent> {
         }
 
         // Calculate new scroll wheel offset and clamp value between max and min value
-        wheelOffset += mouseDelta / 40;
-        wheelOffset = Math.max(wheelOffset, MIN_WHEEL_OFFSET);
-        wheelOffset = Math.min(wheelOffset, MAX_WHEEL_OFFSET);
+        int newWheelOffset = wheelOffset + (int)(mouseDelta / 40);
+        trySetWheelOffset(newWheelOffset);
+    }
 
-        // Calculate logaritmic scaling factor
-        scale = (float)Math.log(1 + (wheelOffset / 10d)) * 2f;
+    public void zoomIn(){
+        trySetWheelOffset(wheelOffset - 1);
+    }
+
+    public void zoomOut(){
+        trySetWheelOffset(wheelOffset + 1);
+    }
+
+    private void trySetWheelOffset(int newWheelOffset){
+        newWheelOffset = Math.max(newWheelOffset, MIN_WHEEL_OFFSET);
+        newWheelOffset = Math.min(newWheelOffset, MAX_WHEEL_OFFSET);
+        if(wheelOffset != newWheelOffset){
+            wheelOffset = newWheelOffset;
+            applyScale();
+        }
+    }
+
+    private void applyScale(){
+        // Calculate scaling factor
+        scale = (float)Math.pow(ZOOM_MULTIPLIER_STEP, -wheelOffset);
 
         // Calculate new world space camera width and height
         camera.setWidth(DEFAULT_ORTHO_CAM_WIDTH * scale);

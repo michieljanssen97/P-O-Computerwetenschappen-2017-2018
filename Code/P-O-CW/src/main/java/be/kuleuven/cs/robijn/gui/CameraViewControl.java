@@ -16,11 +16,13 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
@@ -78,7 +80,7 @@ public class CameraViewControl extends AnchorPane {
     private Camera activeCamera;
 
     private DragHelper dragHelper;
-    private double dragSensitivity = 0.1;
+    private double dragSensitivity = 200;
     private final MainController mainController;
 
     public CameraViewControl(MainController parent){
@@ -117,8 +119,8 @@ public class CameraViewControl extends AnchorPane {
             WorldObject world = newValue.getTestBed().getWorldRepresentation();
 
             activeCamera = sideCamera = getSimulation().getTestBed().getRenderer().createOrthographicCamera();
-            sideCamera.setWidth(130);
-            sideCamera.setHeight(30);
+            sideCamera.setWidth(OrthoCameraZoomHandler.DEFAULT_ORTHO_CAM_WIDTH);
+            sideCamera.setHeight(OrthoCameraZoomHandler.DEFAULT_ORTHO_CAM_HEIGHT);
             sideCamera.setName(CameraViewControl.SIDE_CAMERA_ID);
             sideCamera.setRelativePosition(new ArrayRealVector(new double[]{1000, 5, -55}, false));
             sideCamera.setRelativeRotation(new Rotation(new Vector3D(0, 1, 0), Math.PI/2d));
@@ -126,8 +128,8 @@ public class CameraViewControl extends AnchorPane {
             world.addChild(sideCamera);
 
             topCamera = getSimulation().getTestBed().getRenderer().createOrthographicCamera();
-            topCamera.setWidth(130);
-            topCamera.setHeight(40);
+            topCamera.setWidth(OrthoCameraZoomHandler.DEFAULT_ORTHO_CAM_WIDTH);
+            topCamera.setHeight(OrthoCameraZoomHandler.DEFAULT_ORTHO_CAM_HEIGHT);
             topCamera.setName(CameraViewControl.TOPDOWN_CAMERA_ID);
             topCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 1000, -55}, false));
             Rotation rot = new Rotation(new Vector3D(0, 0, 1), Math.PI/2d)
@@ -234,13 +236,13 @@ public class CameraViewControl extends AnchorPane {
             if(activeCamera instanceof OrthographicCamera){
                 OrthographicCamera ortho = (OrthographicCamera)activeCamera;
 
-                float scale = activeCamera == topCamera ? topCamZoomHandler.getScale() : sideCamZoomHandler.getScale();
+                double dx = (e.getDeltaX() / imageView.getFitWidth()) * ortho.getWidth();
+                double dy = (e.getDeltaY() / imageView.getFitHeight()) * ortho.getHeight();
 
                 Rotation camRot = ortho.getRelativeRotation();
                 Vector3D right = camRot.applyTo(new Vector3D(1, 0, 0));
                 Vector3D up = camRot.applyTo(new Vector3D(0, 1, 0));
-                Vector3D delta = right.scalarMultiply(-e.getDeltaX()*dragSensitivity * scale).add(
-                                    up.scalarMultiply(e.getDeltaY()*dragSensitivity * scale));
+                Vector3D delta = right.scalarMultiply(-dx).add(up.scalarMultiply(dy));
                 ortho.setRelativePosition(ortho.getRelativePosition().add(new ArrayRealVector(new double[]{delta.getX(), delta.getY(), delta.getZ()}, false)));
             }
         });
@@ -254,13 +256,40 @@ public class CameraViewControl extends AnchorPane {
             sideCamZoomHandler = new OrthoCameraZoomHandler(sideCamera);
 
             imageView.setOnScroll(event -> {
-                if(activeCamera == topCamera){
-                    topCamZoomHandler.handle(event);
-                }else if(activeCamera == sideCamera){
-                    sideCamZoomHandler.handle(event);
+                OrthoCameraZoomHandler handler = getActiveZoomHandler();
+                if(handler != null){
+                    handler.handle(event);
                 }
             });
+
+            imageView.setOnMouseEntered(e1 -> {
+                Parent p = imageView.getParent();
+                while(p.getParent() != null){
+                    p = p.getParent();
+                }
+
+                p.setOnKeyPressed(event -> {
+                    OrthoCameraZoomHandler handler = getActiveZoomHandler();
+                    if(handler != null) {
+                        if(event.getCode() == KeyCode.ADD){
+                            handler.zoomIn();
+                        }else if(event.getCode() == KeyCode.SUBTRACT){
+                            handler.zoomOut();
+                        }
+                    }
+                });
+            });
         });
+    }
+
+    private OrthoCameraZoomHandler getActiveZoomHandler(){
+        if(activeCamera == topCamera){
+            return topCamZoomHandler;
+        }else if(activeCamera == sideCamera){
+            return sideCamZoomHandler;
+        }else{
+            return null;
+        }
     }
 
     private void setupPerspectiveChanging(){

@@ -240,7 +240,7 @@ public class OpenGLRenderer implements Renderer {
 
             //Render ground if needed
             WorldObject groundObj = new WorldObject();
-            groundObj.setScale(new ArrayRealVector(new double[]{10000, 1, 10000}, false));
+            groundObj.setScale(new ArrayRealVector(new double[]{60000, 1, 60000}, false));
             RealMatrix transform = groundObj.getObjectToWorldTransform();
             renderModel(groundModel, viewProjectionMatrix, transform);
 

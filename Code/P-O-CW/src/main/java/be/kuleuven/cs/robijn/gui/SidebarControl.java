@@ -22,17 +22,12 @@ import java.io.UncheckedIOException;
  * Controller for the sidebar.
  */
 public class SidebarControl extends VBox {
-    private static final double FASTFORWARD_MULTIPLIER = 2.0d;
-    private static final double LIGHTSPEED_MULTIPLIER = 5.0d;
-
     @FXML
     private ToggleButton pauseButton;
     @FXML
     private ToggleButton playButton;
     @FXML
-    private ToggleButton fastForwardButton;
-    @FXML
-    private ToggleButton lightSpeedButton;
+    private Slider simulationSpeedSlider;
 
     @FXML
     private ToggleGroup simulationRunningToggleGroup;
@@ -141,26 +136,30 @@ public class SidebarControl extends VBox {
         //Bind the play/pause buttons to the simulation pause variable.
         simulationRunningProperty.bind(
                 playButton.selectedProperty()
-                    .or(fastForwardButton.selectedProperty())
-                    .or(lightSpeedButton.selectedProperty())
+                    .and(simulationSpeedSlider.valueProperty().greaterThan(0))
         );
         playButton.selectedProperty().setValue(true);
+        simulationRunningToggleGroup.selectedToggleProperty().addListener((observableValue, toggle, newSelectedToggle) -> {
+            if(newSelectedToggle == playButton && simulationSpeedSlider.getValue() == 0){
+                simulationSpeedSlider.setValue(1);
+            }
+            if(newSelectedToggle == null){
+                pauseButton.selectedProperty().setValue(true);
+            }
+        });
         simulationRunningProperty.addListener(e -> getSimulation().setSimulationPaused(!simulationRunningProperty.get()));
+        simulationSpeedSlider.valueProperty().addListener((observableValue, oldVal, newVal) -> {
+            if(newVal.doubleValue() == 0){
+                pauseButton.selectedProperty().setValue(true);
+            }else{
+                getSimulation().setSimulationSpeedMultiplier(newVal.doubleValue());
+            }
+        });
 
         //Bind the play/fastforward/lightspeed buttons to the simulation speed multiplier
         playButton.selectedProperty().addListener((property, wasSelected, isSelected) -> {
             if(isSelected){
                 getSimulation().setSimulationSpeedMultiplier(1.0d);
-            }
-        });
-        fastForwardButton.selectedProperty().addListener((property, wasSelected, isSelected) -> {
-            if(isSelected){
-                getSimulation().setSimulationSpeedMultiplier(FASTFORWARD_MULTIPLIER);
-            }
-        });
-        lightSpeedButton.selectedProperty().addListener((property, wasSelected, isSelected) -> {
-            if(isSelected){
-                getSimulation().setSimulationSpeedMultiplier(LIGHTSPEED_MULTIPLIER);
             }
         });
 
@@ -182,8 +181,7 @@ public class SidebarControl extends VBox {
         		.or(outOfControlProperty);
         pauseButton.disableProperty().bind(canPlay);
         playButton.disableProperty().bind(canPlay);
-        fastForwardButton.disableProperty().bind(canPlay);
-        lightSpeedButton.disableProperty().bind(canPlay);
+        simulationSpeedSlider.disableProperty().bind(canPlay);
 
         simulationFinishedLabel.visibleProperty().bind(simulationFinishedProperty);
         simulationFinishedLabel.managedProperty().bind(simulationFinishedProperty);
