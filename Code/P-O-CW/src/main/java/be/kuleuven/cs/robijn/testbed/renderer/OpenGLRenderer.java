@@ -1,9 +1,13 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.*;
+import be.kuleuven.cs.robijn.common.Font;
+import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.airports.Runway;
-import be.kuleuven.cs.robijn.testbed.renderer.bmfont.Label3D;
+import be.kuleuven.cs.robijn.testbed.renderer.bmfont.BMFont;
+import be.kuleuven.cs.robijn.worldObjects.Label3D;
+import be.kuleuven.cs.robijn.common.math.VectorMath;
 import be.kuleuven.cs.robijn.worldObjects.Box;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
@@ -18,13 +22,16 @@ import org.apache.commons.math3.linear.RealVector;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
+import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.concurrent.Semaphore;
 
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
 import static org.lwjgl.glfw.GLFWNativeWGL.glfwGetWGLContext;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
@@ -33,8 +40,7 @@ import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
 import static org.lwjgl.opengl.GL14.glBlendEquation;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.GL32.GL_FIRST_VERTEX_CONVENTION;
-import static org.lwjgl.opengl.GL32.glProvokingVertex;
+import static org.lwjgl.opengl.GL32.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class OpenGLRenderer implements Renderer {
@@ -94,6 +100,7 @@ public class OpenGLRenderer implements Renderer {
 
     private Model runwayModel = null;
     private Model gateModel = null;
+    private Model withPackageGateModel = null;
 
     private Billboard droneIcon;
     private Billboard boxIcon;
@@ -117,8 +124,10 @@ public class OpenGLRenderer implements Renderer {
         }
 
         //Load drone
-        Mesh droneMesh = OBJLoader.loadFromResources("/models/drone/drone.obj");
-        Texture droneTexture = Texture.load(Resources.loadImageResource("/models/drone/texture.jpg"));
+        //Mesh droneMesh = OBJLoader.loadFromResources("/models/drone/drone.obj");
+        //Texture droneTexture = Texture.load(Resources.loadImageResource("/models/drone/texture.jpg"));
+        Mesh droneMesh = OBJLoader.loadFromResources("/models/drone/predator.obj");
+        Texture droneTexture = Texture.load(Resources.loadImageResource("/models/drone/predator.png"));
         droneModel = new Model(droneMesh, droneTexture, texturedProgram);
 
         //Load shader for box model
@@ -143,7 +152,9 @@ public class OpenGLRenderer implements Renderer {
         Mesh gateMesh = OBJLoader.loadFromResources("/models/plane/plane.obj");
         gateMesh.setRenderOffset(new Vector3D(0, .006, 0));
         Texture gateTexture = Texture.load(Resources.loadImageResource("/models/gate/texture.png"));
+        Texture withPackageGateTexture = Texture.load(Resources.loadImageResource("/models/gate/with_package_texture.png"));
         gateModel = new Model(gateMesh, gateTexture, texturedProgram);
+        withPackageGateModel = new Model(gateMesh, withPackageGateTexture, texturedProgram);
 
         //Load runway model
         Mesh runwayMesh = OBJLoader.loadFromResources("/models/plane/plane.obj");
@@ -183,7 +194,7 @@ public class OpenGLRenderer implements Renderer {
     }
 
     @Override
-    public void render(WorldObject worldRoot, FrameBuffer buffer, Camera camera){
+    public RenderTask startRender(WorldObject worldRoot, FrameBuffer buffer, Camera camera, Semaphore worldStateLock){
         if(!(buffer instanceof OpenGLFrameBuffer)){
             throw new IllegalArgumentException("Incompatible framebuffer");
         }
@@ -191,55 +202,76 @@ public class OpenGLRenderer implements Renderer {
             throw new IllegalArgumentException("Incompatible camera");
         }
 
-        labelRenderer.updateLabelCache(worldRoot);
-
-        //Use own framebuffer instead of default framebuffer
-        glBindFramebuffer(GL_FRAMEBUFFER, ((OpenGLFrameBuffer)buffer).getId());
-        //Set the size and position of the image we want to render in the buffer
-        glViewport(0, 0, buffer.getWidth(), buffer.getHeight());
-        //Enable depth testing so we only see the faces oriented towards the camera.
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        //The projection matrix that is used mirrors the y-axis. (see createProjectionMatrix())
-        //This causes the winding order of the vertices to flip:
-        //   B
-        //  / \      Winding order is ABC: counter-clock-wise
-        // C - A
-        //-------
-        // C - A
-        //  \ /      Winding order is ABC: clock-wise
-        //   B
-        //We need to flip the OpenGL winding order as well to compensate and keep the face normals in the same direction.
-        //Otherwise face culling will cut away the front parts and leave behind only the back parts
-        glFrontFace(GL_CW);
-        //Replace previous frame with a blank screen
-        glClearColor(1f, 1f, 1f, 1f);
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-        //Setup per-camera matrices
-        Matrix4f viewMatrix = createViewMatrix(camera);
-        Matrix4f projectionMatrix = createProjectionMatrix(camera);
-        Matrix4f viewProjectionMatrix = new Matrix4f(projectionMatrix).mul(viewMatrix);
-
-        //Render ground if needed
-        WorldObject groundObj = new WorldObject();
-        groundObj.setScale(new ArrayRealVector(new double[]{10000, 1, 10000}, false));
-        RealMatrix transform = groundObj.getObjectToWorldTransform();
-        renderModel(groundModel, viewProjectionMatrix, transform);
-
-        //Render objects
-        for (WorldObject child : worldRoot.getChildren()){
-            renderChildren(child, viewProjectionMatrix, camera);
+        if(!((OpenGLFrameBuffer) buffer).isReady()){
+            throw new IllegalStateException("The framebuffer is unavailable.");
         }
 
-        //Render debug objects if needed
-        WorldObject dummyLine = new WorldObject();
-        dummyLine.setName("debug-line");
-        if(camera.isVisible(dummyLine)){
-            for (Line line : linesToDraw){
-                renderLine(line, viewProjectionMatrix);
+        try {
+            worldStateLock.acquire();
+
+            labelRenderer.updateLabelCache(worldRoot);
+
+            //Use own framebuffer instead of default framebuffer
+            glBindFramebuffer(GL_FRAMEBUFFER, ((OpenGLFrameBuffer)buffer).getId());
+            //Set the size and position of the image we want to render in the buffer
+            glViewport(0, 0, buffer.getWidth(), buffer.getHeight());
+            //Enable depth testing so we only see the faces oriented towards the camera.
+            glEnable(GL_DEPTH_TEST);
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+            //The projection matrix that is used mirrors the y-axis. (see createProjectionMatrix())
+            //This causes the winding order of the vertices to flip:
+            //   B
+            //  / \      Winding order is ABC: counter-clock-wise
+            // C - A
+            //-------
+            // C - A
+            //  \ /      Winding order is ABC: clock-wise
+            //   B
+            //We need to flip the OpenGL winding order as well to compensate and keep the face normals in the same direction.
+            //Otherwise face culling will cut away the front parts and leave behind only the back parts
+            glFrontFace(GL_CW);
+            //Replace previous frame with a blank screen
+            glClearColor(1f, 1f, 1f, 1f);
+            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+            //Setup per-camera matrices
+            Matrix4f viewProjectionMatrix = createViewProjectionMatrix(camera);
+
+            //Render ground if needed
+            WorldObject groundObj = new WorldObject();
+            groundObj.setScale(new ArrayRealVector(new double[]{60000, 1, 60000}, false));
+            RealMatrix transform = groundObj.getObjectToWorldTransform();
+            renderModel(groundModel, viewProjectionMatrix, transform);
+
+            //Render objects
+            for (WorldObject child : worldRoot.getChildren()){
+                renderChildren(child, viewProjectionMatrix, camera);
             }
+
+            //Render debug objects if needed
+            WorldObject dummyLine = new WorldObject();
+            dummyLine.setName("debug-line");
+            if(camera.isVisible(dummyLine)){
+                for (Line line : linesToDraw){
+                    renderLine(line, viewProjectionMatrix);
+                }
+            }
+
+            //Add a fence sync object so we can check when the rendering finishes.
+            long sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+            if(sync == 0){
+                throw new RuntimeException("glFenceSync failed");
+            }
+
+            OpenGLRenderTask task = new OpenGLRenderTask(sync);
+            ((OpenGLFrameBuffer) buffer).setCurrentRenderTask(task);
+            return task;
+
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            worldStateLock.release();
         }
     }
 
@@ -263,7 +295,8 @@ public class OpenGLRenderer implements Renderer {
         }else if(obj instanceof Drone){
             model = droneModel;
         }else if(obj instanceof Gate){
-            model = gateModel;
+            Gate gate = (Gate)obj;
+            model = gate.hasPackage() ? withPackageGateModel : gateModel;
         }else if(obj instanceof Runway){
             model = runwayModel;
         }else if(obj instanceof Label3D){
@@ -279,7 +312,7 @@ public class OpenGLRenderer implements Renderer {
         if(camera instanceof OpenGLOrthographicCamera){
             OpenGLOrthographicCamera orthoCam = (OpenGLOrthographicCamera) camera;
 
-            Vector3D size = model.getMesh().getBoundingBox().getBoxSize();
+            Vector3D size = model.getMesh().getBoundingBox().getBoxDimensions();
             double avgAxis = (size.getX() + size.getY() + size.getZ()) / 3d;
             double minRatio = Math.min(avgAxis/orthoCam.getWidth(), avgAxis/orthoCam.getHeight());
             if(minRatio < orthoCam.getRenderIconsThresholdRatio()){
@@ -371,6 +404,35 @@ public class OpenGLRenderer implements Renderer {
         glDrawElements(GL_LINES, lineModel.getMesh().getIndexCount(), GL_UNSIGNED_INT, 0);
     }
 
+    @Override
+    public RealVector screenPointToWorldSpace(Camera camera, FrameBuffer frameBuffer, int screenX, int screenY){
+        float z = ((OpenGLFrameBuffer)frameBuffer).readDepth(screenX, screenY);
+        return screenPointToWorldSpace(camera, frameBuffer, screenX, screenY, z);
+    }
+
+    @Override
+    public RealVector screenPointToWorldSpace(Camera camera, FrameBuffer frameBuffer, int screenX, int screenY, float z){
+        Matrix4f transform = createViewProjectionMatrix(camera).invert();
+
+        // Map to [0;1]
+        float x = ((float)screenX) / (float)frameBuffer.getWidth();
+        float y = ((float)screenY) / (float)frameBuffer.getHeight();
+        // Map to [-1;1]
+        x = (x*2.0f)-1.0f;
+        y = (y*2.0f)-1.0f;
+        z = (z*2.0f)-1.0f;
+
+        Vector4f worldSpace = transform.transform(x, y, z, 1, new Vector4f());
+        worldSpace = worldSpace.div(worldSpace.w);
+        return new ArrayRealVector(new double[]{worldSpace.x, worldSpace.y, worldSpace.z}, false);
+    }
+
+    private Matrix4f createViewProjectionMatrix(Camera camera){
+        Matrix4f viewMatrix = createViewMatrix(camera);
+        Matrix4f projectionMatrix = createProjectionMatrix(camera);
+        return new Matrix4f(projectionMatrix).mul(viewMatrix);
+    }
+
     /**
      * Returns a linear transformation matrix for transforming vertices from world space to camera space.
      * @return a non-null matrix
@@ -430,6 +492,44 @@ public class OpenGLRenderer implements Renderer {
         return projectionMatrix;
     }
 
+    public BoundingBox getBoundingBoxFor(WorldObject obj){
+        BoundingBox b = getBoundingBoxOrNull(obj);
+        return b == null ? new BoundingBox(Vector3D.ZERO) : b;
+    }
+
+    private BoundingBox getBoundingBoxOrNull(WorldObject obj){
+        BoundingBox selfBox;
+
+        if(obj instanceof Box){
+            selfBox = boxModel.getMesh().getBoundingBox();
+        }else if(obj instanceof Drone){
+            selfBox = droneModel.getMesh().getBoundingBox();
+        }else if(obj instanceof Gate){
+            selfBox = gateModel.getMesh().getBoundingBox();
+        }else if(obj instanceof Runway){
+            selfBox = runwayModel.getMesh().getBoundingBox();
+        }else{
+            selfBox = null;
+        }
+
+        if (selfBox != null) {
+            selfBox.setRelativePosition(obj.getWorldPosition());
+            selfBox.scaleDimensions(obj.getScale());
+        }
+
+        return obj.getChildren().stream()
+                .map(this::getBoundingBoxOrNull)
+                .reduce(selfBox, (b1, b2) -> {
+                    if(b1 == null){
+                        return b2;
+                    }
+                    if(b2 == null){
+                        return b1;
+                    }
+                    return b1.merge(b2);
+                });
+    }
+
     public void addLineToDraw(Line line){
         this.linesToDraw.add(line);
     }
@@ -453,6 +553,11 @@ public class OpenGLRenderer implements Renderer {
     @Override
     public OrthographicCamera createOrthographicCamera() {
         return new OpenGLOrthographicCamera();
+    }
+
+    @Override
+    public Font loadFont(String fontName) {
+        return fontName == null ? BMFont.loadDefaultFont() : BMFont.loadFont(fontName);
     }
 
     public long getHGLRC(){
@@ -486,7 +591,7 @@ public class OpenGLRenderer implements Renderer {
         boxIcon.getTexture().close();
 
         //Destroy framebuffers
-        for(OpenGLFrameBuffer frameBuffer : frameBuffers){
+        for (OpenGLFrameBuffer frameBuffer : frameBuffers) {
             frameBuffer.close();
         }
         frameBuffers.clear();

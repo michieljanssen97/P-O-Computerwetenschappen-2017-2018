@@ -1,6 +1,8 @@
 package be.kuleuven.cs.robijn.common;
 
 import be.kuleuven.cs.robijn.autopilot.AutopilotModuleAdapter;
+import be.kuleuven.cs.robijn.common.airports.AirportPackage;
+import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.exceptions.CrashException;
 import be.kuleuven.cs.robijn.common.stopwatch.ConstantIntervalStopwatch;
 import be.kuleuven.cs.robijn.common.stopwatch.RealTimeStopwatch;
@@ -9,9 +11,8 @@ import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
 import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  * This class combines the testbed and autopilot into one runnable simulation.
@@ -32,6 +33,8 @@ public class SimulationDriver {
 
     //List of eventhandlers that are invoked when the simulation has updated.
     private final TreeSet<UpdateEventHandler> updateEventHandlers = new TreeSet<>();
+
+    private Queue<AirportPackage> newPackages = new LinkedList<>();
     
     public SimulationDriver(SimulationSettings settings){
         this(settings, new ConstantIntervalStopwatch(0.1d));
@@ -91,7 +94,13 @@ public class SimulationDriver {
 
             //Run the autopilotmodule update
             try {
-                //autoPilotModule.deliverPackage(); // Called for every (new?) package?
+                while(!newPackages.isEmpty()){
+                    AirportPackage newPack = newPackages.poll();
+                    autoPilotModule.deliverPackage(
+                        newPack.getOrigin().getAirport().getId(), newPack.getOrigin().getId(),
+                        newPack.getDestination().getAirport().getId(), newPack.getDestination().getId()
+                    );
+                }
             	
                 for(int i = 0; i < settings.getDrones().length; i++){
                     autoPilotModule.startTimeHasPassed(i, latestAutopilotInputs[i]);
@@ -136,6 +145,16 @@ public class SimulationDriver {
         for (UpdateEventHandler eventHandler : updateEventHandlers) {
             eventHandler.getFunction().accept(latestAutopilotInputs, latestAutopilotOutputs);
         }
+    }
+
+    public AirportPackage addPackage(Gate sourceGate, Gate targetGate){
+        if(sourceGate.hasPackage()){
+            throw new IllegalStateException("The source gate already has a package");
+        }
+
+        AirportPackage pack = new AirportPackage(sourceGate, targetGate);
+        newPackages.add(pack);
+        return pack;
     }
 
     public void setSimulationPaused(boolean simulationPaused) {

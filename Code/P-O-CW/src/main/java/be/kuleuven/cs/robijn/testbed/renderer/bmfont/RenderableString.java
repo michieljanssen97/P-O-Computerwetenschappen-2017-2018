@@ -26,17 +26,17 @@ public class RenderableString {
         }
     }
 
-    private final Font font;
+    private final BMFont font;
     private final CharQuad[] characters;
     private int width = -1;
     private int height = -1;
 
-    RenderableString(Font font, List<CharQuad> characters){
+    RenderableString(BMFont font, List<CharQuad> characters){
         this.font = font;
         this.characters = characters.toArray(new RenderableString.CharQuad[characters.size()]);
     }
 
-    public Font getFont() {
+    public BMFont getFont() {
         return font;
     }
 

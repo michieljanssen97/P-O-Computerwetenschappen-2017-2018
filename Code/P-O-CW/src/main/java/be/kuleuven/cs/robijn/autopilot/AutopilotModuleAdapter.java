@@ -6,6 +6,7 @@ import be.kuleuven.cs.robijn.common.SimulationSettings.AirportDefinition;
 import be.kuleuven.cs.robijn.common.SimulationSettings.DroneDefinition;
 import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Airport;
+import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.gui.ObservableAutoPilotConfig;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
@@ -78,6 +79,9 @@ public class AutopilotModuleAdapter implements interfaces.AutopilotModule {
         Gate fromGate = fromAirport.getGates()[fromGateIndex];
         Airport toAirport = airports.get(toAirportIndex);
         Gate toGate = toAirport.getGates()[toGateIndex];
+
+        AirportPackage newPackage = new AirportPackage(fromGate, toGate);
+        fromGate.setPackage(newPackage);
 
         module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
     }

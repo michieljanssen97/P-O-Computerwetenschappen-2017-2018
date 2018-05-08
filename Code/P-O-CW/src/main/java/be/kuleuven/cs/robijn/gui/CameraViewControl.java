@@ -2,7 +2,10 @@ package be.kuleuven.cs.robijn.gui;
 
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.common.airports.Airport;
-import be.kuleuven.cs.robijn.testbed.renderer.bmfont.Label3D;
+import be.kuleuven.cs.robijn.worldObjects.Label3D;
+import be.kuleuven.cs.robijn.common.airports.Gate;
+import be.kuleuven.cs.robijn.common.math.VectorMath;
+import be.kuleuven.cs.robijn.testbed.renderer.RenderDebug;
 import be.kuleuven.cs.robijn.worldObjects.*;
 import javafx.beans.binding.Bindings;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
@@ -13,23 +16,34 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealVector;
 
 import java.awt.*;
+import java.awt.Menu;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
+import java.util.Optional;
+import java.util.Vector;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.Semaphore;
 
 /**
  * GUI component that displays a 3D render of the world, along with several buttons for changing the view
@@ -66,9 +80,12 @@ public class CameraViewControl extends AnchorPane {
     private Camera activeCamera;
 
     private DragHelper dragHelper;
-    private double dragSensitivity = 0.1;
+    private double dragSensitivity = 200;
+    private final MainController mainController;
 
-    public CameraViewControl(){
+    public CameraViewControl(MainController parent){
+        this.mainController = parent;
+
         //Load the layout associated with this GUI control
         FXMLLoader fxmlLoader = new FXMLLoader(Resources.getResourceURL("/layouts/camera_view.fxml"));
         fxmlLoader.setRoot(this);
@@ -91,6 +108,7 @@ public class CameraViewControl extends AnchorPane {
         setupResizing();
         setupPerspectiveChanging();
         setupRendering();
+        setupContextMenu();
     }
 
     private OrthographicCamera sideCamera, topCamera;
@@ -101,8 +119,8 @@ public class CameraViewControl extends AnchorPane {
             WorldObject world = newValue.getTestBed().getWorldRepresentation();
 
             activeCamera = sideCamera = getSimulation().getTestBed().getRenderer().createOrthographicCamera();
-            sideCamera.setWidth(130);
-            sideCamera.setHeight(30);
+            sideCamera.setWidth(OrthoCameraZoomHandler.DEFAULT_ORTHO_CAM_WIDTH);
+            sideCamera.setHeight(OrthoCameraZoomHandler.DEFAULT_ORTHO_CAM_HEIGHT);
             sideCamera.setName(CameraViewControl.SIDE_CAMERA_ID);
             sideCamera.setRelativePosition(new ArrayRealVector(new double[]{1000, 5, -55}, false));
             sideCamera.setRelativeRotation(new Rotation(new Vector3D(0, 1, 0), Math.PI/2d));
@@ -110,8 +128,8 @@ public class CameraViewControl extends AnchorPane {
             world.addChild(sideCamera);
 
             topCamera = getSimulation().getTestBed().getRenderer().createOrthographicCamera();
-            topCamera.setWidth(130);
-            topCamera.setHeight(40);
+            topCamera.setWidth(OrthoCameraZoomHandler.DEFAULT_ORTHO_CAM_WIDTH);
+            topCamera.setHeight(OrthoCameraZoomHandler.DEFAULT_ORTHO_CAM_HEIGHT);
             topCamera.setName(CameraViewControl.TOPDOWN_CAMERA_ID);
             topCamera.setRelativePosition(new ArrayRealVector(new double[]{0, 1000, -55}, false));
             Rotation rot = new Rotation(new Vector3D(0, 0, 1), Math.PI/2d)
@@ -218,13 +236,13 @@ public class CameraViewControl extends AnchorPane {
             if(activeCamera instanceof OrthographicCamera){
                 OrthographicCamera ortho = (OrthographicCamera)activeCamera;
 
-                float scale = activeCamera == topCamera ? topCamZoomHandler.getScale() : sideCamZoomHandler.getScale();
+                double dx = (e.getDeltaX() / imageView.getFitWidth()) * ortho.getWidth();
+                double dy = (e.getDeltaY() / imageView.getFitHeight()) * ortho.getHeight();
 
                 Rotation camRot = ortho.getRelativeRotation();
                 Vector3D right = camRot.applyTo(new Vector3D(1, 0, 0));
                 Vector3D up = camRot.applyTo(new Vector3D(0, 1, 0));
-                Vector3D delta = right.scalarMultiply(-e.getDeltaX()*dragSensitivity * scale).add(
-                                    up.scalarMultiply(e.getDeltaY()*dragSensitivity * scale));
+                Vector3D delta = right.scalarMultiply(-dx).add(up.scalarMultiply(dy));
                 ortho.setRelativePosition(ortho.getRelativePosition().add(new ArrayRealVector(new double[]{delta.getX(), delta.getY(), delta.getZ()}, false)));
             }
         });
@@ -238,13 +256,40 @@ public class CameraViewControl extends AnchorPane {
             sideCamZoomHandler = new OrthoCameraZoomHandler(sideCamera);
 
             imageView.setOnScroll(event -> {
-                if(activeCamera == topCamera){
-                    topCamZoomHandler.handle(event);
-                }else if(activeCamera == sideCamera){
-                    sideCamZoomHandler.handle(event);
+                OrthoCameraZoomHandler handler = getActiveZoomHandler();
+                if(handler != null){
+                    handler.handle(event);
                 }
             });
+
+            imageView.setOnMouseEntered(e1 -> {
+                Parent p = imageView.getParent();
+                while(p.getParent() != null){
+                    p = p.getParent();
+                }
+
+                p.setOnKeyPressed(event -> {
+                    OrthoCameraZoomHandler handler = getActiveZoomHandler();
+                    if(handler != null) {
+                        if(event.getCode() == KeyCode.ADD){
+                            handler.zoomIn();
+                        }else if(event.getCode() == KeyCode.SUBTRACT){
+                            handler.zoomOut();
+                        }
+                    }
+                });
+            });
         });
+    }
+
+    private OrthoCameraZoomHandler getActiveZoomHandler(){
+        if(activeCamera == topCamera){
+            return topCamZoomHandler;
+        }else if(activeCamera == sideCamera){
+            return sideCamZoomHandler;
+        }else{
+            return null;
+        }
     }
 
     private void setupPerspectiveChanging(){
@@ -274,6 +319,137 @@ public class CameraViewControl extends AnchorPane {
                 update();
             }, UpdateEventHandler.LOW_PRIORITY));
         });
+    }
+
+    private void setupContextMenu() {
+        final ContextMenu airportMenu = new ContextMenu();
+
+        final Gate[] destinationGate = new Gate[1];
+        imageView.setOnContextMenuRequested(e -> {
+            if(simulationProperty.get() == null || activeCamera == null || frameBuffer == null){
+                return;
+            }
+
+            TestBed testBed = simulationProperty.get().getTestBed();
+            Renderer renderer = testBed.getRenderer();
+            WorldObject world = testBed.getWorldRepresentation();
+
+            RealVector worldPos = renderer.screenPointToWorldSpace(activeCamera, frameBuffer, (int)e.getX(), (int)e.getY());
+            WorldObject clickedObj = getObjectAtPosition(renderer, world, worldPos);
+
+            if(clickedObj instanceof Gate){
+                Gate gate = (Gate)clickedObj;
+                String gateUID = gate.getAirport().getId() + ":" + gate.getId();
+
+                MenuItem addRandomPackageMenuItem = new MenuItem("Add package from " + gateUID + " to random");
+                addRandomPackageMenuItem.setDisable(gate.hasPackage());
+                addRandomPackageMenuItem.setOnAction(e2 -> {
+                    mainController.getPackageListControl().addRandomPackage(gate);
+                });
+
+                MenuItem setDestinationMenuItem = new MenuItem("Set " + gateUID + " as destination");
+                setDestinationMenuItem.setOnAction(e2 -> {
+                    destinationGate[0] = gate;
+                });
+
+                String addPackageMenuItemLabel = "Add package from " + gateUID + " to <none>";
+                if(destinationGate[0] != null){
+                    String destinationGateUID = destinationGate[0].getAirport().getId() + ":" + destinationGate[0].getId();
+                    addPackageMenuItemLabel = "Add package from " + gateUID + " to " + destinationGateUID;
+                }
+                MenuItem addPackageMenuItem = new MenuItem(addPackageMenuItemLabel);
+                addPackageMenuItem.setDisable(destinationGate[0] == null || gate.hasPackage() || destinationGate[0] == gate);
+                addPackageMenuItem.setOnAction(e2 -> {
+                    mainController.getPackageListControl().addPackage(gate, destinationGate[0]);
+                });
+
+                airportMenu.getItems().clear();
+                airportMenu.getItems().addAll(addPackageMenuItem, setDestinationMenuItem, addRandomPackageMenuItem);
+
+                airportMenu.show(imageView, e.getScreenX(), e.getScreenY());
+            }
+
+            /*world.getDescendantsStream().filter(c -> c instanceof Airport).forEach(c -> {
+                Color color = ColorGenerator.random();
+
+                BoundingBox box = renderer.getBoundingBoxFor(c);
+                Vector3D boxPos = VectorMath.realTo3D(box.getWorldPosition());
+                double dX = (box.getBoxDimensions().getX() / 2d) + 0.01f;
+                double dY = (box.getBoxDimensions().getY() / 2d) + 0.01f;
+                double dZ = (box.getBoxDimensions().getZ() / 2d) + 0.01f;
+                RenderDebug.drawLine(
+                        new Vector3D(boxPos.getX() - dX, boxPos.getY() + dY, boxPos.getZ() - dZ),
+                        new Vector3D(boxPos.getX() + dX, boxPos.getY() + dY, boxPos.getZ() - dZ),
+                        color
+                    );
+                RenderDebug.drawLine(
+                        new Vector3D(boxPos.getX() - dX, boxPos.getY() + dY, boxPos.getZ() + dZ),
+                        new Vector3D(boxPos.getX() + dX, boxPos.getY() + dY, boxPos.getZ() + dZ),
+                        color
+                );
+                RenderDebug.drawLine(
+                        new Vector3D(boxPos.getX() - dX, boxPos.getY() + dY, boxPos.getZ() - dZ),
+                        new Vector3D(boxPos.getX() - dX, boxPos.getY() + dY, boxPos.getZ() + dZ),
+                        color
+                );
+                RenderDebug.drawLine(
+                        new Vector3D(boxPos.getX() + dX, boxPos.getY() + dY, boxPos.getZ() - dZ),
+                        new Vector3D(boxPos.getX() + dX, boxPos.getY() + dY, boxPos.getZ() + dZ),
+                        color
+                );
+            });*/
+        });
+
+        imageView.setOnMouseClicked(e -> {
+            if(simulationProperty.get() == null || activeCamera == null || frameBuffer == null){
+                return;
+            }
+
+            if(e.getButton() == MouseButton.PRIMARY){
+                airportMenu.hide();
+            }
+
+            if(e.getClickCount() != 2){
+                return;
+            }
+
+            TestBed testBed = simulationProperty.get().getTestBed();
+            Renderer renderer = testBed.getRenderer();
+            WorldObject world = testBed.getWorldRepresentation();
+
+            RealVector worldPos = renderer.screenPointToWorldSpace(activeCamera, frameBuffer, (int)e.getX(), (int)e.getY());
+            WorldObject clickedObj = getObjectAtPosition(renderer, world, worldPos);
+
+            if(clickedObj instanceof Drone){
+                Drone drone = (Drone) clickedObj;
+                mainController.selectDrone(drone);
+                if(drone.getPackage() != null){
+                    mainController.getPackageListControl().setSelectedPackage(drone.getPackage());
+                }
+            }
+
+            if(clickedObj instanceof Gate){
+                Gate gate = (Gate)clickedObj;
+                if(gate.hasPackage()){
+                    mainController.getPackageListControl().setSelectedPackage(gate.getPackage());
+                }
+            }
+        });
+    }
+
+    private WorldObject getObjectAtPosition(Renderer renderer, WorldObject root, RealVector worldPos){
+        WorldObject curObj = root;
+        while(true){
+            Optional<WorldObject> matchingChild = curObj.getChildren().stream()
+                    .filter(w -> renderer.getBoundingBoxFor(w).contains(VectorMath.realTo3D(worldPos), 0.1f))
+                    .findFirst();
+            if(!matchingChild.isPresent()){
+                break;
+            }else{
+                curObj = matchingChild.get();
+            }
+        }
+        return curObj;
     }
 
     private void setupDroneComboBox(){
@@ -358,6 +534,9 @@ public class CameraViewControl extends AnchorPane {
         imageBackingBuffer = ((DataBufferByte) awtImage.getRaster().getDataBuffer()).getData();
     }
 
+    private RenderTask renderTask;
+    private Future<byte[]> imageCopyTask;
+
     private void update(){
         //If no camera is active, don't render.
         if(activeCamera == null){
@@ -388,11 +567,28 @@ public class CameraViewControl extends AnchorPane {
             orthoCam.setIconSize(8f);
         }
 
-        //Render to framebuffer, copy from framebuffer to image, convert image to javafx image, display javafx image
-        renderer.render(world, frameBuffer, activeCamera);
-        frameBuffer.readPixels(imageBackingBuffer);
-        image = SwingFXUtils.toFXImage(awtImage, image);
-        imageView.setImage(image);
+        //The view always lags behind 1 frame so that the GPU work can be done while the Java code continues and so
+        //we don't have to wait.
+
+        // The general workflow is as follows:
+        //  1. Render image on GPU
+        //  2. Copy image from GPU to RAM
+        //  3. Load image into JavaFX
+
+        if(imageCopyTask != null && imageCopyTask.isDone()){
+            image = SwingFXUtils.toFXImage(awtImage, image);
+            imageView.setImage(image);
+            imageCopyTask = null;
+        }
+
+        if(renderTask != null && renderTask.isDone()){
+            imageCopyTask = frameBuffer.readPixels(imageBackingBuffer);
+            renderTask = null;
+        }
+
+        if(renderTask == null || renderTask.isDone()){
+            renderTask = renderer.startRender(world, frameBuffer, activeCamera, testBed.getWorldStateLock());
+        }
     }
 
     private void setCameraAspectRatio(Camera camera, double aspectRatio){

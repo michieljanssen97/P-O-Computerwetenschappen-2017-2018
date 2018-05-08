@@ -1,9 +1,12 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.FrameBuffer;
+import be.kuleuven.cs.robijn.common.RenderTask;
 import org.lwjgl.BufferUtils;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL12.GL_BGR;
@@ -92,6 +95,7 @@ public class OpenGLFrameBuffer implements FrameBuffer {
     private int bytesPerPixel;
     private ByteBuffer buf;
 
+    private OpenGLRenderTask lastRenderTask;
     private boolean isClosed = false;
 
     private OpenGLFrameBuffer(int frameBufferId, int renderBufferId, int depthBufferId, int width, int height, int bytesPerPixel){
@@ -107,6 +111,14 @@ public class OpenGLFrameBuffer implements FrameBuffer {
         return frameBufferId;
     }
 
+    public int getRenderBufferId() {
+        return renderBufferId;
+    }
+
+    public int getDepthBufferId() {
+        return depthBufferId;
+    }
+
     public int getWidth(){
         return width;
     }
@@ -115,13 +127,24 @@ public class OpenGLFrameBuffer implements FrameBuffer {
         return height;
     }
 
+    void setCurrentRenderTask(OpenGLRenderTask task){
+        this.lastRenderTask = task;
+    }
+
+    public boolean isReady(){
+        return lastRenderTask == null || lastRenderTask.isDone();
+    }
+
     @Override
-    public void readPixels(byte[] data) {
+    public Future<byte[]> readPixels(byte[] data) {
         if(this.isClosed){
             throw new IllegalStateException("Cannot read pixels from a closed framebuffer!");
         }
 
-        if(data.length < width*height*bytesPerPixel){
+        int dataLength = width*height*bytesPerPixel;
+        if(data == null){
+            data = new byte[dataLength];
+        }else if(data.length < dataLength){
             throw new IllegalArgumentException("target buffer is too small");
         }
 
@@ -130,18 +153,8 @@ public class OpenGLFrameBuffer implements FrameBuffer {
         }
 
         //Wait until GPU has finished rendering
-        long sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-        if(sync == 0){
-            throw new RuntimeException("glFenceSync failed");
-        }
-        int waitResult;
-        do {
-            waitResult = glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, 2000);
-        } while(waitResult == GL_TIMEOUT_EXPIRED);
-        glDeleteSync(sync);
-
-        if(waitResult != GL_CONDITION_SATISFIED && waitResult != GL_ALREADY_SIGNALED){
-            throw new RuntimeException("waiting for gpu failed: "+waitResult);
+        if(lastRenderTask != null){
+            lastRenderTask.waitUntilFinished();
         }
 
         //Read from this buffer
@@ -157,6 +170,38 @@ public class OpenGLFrameBuffer implements FrameBuffer {
         //Move cursor in buffer back to the begin and copy the contents to the java image
         buf.position(0);
         buf.get(data);
+
+        return CompletableFuture.completedFuture(data);
+    }
+
+    public float readDepth(int x, int y){
+        if(this.isClosed){
+            throw new IllegalStateException("Cannot read pixels from a closed framebuffer!");
+        }
+
+        if(depthBufferId == -1){
+            throw new IllegalStateException("This framebuffer has no depth buffer");
+        }
+
+        if(x < 0 || y < 0 || x >= getWidth() || y >= getHeight()){
+            throw new IllegalArgumentException("Pixel position is out of bounds");
+        }
+
+        //Wait until GPU has finished rendering
+        if(lastRenderTask != null){
+            lastRenderTask.waitUntilFinished();
+        }
+
+        //Read from this buffer
+        glBindFramebuffer(GL_FRAMEBUFFER, this.getId());
+
+        //No padding
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+        //Read frame from GPU to RAM
+        float[] value = new float[1];
+        glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, value);
+        return value[0];
     }
 
     @Override

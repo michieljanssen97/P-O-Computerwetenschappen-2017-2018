@@ -1,8 +1,9 @@
 package be.kuleuven.cs.robijn.testbed;
 
 import be.kuleuven.cs.robijn.common.*;
+import be.kuleuven.cs.robijn.testbed.renderer.AsyncOpenGLRenderer;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
-import be.kuleuven.cs.robijn.testbed.renderer.bmfont.Label3D;
+import be.kuleuven.cs.robijn.worldObjects.Label3D;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
@@ -17,12 +18,14 @@ public class VirtualTestbed implements TestBed {
 	private final TestbedSimulation simulation;
 	private final WorldObject world;
 	private final List<Drone> drones;
+	private final Semaphore worldStateLock = new Semaphore(1);
 
 
 	//Renderer
-	private OpenGLRenderer renderer;
+	private AsyncOpenGLRenderer renderer;
 	private FrameBuffer frameBuffer;
 	private final HashMap<Drone, byte[]> latestCameraImage = new HashMap<>();
+	private final boolean AUTOPILOT_CAMERA_ENABLED = false;
 
 	public VirtualTestbed(SimulationSettings settings) {
 		world = new WorldObject();
@@ -36,7 +39,10 @@ public class VirtualTestbed implements TestBed {
 		inputs = new AutopilotInputs[settings.getDrones().length];
 		for (int i = 0; i < settings.getDrones().length; i++) {
 			Drone drone = drones.get(i);
-			byte[] image = renderCameraView(drone);
+			byte[] image = null;
+			if(AUTOPILOT_CAMERA_ENABLED){
+				image = renderCameraView(drone);
+			}
 			inputs[i] = new VirtualTestbed.TestbedAutopilotInputs(drone, image, 0);
 		}
 
@@ -46,12 +52,25 @@ public class VirtualTestbed implements TestBed {
 
 	@Override
 	public boolean update(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs[] outputs) {
-		//Update drones
-		for(int i = 0; i < drones.size(); i++){
-			Drone drone = drones.get(i);
-			simulation.updateDrone(drone, secondsSinceStart, secondsSinceLastUpdate, outputs[i]);
-			byte[] image = renderCameraView(drone);
-			inputs[i] = new VirtualTestbed.TestbedAutopilotInputs(drone, image, secondsSinceStart);
+		try {
+			worldStateLock.acquire();
+
+			//Update drones
+			for(int i = 0; i < drones.size(); i++){
+				Drone drone = drones.get(i);
+				simulation.updateDrone(drone, secondsSinceStart, secondsSinceLastUpdate, outputs[i]);
+				byte[] image = null;
+				if(AUTOPILOT_CAMERA_ENABLED){
+					image = renderCameraView(drone);
+				}
+				inputs[i] = new VirtualTestbed.TestbedAutopilotInputs(drone, image, secondsSinceLastUpdate);
+			}
+
+			return simulation.isSimulationFinished();
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		} finally {
+			worldStateLock.release();
 		}
 
 
@@ -84,10 +103,14 @@ public class VirtualTestbed implements TestBed {
 		return inputs[i];
 	}
 
-
 	@Override
 	public WorldObject getWorldRepresentation() {
 		return world;
+	}
+
+	@Override
+	public Semaphore getWorldStateLock(){
+		return worldStateLock;
 	}
 
 	/////////////////
@@ -96,7 +119,7 @@ public class VirtualTestbed implements TestBed {
 
 	public Renderer getRenderer() {
 		if (renderer == null)
-			renderer = OpenGLRenderer.create();
+			renderer = AsyncOpenGLRenderer.create();
 		return renderer;
 	}
 
@@ -134,8 +157,12 @@ public class VirtualTestbed implements TestBed {
 		if(droneCamera == null){
 			droneCamera = createDroneCamera(drone);
 		}
-		renderer.render(world, frameBuffer, droneCamera);
-		frameBuffer.readPixels(targetArray);
+		renderer.startRender(world, frameBuffer, droneCamera, worldStateLock).waitUntilFinished();
+		try {
+			frameBuffer.readPixels(targetArray).get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new RuntimeException(e);
+		}
 
 		//Swap blue and red bytes (BGR -> RGB)
 		for(int i = 0; i < pixelCount; i++){
