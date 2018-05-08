@@ -1,8 +1,14 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
+import be.kuleuven.cs.robijn.common.WorldObject;
+import be.kuleuven.cs.robijn.common.math.VectorMath;
+import org.apache.commons.math3.geometry.Vector;
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 import be.kuleuven.cs.robijn.worldObjects.OrthographicCamera;
+import org.apache.commons.math3.linear.RealVector;
 
 public class OpenGLOrthographicCamera extends OrthographicCamera {
     private float width = 100f;
@@ -11,6 +17,27 @@ public class OpenGLOrthographicCamera extends OrthographicCamera {
     private float zFar = 100000f;
     private float iconSize = 1.0f;
     private Vector2D iconOffset = new Vector2D(0, 0);
+
+    @Override
+    public void centerObject(WorldObject obj) {
+        RealVector cameraPos = this.getWorldPosition();
+        RealVector objPos = obj.getWorldPosition();
+
+        //Get camera 'normal' (= vector from center of camera through the middle of the screen)
+        Vector3D normal = this.getWorldRotation().applyTo(new Vector3D(0,  0, -1));
+
+        //Project the object position unto the line defined by the camera normal.
+        Vector3D cameraToObj = VectorMath.realTo3D(objPos.subtract(cameraPos));
+        Rotation alpha = new Rotation(cameraToObj, normal);
+        Vector3D cameraToProjectedPos = normal.scalarMultiply(cameraToObj.getNorm() * Math.cos(alpha.getAngle()));
+        RealVector projectedPos = cameraPos.add(VectorMath.vector3DToReal(cameraToProjectedPos));
+
+        //Calculate the delta vector from the projection point to the object position
+        RealVector deltaVector = objPos.subtract(projectedPos);
+
+        //Apply the delta vector to this object
+        this.setRelativePosition(deltaVector.add(this.getRelativePosition()));
+    }
 
     @Override
     public float getWidth() {

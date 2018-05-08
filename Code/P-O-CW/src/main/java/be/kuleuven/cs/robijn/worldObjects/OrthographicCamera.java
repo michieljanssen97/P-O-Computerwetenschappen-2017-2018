@@ -1,11 +1,18 @@
 package be.kuleuven.cs.robijn.worldObjects;
 
+import be.kuleuven.cs.robijn.common.WorldObject;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 /**
  * Represents a camera that views the world through orthographic projection.
  */
 public abstract class OrthographicCamera extends Camera {
+    /**
+     * Adjusts camera position so the specified object is centered
+     * @param obj the object to center.
+     */
+    public abstract void centerObject(WorldObject obj);
+
     /**
      * Returns the width of the cuboid that is used during projection and frustum culling.
      * Only the objects inside the cuboid defined by getWidth(), getHeight(),

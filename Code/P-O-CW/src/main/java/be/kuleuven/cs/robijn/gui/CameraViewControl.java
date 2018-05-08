@@ -642,4 +642,11 @@ public class CameraViewControl extends AnchorPane {
     public ObjectProperty<Drone> getActiveDronePropertyProperty() {
         return activeDroneProperty;
     }
+
+    public void focusOnObject(WorldObject obj) {
+        if(activeCamera instanceof OrthographicCamera){
+            OrthographicCamera orthoCam = (OrthographicCamera)activeCamera;
+            orthoCam.centerObject(obj);
+        }
+    }
 }
