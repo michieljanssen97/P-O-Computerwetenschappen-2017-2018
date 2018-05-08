@@ -20,9 +20,11 @@ public class routeCalculator {
     	if (orientation.getNorm() != 0)
     		orientation = orientation.mapMultiply(1/orientation.getNorm());
     			
-    	return orientation.mapMultiply(
+    	RealVector solution = orientation.mapMultiply(
     			(fromAirport.getSize().getX()/2) + (hight/Math.tan(Math.toRadians(5)))
     			).add(drone.getWorldPosition());
+    	solution.setEntry(1, hight);
+    	return solution;
 	}
 	
 	public static RealVector[] getLandRoute(Drone drone, Airport toAirport, Gate toGate, Runway toRunway, float hight) {
@@ -45,37 +47,47 @@ public class routeCalculator {
     	solution[solution.length-1] = orientation.mapMultiply(
     			(toAirport.getSize().getX()/2) - (drone.getTailSize()/2)
     			).add(toGate.getWorldPosition());
+    	solution[solution.length-1].setEntry(1, -drone.getConfig().getWheelY() + drone.getConfig().getTyreRadius());
     	
-    	if (hight < hightInterval)
+    	if (hight < hightInterval) {
     		solution[solution.length-2] = orientation.mapMultiply(
         			(hight/Math.tan(Math.toRadians(1)))
         			).add(solution[solution.length-1]);
+    		solution[solution.length-2].setEntry(1, hight);
+    	}
     	else if (hight < 3*hightInterval) {
     		solution[solution.length-2] = orientation.mapMultiply(
         			(hightInterval/Math.tan(Math.toRadians(1)))
         			).add(solution[solution.length-1]);
+    		solution[solution.length-2].setEntry(1, hightInterval);
     		solution[solution.length-3] = orientation.mapMultiply(
-        			(hight/Math.tan(Math.toRadians(3)))
+        			((hight - hightInterval)/Math.tan(Math.toRadians(3)))
         			).add(solution[solution.length-2]);
+    		solution[solution.length-3].setEntry(1, hight);
     	}
     	else {
     		solution[solution.length-2] = orientation.mapMultiply(
         			(hightInterval/Math.tan(Math.toRadians(1)))
         			).add(solution[solution.length-1]);
+    		solution[solution.length-2].setEntry(1, hightInterval);
     		solution[solution.length-3] = orientation.mapMultiply(
-        			(hightInterval/Math.tan(Math.toRadians(3)))
+        			((2*hightInterval)/Math.tan(Math.toRadians(3)))
         			).add(solution[solution.length-2]);
+    		solution[solution.length-3].setEntry(1, 3*hightInterval);
     		solution[solution.length-4] = orientation.mapMultiply(
-        			(hight/Math.tan(Math.toRadians(5)))
+        			((hight-(3*hightInterval))/Math.tan(Math.toRadians(3)))
         			).add(solution[solution.length-3]);
+    		solution[solution.length-4].setEntry(1, hight);
     	}
     	
     	solution[2] = orientation.mapMultiply(
     			750
     			).add(solution[3]);
+    	solution[2].setEntry(1, hight);
     	solution[1] = orientation.mapMultiply(
     			1000
     			).add(solution[2]);
+    	solution[1].setEntry(1, hight);
 	
     	return solution;
 	}
@@ -111,7 +123,7 @@ public class routeCalculator {
     		
     	Airport toAirport = toGate.getAirport();
     	Runway toRunway1 = toAirport.getRunways()[0];
-    	Runway toRunway2 = fromAirport.getRunways()[1];
+    	Runway toRunway2 = toAirport.getRunways()[1];
     	Runway toRunway = routeCalculator.getBestRunway(drone, fromAirport, toAirport, fromGate, toGate, fromRunway, toRunway1, toRunway2, hight);
     	
     	RealVector[] nextTargets = routeCalculator.getLandRoute(drone, toAirport, toGate, toRunway, hight);

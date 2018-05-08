@@ -17,6 +17,8 @@ public class Targets {
 		float distanceToTarget = (float) currentTarget.getDistance(this.getDronePosition());
 		if (distanceToTarget <= 3)
 			index += 1;
+		if (index == this.getTargets().length)
+			return null;
 		return this.getTargets()[index];
 	}
 		

@@ -61,10 +61,7 @@ public class Angle {
 	
 	public static Angle getXRotation(RealVector target, RealVector current) {
 		float angle = (float) Math.atan((target.getEntry(1) - current.getEntry(1))
-				/(current.getEntry(2) - target.getEntry(2)));
-		if ((current.getEntry(2) - target.getEntry(2)) < 0) {
-			angle = -angle;
-		}
+				/Math.sqrt(Math.pow((current.getEntry(2) - target.getEntry(2)), 2) + Math.pow((current.getEntry(0) - target.getEntry(0)), 2)));
 		return new Angle(angle);
 	}
 	

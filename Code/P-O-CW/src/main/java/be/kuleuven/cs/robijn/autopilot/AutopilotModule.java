@@ -44,7 +44,18 @@ public class AutopilotModule {
     }
 
     public void deliverPackage(Airport fromAirport, Gate fromGate, Airport toAirport, Gate toGate) {
-        //TODO
+    	float closestDistance = Float.POSITIVE_INFINITY;
+    	Drone bestDrone = null;
+    	ArrayList<Drone> drones = world.getChildrenOfType(Drone.class);
+		for (Drone drone : drones) {
+			float distance = (float) fromGate.getWorldPosition().getDistance(drone.getWorldPosition());
+			if (distance < closestDistance) {
+				closestDistance = distance;
+				bestDrone = drone;
+			}
+	    }
+		this.flyRoute(bestDrone, fromGate, toGate, 100);
+		
     }
 
     public void startTimeHasPassed(Drone drone, AutopilotInputs inputs) {
