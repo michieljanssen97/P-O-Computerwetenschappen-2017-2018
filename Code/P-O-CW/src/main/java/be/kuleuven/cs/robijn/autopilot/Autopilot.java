@@ -18,7 +18,7 @@ import interfaces.*;
 public class Autopilot {
 	private static boolean drawChartPositions = false;
 	public static ExpPosition exppos = new ExpPosition();
-	public FlightMode currentFlightMode = FlightMode.READY;
+	public FlightMode currentFlightMode = FlightMode.TAXI;
 	
 	public AutopilotConfig getConfig() {
 		return this.config;
@@ -58,7 +58,7 @@ public class Autopilot {
 		this.targets.setTargets(targets);
 	}
 	
-	private RealVector targetPosition = null;
+	private RealVector targetPosition = new ArrayRealVector(new double[]{0,0,100});
 	
 	public RealVector getTargetPosition() {
 		return targetPosition;
@@ -437,8 +437,7 @@ public class Autopilot {
 				}
 			}
         } if (this.getFlightMode() == FlightMode.TAXI) {
-        	double[] targetPositionCoordinates = {19.72,0,-103.23};
-			RealVector targetPosition = new ArrayRealVector(targetPositionCoordinates);
+			RealVector targetPosition = this.getTargetPosition();
 			RealVector targetPositionDroneCoordinates = drone.transformationToDroneCoordinates(targetPosition.subtract(drone.getWorldPosition()));
 			double droneVelocity = drone.getVelocity().getNorm();
 			float targetHeading = (float) Math.atan(targetPositionDroneCoordinates.getEntry(0)/targetPositionDroneCoordinates.getEntry(2));
@@ -533,7 +532,7 @@ public class Autopilot {
 					leftBrakeForce = Math.min(leftBrakeForce, 4300);
 				}
 				if (targetPositionDroneCoordinates.getNorm() <= 5) {
-					this.setFlightMode(FlightMode.WAIT);
+					this.setFlightMode(FlightMode.BRAKE);
 //					if (droneVelocity >= 1) {
 //						float breakforce = Math.min( 8600, (float) (droneVelocity*droneVelocity*480)/(2*(float)targetPositionDroneCoordinates.getNorm()));
 //						rightBrakeForce += breakforce/2f;
@@ -556,8 +555,9 @@ public class Autopilot {
         }
         if (this.getFlightMode() == FlightMode.BRAKE) {
 			if (drone.getVelocity().getNorm() > 0.001) {
+				float targetHeading;
 				float targetVelocity;
-				RealVector targetPosition = new ArrayRealVector(this.getTargetPosition());
+				RealVector targetPosition = this.getTargetPosition();
 				RealVector targetPositionDroneCoordinates = drone.transformationToDroneCoordinates(targetPosition.subtract(drone.getWorldPosition()));
 				if (targetPositionDroneCoordinates.getNorm() > 200)
 					targetVelocity = 30;
@@ -577,13 +577,13 @@ public class Autopilot {
 				if (targetPositionDroneCoordinates.getNorm() < 5) {
 					float accel = (float) (drone.getVelocity().getNorm() - 0.01);
 					float force = drone.getTotalMass() * accel;
-					rightBrakeForce = Math.min(force/2, 500);
-					leftBrakeForce = Math.min(force/2, 500);
+					rightBrakeForce = Math.max(0, Math.min(force/2, 500));
+					leftBrakeForce = Math.max(0, Math.min(force/2, 500));
 				}
 
 			}
-			else
-				this.setFlightMode(FlightMode.READY);
+//			else
+//				this.setFlightMode(FlightMode.READY);
 		}
 
         final float thrustOutput = thrust;
