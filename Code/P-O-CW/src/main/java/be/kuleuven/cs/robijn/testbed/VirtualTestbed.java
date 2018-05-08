@@ -11,6 +11,7 @@ import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 
 import java.util.*;
+import java.util.concurrent.*;
 
 public class VirtualTestbed implements TestBed {
 	//Simulation
@@ -52,27 +53,6 @@ public class VirtualTestbed implements TestBed {
 
 	@Override
 	public boolean update(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs[] outputs) {
-		try {
-			worldStateLock.acquire();
-
-			//Update drones
-			for(int i = 0; i < drones.size(); i++){
-				Drone drone = drones.get(i);
-				simulation.updateDrone(drone, secondsSinceStart, secondsSinceLastUpdate, outputs[i]);
-				byte[] image = null;
-				if(AUTOPILOT_CAMERA_ENABLED){
-					image = renderCameraView(drone);
-				}
-				inputs[i] = new VirtualTestbed.TestbedAutopilotInputs(drone, image, secondsSinceLastUpdate);
-			}
-
-			return simulation.isSimulationFinished();
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		} finally {
-			worldStateLock.release();
-		}
-
 
 		for(int i = 0; i < drones.size()-1; i++){
 			for(int j = i+1; j < drones.size(); j++){
@@ -94,7 +74,28 @@ public class VirtualTestbed implements TestBed {
 			throw new IllegalArgumentException("No more drone's in the world");
 		}
 
-		return simulation.isSimulationFinished();
+		try {
+			worldStateLock.acquire();
+
+			//Update drones
+			for(int i = 0; i < drones.size(); i++){
+				Drone drone = drones.get(i);
+				simulation.updateDrone(drone, secondsSinceStart, secondsSinceLastUpdate, outputs[i]);
+				byte[] image = null;
+				if(AUTOPILOT_CAMERA_ENABLED){
+					image = renderCameraView(drone);
+				}
+				inputs[i] = new VirtualTestbed.TestbedAutopilotInputs(drone, image, secondsSinceLastUpdate);
+			}
+
+			return simulation.isSimulationFinished();
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		} finally {
+			worldStateLock.release();
+		}
+
+		
 	}
 
 
