@@ -58,6 +58,16 @@ public class Autopilot {
 		this.targets.setTargets(targets);
 	}
 	
+	private RealVector targetPosition = null;
+	
+	public RealVector getTargetPosition() {
+		return targetPosition;
+	}
+	
+	public void setTargetPosition(RealVector targetPosition) {
+		this.targetPosition = targetPosition;
+	}
+	
 	/**
 	 * Wel roll ten gevolge van verschillende snelheid van vleugels (door de rotaties). 
 	 */
@@ -134,7 +144,7 @@ public class Autopilot {
 				
 			FrontWheel wheel = drone.getFirstChildOfType(FrontWheel.class);
 			if (this.getConfig().getTyreRadius() >= wheel.getPosition(drone).getEntry(1)) {
-				this.setFlightMode(FlightMode.TAXI);
+				this.setFlightMode(FlightMode.BRAKE);
 			}
 			else {
 				boolean finished = false;

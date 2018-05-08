@@ -70,41 +70,10 @@ public class AutopilotModule {
     }
     
     public void flyRoute(Drone drone, Gate fromGate, Gate toGate, float hight) {
-    	Airport fromAirport = fromGate.getAirport();
-    	Runway fromRunway1 = fromAirport.getRunways()[0];
-    	RealVector vector1 = fromRunway1.getWorldPosition();
-    	Runway fromRunway2 = fromAirport.getRunways()[1];
-    	RealVector vector2 = fromRunway2.getWorldPosition();
-    	
-    	Runway fromRunway;
-    	RealVector droneHeading = drone.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, -50}, false))
-    			.add(drone.getWorldPosition());
-    	if (vector1.getDistance(droneHeading) < vector2.getDistance(droneHeading))
-    		fromRunway = fromRunway1;
-    	else {
-    		fromRunway = fromRunway2;
-    	}
-    	
-    	RealVector fromOrientation = fromRunway.getWorldPosition().subtract(fromAirport.getWorldPosition());
-    	fromOrientation = fromOrientation.add(
-    			fromGate.getWorldPosition().subtract(fromAirport.getWorldPosition()));
-    	if (fromOrientation.getNorm() != 0)
-    		fromOrientation = fromOrientation.mapMultiply(1/fromOrientation.getNorm());
-    			
-    	RealVector firstTarget = fromOrientation.mapMultiply(
-    			(fromAirport.getSize().getX()/2) + (hight/Math.tan(Math.toRadians(5)))
-    			).add(drone.getWorldPosition());
-    		
-    	Airport toAirport = toGate.getAirport();
-    	Runway toRunway1 = toAirport.getRunways()[0];
-    	RealVector toOrientation1 = toRunway1.getWorldPosition().subtract(toAirport.getWorldPosition());
-    	toOrientation1 = toOrientation1.add(
-    			toGate.getWorldPosition().subtract(toAirport.getWorldPosition()));
-    	if (toOrientation1.getNorm() != 0)
-    		toOrientation1 = toOrientation1.mapMultiply(1/toOrientation1.getNorm());
-    	float tempHight = hight;
-    		
-    	Runway toRunway2 = fromAirport.getRunways()[1];
-    	
+    	Autopilot autopilot = autopilots.get(drone);
+    	RealVector[] route = routeCalculator.calculateRoute(drone, fromGate, toGate, hight);
+    	autopilot.setTargets(route);
+    	autopilot.setTargetPosition(toGate.getWorldPosition());
+    	autopilot.setFlightMode(FlightMode.ASCEND);
     }
 }
