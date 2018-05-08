@@ -115,6 +115,7 @@ public class Autopilot {
 		}
         this.setPreviousElapsedTime(inputs.getElapsedTime());  
         
+        double[] targetPositionCoordinates = {0,0,100};
         float horStabInclination = 0;
 		float verStabInclination = 0;
 		float leftWingInclination = 0;
@@ -476,7 +477,6 @@ public class Autopilot {
 				}
 			}
         } if (this.getFlightMode() == FlightMode.TAXI) {
-        	double[] targetPositionCoordinates = {20,0,-200};
 			RealVector targetPosition = new ArrayRealVector(targetPositionCoordinates);
 			RealVector targetPositionDroneCoordinates = drone.transformationToDroneCoordinates(targetPosition.subtract(drone.getWorldPosition()));
 			double droneVelocity = drone.getVelocity().getNorm();
@@ -601,7 +601,6 @@ public class Autopilot {
 		if (this.getFlightMode() == FlightMode.BRAKE) {
 			if (drone.getVelocity().getNorm() > 0.01) {
 				float targetVelocity;
-				double[] targetPositionCoordinates = {20,0,-200};
 				RealVector targetPosition = new ArrayRealVector(targetPositionCoordinates);
 				RealVector targetPositionDroneCoordinates = drone.transformationToDroneCoordinates(targetPosition.subtract(drone.getWorldPosition()));
 				if (targetPositionDroneCoordinates.getNorm() > 200)
@@ -624,8 +623,8 @@ public class Autopilot {
 					float force = drone.getTotalMass() * accel;
 					rightBrakeForce = Math.min(force/2, 500);
 					leftBrakeForce = Math.min(force/2, 500);
-					System.out.println(accel);
-					System.out.println(drone.getVelocity().getNorm());
+//					System.out.println(accel);
+//					System.out.println(drone.getVelocity().getNorm());
 				}
 
 			}
