@@ -115,7 +115,7 @@ public class Autopilot {
 		}
         this.setPreviousElapsedTime(inputs.getElapsedTime());  
         
-        double[] targetPositionCoordinates = {0,0,100};
+        double[] targetPositionCoordinates = {0,0,200};
         float horStabInclination = 0;
 		float verStabInclination = 0;
 		float leftWingInclination = 0;
@@ -625,11 +625,14 @@ public class Autopilot {
 					float force = drone.getTotalMass() * accel;
 					rightBrakeForce = Math.min(force/2, 500);
 					leftBrakeForce = Math.min(force/2, 500);
+					System.out.println(drone.getPitchAngularVelocity());
 //					System.out.println(accel);
 //					System.out.println(drone.getVelocity().getNorm());
 				}
 
 			}
+			else
+				this.setFlightMode(FlightMode.READY);
 		}
 
         final float thrustOutput = thrust;
