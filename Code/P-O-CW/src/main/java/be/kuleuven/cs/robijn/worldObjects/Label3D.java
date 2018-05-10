@@ -1,10 +1,12 @@
 package be.kuleuven.cs.robijn.worldObjects;
 
+
 import be.kuleuven.cs.robijn.common.Font;
-import be.kuleuven.cs.robijn.common.WorldObject;
 
 import java.awt.*;
 import java.util.ArrayList;
+
+import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 
 public class Label3D extends WorldObject {
     private String text = "";

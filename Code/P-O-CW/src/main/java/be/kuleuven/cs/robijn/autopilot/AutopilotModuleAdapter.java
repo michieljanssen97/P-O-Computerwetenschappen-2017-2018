@@ -4,12 +4,12 @@ import be.kuleuven.cs.robijn.common.SimulationBuilder;
 import be.kuleuven.cs.robijn.common.SimulationSettings;
 import be.kuleuven.cs.robijn.common.SimulationSettings.AirportDefinition;
 import be.kuleuven.cs.robijn.common.SimulationSettings.DroneDefinition;
-import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.gui.ObservableAutoPilotConfig;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
+import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 import interfaces.AutopilotConfig;
 import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
@@ -65,8 +65,8 @@ public class AutopilotModuleAdapter implements interfaces.AutopilotModule {
             settings.setDrones(droneDefinitions.toArray(new DroneDefinition[droneDefinitions.size()]));
             SimulationBuilder.buildSimulation(settings, world);
 
-            airports = world.getChildrenOfType(Airport.class);
-            drones = world.getChildrenOfType(Drone.class);
+            airports = WorldObject.getChildrenOfType(Airport.class);
+            drones = WorldObject.getChildrenOfType(Drone.class);
             module = new AutopilotModule(world);
         }
     }

@@ -2,7 +2,6 @@ package be.kuleuven.cs.robijn.autopilot;
 
 import org.apache.commons.math3.linear.*;
 
-import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.exceptions.FinishedException;
 import be.kuleuven.cs.robijn.common.math.Angle;
 import be.kuleuven.cs.robijn.common.math.Angle.Type;
@@ -10,6 +9,7 @@ import be.kuleuven.cs.robijn.common.math.ScalarMath;
 import be.kuleuven.cs.robijn.experiments.ExpPosition;
 import be.kuleuven.cs.robijn.tyres.FrontWheel;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
+import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 import interfaces.*;
 import java.util.*;
 
@@ -21,7 +21,8 @@ import java.util.*;
 public class Autopilot {
 	private static boolean drawChartPositions = false;
 	public static ExpPosition exppos = new ExpPosition();
-	public FlightMode currentFlightMode = FlightMode.TAXI;
+	public Drone drone;
+	public FlightMode currentFlightMode = FlightMode.TAXI; //TODO zal READY moeten worden??
 	
 	public AutopilotConfig getConfig() {
 		return this.config;
@@ -29,6 +30,10 @@ public class Autopilot {
 	
 	public static boolean isValidConfig(AutopilotConfig config) {
 		return (config != null);
+	}
+	
+	public FlightMode getCurrentFlightMode() {
+		return this.currentFlightMode;
 	}
 	
 	private AutopilotConfig config;
@@ -55,13 +60,13 @@ public class Autopilot {
 		this.previousElapsedTime = previousElapsedTime;
 	}
 
-	private WorldObject world;
+//	private WorldObject world;
 	private List<Drone> drones = new ArrayList<>();
 
 
 	public Drone[] calculateFirstDroneCollision(){
-		world = new WorldObject();
-		drones = world.getChildrenOfType(Drone.class);
+//		world = new WorldObject();
+		drones = WorldObject.getChildrenOfType(Drone.class);
 		Map<Drone[], Double> collisionDroneMap = new HashMap<>();
 		Double collisionTime;
 
@@ -129,6 +134,7 @@ public class Autopilot {
 		AutopilotSettings settings = new AutopilotSettings();
 
 		
+
 		Drone[] collidableDrones = calculateFirstDroneCollision();
 
 
@@ -194,9 +200,10 @@ public class Autopilot {
 
 		else if ((this.getFlightMode() == FlightMode.FULL_FLIGHT) || (this.getFlightMode() == FlightMode.LAND)) {
 				
-			FrontWheel wheel = drone.getFirstChildOfType(FrontWheel.class);
+			FrontWheel wheel = WorldObject.getFirstChildOfType(FrontWheel.class);
 			if (this.getConfig().getTyreRadius() >= wheel.getPosition(drone).getEntry(1)) {
 				this.setFlightMode(FlightMode.TAXI);
+				this.drone.setArrived();
 			}
 			else {
 //				if (this.getFlightMode() == FlightMode.FULL_FLIGHT)
@@ -1035,6 +1042,14 @@ public class Autopilot {
 	public void initialise(AutopilotConfig config, Drone drone) {
 		if (! isValidConfig(config))
 			throw new IllegalArgumentException();
+//<<<<<<< HEAD
+//		RealVector initialVelocity = new ArrayRealVector(new double[] {0, 0, 0}, false);
+//		Drone drone = new Drone(config, initialVelocity);
+//		this.drone = drone;
+//		drone.setRelativePosition(new ArrayRealVector(new double[] {0, -config.getWheelY() + config.getTyreRadius(), 0}, false));
+//		//drone.setRelativePosition(new ArrayRealVector(new double[] {0, 100, 0}, false));
+//		this.addChild(drone);
+//=======
 		this.drone = drone;
 		this.config = config;
 		RealVector previousPosition = drone.getWorldPosition();
@@ -1078,6 +1093,4 @@ public class Autopilot {
 	public void simulationEnded() throws IllegalArgumentException {
 		throw new IllegalArgumentException();
 	}
-	
-	private Drone drone;
 }

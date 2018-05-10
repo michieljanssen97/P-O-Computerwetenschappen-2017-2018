@@ -7,10 +7,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Airport;
+import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
+import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 
@@ -24,7 +25,7 @@ public class AutopilotModule {
         this.world = world;
 
         // Create a new autopilot for each drone in the world.
-        ArrayList<Drone> drones = world.getChildrenOfType(Drone.class);
+        ArrayList<Drone> drones = WorldObject.getChildrenOfType(Drone.class);
         for (Drone drone : drones) {
         	Autopilot autopilot = new Autopilot();
         	autopilot.initialise(drone.getConfig(), drone);
@@ -38,10 +39,12 @@ public class AutopilotModule {
             return thread;
         });
     }
-
+    
     public void deliverPackage(Airport fromAirport, Gate fromGate, Airport toAirport, Gate toGate) {
-        //TODO
+    	new AirportPackage(fromGate, toGate);
+        //new Package(fromAirport, fromGate, toAirport, toGate);
     }
+    
 
     public void startTimeHasPassed(Drone drone, AutopilotInputs inputs) {
         // Get the autopilot that controls this drone
