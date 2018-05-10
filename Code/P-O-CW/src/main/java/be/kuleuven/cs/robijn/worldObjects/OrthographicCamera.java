@@ -7,6 +7,12 @@ import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
  */
 public abstract class OrthographicCamera extends Camera {
     /**
+     * Adjusts camera position so the specified object is centered
+     * @param obj the object to center.
+     */
+    public abstract void centerObject(WorldObject obj);
+
+    /**
      * Returns the width of the cuboid that is used during projection and frustum culling.
      * Only the objects inside the cuboid defined by getWidth(), getHeight(),
      * getNearPlane() and getFarPlane() will be visible.
@@ -31,21 +37,6 @@ public abstract class OrthographicCamera extends Camera {
      * @throws IllegalArgumentException thrown if height is zero, negative, NaN or infinite
      */
     public abstract void setHeight(float height);
-
-    /**
-     * Retrieves the threshold value that is used to decide whether or not to render an icon for an object.
-     * The ratio that is compared to this value is based on the size of the object compared to the camera view cuboid size.
-     * A higher threshold value means that larger objects will get icons too.
-     * @return the current icons threshold ratio, 0 by default
-     */
-    public abstract double getRenderIconsThresholdRatio();
-
-    /**
-     * Sets the camera icon rendering threshold ratio. See getRenderIconsThresholdRatio() for more details.
-     * @param threshold the new value
-     * @throws IllegalArgumentException thrown if threshold is negative or NaN
-     */
-    public abstract void setRenderIconsThresholdRatio(double threshold);
 
     /**
      * Returns the visual size of the icon in the resulting image in world units.

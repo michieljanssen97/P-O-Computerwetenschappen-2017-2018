@@ -18,8 +18,9 @@ public class Airport extends WorldObject {
     private Vector2D size;
     private Gate[] gates;
     private Runway[] runways;
-    private ArrayList<Drone> currentDrones = new ArrayList<Drone>();
 
+    private ArrayList<Drone> currentDrones = new ArrayList<Drone>();
+    private double angle;
     public Airport(int id, float length, float width, Vector2D centerToRunway0){
         this.id = id;
         size = new Vector2D((2f*length) + width, 2f*width);
@@ -43,11 +44,13 @@ public class Airport extends WorldObject {
         runways[1].setRelativePosition(new ArrayRealVector(new double[]{(length+width)/2f, 0, 0}, false));
         runways[1].setScale(runwaySize);
         this.addChildren(runways);
-
+        
+        double angle = Math.atan2( centerToRunway0.getY(), -centerToRunway0.getX());
         this.setRelativeRotation(
-            new Rotation(Vector3D.PLUS_J, Math.acos(new Vector2D(-1, 0).dotProduct(centerToRunway0)))
+            new Rotation(Vector3D.PLUS_J, angle)
         );
         Airport.allAirportsList.add(this);
+        this.angle = angle;
     }
     
     public static ArrayList<Airport>getAllAirports() {
@@ -170,4 +173,7 @@ public class Airport extends WorldObject {
 	public Runway getRunwayToTakeOff() {
 		return this.getRunways()[1];
 	}
+    public double getAngle() {
+    	return angle;
+    }
 }

@@ -5,6 +5,7 @@ import be.kuleuven.cs.robijn.common.Font;
 import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.airports.Runway;
+import be.kuleuven.cs.robijn.gui.OrthoCameraZoomHandler;
 import be.kuleuven.cs.robijn.testbed.renderer.bmfont.BMFont;
 import be.kuleuven.cs.robijn.worldObjects.Label3D;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
@@ -313,28 +314,24 @@ public class OpenGLRenderer implements Renderer {
         if(camera instanceof OpenGLOrthographicCamera){
             OpenGLOrthographicCamera orthoCam = (OpenGLOrthographicCamera) camera;
 
-            Vector3D size = model.getMesh().getBoundingBox().getBoxDimensions();
-            double avgAxis = (size.getX() + size.getY() + size.getZ()) / 3d;
-            double minRatio = Math.min(avgAxis/orthoCam.getWidth(), avgAxis/orthoCam.getHeight());
-            if(minRatio < orthoCam.getRenderIconsThresholdRatio()){
-                //Render icon
-
-                Billboard icon = null;
-                if(obj instanceof Box){
-                    icon = boxIcon;
-                }else if(obj instanceof Drone){
-                    icon = droneIcon;
-                }else{
-                    return;
-                }
-
-                Vector3D billboardRelPos = camera.getWorldRotation().applyTo(
-                        new Vector3D(orthoCam.getIconOffset().getX(), orthoCam.getIconOffset().getY(), 0)
-                );
-                RealVector billboardPosition = obj.getWorldPosition().add(
-                        new ArrayRealVector(new double[]{billboardRelPos.getX(), billboardRelPos.getY(), billboardRelPos.getZ()}, false));
-                renderModel(icon, viewProjectionMatrix, icon.generateModelMatrix(camera, billboardPosition, orthoCam.getIconSize()));
+            //Render icon
+            Billboard icon = null;
+            if(obj instanceof Box){
+                icon = boxIcon;
+            }else if(obj instanceof Drone){
+                icon = droneIcon;
+            }else{
+                return;
             }
+
+            Vector3D billboardRelPos = camera.getWorldRotation().applyTo(
+                    new Vector3D(orthoCam.getIconOffset().getX(), orthoCam.getIconOffset().getY(), 0)
+            );
+            RealVector billboardPosition = obj.getWorldPosition().add(
+                    new ArrayRealVector(new double[]{billboardRelPos.getX(), billboardRelPos.getY(), billboardRelPos.getZ()}, false));
+
+            float scale = orthoCam.getWidth() / OrthoCameraZoomHandler.DEFAULT_ORTHO_CAM_WIDTH;
+            renderModel(icon, viewProjectionMatrix, icon.generateModelMatrix(camera, billboardPosition, scale * orthoCam.getIconSize()));
         }
     }
 

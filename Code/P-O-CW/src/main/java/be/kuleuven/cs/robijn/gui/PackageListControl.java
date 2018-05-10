@@ -5,6 +5,7 @@ import be.kuleuven.cs.robijn.common.SimulationDriver;
 import be.kuleuven.cs.robijn.common.SimulationSettings;
 import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import be.kuleuven.cs.robijn.common.airports.Gate;
+import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -12,9 +13,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+import javafx.util.Callback;
 import javafx.util.converter.NumberStringConverter;
 
 import java.io.IOException;
@@ -49,6 +53,11 @@ public class PackageListControl extends AnchorPane {
         } catch (IOException exception) {
             throw new UncheckedIOException(exception);
         }
+    }
+
+    private MainController main;
+    public void setMainController(MainController main){
+        this.main = main;
     }
 
     @FXML
@@ -120,8 +129,33 @@ public class PackageListControl extends AnchorPane {
         addPackage(originGate, destinationGate);
     }
 
+    private void focusCameraOnPackage(AirportPackage pkg){
+        WorldObject objToFocus;
+        switch (pkg.getState()){
+            case AT_GATE:
+                objToFocus = pkg.getCurrentGate();
+                break;
+            case IN_TRANSIT:
+                objToFocus = pkg.getCurrentTransporter();
+                break;
+            default:
+                return;
+        }
+
+        main.focusCameraOnObject(objToFocus);
+    }
+
     private void setupTable(){
         packageTable.setEditable(false);
+        packageTable.setRowFactory(tableView -> {
+            final TableRow<AirportPackage> row = new TableRow<>();
+            row.setOnMouseClicked(e -> {
+                if(e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 2){
+                    focusCameraOnPackage(row.getItem());
+                }
+            });
+            return row;
+        });
 
         //Column 1 is origin
         TableColumn<AirportPackage, String> originColumn = new TableColumn<>();
