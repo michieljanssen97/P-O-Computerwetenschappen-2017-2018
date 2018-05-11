@@ -81,8 +81,6 @@ public class Drone extends WorldObject {
 		this.addChild(frontWheel);
 		this.addChild(rightRearWheel);
 		this.addChild(leftRearWheel);
-		
-		this.setToAirport(); //TODO zorg dat drones pas na airports worden aangemaakt!!!!!!
 	}
 	
     //     -----------------     //
@@ -262,12 +260,17 @@ public class Drone extends WorldObject {
     
 	public void setToAirport() {
 		Airport currentAirport = Airport.getAirportAt(this.getWorldPosition());
-		currentAirport.addDroneToCurrentDrones(this);
+		if(currentAirport != null) {
+			currentAirport.addDroneToCurrentDrones(this);
+		}
 	}
 	
 	public void removeFromAirport() {
 		Airport currentAirport = Airport.getAirportAt(this.getWorldPosition());
-		currentAirport.removeDroneFromCurrentDrones(this);
+		if(currentAirport != null) {
+			currentAirport.removeDroneFromCurrentDrones(this);
+			currentAirport.getRunwayToTakeOff().setHasDrones(false);
+		}
 	}
 	
 	public void setArrived() {
@@ -283,9 +286,7 @@ public class Drone extends WorldObject {
 	}
 	
 	public void setTookOff() { //TODO gebruik dit wanneer opgestegen, autopilot == FLightMode.Ascend na FlightMode.Taxi
-		Airport airport = Airport.getAirportAt(this.getWorldPosition());
-		airport.removeDroneFromCurrentDrones(this);
-		airport.getRunwayToTakeOff().setHasDrones(false);
+		this.removeFromAirport();
 	}
 	
     //  -----------------   //

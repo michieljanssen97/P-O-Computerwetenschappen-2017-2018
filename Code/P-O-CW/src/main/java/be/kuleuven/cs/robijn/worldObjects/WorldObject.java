@@ -12,7 +12,7 @@ import org.apache.commons.math3.linear.*;
 public class WorldObject {
     private WorldObject parent;
     private static ArrayList<WorldObject> children = new ArrayList<>();
-    private RealVector position = new ArrayRealVector(new double[]{0, 0, 0}, false);
+    private RealVector place = new ArrayRealVector(new double[]{0, 0, 0}, false);
     private Rotation rotation = new Rotation(new Vector3D(1, 0, 0), 0);
     private RealVector scale = new ArrayRealVector(new double[]{1, 1, 1}, false);
     private RealMatrix objectToWorldTransform = null;
@@ -215,7 +215,7 @@ public class WorldObject {
             throw new IllegalArgumentException("vector cannot be null");
         }
 
-        this.position = vector;
+        this.place = vector;
         this.objectToWorldTransform = null;
     }
 
@@ -224,7 +224,7 @@ public class WorldObject {
      * @return a non-null vector that is immutable.
      */
     public RealVector getRelativePosition() {
-        return RealVector.unmodifiableRealVector(position);
+        return RealVector.unmodifiableRealVector(place);
     }
 
     /**

@@ -2,6 +2,7 @@ package be.kuleuven.cs.robijn.common;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.linear.ArrayRealVector;
@@ -113,12 +114,59 @@ public class AirportPackageTest {
         public int getNbColumns() { return nbColumns; }
         public int getNbRows() { return nbRows; }
     };	
+    
+
+//    @Test
+//	public void testNewPackageNoAvailableDrone() {
+//		Airport.removeAllAirports();
+//		WorldObject world = new WorldObject();
+//		Airport airport1 = new Airport(0, 1000, 500, new Vector2D(0,0));
+//		airport1.setRelativePosition(new ArrayRealVector(new double[] {0,0,0}, false));
+//		Airport airport2 = new Airport(1, 1000, 500, new Vector2D(0, 0));
+//		airport2.setRelativePosition(new ArrayRealVector(new double[] {-10000,0,60000}, false));
+//		Drone drone = new Drone(config, velocity);
+//		world.addChild(airport1);
+//		world.addChild(airport2);
+//		world.addChild(drone);
+//		
+//		Airport fromAirport = airport2;
+//		Airport toAirport = airport1;
+//		Gate fromGate = fromAirport.getGates()[0];
+//		Gate toGate = toAirport.getGates()[0];
+//		
+//		//Set the position of the Drone at no airport
+//		RealVector gatePos = fromGate.getWorldPosition();
+//        RealVector dronePos = gatePos.add(
+//                new ArrayRealVector(new double[]{
+//                        -5000000,
+//                        -drone.getConfig().getWheelY() + drone.getConfig().getTyreRadius(),
+//                        -5000000
+//                }, false)
+//        );
+//        drone.setRelativePosition(dronePos);
+//        drone.setToAirport();
+//        
+//        assertEquals(Airport.getAllAirports().size(), 2);
+//		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
+//		AutopilotModule module = new AutopilotModule(world);		
+//		module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
+//		AirportPackage.assignPackages();
+//		for(Airport air : Airport.getAllAirports()) {
+//			assertEquals(0, air.getCurrentDrones().size());
+//		}
+//		assertEquals(AirportPackage.getAllPackagesToAssign().size(),1);
+//		AirportPackage airportPackage = AirportPackage.getAllPackagesToAssign().get(0);
+//		assertEquals(airportPackage.getState(), State.AT_GATE);
+//	}
 	
 	@Test
 	public void testNewPackageOnAirportDrone() {
+		Airport.removeAllAirports();
 	    WorldObject world = new WorldObject();
-		Airport airport1 = new Airport(0, 1000, 1000, new Vector2D(0,0));
-		Airport airport2 = new Airport(1, 1000, 1000, new Vector2D(0, -5000));
+		Airport airport1 = new Airport(0, 1000, 500, new Vector2D(0,0));
+		airport1.setRelativePosition(new ArrayRealVector(new double[] {0,0,0}, false));
+		Airport airport2 = new Airport(1, 1000, 500, new Vector2D(0,0));
+		airport2.setRelativePosition(new ArrayRealVector(new double[] {-10000,0,60000}, false));
 		Drone drone = new Drone(config, velocity);
 		world.addChild(drone);
 		world.addChild(airport1);
@@ -139,8 +187,9 @@ public class AirportPackageTest {
                 }, false)
         );
         drone.setRelativePosition(dronePos);
+        drone.setToAirport();
 		
-		
+        assertEquals(Airport.getAllAirports().size(), 2);
 		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
 		AutopilotModule module = new AutopilotModule(world);
 		module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
@@ -157,9 +206,12 @@ public class AirportPackageTest {
 	
 	@Test
 	public void testNewPackageNotOnAirportDrone() {
+		Airport.removeAllAirports();
 		WorldObject world = new WorldObject();
-		Airport airport1 = new Airport(0, 1000, 1000, new Vector2D(0,0));
-		Airport airport2 = new Airport(1, 1000, 1000, new Vector2D(0, -5000));
+		Airport airport1 = new Airport(0, 1000, 500, new Vector2D(0,0));
+		airport1.setRelativePosition(new ArrayRealVector(new double[] {0,0,0}, false));
+		Airport airport2 = new Airport(1, 1000, 500, new Vector2D(0, 0));
+		airport2.setRelativePosition(new ArrayRealVector(new double[] {-10000,0,60000}, false));
 		Drone drone = new Drone(config, velocity);
 		world.addChild(drone);
 		world.addChild(airport1);
@@ -180,8 +232,9 @@ public class AirportPackageTest {
                 }, false)
         );
         drone.setRelativePosition(dronePos);
+        drone.setToAirport();
 		
-		
+        assertEquals(Airport.getAllAirports().size(), 2);
 		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
 		AutopilotModule module = new AutopilotModule(world);
 		module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
@@ -189,42 +242,44 @@ public class AirportPackageTest {
 		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
 		assertTrue(drone.hasPackageWaiting());
 		assertTrue(!drone.hasPackage());
-	}
+	}	
 	
-	//TODO deze test werkt precies niet...
-//	@Test
-//	public void testNewPackageNoAvailableDrone() {
-//		WorldObject world3 = new WorldObject();
-//		Airport airport31 = new Airport(0, 1000, 1000, new Vector2D(0,0));
-//		Airport airport32 = new Airport(1, 1000, 1000, new Vector2D(0, -5000));
-//		Drone drone3 = new Drone(config, velocity);
-//		world3.addChild(airport31);
-//		world3.addChild(airport32);
-//		world3.addChild(drone3);
-//		
-//		Airport fromAirport = airport32;
-//		Airport toAirport = airport31;
-//		Gate fromGate = fromAirport.getGates()[0];
-//		Gate toGate = toAirport.getGates()[0];
-//		
-//		//Set the position of the Drone at no airport
-//		RealVector gatePos = fromGate.getWorldPosition();
-//        RealVector dronePos = gatePos.add(
-//                new ArrayRealVector(new double[]{
-//                        -5000000,
-//                        -drone3.getConfig().getWheelY() + drone3.getConfig().getTyreRadius(),
-//                        -5000000
-//                }, false)
-//        );
-//        drone3.setRelativePosition(dronePos);
-//        
-//		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
-//		AutopilotModule module = new AutopilotModule(world3);		
-//		module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
-//		AirportPackage.assignPackages();
-//		assertEquals(AirportPackage.getAllPackagesToAssign().size(),1);
-//		AirportPackage airportPackage = AirportPackage.getAllPackagesToAssign().get(0);
-//		assertEquals(airportPackage.getState(), State.AT_GATE);
-//	}
+	@Test
+	public void testNewInvalidPackage() {
+		Airport.removeAllAirports();
+		WorldObject world = new WorldObject();
+		Airport airport1 = new Airport(0, 1000, 500, new Vector2D(0,0));
+		airport1.setRelativePosition(new ArrayRealVector(new double[] {0,0,0}, false));
+		Airport airport2 = new Airport(1, 1000, 500, new Vector2D(0, 0));
+		airport2.setRelativePosition(new ArrayRealVector(new double[] {-10000,0,60000}, false));
+		Drone drone = new Drone(config, velocity);
+		world.addChild(drone);
+		world.addChild(airport1);
+		world.addChild(airport2);
+		
+		Airport fromAirport = airport2;
+		Airport toAirport = airport1;
+		Gate fromGate = fromAirport.getGates()[0];
+		Gate toGate = toAirport.getGates()[0];
+		
+		//Set position of drone at airport1
+        RealVector gatePos = toGate.getWorldPosition();
+        RealVector dronePos = gatePos.add(
+                new ArrayRealVector(new double[]{
+                        0,
+                        -drone.getConfig().getWheelY() + drone.getConfig().getTyreRadius(),
+                        0
+                }, false)
+        );
+        drone.setRelativePosition(dronePos);
+        drone.setToAirport();
+        
+        assertEquals(Airport.getAllAirports().size(), 2);
+		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
+		AutopilotModule module = new AutopilotModule(world);
+		module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
+		assertThrows(IllegalStateException.class, () -> module.deliverPackage(fromAirport, fromGate, toAirport, toGate));
+		
+	}
 
 }

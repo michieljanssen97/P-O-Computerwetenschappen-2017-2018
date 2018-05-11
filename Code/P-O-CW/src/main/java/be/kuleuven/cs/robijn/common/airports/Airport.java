@@ -49,12 +49,17 @@ public class Airport extends WorldObject {
         this.setRelativeRotation(
             new Rotation(Vector3D.PLUS_J, angle)
         );
-        Airport.allAirportsList.add(this);
         this.angle = angle;
+        
+        Airport.allAirportsList.add(this);
     }
     
     public static ArrayList<Airport>getAllAirports() {
     	return Airport.allAirportsList;
+    }
+    
+    public static void removeAllAirports() {
+    	Airport.allAirportsList = new ArrayList<Airport>();
     }
     
     public int getXPositionMiddle() {
@@ -62,7 +67,7 @@ public class Airport extends WorldObject {
     }
     
     public int getZPositionMiddle() {
-    	return (int) this.getWorldPosition().getEntry(1);
+    	return (int) this.getWorldPosition().getEntry(2);
     }
     
 
@@ -155,32 +160,36 @@ public class Airport extends WorldObject {
 	/**
 	 * Check if the given location is on (or above) the given airport
 	 */
-	public boolean isOnAirport(RealVector place) {
-		RealVector airportPos = this.getWorldPosition();
-		Vector2D airport2DPos = new Vector2D(airportPos.getEntry(0), airportPos.getEntry(2));
+	public boolean isOnAirport(RealVector place) { //TODO werkt niet volledig, geeft altijd true denk ik...
+		Vector2D airport2DPos = new Vector2D(this.getXPositionMiddle(), this.getZPositionMiddle());
 		Vector2D airportSize = this.getSize();
-		double angle = this.getAngle()+Math.PI;
-		Vector2D position = new Vector2D(place.getEntry(0), place.getEntry(2));
+		double angle = this.getAngle();
+		Vector2D positionToCheck = new Vector2D(place.getEntry(0), place.getEntry(2));
 		
 		Vector2D up = new Vector2D(airportSize.getX()/2, new Vector2D(-Math.cos(angle), -Math.sin(angle)));		
 		Vector2D down = new Vector2D(airportSize.getX()/2, new Vector2D(Math.cos(angle), Math.sin(angle)));		
 		Vector2D right = new Vector2D(airportSize.getY()/2, new Vector2D(-Math.sin(angle), Math.cos(angle)));		
 		Vector2D left = new Vector2D(airportSize.getY()/2, new Vector2D(Math.sin(angle), -Math.cos(angle)));
 		
-		Vector2D leftUpCorner = airport2DPos.add(up).add(right);
-		Vector2D leftDownCorner = airport2DPos.add(up).add(left);
-		Vector2D rightDownCorner = airport2DPos.add(down).add(left);
-		Vector2D rightUpCorner = airport2DPos.add(down).add(right);
+		Vector2D rightUpCorner = airport2DPos.add(up).add(right);
+		Vector2D rightDownCorner = airport2DPos.add(up).add(left);
+		Vector2D leftDownCorner = airport2DPos.add(down).add(left);
+		Vector2D leftUpCorner = airport2DPos.add(down).add(right);
 		
-		//The rectangle consists out of four vectors. If the tyre position is left of all four vectors, it's located within the rectangle's area.
-		if ( Math.atan2(leftDownCorner.getY()-leftUpCorner.getY(), leftDownCorner.getX() - leftUpCorner.getX()) >= Math.atan2(position.getY()-leftUpCorner.getY(), position.getX()-leftUpCorner.getX()) &&
-				Math.atan2(rightDownCorner.getY()-leftDownCorner.getY(), rightDownCorner.getX() - leftDownCorner.getX()) >= Math.atan2(position.getY()-leftDownCorner.getY(), position.getX()-leftDownCorner.getX()) &&
-				Math.atan2(rightUpCorner.getY()-rightDownCorner.getY(), rightUpCorner.getX() - rightDownCorner.getX()) >= Math.atan2(position.getY()-rightDownCorner.getY(), position.getX()-rightDownCorner.getX()) &&
-				Math.atan2(leftUpCorner.getY()-rightUpCorner.getY(), leftUpCorner.getX() - rightUpCorner.getX()) >= Math.atan2(position.getY()-rightUpCorner.getY(), position.getX()-rightUpCorner.getX()) ) {
+//		Vector2D leftUpCorner = airport2DPos.add(up).add(right);
+//		Vector2D leftDownCorner = airport2DPos.add(up).add(left);
+//		Vector2D rightDownCorner = airport2DPos.add(down).add(left);
+//		Vector2D rightUpCorner = airport2DPos.add(down).add(right);
+		
+		//The rectangle consists out of four vectors. If the positionToCheck is left of all four vectors, it's located within the rectangle's area.
+		if ( Math.atan2(leftDownCorner.getY()-leftUpCorner.getY(), leftDownCorner.getX() - leftUpCorner.getX()) >= Math.atan2(positionToCheck.getY()-leftUpCorner.getY(), positionToCheck.getX()-leftUpCorner.getX()) &&
+				Math.atan2(rightDownCorner.getY()-leftDownCorner.getY(), rightDownCorner.getX() - leftDownCorner.getX()) >= Math.atan2(positionToCheck.getY()-leftDownCorner.getY(), positionToCheck.getX()-leftDownCorner.getX()) &&
+				Math.atan2(rightUpCorner.getY()-rightDownCorner.getY(), rightUpCorner.getX() - rightDownCorner.getX()) >= Math.atan2(positionToCheck.getY()-rightDownCorner.getY(), positionToCheck.getX()-rightDownCorner.getX()) &&
+				Math.atan2(leftUpCorner.getY()-rightUpCorner.getY(), leftUpCorner.getX() - rightUpCorner.getX()) >= Math.atan2(positionToCheck.getY()-rightUpCorner.getY(), positionToCheck.getX()-rightUpCorner.getX()) ) {
 			return true;
 		}
-		
 		return false;
+
 	}
 
 	public Runway getRunwayToLand() { //TODO kan mss anders
