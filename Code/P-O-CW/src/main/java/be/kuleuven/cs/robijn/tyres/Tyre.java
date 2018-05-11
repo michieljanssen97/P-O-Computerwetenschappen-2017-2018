@@ -157,7 +157,7 @@ public abstract class Tyre extends WorldObject {
 			d = 0;
 		else {
 			GroundPlane g = WorldObject.getFirstChildOfType(GroundPlane.class);
-			if (g.isGrass(this.getPosition(drone).getEntry(0), this.getPosition(drone).getEntry(2)))
+			if (g.isGrass(this.getPosition(drone)));
 				throw new CrashException();
 		}
 		return d;

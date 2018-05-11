@@ -82,7 +82,7 @@ public class Airport extends WorldObject {
         return runways;
     }
     
-    public ArrayList<Drone> getCurrentDrones() { //TODO gebruik als drones spawnen op een airport
+    public ArrayList<Drone> getCurrentDrones() {
         return new ArrayList<Drone>(this.currentDrones);
     }
     
@@ -145,7 +145,7 @@ public class Airport extends WorldObject {
      */
 	public static Airport getAirportAt(RealVector position) {
 		for(Airport airport : allAirportsList) {
-			if(airport.isInsideAirport(position)) {
+			if(airport.isOnAirport(position)) {
 				return airport;
 			}
 		}
@@ -155,15 +155,32 @@ public class Airport extends WorldObject {
 	/**
 	 * Check if the given location is on (or above) the given airport
 	 */
-	public boolean isInsideAirport(RealVector position) { //TODO hou rekening met orientatie van de airport tov wereldassenstelsel
-		Vector2D size = this.getSize();
-		if( (position.getEntry(0) < this.getXPositionMiddle() - (size.getX()/1.5)) || // delen door 1.5 ipv 2 om iets meer speling te hebben
-				(position.getEntry(0) > this.getXPositionMiddle() + (size.getX()/1.5)) ||
-				(position.getEntry(2) < this.getZPositionMiddle() - (size.getY()/1.5)) ||
-				(position.getEntry(2) > this.getZPositionMiddle() + (size.getY()/1.5))) {
-			return false;
+	public boolean isOnAirport(RealVector place) {
+		RealVector airportPos = this.getWorldPosition();
+		Vector2D airport2DPos = new Vector2D(airportPos.getEntry(0), airportPos.getEntry(2));
+		Vector2D airportSize = this.getSize();
+		double angle = this.getAngle()+Math.PI;
+		Vector2D position = new Vector2D(place.getEntry(0), place.getEntry(2));
+		
+		Vector2D up = new Vector2D(airportSize.getX()/2, new Vector2D(-Math.cos(angle), -Math.sin(angle)));		
+		Vector2D down = new Vector2D(airportSize.getX()/2, new Vector2D(Math.cos(angle), Math.sin(angle)));		
+		Vector2D right = new Vector2D(airportSize.getY()/2, new Vector2D(-Math.sin(angle), Math.cos(angle)));		
+		Vector2D left = new Vector2D(airportSize.getY()/2, new Vector2D(Math.sin(angle), -Math.cos(angle)));
+		
+		Vector2D leftUpCorner = airport2DPos.add(up).add(right);
+		Vector2D leftDownCorner = airport2DPos.add(up).add(left);
+		Vector2D rightDownCorner = airport2DPos.add(down).add(left);
+		Vector2D rightUpCorner = airport2DPos.add(down).add(right);
+		
+		//The rectangle consists out of four vectors. If the tyre position is left of all four vectors, it's located within the rectangle's area.
+		if ( Math.atan2(leftDownCorner.getY()-leftUpCorner.getY(), leftDownCorner.getX() - leftUpCorner.getX()) >= Math.atan2(position.getY()-leftUpCorner.getY(), position.getX()-leftUpCorner.getX()) &&
+				Math.atan2(rightDownCorner.getY()-leftDownCorner.getY(), rightDownCorner.getX() - leftDownCorner.getX()) >= Math.atan2(position.getY()-leftDownCorner.getY(), position.getX()-leftDownCorner.getX()) &&
+				Math.atan2(rightUpCorner.getY()-rightDownCorner.getY(), rightUpCorner.getX() - rightDownCorner.getX()) >= Math.atan2(position.getY()-rightDownCorner.getY(), position.getX()-rightDownCorner.getX()) &&
+				Math.atan2(leftUpCorner.getY()-rightUpCorner.getY(), leftUpCorner.getX() - rightUpCorner.getX()) >= Math.atan2(position.getY()-rightUpCorner.getY(), position.getX()-rightUpCorner.getX()) ) {
+			return true;
 		}
-		return true;
+		
+		return false;
 	}
 
 	public Runway getRunwayToLand() { //TODO kan mss anders
