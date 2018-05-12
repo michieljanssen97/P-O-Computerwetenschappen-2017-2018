@@ -197,7 +197,6 @@ public class AirportPackage {
     	for(AirportPackage p : getAllPackagesToAssign()){
             Airport fromAirport = p.getOrigin().getAirport();            
             Drone drone = fromAirport.getAvailableDrone();
-
             if(drone != null) {
             	if(drone.getCurrentAirport() != fromAirport) {
 	            	//TODO laat drone naar fromAirport vliegen
