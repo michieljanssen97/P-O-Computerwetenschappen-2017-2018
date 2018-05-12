@@ -68,10 +68,6 @@ public class TestbedSimulation {
 		if (drone == null)
 			throw new IllegalStateException("this virtual testbed has no drone");
 		
-		if(drone.hasPackageWaiting()) {
-			drone.packageCanBeAssigned();
-		}
-		
 		RealVector position = drone.getWorldPosition();
 		RealVector velocity = drone.getVelocity();
 		RealVector acceleration = drone.getAcceleration(output.getThrust(),

@@ -4,7 +4,6 @@ import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import org.apache.commons.math3.geometry.euclidean.threed.*;
 import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.common.airports.Airport;
-import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.airports.Runway;
 import be.kuleuven.cs.robijn.common.exceptions.CrashException;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
@@ -1259,27 +1258,6 @@ public class Drone extends WorldObject {
 			}
 		}
 		return null;
-	}
-	
-	/**
-	 * Variables necessary when drone is not at the airport of which to pick up a package
-	 */
-	AirportPackage tempPackage = null;
-	
-	public void assignNecessitiesLater(AirportPackage p, Gate fromGate, Gate toGate) {
-		this.tempPackage = p;
-	}
-	
-	public void packageCanBeAssigned() {
-		
-		if(this.tempPackage.droneCanStart(this.getCurrentAirport())) {
-			this.tempPackage.markAsInTransit(this);
-			this.tempPackage = null;
-		}
-	}
-	
-	public boolean hasPackageWaiting() {
-		return this.tempPackage != null;
 	}
 
 	/**

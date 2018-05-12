@@ -14,7 +14,6 @@ public class AirportPackage {
     private State packageState;
     private Gate currentGate;
     private Drone currentTransporter;
-    private boolean isAssignedLater = false;
 
     public AirportPackage(Gate origin, Gate destination){
         if(origin == null || destination == null){
@@ -175,7 +174,7 @@ public class AirportPackage {
     public static ArrayList<AirportPackage> getAllPackagesToAssign(){
     	ArrayList<AirportPackage> packageList = new ArrayList<AirportPackage>();
     	for (Gate gate : WorldObject.getChildrenOfType(Gate.class)) {
-    		if(gate.hasPackage() && gate.getPackage().isAssignedLater == false) {
+    		if(gate.hasPackage()) {
     			packageList.add(gate.getPackage());
     		}
     	}
@@ -195,21 +194,15 @@ public class AirportPackage {
     public static void assignPackages() {
     	//TODO kan dat toekenning van pakje aan ene drone beter is dan aan andere -> moeten eerst allemaal een temp toekenning hebben en dan controleren of er 2 dezelfde hebben -> Indien ja: De 'slechtste" opniew toekennen...
        
-    	for(AirportPackage p : getAllPackagesToAssign()){ 
-            Gate fromGate = p.getOrigin();
-            Gate toGate = p.getDestination();
-            Airport fromAirport = fromGate.getAirport();
-            
+    	for(AirportPackage p : getAllPackagesToAssign()){
+            Airport fromAirport = p.getOrigin().getAirport();            
             Drone drone = fromAirport.getAvailableDrone();
 
             if(drone != null) {
             	if(drone.getCurrentAirport() != fromAirport) {
 	            	//TODO laat drone naar fromAirport vliegen
-            		p.isAssignedLater = true;
-	            	drone.assignNecessitiesLater(p, fromGate, toGate);
             	}
 	            else {
-
 	            	if (p.droneCanStart(fromAirport)){
 		            	p.markAsInTransit(drone);;
 	            	}
