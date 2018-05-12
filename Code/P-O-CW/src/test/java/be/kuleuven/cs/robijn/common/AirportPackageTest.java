@@ -242,6 +242,9 @@ public class AirportPackageTest {
 		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
 		assertTrue(drone.hasPackageWaiting());
 		assertTrue(!drone.hasPackage());
+		
+		assertEquals(1, airport1.getCurrentDrones().size());
+		assertEquals(0, airport2.getCurrentDrones().size());
 	}	
 	
 	@Test
@@ -278,7 +281,9 @@ public class AirportPackageTest {
 		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
 		AutopilotModule module = new AutopilotModule(world);
 		module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
-		assertThrows(IllegalStateException.class, () -> module.deliverPackage(fromAirport, fromGate, toAirport, toGate));
+		assertEquals(AirportPackage.getAllPackagesToAssign().size(),1);
+		module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
+		assertEquals(AirportPackage.getAllPackagesToAssign().size(),1);
 		
 	}
 

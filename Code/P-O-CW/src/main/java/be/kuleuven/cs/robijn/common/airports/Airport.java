@@ -115,12 +115,12 @@ public class Airport extends WorldObject {
     }
     
     public Drone getFirstAvailableDrone(){
+    	
         for(Drone d : this.getCurrentDrones()){
             if (d.isAvailable()){
                 return d;
             }
         }
-        
         return null;
     }
     

@@ -11,6 +11,7 @@ public class Gate extends WorldObject{
     private final int id;
     private AirportPackage queuedPackage;
 
+    //TODO mss een vertrek gate voor pakjes en een aankomstgate
     public Gate(Airport parent, int id){
         this.parent = parent;
         this.id = id;

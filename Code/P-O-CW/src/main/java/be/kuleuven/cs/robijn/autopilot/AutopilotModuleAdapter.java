@@ -79,11 +79,13 @@ public class AutopilotModuleAdapter implements interfaces.AutopilotModule {
         Gate fromGate = fromAirport.getGates()[fromGateIndex];
         Airport toAirport = airports.get(toAirportIndex);
         Gate toGate = toAirport.getGates()[toGateIndex];
-
-        AirportPackage newPackage = new AirportPackage(fromGate, toGate);
-        fromGate.setPackage(newPackage);
-
-        module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
+        
+        if(! fromGate.hasPackage()){ //Er mag maar 1 pakket beschikbaar zijn per Gate
+	        AirportPackage newPackage = new AirportPackage(fromGate, toGate);
+	        fromGate.setPackage(newPackage);
+	
+	        module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
+        }
     }
 
     @Override

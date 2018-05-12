@@ -20,10 +20,6 @@ public class AirportPackage {
         if(origin == null || destination == null){
             throw new IllegalArgumentException();
         }
-        
-      if(origin.hasPackage()){
-    	  throw new IllegalStateException(); //mag maar 1 package beschikbaar zijn per Gate
-      }
 
         this.origin = origin;
         this.destination = destination;
@@ -185,15 +181,27 @@ public class AirportPackage {
     	}
         return packageList;
     }
+    
+    public boolean droneCanStart(Airport currentAirport) {
+    	if(currentAirport == null) {
+    		return false;
+    	}
+    	
+		Runway toTakeOff = this.getOrigin().getAirport().getRunwayToTakeOff();
+		Runway toLand = this.getDestination().getAirport().getRunwayToLand();
+    	return (currentAirport.equals(this.getOrigin().getAirport()) && Runway.areRunwaysAvailable(toTakeOff, toLand));
+    }
 
     public static void assignPackages() {
-        for(AirportPackage p : getAllPackagesToAssign()){
+    	//TODO kan dat toekenning van pakje aan ene drone beter is dan aan andere -> moeten eerst allemaal een temp toekenning hebben en dan controleren of er 2 dezelfde hebben -> Indien ja: De 'slechtste" opniew toekennen...
+       
+    	for(AirportPackage p : getAllPackagesToAssign()){ 
             Gate fromGate = p.getOrigin();
             Gate toGate = p.getDestination();
             Airport fromAirport = fromGate.getAirport();
-            Airport toAirport = toGate.getAirport();
             
             Drone drone = fromAirport.getAvailableDrone();
+
             if(drone != null) {
             	if(drone.getCurrentAirport() != fromAirport) {
 	            	//TODO laat drone naar fromAirport vliegen
@@ -201,9 +209,8 @@ public class AirportPackage {
 	            	drone.assignNecessitiesLater(p, fromGate, toGate);
             	}
 	            else {
-	        		Runway toTakeOff = fromAirport.getRunwayToTakeOff();
-	        		Runway toLand = toAirport.getRunwayToLand();
-	            	if (Runway.areRunwaysAvailable(toTakeOff, toLand)){
+
+	            	if (p.droneCanStart(fromAirport)){
 		            	p.markAsInTransit(drone);;
 	            	}
 	            }

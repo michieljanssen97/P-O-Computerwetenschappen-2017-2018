@@ -41,8 +41,9 @@ public class AutopilotModule {
     }
     
     public void deliverPackage(Airport fromAirport, Gate fromGate, Airport toAirport, Gate toGate) {
-    	new AirportPackage(fromGate, toGate);
-        //new Package(fromAirport, fromGate, toAirport, toGate);
+        if(! fromGate.hasPackage()){ //Er mag maar 1 pakket beschikbaar zijn per Gate
+        	new AirportPackage(fromGate, toGate);
+        }
     }
     
 
