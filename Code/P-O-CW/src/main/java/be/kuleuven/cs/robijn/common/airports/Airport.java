@@ -12,7 +12,7 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 
 public class Airport extends WorldObject {
-	private static ArrayList<Airport> allAirportsList = new ArrayList<Airport>();
+//	private static ArrayList<Airport> allAirportsList = new ArrayList<Airport>();
 
     private final int id;
     private Vector2D size;
@@ -51,16 +51,16 @@ public class Airport extends WorldObject {
         );
         this.angle = angle;
         
-        Airport.allAirportsList.add(this);
+//        Airport.allAirportsList.add(this);
     }
     
     public static ArrayList<Airport>getAllAirports() {
-    	return Airport.allAirportsList;
+    	return WorldObject.getChildrenOfType(Airport.class);
     }
     
-    public static void removeAllAirports() {
-    	Airport.allAirportsList = new ArrayList<Airport>();
-    }
+//    public static void removeAllAirports() {
+//    	Airport.allAirportsList = new ArrayList<Airport>();
+//    }
     
     public int getXPositionMiddle() {
     	return (int) this.getWorldPosition().getEntry(0);
@@ -149,7 +149,7 @@ public class Airport extends WorldObject {
      * Get the airport at the given position
      */
 	public static Airport getAirportAt(RealVector position) {
-		for(Airport airport : allAirportsList) {
+		for(Airport airport : getAllAirports()) {
 			if(airport.isOnAirport(position)) {
 				return airport;
 			}

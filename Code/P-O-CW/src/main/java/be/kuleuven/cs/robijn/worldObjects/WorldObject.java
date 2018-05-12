@@ -161,7 +161,7 @@ public class WorldObject {
      * @param obj the child to remove. Must not be null
      * @return true if obj was a child of this object.
      */
-    public boolean removeChild(WorldObject obj){
+    public static boolean removeChild(WorldObject obj){
         if(obj == null){
             throw new IllegalArgumentException("obj cannot be null");
         }
@@ -171,6 +171,12 @@ public class WorldObject {
             return true;
         }
         return false;
+    }
+    
+    public static <T extends WorldObject> void removeAllChildrenOfType(Class<T> clazz) {
+    	for (WorldObject child : getChildrenOfType(clazz)) {
+    		removeChild(child);
+    	}
     }
 
     /**

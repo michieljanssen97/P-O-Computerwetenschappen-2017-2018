@@ -14,6 +14,7 @@ import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import be.kuleuven.cs.robijn.common.airports.AirportPackage.State;
 import be.kuleuven.cs.robijn.common.airports.Gate;
+import be.kuleuven.cs.robijn.common.airports.Runway;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 import interfaces.AutopilotConfig;
@@ -157,11 +158,16 @@ public class AirportPackageTest {
 //		assertEquals(AirportPackage.getAllPackagesToAssign().size(),1);
 //		AirportPackage airportPackage = AirportPackage.getAllPackagesToAssign().get(0);
 //		assertEquals(airportPackage.getState(), State.AT_GATE);
+//		
+//		
+//		WorldObject.removeAllChildrenOfType(Drone.class);
+//		WorldObject.removeAllChildrenOfType(Gate.class);
+//		WorldObject.removeAllChildrenOfType(Airport.class);
+//		WorldObject.removeAllChildrenOfType(Runway.class);
 //	}
 	
 	@Test
 	public void testNewPackageOnAirportDrone() {
-		Airport.removeAllAirports();
 	    WorldObject world = new WorldObject();
 		Airport airport1 = new Airport(0, 1000, 500, new Vector2D(0,0));
 		airport1.setRelativePosition(new ArrayRealVector(new double[] {0,0,0}, false));
@@ -201,12 +207,17 @@ public class AirportPackageTest {
 		assertEquals(airportPackage.getCurrentGate(), null);
 		assertEquals(airportPackage.getOrigin(), fromGate);
 		assertEquals(airportPackage.getCurrentTransporter(), drone);
-		assertEquals(airportPackage.getDestination(), toGate);		
+		assertEquals(airportPackage.getDestination(), toGate);	
+		
+		WorldObject.removeAllChildrenOfType(Drone.class);
+		WorldObject.removeAllChildrenOfType(Gate.class);
+		WorldObject.removeAllChildrenOfType(Airport.class);
+		WorldObject.removeAllChildrenOfType(Runway.class);
+		
 	}
 	
 	@Test
 	public void testNewPackageNotOnAirportDrone() {
-		Airport.removeAllAirports();
 		WorldObject world = new WorldObject();
 		Airport airport1 = new Airport(0, 1000, 500, new Vector2D(0,0));
 		airport1.setRelativePosition(new ArrayRealVector(new double[] {0,0,0}, false));
@@ -245,11 +256,15 @@ public class AirportPackageTest {
 		
 		assertEquals(1, airport1.getCurrentDrones().size());
 		assertEquals(0, airport2.getCurrentDrones().size());
+		
+		WorldObject.removeAllChildrenOfType(Drone.class);
+		WorldObject.removeAllChildrenOfType(Gate.class);
+		WorldObject.removeAllChildrenOfType(Airport.class);
+		WorldObject.removeAllChildrenOfType(Runway.class);
 	}	
 	
 	@Test
 	public void testNewInvalidPackage() {
-		Airport.removeAllAirports();
 		WorldObject world = new WorldObject();
 		Airport airport1 = new Airport(0, 1000, 500, new Vector2D(0,0));
 		airport1.setRelativePosition(new ArrayRealVector(new double[] {0,0,0}, false));
@@ -284,6 +299,11 @@ public class AirportPackageTest {
 		assertEquals(AirportPackage.getAllPackagesToAssign().size(),1);
 		module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
 		assertEquals(AirportPackage.getAllPackagesToAssign().size(),1);
+		
+		WorldObject.removeAllChildrenOfType(Drone.class);
+		WorldObject.removeAllChildrenOfType(Gate.class);
+		WorldObject.removeAllChildrenOfType(Airport.class);
+		WorldObject.removeAllChildrenOfType(Runway.class);
 		
 	}
 
