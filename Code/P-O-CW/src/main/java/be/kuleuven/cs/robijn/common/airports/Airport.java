@@ -117,11 +117,9 @@ public class Airport extends WorldObject {
     }
     
     public Drone getFirstAvailableDrone(){
-        for(Drone d : this.getCurrentDrones()){
-            if (d.isAvailable()){
-                return d;
-            }
-        }
+    	if(! this.getAllAvailableDrones().isEmpty()) {
+    		return this.getAllAvailableDrones().get(0);
+    	}
         return null;
     }
     
@@ -134,7 +132,7 @@ public class Airport extends WorldObject {
     	double minDistance = Double.MAX_VALUE;
     	for(Airport airp : Airport.getAllAirports()) {
     		Drone tempDrone = airp.getFirstAvailableDrone();
-    		if(tempDrone != null && tempDrone.calculateDistanceToAirport(this) < minDistance && (!airp.hasPackage() || airp.hasMoreThanOneAvailableDrone())) { //if airp.hasPackage() than the drone must be assigned to that package, not to this package
+    		if(tempDrone != null && tempDrone.calculateDistanceToAirport(this) < minDistance && airp.hasSufficientAvailableDrones()) {
     			minDistance = tempDrone.calculateDistanceToAirport(this);
     			drone = tempDrone;
     		}
@@ -142,29 +140,34 @@ public class Airport extends WorldObject {
     	return drone; //Is null if no drones are Available
     }
     
-    private boolean hasMoreThanOneAvailableDrone() {
-    	int amountAvailable = 0;
+    /**
+     * Check if the airport has more available drones than packages that have yet to be assigned
+     */
+    private boolean hasSufficientAvailableDrones() {
+    	return this.getAllAvailableDrones().size() > this.getAllPackagesThatMustBeAssignedAtThisAirport().size();
+    }
+    
+    private ArrayList<Drone> getAllAvailableDrones() {
+    	ArrayList<Drone> availableDrones = new ArrayList<Drone>();
 		for(Drone d : this.getCurrentDrones()) {
 			if(d.isAvailable()) {
-				amountAvailable++;
+				availableDrones.add(d);
 			}
 		}
 		
-		return (amountAvailable > 1);
+		return availableDrones;
 	}
-
-	/**
-     * Chack if this airport has a package available
-     */
-    private boolean hasPackage() {
-		for(Gate gate : this.getGates()) {
-			if(gate.hasPackage()) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
+    
+    private ArrayList<AirportPackage> getAllPackagesThatMustBeAssignedAtThisAirport(){
+    	ArrayList<AirportPackage> allPackages = new ArrayList<AirportPackage>();
+    	for(Gate g : this.getGates()) {
+    		if(g.hasPackage()) {
+    			allPackages.add(g.getPackage());
+    		}
+    	}
+    	
+    	return allPackages;
+    }
 
 	public boolean isDroneAvailableOnThisAirport() {
         return this.getFirstAvailableDrone() != null;
