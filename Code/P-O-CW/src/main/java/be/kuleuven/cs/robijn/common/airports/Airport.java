@@ -130,10 +130,11 @@ public class Airport extends WorldObject {
     	if(drone != null) {
     		return drone;
     	}
+    	
     	double minDistance = Double.MAX_VALUE;
     	for(Airport airp : Airport.getAllAirports()) {
     		Drone tempDrone = airp.getFirstAvailableDrone();
-    		if(tempDrone != null && tempDrone.calculateDistanceToAirport(this) < minDistance) { //Give higher priority to Drones at nearby Airports, moet mss nog anders wegens orientatie van de luchthavens
+    		if(tempDrone != null && tempDrone.calculateDistanceToAirport(this) < minDistance && (!airp.hasPackage() || airp.hasMoreThanOneAvailableDrone())) { //if airp.hasPackage() than the drone must be assigned to that package, not to this package
     			minDistance = tempDrone.calculateDistanceToAirport(this);
     			drone = tempDrone;
     		}
@@ -141,7 +142,31 @@ public class Airport extends WorldObject {
     	return drone; //Is null if no drones are Available
     }
     
-    public boolean isDroneAvailableOnThisAirport() {
+    private boolean hasMoreThanOneAvailableDrone() {
+    	int amountAvailable = 0;
+		for(Drone d : this.getCurrentDrones()) {
+			if(d.isAvailable()) {
+				amountAvailable++;
+			}
+		}
+		
+		return (amountAvailable > 1);
+	}
+
+	/**
+     * Chack if this airport has a package available
+     */
+    private boolean hasPackage() {
+		for(Gate gate : this.getGates()) {
+			if(gate.hasPackage()) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	public boolean isDroneAvailableOnThisAirport() {
         return this.getFirstAvailableDrone() != null;
     }
 

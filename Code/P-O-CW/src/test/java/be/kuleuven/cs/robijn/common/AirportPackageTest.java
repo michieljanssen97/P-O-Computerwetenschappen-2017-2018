@@ -290,6 +290,65 @@ public class AirportPackageTest {
 		removeAllChildren();
 	}
 	
+	/**
+	 * Spawn 1 drone op een airport. Voeg 2 pakketten toe, eerst aan airport waar drone niet staat, dan een waar drone wel staat.
+	 * Het 2de pakket mag worden toegekend, het eerste niet.
+	 */
+	@Test
+	public void testMoreThanOneDroneAvailableAtOtherAirport() {
+		WorldObject world = new WorldObject();
+		Airport airport1 = new Airport(0, 1000, 500, new Vector2D(0,0));
+		airport1.setRelativePosition(new ArrayRealVector(new double[] {0,0,0}, false));
+		Airport airport2 = new Airport(1, 1000, 500, new Vector2D(0, 0));
+		airport2.setRelativePosition(new ArrayRealVector(new double[] {-10000,0,60000}, false));
+		Drone drone = new Drone(config, velocity);
+		world.addChild(drone);
+		world.addChild(airport1);
+		world.addChild(airport2);
+		
+		Airport fromAirport1 = airport1;
+		Airport toAirport1 = airport2;
+		Gate fromGate1 = fromAirport1.getGates()[0];
+		Gate toGate1 = toAirport1.getGates()[0];
+		
+		Airport fromAirport2 = airport2;
+		Airport toAirport2 = airport1;
+		Gate fromGate2 = fromAirport2.getGates()[0];
+		Gate toGate2 = toAirport2.getGates()[0];
+		
+		//Set position of drone1 at airport1
+        RealVector gatePos = fromGate1.getWorldPosition();
+        RealVector dronePos1 = gatePos.add(
+                new ArrayRealVector(new double[]{
+                        0,
+                        -drone.getConfig().getWheelY() + drone.getConfig().getTyreRadius(),
+                        0
+                }, false)
+        );
+        drone.setRelativePosition(dronePos1);
+        drone.setToAirport();
+        
+        assertEquals(Airport.getAllAirports().size(), 2);
+		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
+		assertEquals(WorldObject.getChildrenOfType(Drone.class).size(), 1);
+		
+		//Packet1
+		AutopilotModule module = new AutopilotModule(world);
+		module.deliverPackage(fromAirport2, fromGate2, toAirport2, toGate2);
+		assertEquals(AirportPackage.getAllPackagesToAssign().size(),1);
+		
+		//Packet2
+		module.deliverPackage(fromAirport1, fromGate1, toAirport1, toGate1);
+		AirportPackage.assignPackages();
+		assertEquals(AirportPackage.getAllPackagesToAssign().size(),1);
+		
+		assertEquals(drone.getPackage().getOrigin(), fromGate1);	
+		assertTrue(fromGate2.hasPackage());
+		
+		removeAllChildren();
+        
+	}
+	
 	public static void removeAllChildren() {
 		WorldObject.removeAllChildrenOfType(Drone.class);
 		WorldObject.removeAllChildrenOfType(Gate.class);
