@@ -1,5 +1,6 @@
 package be.kuleuven.cs.robijn.common.airports;
 
+import be.kuleuven.cs.robijn.autopilot.AutopilotModule;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 
@@ -89,16 +90,17 @@ public class AirportPackage {
 		Runway landRunway = toAirport.getRunwayToLand();
 		
 		
-    	//TODO naar fromGate taxiën (packet ophalen), en van daaruit naar takeOffRunWay om op te stijgen
         takeOffRunway.setHasDrones(true);
-        currentTransporter.setTakeOffRunway(takeOffRunway);
         
-    	landRunway.setHasDrones(true); //TODO mss pas later locken, vanaf inzetten landing ofzo -> Wel rekening houden dat hij dan niet vrij kan zijn, erboven blijven cirkelen, enz...
+    	landRunway.setHasDrones(true);
         currentTransporter.setDestinationRunway(landRunway);
 
         for(Consumer<AirportPackage> handler : stateUpdateEventHandlers){
             handler.accept(this);
         }
+        
+        //TODO moet drone eerst nog naar fromGate taxiën of niet??
+        AutopilotModule.flyRoute(transporter, this.getOrigin(), this.getDestination(), transporter.getHeight());
     }
 
     /**
@@ -195,11 +197,15 @@ public class AirportPackage {
     	//TODO kan dat toekenning van pakje aan ene drone beter is dan aan andere -> moeten eerst allemaal een temp toekenning hebben en dan controleren of er 2 dezelfde hebben -> Indien ja: De 'slechtste" opniew toekennen...
        
     	for(AirportPackage p : getAllPackagesToAssign()){
-            Airport fromAirport = p.getOrigin().getAirport();            
+            Airport fromAirport = p.getOrigin().getAirport();  
+            Gate toGate = p.getDestination();
             Drone drone = fromAirport.getAvailableDrone();
             if(drone != null) {
             	if(drone.getCurrentAirport() != fromAirport) {
-	            	//TODO laat drone naar fromAirport vliegen
+            		if(drone.getAirportOfDrone() == null) {
+            			throw new IllegalStateException();
+            		}
+	            	AutopilotModule.flyRoute(drone, drone.getAirportOfDrone().getGates()[0], toGate, drone.getHeight());
             	}
 	            else {
 	            	if (p.droneCanStart(fromAirport)){

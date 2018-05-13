@@ -200,11 +200,11 @@ public class Airport extends WorldObject {
 
 	}
 
-	public Runway getRunwayToLand() { //TODO kan mss anders
+	public Runway getRunwayToLand() { //TODO gebruik in routeCalculator
 		return this.getRunways()[0];
 	}
 
-	public Runway getRunwayToTakeOff() {
+	public Runway getRunwayToTakeOff() { //TODO gebruik in routeCalculator
 		return this.getRunways()[1];
 	}
     public double getAngle() {

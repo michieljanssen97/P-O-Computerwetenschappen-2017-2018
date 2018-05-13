@@ -80,6 +80,11 @@ public class Drone extends WorldObject {
 		this.addChild(frontWheel);
 		this.addChild(rightRearWheel);
 		this.addChild(leftRearWheel);
+		
+		int amountOfDrones = WorldObject.getChildrenOfType(Drone.class).size() + 1;
+		int minHeight = 30;
+		int extraHeight = 10;
+		this.height = minHeight + (amountOfDrones * extraHeight);
 	}
 	
     //     -----------------     //
@@ -111,11 +116,11 @@ public class Drone extends WorldObject {
 	
 	private final String droneID;
 	
+	private final float height;
+	
     private AirportPackage assignedPackage = null;
     
     private Runway destinationRunway = null;
-    
-    private Runway takeOffRunWay = null;
 
  	public AutopilotConfig getConfig() {
 		return config;
@@ -233,22 +238,13 @@ public class Drone extends WorldObject {
         return this.assignedPackage == null;
     }
     
-    public Runway getDestinationRunway(){ //TODO laat drone dit als destination gebruiken -> Target in zijn autopilot aanpassen
+    public Runway getDestinationRunway(){
         return destinationRunway;
     }
     
     public void setDestinationRunway(Runway dest){
         this.destinationRunway = dest;
-    }
-    
-    public Runway gettakeOffRunway(){
-        return this.takeOffRunWay;
-    }
-    
-    public void setTakeOffRunway(Runway dest){
-        this.takeOffRunWay = dest;
-    }
-    
+    }    
     
     public double calculateDistanceToAirport(Airport airport) {
     	RealVector currentPosition = this.getEnginePosition();
@@ -272,10 +268,15 @@ public class Drone extends WorldObject {
 		}
 	}
 	
+	public Airport getAirportOfDrone() {
+		return Airport.getAirportAt(this.getWorldPosition());
+
+	}
+	
 	public void setArrived() {
 		this.setToAirport();
 		this.setPackageDelivered();
-		//TODO drone van runway naar toGate taxiën + bij aankomst: this.getDestinationRunway().setHasDrones(false);
+		this.getDestinationRunway().setHasDrones(false);
 	}
 	
 	public void setPackageDelivered() {
@@ -284,7 +285,7 @@ public class Drone extends WorldObject {
 		}
 	}
 	
-	public void setTookOff() { //TODO gebruik dit wanneer opgestegen, autopilot == FLightMode.Ascend na FlightMode.Taxi
+	public void setTookOff() {
 		this.removeFromAirport();
 	}
 	
@@ -1276,5 +1277,9 @@ public class Drone extends WorldObject {
 	
 	public boolean hasPackage() {
 		return this.getPackage() != null;
+	}
+
+	public float getHeight() {
+		return this.height;
 	}
 }

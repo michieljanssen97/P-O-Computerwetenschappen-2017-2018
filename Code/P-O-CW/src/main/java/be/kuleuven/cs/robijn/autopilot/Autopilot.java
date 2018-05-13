@@ -149,7 +149,7 @@ public class Autopilot {
 		}
 
 		if (this.getFlightMode() == FlightMode.ASCEND) { //ascend
-
+			
 			thrust = this.getConfig().getMaxThrust();
 			
 			float takeOffSpeed = (float) Math.sqrt((-drone.getTotalGravitationalForce().getEntry(1))
@@ -194,6 +194,7 @@ public class Autopilot {
 			}
 			
 			if (drone.getWorldPosition().getEntry(1) > this.getConfig().getTailSize()) {
+				drone.setTookOff();
 				this.setFlightMode(FlightMode.FULL_FLIGHT);
 			}
 		}
