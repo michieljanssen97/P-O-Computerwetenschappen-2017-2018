@@ -1,13 +1,12 @@
 package be.kuleuven.cs.robijn.testbed;
 
 import be.kuleuven.cs.robijn.common.*;
-import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import be.kuleuven.cs.robijn.testbed.renderer.AsyncOpenGLRenderer;
+import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
 import be.kuleuven.cs.robijn.worldObjects.Label3D;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
-import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 
@@ -34,10 +33,10 @@ public class VirtualTestbed implements TestBed {
 
 		//Create airports and drones
 		SimulationBuilder.buildSimulation(settings, world);
-		drones = WorldObject.getChildrenOfType(Drone.class);
+		drones = world.getChildrenOfType(Drone.class);
 
 		//Set initial autopilotinputs
-		List<Drone> drones = WorldObject.getChildrenOfType(Drone.class);
+		List<Drone> drones = world.getChildrenOfType(Drone.class);
 		inputs = new AutopilotInputs[settings.getDrones().length];
 		for (int i = 0; i < settings.getDrones().length; i++) {
 			Drone drone = drones.get(i);
@@ -79,7 +78,6 @@ public class VirtualTestbed implements TestBed {
 			worldStateLock.acquire();
 
 			//Update drones
-			AirportPackage.assignPackages();
 			for(int i = 0; i < drones.size(); i++){
 				Drone drone = drones.get(i);
 				simulation.updateDrone(drone, secondsSinceStart, secondsSinceLastUpdate, outputs[i]);
@@ -156,7 +154,7 @@ public class VirtualTestbed implements TestBed {
 			frameBuffer = renderer.createFrameBuffer(drone.getConfig().getNbColumns(), drone.getConfig().getNbRows());
 		}
 
-		Camera droneCamera = WorldObject.getFirstChildOfType(Camera.class);
+		Camera droneCamera = drone.getFirstChildOfType(Camera.class);
 		if(droneCamera == null){
 			droneCamera = createDroneCamera(drone);
 		}

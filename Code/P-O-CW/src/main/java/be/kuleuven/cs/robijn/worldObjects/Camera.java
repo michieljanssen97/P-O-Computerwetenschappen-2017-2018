@@ -1,5 +1,7 @@
 package be.kuleuven.cs.robijn.worldObjects;
 
+import be.kuleuven.cs.robijn.common.WorldObject;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

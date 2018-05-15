@@ -13,7 +13,6 @@ import be.kuleuven.cs.robijn.worldObjects.Box;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 import be.kuleuven.cs.robijn.worldObjects.OrthographicCamera;
-import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;

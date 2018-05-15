@@ -1,10 +1,9 @@
 package be.kuleuven.cs.robijn.common.airports;
 
+import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.linear.RealVector;
-
-import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 
 public class Gate extends WorldObject{
     private final Airport parent;
@@ -19,7 +18,7 @@ public class Gate extends WorldObject{
     public Vector2D getSize(){
         return new Vector2D(this.getScale().getEntry(0), this.getScale().getEntry(2));
     }
-    
+
     public Airport getAirport() {
         return parent;
     }
