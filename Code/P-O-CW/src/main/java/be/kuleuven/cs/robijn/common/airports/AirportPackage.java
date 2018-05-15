@@ -100,7 +100,8 @@ public class AirportPackage extends WorldObject{
         }
         
         //TODO drone moet eerst nog naar fromGate taxiën
-        AutopilotModule.flyRoute(transporter, this.getOrigin(), this.getDestination(), transporter.getHeight());
+        AutopilotModule module = new AutopilotModule(this.getParent());
+        module.flyRoute(transporter, this.getOrigin(), this.getDestination(), transporter.getHeight());
     }
 
     /**
@@ -203,7 +204,8 @@ public class AirportPackage extends WorldObject{
             		if(drone.getAirportOfDrone() == null) {
             			throw new IllegalStateException();
             		}
-	            	AutopilotModule.flyRoute(drone, drone.getAirportOfDrone().getGates()[0], toGate, drone.getHeight());
+            		AutopilotModule module = new AutopilotModule(this.getParent());
+	            	module.flyRoute(drone, drone.getAirportOfDrone().getGates()[0], toGate, drone.getHeight());
             	}
 	            else {
 	            	if (p.droneCanStart(fromAirport)){
