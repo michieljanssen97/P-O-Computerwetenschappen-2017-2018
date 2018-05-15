@@ -75,7 +75,7 @@ public class routeCalculator {
         			).add(solution[solution.length-2]);
     		solution[solution.length-3].setEntry(1, 3*hightInterval);
     		solution[solution.length-4] = orientation.mapMultiply(
-        			((hight-(3*hightInterval))/Math.tan(Math.toRadians(3)))
+        			((hight-(3*hightInterval))/Math.tan(Math.toRadians(5)))
         			).add(solution[solution.length-3]);
     		solution[solution.length-4].setEntry(1, hight);
     	}
