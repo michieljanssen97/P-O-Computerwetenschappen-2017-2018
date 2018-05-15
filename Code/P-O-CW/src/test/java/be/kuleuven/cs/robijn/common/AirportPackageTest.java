@@ -157,7 +157,7 @@ public class AirportPackageTest {
 		for(Airport air : firstAirport.getAllAirports()) {
 			assertEquals(0, air.getCurrentDrones().size());
 		}
-		assertEquals(airPackage.getAllPackagesToAssign().size(),1);
+		assertEquals(1, airPackage.getAllPackagesToAssign().size());
 		AirportPackage p = airPackage.getAllPackagesToAssign().get(0);
 		assertEquals(p.getState(), State.AT_GATE);
 		
@@ -252,7 +252,7 @@ public class AirportPackageTest {
 		module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
         AirportPackage airPackage = world.getFirstChildOfType(AirportPackage.class);
 		airPackage.assignPackages();
-		assertEquals(airPackage.getAllPackagesToAssign().size(),1);
+		assertEquals(1, airPackage.getAllPackagesToAssign().size());
 		assertTrue(!drone.hasPackage());
 		
 		assertEquals(1, airport1.getCurrentDrones().size());
@@ -293,13 +293,12 @@ public class AirportPackageTest {
         Airport firstAirport = world.getFirstChildOfType(Airport.class);
         
         assertEquals(firstAirport.getAllAirports().size(), 2);
-//		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
 		AutopilotModule module = new AutopilotModule(world);
 		module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
         AirportPackage airPackage = world.getFirstChildOfType(AirportPackage.class);
-		assertEquals(airPackage.getAllPackagesToAssign().size(),1);
+		assertEquals(1, airPackage.getAllPackagesToAssign().size());
 		module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
-		assertEquals(airPackage.getAllPackagesToAssign().size(),1);
+		assertEquals(1, airPackage.getAllPackagesToAssign().size());
 		
 		removeAllChildren(world);
 	}
@@ -346,7 +345,7 @@ public class AirportPackageTest {
         
         assertEquals(firstAirport.getAllAirports().size(), 2);
 //		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
-		assertEquals(firstAirport.getChildrenOfType(Drone.class).size(), 1);
+		assertEquals(firstAirport.getParent().getChildrenOfType(Drone.class).size(), 1);
 		
 		//Packet1
 		AutopilotModule module = new AutopilotModule(world);
@@ -357,7 +356,7 @@ public class AirportPackageTest {
 		//Packet2
 		module.deliverPackage(fromAirport1, fromGate1, toAirport1, toGate1);
 		airPackage.assignPackages();
-		assertEquals(airPackage.getAllPackagesToAssign().size(),1);
+		assertEquals(1, airPackage.getAllPackagesToAssign().size());
 		
 		assertEquals(drone.getPackage().getOrigin(), fromGate1);	
 		assertTrue(fromGate2.hasPackage());

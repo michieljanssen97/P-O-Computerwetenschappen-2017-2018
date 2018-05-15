@@ -175,8 +175,7 @@ public class AirportPackage extends WorldObject{
     
     public ArrayList<AirportPackage> getAllPackagesToAssign(){
     	ArrayList<AirportPackage> packageList = new ArrayList<AirportPackage>();
-    	Airport airp = this.getParent().getFirstChildOfType(Airport.class);
-    	for (Gate gate : airp.getChildrenOfType(Gate.class)) {
+    	for (Gate gate : Gate.getAllGates(this.getParent())) {
     		if(gate.hasPackage()) {
     			packageList.add(gate.getPackage());
     		}
