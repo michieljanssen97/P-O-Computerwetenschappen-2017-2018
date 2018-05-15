@@ -155,11 +155,11 @@ public abstract class Tyre extends WorldObject {
 		float d = (float) (this.getTyreRadius() - this.getPosition(drone).getEntry(1));
 		if (d < 0)
 			d = 0;
-//		else {
-//			GroundPlane g = this.getParent().getParent().getFirstChildOfType(GroundPlane.class);
-//			if (g.isGrass(this.getPosition(drone).getEntry(0), this.getPosition(drone).getEntry(2)))
-//				throw new CrashException();
-//		}
+		else {
+			GroundPlane g = this.getParent().getParent().getFirstChildOfType(GroundPlane.class);
+			if (g.isGrass(new ArrayRealVector(new double[]{this.getPosition(drone).getEntry(0), 0, this.getPosition(drone).getEntry(2)}, false)))
+				throw new CrashException();
+		}
 		return d;
 	}
 	
