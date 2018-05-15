@@ -58,7 +58,7 @@ public class Autopilot {
 		this.targets.setTargets(targets);
 	}
 	
-	private RealVector targetPosition = new ArrayRealVector(new double[]{0,0,100});
+	private RealVector targetPosition = new ArrayRealVector(new double[]{0,1.40,100});
 	
 	public RealVector getTargetPosition() {
 		return targetPosition;
@@ -587,7 +587,6 @@ public class Autopilot {
         }
         if (this.getFlightMode() == FlightMode.BRAKE) {
 			if (drone.getVelocity().getNorm() > 0.001) {
-				float targetHeading;
 				float targetVelocity;
 				RealVector targetPosition = this.getTargetPosition();
 				RealVector targetPositionDroneCoordinates = drone.transformationToDroneCoordinates(targetPosition.subtract(drone.getWorldPosition()));
@@ -606,17 +605,110 @@ public class Autopilot {
 					rightBrakeForce = 4300;
 				}
 				
-				if (targetPositionDroneCoordinates.getNorm() < 5) {
-					float accel = (float) (drone.getVelocity().getNorm() - 0.01);
-					float force = drone.getTotalMass() * accel;
-					rightBrakeForce = Math.max(0, Math.min(force/2, 500));
-					leftBrakeForce = Math.max(0, Math.min(force/2, 500));
+				if (targetPositionDroneCoordinates.getNorm() < 3) {
+					
+					this.setFlightMode(FlightMode.TURN);
+					
+					
+					
+//					float accel = (float) (drone.getVelocity().getNorm() - 0.01);
+//					float force = drone.getTotalMass() * accel;
+//					rightBrakeForce = Math.max(0, Math.min(force/2, 500));
+//					leftBrakeForce = Math.max(0, Math.min(force/2, 500));
+//					if (targetHeading > drone.getHeading()) {
+//						//draaien volgens positieve y (neus naar links)
+//						leftBrakeForce *= (3/2 -20 * drone.getHeadingAngularVelocity());
+//						rightBrakeForce = Math.max(0, force - leftBrakeForce);
+//					}
+//					if (targetHeading < drone.getHeading()) {
+//						//draaien volgens negatieve y (neus naar rechts)
+//						rightBrakeForce *= (3/2 + 20 * drone.getHeadingAngularVelocity());
+//						leftBrakeForce = Math.max(0, force - rightBrakeForce);
+//					}
+					
+					
+					
 				}
 
 			}
 //			else
 //				this.setFlightMode(FlightMode.READY);
 		}
+        if (this.getFlightMode() == FlightMode.TURN) {
+        	float targetHeading = (float) (Math.PI);
+        	if (drone.getVelocity().getNorm() < 1) {
+        		thrust = 20;
+        	}
+        	if (drone.getHeading() < targetHeading) {
+        		if (targetHeading - drone.getHeading() < Math.PI/180) {
+//        			leftBrakeForce = 2000;
+//        			rightBrakeForce = 2000;
+//        			thrust = 0;
+        			this.setFlightMode(FlightMode.STOP);
+        		}
+        		else if (drone.getHeadingAngularVelocity() > ((targetHeading - drone.getHeading()) / 20)){
+        			leftBrakeForce = 0;
+        			rightBrakeForce = 0;
+        			thrust = 0;
+        		}
+        		else {
+        			leftBrakeForce = 100;
+        			rightBrakeForce = 0;
+        		}
+        		
+        	}
+        	else if (drone.getHeading() > targetHeading) {
+        		if (targetHeading - drone.getHeading() > - Math.PI/180) {
+        			this.setFlightMode(FlightMode.STOP);
+        		}
+        		else if (Math.abs(drone.getHeadingAngularVelocity()) > Math.abs(((targetHeading - drone.getHeading()) / 20))) {
+        			leftBrakeForce = 0;
+        			rightBrakeForce = 0;
+        			thrust = 0;
+//        			System.out.println(3);
+//        			System.out.println("");
+//        			System.out.println("Omega heading");
+//        			System.out.println(drone.getHeadingAngularVelocity());
+//        			System.out.println("");
+//        			System.out.println("targetHeading - drone.getHeading");
+//        			System.out.println(targetHeading - drone.getHeading());
+//        			System.out.println("");
+//        			System.out.println("Heading:");
+//        			System.out.println(targetHeading);
+//        			System.out.println("");
+//        			System.out.println("drone.getHeading");
+//        			System.out.println(drone.getHeading());
+        		}
+        		else {
+        			leftBrakeForce = 0;
+        			rightBrakeForce = 100;
+//        			System.out.println(4);
+//        			System.out.println("");
+//        			System.out.println("Omega heading");
+//        			System.out.println(drone.getHeadingAngularVelocity());
+//        			System.out.println("");
+//        			System.out.println("targetHeading - drone.getHeading");
+//        			System.out.println(targetHeading - drone.getHeading());
+//        			System.out.println("");
+//        			System.out.println("Heading:");
+//        			System.out.println(targetHeading);
+//        			System.out.println("");
+//        			System.out.println("drone.getHeading");
+//        			System.out.println(drone.getHeading());
+        		}
+        	}
+//        	System.out.println(rightBrakeForce);
+//        	System.out.println(leftBrakeForce);
+//        	System.out.println(drone.getHeadingAngularVelocity());
+//        	System.out.println(drone.getHeading() - targetHeading);
+//        	System.out.println("");
+        	System.out.println(drone.getVelocity().getNorm());
+        }
+        if (this.getFlightMode() == FlightMode.STOP){
+        	thrust = 0;
+        	leftBrakeForce = 2000;
+        	rightBrakeForce = 2000;
+        }
 
         final float thrustOutput = thrust;
         final float leftWingInclinationOutput = leftWingInclination;
@@ -656,7 +748,6 @@ public class Autopilot {
 				return rightBrakeForceOutput;
 			}
 		};
-		
         return output;
 	}
 	
