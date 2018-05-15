@@ -1,9 +1,10 @@
-package be.kuleuven.cs.robijn.worldObjects;
+package be.kuleuven.cs.robijn.common;
 
 import java.util.*;
 import java.util.stream.Stream;
 
 import be.kuleuven.cs.robijn.common.math.VectorMath;
+import be.kuleuven.cs.robijn.tyres.Tyre;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -11,7 +12,7 @@ import org.apache.commons.math3.linear.*;
 
 public class WorldObject {
     private WorldObject parent;
-    private static ArrayList<WorldObject> children = new ArrayList<>();
+    private ArrayList<WorldObject> children = new ArrayList<>();
     private RealVector position = new ArrayRealVector(new double[]{0, 0, 0}, false);
     private Rotation rotation = new Rotation(new Vector3D(1, 0, 0), 0);
     private RealVector scale = new ArrayRealVector(new double[]{1, 1, 1}, false);
@@ -34,11 +35,11 @@ public class WorldObject {
     /**
      * Returns an immutable list of the children of this object.
      */
-    public static List<WorldObject> getChildren(){
+    public List<WorldObject> getChildren(){
         return Collections.unmodifiableList(children);
     }
     
-//	public static <T extends WorldObject> T getFirstChildOfType(Class<T> clazz){
+//	public <T extends WorldObject> T getFirstChildOfType(Class<T> clazz){
 //        if(clazz == null){
 //            throw new IllegalArgumentException("clazz cannot be null");
 //        }
@@ -58,7 +59,7 @@ public class WorldObject {
      * @param clazz the class of the child to return. Must not be null.
      */
     @SuppressWarnings("unchecked")
-	public static <T extends WorldObject> T getFirstChildOfType(Class<T> clazz){
+	public <T extends WorldObject> T getFirstChildOfType(Class<T> clazz){
         try {
         	ArrayList<T> childrenOfType = getChildrenOfType(clazz);
         	
@@ -80,7 +81,7 @@ public class WorldObject {
      * @param clazz the class of the child to return. Must not be null.
      */
     @SuppressWarnings("unchecked")
-	public static <T extends WorldObject> ArrayList<T> getChildrenOfType(Class<T> clazz){
+	public <T extends WorldObject> ArrayList<T> getChildrenOfType(Class<T> clazz){
     	ArrayList<T> childrenOfType = new ArrayList<T>();
     	
     	if(clazz == null) {

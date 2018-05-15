@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.linear.RealVector;
 
+import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Airport;
 
 public class GroundPlane extends WorldObject{

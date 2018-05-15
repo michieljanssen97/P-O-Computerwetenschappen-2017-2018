@@ -4,7 +4,6 @@ import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.OrthographicCamera;
 import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
-import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 import org.apache.commons.math3.linear.RealVector;
 
 import java.util.concurrent.*;

@@ -1,24 +1,11 @@
 package be.kuleuven.cs.robijn.common.airports;
 
+import be.kuleuven.cs.robijn.common.WorldObject;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
-import be.kuleuven.cs.robijn.worldObjects.WorldObject;
-
 public class Runway extends WorldObject{
-	private boolean hasDrone = false;
     private final Airport parent;
     private final int id;
-    
-    public boolean hasDrones(){
-        return this.hasDrone;
-    }
-    
-    public void setHasDrones(Boolean status){
-        this.hasDrone = status;
-    }
-	public static boolean areRunwaysAvailable(Runway runway1, Runway runway2) {
-		return !runway1.hasDrones() && !runway2.hasDrones();
-	}
 
     public Runway(Airport parent, int id) {
         this.parent = parent;

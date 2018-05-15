@@ -7,11 +7,10 @@ import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
 import org.apache.commons.math3.ode.FirstOrderIntegrator;
 import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
 
+import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.math.SystemDifferentialEquations;
 import be.kuleuven.cs.robijn.tyres.Tyre;
-
 import be.kuleuven.cs.robijn.worldObjects.Drone;
-import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 import interfaces.AutopilotOutputs;
 
 import java.util.Optional;
@@ -60,18 +59,13 @@ public class TestbedSimulation {
 	 *         This virtual testbed has no drone.
 	 *         drone == null
 	 */
-	public void moveDrone(Drone drone, float secondsSinceLastUpdate, AutopilotOutputs output) throws IllegalArgumentException, IllegalStateException {		
+	public void moveDrone(Drone drone, float secondsSinceLastUpdate, AutopilotOutputs output) throws IllegalArgumentException, IllegalStateException {
 		boolean useDiffEquations = true;
 		
 		if (secondsSinceLastUpdate < 0)
 			throw new IllegalArgumentException();
 		if (drone == null)
 			throw new IllegalStateException("this virtual testbed has no drone");
-		
-		if(drone.hasPackageWaiting()) {
-			drone.packageCanBeAssigned();
-		}
-		
 		RealVector position = drone.getWorldPosition();
 		RealVector velocity = drone.getVelocity();
 		RealVector acceleration = drone.getAcceleration(output.getThrust(),
@@ -129,7 +123,7 @@ public class TestbedSimulation {
 			drone.setPitchAngularVelocity((float) y[9]);
 			drone.setRollAngularVelocity((float) y[11]);
 			
-			for (Tyre tyres: WorldObject.getChildrenOfType(Tyre.class)) {
+			for (Tyre tyres: drone.getChildrenOfType(Tyre.class)) {
 				@SuppressWarnings("unused")
 				float d = tyres.getD(drone);
 			}
@@ -162,7 +156,7 @@ public class TestbedSimulation {
 			drone.setPitchAngularVelocity(pitchAngularVelocity + pitchAngularAcceleration*secondsSinceLastUpdate);
 			drone.setRollAngularVelocity(rollAngularVelocity + rollAngularAcceleration*secondsSinceLastUpdate);
 			
-			for (Tyre tyres: WorldObject.getChildrenOfType(Tyre.class)) {
+			for (Tyre tyres: drone.getChildrenOfType(Tyre.class)) {
 				@SuppressWarnings("unused")
 				float d = tyres.getD(drone);
 			}

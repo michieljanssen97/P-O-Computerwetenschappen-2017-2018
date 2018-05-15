@@ -1,13 +1,13 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
+import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
+import org.apache.commons.math3.geometry.Vector;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 import be.kuleuven.cs.robijn.worldObjects.OrthographicCamera;
-import be.kuleuven.cs.robijn.worldObjects.WorldObject;
-
 import org.apache.commons.math3.linear.RealVector;
 
 public class OpenGLOrthographicCamera extends OrthographicCamera {
