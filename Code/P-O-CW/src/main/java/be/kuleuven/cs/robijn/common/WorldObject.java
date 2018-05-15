@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import be.kuleuven.cs.robijn.common.math.VectorMath;
-import be.kuleuven.cs.robijn.tyres.Tyre;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -12,6 +11,7 @@ import org.apache.commons.math3.linear.*;
 
 public class WorldObject {
     private WorldObject parent;
+
     private ArrayList<WorldObject> children = new ArrayList<>();
     private RealVector position = new ArrayRealVector(new double[]{0, 0, 0}, false);
     private Rotation rotation = new Rotation(new Vector3D(1, 0, 0), 0);
@@ -87,6 +87,7 @@ public class WorldObject {
     	if(clazz == null) {
     		throw new IllegalArgumentException("clazz cannot be null");
     	}
+    	
     	
     	for(WorldObject child : getChildren()) {
     		if(clazz.isAssignableFrom(child.getClass())) {
@@ -172,6 +173,12 @@ public class WorldObject {
             return true;
         }
         return false;
+    }
+    
+    public <T extends WorldObject> void removeAllChildrenOfType(Class<T> clazz) {
+    	for (WorldObject child : getChildrenOfType(clazz)) {
+    		removeChild(child);
+    	}
     }
 
     /**

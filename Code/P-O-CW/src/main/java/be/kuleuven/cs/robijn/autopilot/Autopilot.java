@@ -1,6 +1,8 @@
 package be.kuleuven.cs.robijn.autopilot;
 
 import org.apache.commons.math3.linear.*;
+
+import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.exceptions.FinishedException;
 import be.kuleuven.cs.robijn.common.math.Angle;
 import be.kuleuven.cs.robijn.common.math.Angle.Type;
@@ -9,6 +11,7 @@ import be.kuleuven.cs.robijn.experiments.ExpPosition;
 import be.kuleuven.cs.robijn.tyres.FrontWheel;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 import interfaces.*;
+import java.util.*;
 
 /**
  * A class of autopilots.
@@ -68,6 +71,55 @@ public class Autopilot {
 		this.targetPosition = targetPosition;
 	}
 	
+	private WorldObject world;
+	private List<Drone> drones = new ArrayList<>();
+
+
+	public Drone[] calculateFirstDroneCollision(){
+		world = new WorldObject();
+		drones = world.getChildrenOfType(Drone.class);
+		Map<Drone[], Double> collisionDroneMap = new HashMap<>();
+		Double collisionTime;
+
+		for(int i = 0; i < drones.size(); i++){
+			for(int j = i+1; j < drones.size(); j++){
+
+				double deltaPosX = drones.get(i).getWorldPosition().getEntry(0)-drones.get(j).getWorldPosition().getEntry(0);
+				double deltaPosY = drones.get(i).getWorldPosition().getEntry(1)-drones.get(j).getWorldPosition().getEntry(1);
+				double deltaPosZ = drones.get(i).getWorldPosition().getEntry(2)-drones.get(j).getWorldPosition().getEntry(2);
+
+
+				double deltaVelX = drones.get(i).getVelocity().getEntry(0)-drones.get(j).getVelocity().getEntry(0);
+				double deltaVelY = drones.get(i).getVelocity().getEntry(1)-drones.get(j).getVelocity().getEntry(1);
+				double deltaVelZ = drones.get(i).getVelocity().getEntry(2)-drones.get(j).getVelocity().getEntry(2);
+
+				double deltaRR = Math.pow(deltaPosX, 2) + Math.pow(deltaPosY, 2) + Math.pow(deltaPosZ, 2);
+				double deltaVV = Math.pow(deltaVelX, 2) + Math.pow(deltaVelY, 2) + Math.pow(deltaVelZ, 2);
+				double deltaVR = (deltaVelX*deltaPosX)  + (deltaVelY*deltaPosY) +  (deltaVelZ*deltaPosZ);
+				double d = Math.pow(deltaVR, 2) - (deltaVV)*(deltaRR - Math.pow(5, 2));
+
+
+				if (deltaVR >= 0){
+					collisionTime =  Double.POSITIVE_INFINITY;
+				} else if (d < 0){
+					collisionTime = Double.POSITIVE_INFINITY;
+				} else {
+					collisionTime =  - ((deltaVR + Math.sqrt(d))/(deltaVV));
+				}
+				if (collisionTime != Double.POSITIVE_INFINITY) {
+					Drone[] collisionArray = {drones.get(i), drones.get(j)};
+					collisionDroneMap.put(collisionArray, collisionTime);
+				}
+			}
+		}
+		if (collisionDroneMap.isEmpty()) {
+			return null;
+		} else {
+			Drone[] firstCollisionDroneArray = Collections.min(collisionDroneMap.entrySet(), Map.Entry.comparingByValue()).getKey();
+			return firstCollisionDroneArray;
+		}
+	}
+	
 	/**
 	 * Wel roll ten gevolge van verschillende snelheid van vleugels (door de rotaties). 
 	 */
@@ -79,6 +131,7 @@ public class Autopilot {
 		}
         this.setPreviousElapsedTime(inputs.getElapsedTime());  
         
+        double[] targetPositionCoordinates = {0,0,200};
         float horStabInclination = 0;
 		float verStabInclination = 0;
 		float leftWingInclination = 0;
@@ -90,7 +143,7 @@ public class Autopilot {
 		
 		AutopilotSettings settings = new AutopilotSettings();
 		if (this.getFlightMode() == FlightMode.ASCEND) { //ascend
-
+			
 			thrust = this.getConfig().getMaxThrust();
 			
 			float takeOffSpeed = (float) Math.sqrt((-drone.getTotalGravitationalForce().getEntry(1))
@@ -135,6 +188,7 @@ public class Autopilot {
 			}
 			
 			if (drone.getWorldPosition().getEntry(1) > this.getConfig().getTailSize()) {
+				drone.setTookOff();
 				this.setFlightMode(FlightMode.FULL_FLIGHT);
 			}
 		}
@@ -472,20 +526,21 @@ public class Autopilot {
 			RealVector targetPosition = this.getTargetPosition();
 			RealVector targetPositionDroneCoordinates = drone.transformationToDroneCoordinates(targetPosition.subtract(drone.getWorldPosition()));
 			double droneVelocity = drone.getVelocity().getNorm();
-			float targetHeading = (float) Math.atan(targetPositionDroneCoordinates.getEntry(0)/targetPositionDroneCoordinates.getEntry(2));
-			if (targetPositionDroneCoordinates.getEntry(2) > 0 && targetHeading > 0) {
-				targetHeading -= Math.PI;
+			float necessaryHeading = (float) Math.atan(targetPositionDroneCoordinates.getEntry(0)/targetPositionDroneCoordinates.getEntry(2));
+			if (targetPositionDroneCoordinates.getEntry(2) > 0 && necessaryHeading > 0) {
+				necessaryHeading -= Math.PI;
 
 			}
-			if (targetPositionDroneCoordinates.getEntry(2) > 0 && targetHeading < 0) {
-				targetHeading += Math.PI;
+			if (targetPositionDroneCoordinates.getEntry(2) > 0 && necessaryHeading < 0) {
+				necessaryHeading += Math.PI;
 			}
 			if (targetPositionDroneCoordinates.getEntry(0) == 0 && targetPositionDroneCoordinates.getEntry(2) < 0) {
 				thrust = 200;
 			}
 			else if ((- targetPositionDroneCoordinates.getEntry(2) < Math.tan(Math.PI/3) * Math.abs(targetPositionDroneCoordinates.getEntry(0)) && targetPositionDroneCoordinates.getEntry(2) <= 0) || targetPositionDroneCoordinates.getEntry(2) > 0){
-				if (drone.getVelocity().getNorm() > 3)
+				if (drone.getVelocity().getNorm() > 3) {
 					thrust = 0;
+				}
 				else
 					thrust = 1500;
 				if (targetPositionDroneCoordinates.getEntry(0) < 0)
@@ -493,14 +548,14 @@ public class Autopilot {
 				else
 					rightBrakeForce = 500;
 			}else {
-				float rotationNecessary = targetHeading;
+				float rotationNecessary = necessaryHeading;
 				if (rotationNecessary > 2* Math.PI)
 					rotationNecessary -= 2* Math.PI;
 				if (rotationNecessary > 0 && rotationNecessary < Math.PI) {
 					if (rotationNecessary > Math.PI/18) {
 						leftBrakeForce = (float) Math.abs(1000*targetPositionDroneCoordinates.getEntry(0)/targetPositionDroneCoordinates.getEntry(2));
 						rightBrakeForce = 0;
-						thrust = Math.min(2000,2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, Math.min(4300,leftBrakeForce), 0)[0] * drone.getTotalMass() + leftBrakeForce + 200);
+						thrust = Math.min(2000,2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, Math.min(4300,leftBrakeForce), 0)[0] * drone.getTotalMass() + leftBrakeForce + 500);
 					}
 					else if (rotationNecessary < Math.PI/18 && drone.getHeadingAngularVelocity() > rotationNecessary/10) {
 						leftBrakeForce = 0;
@@ -510,7 +565,7 @@ public class Autopilot {
 					else if (rotationNecessary < Math.PI/18 && drone.getHeadingAngularVelocity() < rotationNecessary/10) {
 						leftBrakeForce = (float) Math.abs(1000*targetPositionDroneCoordinates.getEntry(0)/targetPositionDroneCoordinates.getEntry(2));
 						rightBrakeForce = 0;
-						thrust = Math.min(2000,2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, Math.min(4300,leftBrakeForce), 0)[0] * drone.getTotalMass() + leftBrakeForce + 200);
+						thrust = Math.min(2000,2.5f * drone.getAngularAccelerations(0, 0, 0, 0, 0, Math.min(4300,leftBrakeForce), 0)[0] * drone.getTotalMass() + leftBrakeForce + 500);
 					}
 				}
 				else if (rotationNecessary > - Math.PI && rotationNecessary < 0) {
@@ -545,6 +600,9 @@ public class Autopilot {
 					thrust = 0;
 				}
 			}
+			System.out.println(drone.getVelocity().getNorm());
+			System.out.println(targetPositionDroneCoordinates.getNorm());
+			System.out.println();
 			int factor;
 			if (droneVelocity < 10)
 				factor = 2;
@@ -608,31 +666,9 @@ public class Autopilot {
 				if (targetPositionDroneCoordinates.getNorm() < 3) {
 					
 					this.setFlightMode(FlightMode.TURN);
-					
-					
-					
-//					float accel = (float) (drone.getVelocity().getNorm() - 0.01);
-//					float force = drone.getTotalMass() * accel;
-//					rightBrakeForce = Math.max(0, Math.min(force/2, 500));
-//					leftBrakeForce = Math.max(0, Math.min(force/2, 500));
-//					if (targetHeading > drone.getHeading()) {
-//						//draaien volgens positieve y (neus naar links)
-//						leftBrakeForce *= (3/2 -20 * drone.getHeadingAngularVelocity());
-//						rightBrakeForce = Math.max(0, force - leftBrakeForce);
-//					}
-//					if (targetHeading < drone.getHeading()) {
-//						//draaien volgens negatieve y (neus naar rechts)
-//						rightBrakeForce *= (3/2 + 20 * drone.getHeadingAngularVelocity());
-//						leftBrakeForce = Math.max(0, force - rightBrakeForce);
-//					}
-					
-					
-					
 				}
-
 			}
-//			else
-//				this.setFlightMode(FlightMode.READY);
+					
 		}
         if (this.getFlightMode() == FlightMode.TURN) {
         	float targetHeading = (float) (Math.PI);

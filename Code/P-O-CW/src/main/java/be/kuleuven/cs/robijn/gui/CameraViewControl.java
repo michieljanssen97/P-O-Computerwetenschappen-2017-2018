@@ -562,9 +562,8 @@ public class CameraViewControl extends AnchorPane {
         //If the camera is orthographic, update the icon rendering properties
         if(activeCamera instanceof OrthographicCamera){
             OrthographicCamera orthoCam = (OrthographicCamera) activeCamera;
-            orthoCam.setRenderIconsThresholdRatio(0.025);
             orthoCam.setIconOffset(new Vector2D(0, 7));
-            orthoCam.setIconSize(8f);
+            orthoCam.setIconSize(10f);
         }
 
         //The view always lags behind 1 frame so that the GPU work can be done while the Java code continues and so
@@ -642,5 +641,12 @@ public class CameraViewControl extends AnchorPane {
 
     public ObjectProperty<Drone> getActiveDronePropertyProperty() {
         return activeDroneProperty;
+    }
+
+    public void focusOnObject(WorldObject obj) {
+        if(activeCamera instanceof OrthographicCamera){
+            OrthographicCamera orthoCam = (OrthographicCamera)activeCamera;
+            orthoCam.centerObject(obj);
+        }
     }
 }

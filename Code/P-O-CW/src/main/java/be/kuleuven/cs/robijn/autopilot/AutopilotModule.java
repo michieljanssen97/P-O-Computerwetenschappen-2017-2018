@@ -12,6 +12,7 @@ import org.apache.commons.math3.linear.RealVector;
 
 import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Airport;
+import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.airports.Runway;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
@@ -44,18 +45,8 @@ public class AutopilotModule {
     }
 
     public void deliverPackage(Airport fromAirport, Gate fromGate, Airport toAirport, Gate toGate) {
-    	float closestDistance = Float.POSITIVE_INFINITY;
-    	Drone bestDrone = null;
-    	ArrayList<Drone> drones = world.getChildrenOfType(Drone.class);
-		for (Drone drone : drones) {
-			float distance = (float) fromGate.getWorldPosition().getDistance(drone.getWorldPosition());
-			if (distance < closestDistance) {
-				closestDistance = distance;
-				bestDrone = drone;
-			}
-	    }
-		this.flyRoute(bestDrone, fromGate, toGate, 100);
-		
+    	AirportPackage p = new AirportPackage(fromGate, toGate);
+    	this.world.addChild(p);
     }
 
     public void startTimeHasPassed(Drone drone, AutopilotInputs inputs) {
