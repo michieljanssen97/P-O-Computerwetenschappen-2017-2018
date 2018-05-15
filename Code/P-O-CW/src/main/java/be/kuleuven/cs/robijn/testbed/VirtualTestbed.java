@@ -78,13 +78,11 @@ public class VirtualTestbed implements TestBed {
 		try {
 			worldStateLock.acquire();
 
-			try {
-				AirportPackage airpPack = world.getFirstChildOfType(AirportPackage.class);
+			AirportPackage airpPack = world.getFirstChildOfType(AirportPackage.class);
+			if(airpPack != null) {
 				airpPack.assignPackages();
 			}
-			catch(IllegalArgumentException e) {
-				//There are no packages to assign
-			}
+			
 			//Update drones
 			for(int i = 0; i < drones.size(); i++){
 				Drone drone = drones.get(i);
