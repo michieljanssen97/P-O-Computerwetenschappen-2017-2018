@@ -1,7 +1,5 @@
 package be.kuleuven.cs.robijn.testbed.renderer.bmfont;
 
-import java.util.HashMap;
-
 public class AttributeParser {
     public static AttributesMap parse(String attributesLine){
         AttributeParser parser = new AttributeParser();

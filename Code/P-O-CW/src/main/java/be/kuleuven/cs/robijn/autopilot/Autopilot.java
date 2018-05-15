@@ -130,8 +130,6 @@ public class Autopilot {
 			this.moveDrone(inputs.getElapsedTime() - this.getPreviousElapsedTime(), inputs);
 		}
         this.setPreviousElapsedTime(inputs.getElapsedTime());  
-        
-        double[] targetPositionCoordinates = {0,0,200};
         float horStabInclination = 0;
 		float verStabInclination = 0;
 		float leftWingInclination = 0;

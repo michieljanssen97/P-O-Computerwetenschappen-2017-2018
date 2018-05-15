@@ -1,11 +1,11 @@
 package interfaces;
 
 public class AutopilotOutputsWriter {
-    private static void writeByteArray(java.io.DataOutputStream stream, byte[] array) throws java.io.IOException {
+    public static void writeByteArray(java.io.DataOutputStream stream, byte[] array) throws java.io.IOException {
         stream.writeInt(array.length);
         stream.write(array);
     }
-    private static void writeFloatArray(java.io.DataOutputStream stream, float[] array) throws java.io.IOException {
+    public static void writeFloatArray(java.io.DataOutputStream stream, float[] array) throws java.io.IOException {
         stream.writeInt(array.length);
         for (float f : array) { stream.writeFloat(f); }
     }

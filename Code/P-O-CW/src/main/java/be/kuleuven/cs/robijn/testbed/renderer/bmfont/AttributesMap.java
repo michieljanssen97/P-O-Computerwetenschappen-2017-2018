@@ -4,7 +4,12 @@ import java.util.HashMap;
 import java.util.Optional;
 
 public class AttributesMap extends HashMap<String, String> {
-    public String getString(String tag){
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 2311857764553985679L;
+
+	public String getString(String tag){
         String value = get(tag);
         if(value == null) {
             throw new IllegalStateException("Missing string attribute '"+tag+"'");

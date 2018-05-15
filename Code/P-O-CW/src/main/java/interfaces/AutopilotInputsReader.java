@@ -7,7 +7,7 @@ public class AutopilotInputsReader {
         stream.readFully(array);
         return array;
     }
-    private static float[] readFloatArray(java.io.DataInputStream stream) throws java.io.IOException {
+    public static float[] readFloatArray(java.io.DataInputStream stream) throws java.io.IOException {
         int length = stream.readInt();
         float[] array = new float[length];
         for (int i = 0; i < length; i++) { array[i] = stream.readFloat(); }

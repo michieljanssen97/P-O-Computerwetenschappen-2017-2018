@@ -1,6 +1,5 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
-import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
 
 public class OpenGLPerspectiveCamera extends PerspectiveCamera {

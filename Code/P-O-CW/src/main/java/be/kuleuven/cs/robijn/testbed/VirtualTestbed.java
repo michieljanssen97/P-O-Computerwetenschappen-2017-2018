@@ -3,7 +3,6 @@ package be.kuleuven.cs.robijn.testbed;
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import be.kuleuven.cs.robijn.testbed.renderer.AsyncOpenGLRenderer;
-import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
 import be.kuleuven.cs.robijn.worldObjects.Label3D;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.Drone;

@@ -1,11 +1,11 @@
 package be.kuleuven.cs.robijn.gui;
 
 import javafx.scene.Node;
-import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
 
 import java.util.function.Consumer;
 
+@SuppressWarnings("restriction")
 public class DragHelper {
     private final Node node;
     private double lastX, lastY;

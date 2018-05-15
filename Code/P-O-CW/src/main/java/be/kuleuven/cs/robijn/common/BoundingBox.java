@@ -3,10 +3,7 @@ package be.kuleuven.cs.robijn.common;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
-
-import java.util.stream.Stream;
 
 /**
  * Represents the box with minimal volume that completely contains a mesh

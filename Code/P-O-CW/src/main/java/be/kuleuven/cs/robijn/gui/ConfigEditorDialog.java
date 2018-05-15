@@ -24,6 +24,7 @@ import javafx.util.converter.NumberStringConverter;
 
 import java.io.*;
 
+@SuppressWarnings("restriction")
 public class ConfigEditorDialog {
     public static ObservableAutoPilotConfig showDialog(Stage parentStage, ObservableAutoPilotConfig configToEdit){
         Stage dialog = new Stage();
@@ -64,10 +65,12 @@ public class ConfigEditorDialog {
     @FXML
     private Button loadConfigDefaultsButton;
 
-    @FXML
+    @SuppressWarnings("rawtypes")
+	@FXML
     private TableView stringPropertiesTable;
 
-    @FXML
+    @SuppressWarnings("rawtypes")
+	@FXML
     private TableView numberPropertiesTable;
 
     private ObjectProperty<ObservableAutoPilotConfig> configProperty = new SimpleObjectProperty<>(this, "config");
@@ -143,7 +146,8 @@ public class ConfigEditorDialog {
         });
     }
 
-    private void setupConfigTable(){
+    @SuppressWarnings("unchecked")
+	private void setupConfigTable(){
         //Make table editable
         stringPropertiesTable.setEditable(true);
         numberPropertiesTable.setEditable(true);

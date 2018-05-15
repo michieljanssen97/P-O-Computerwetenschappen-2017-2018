@@ -5,7 +5,6 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import be.kuleuven.cs.robijn.common.WorldObject;
 
 import java.awt.*;
-import java.util.ArrayList;
 
 public class Box extends WorldObject {
 	private Color color = Color.RED;
