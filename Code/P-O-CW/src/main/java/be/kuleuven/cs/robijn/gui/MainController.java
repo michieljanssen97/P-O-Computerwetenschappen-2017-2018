@@ -15,6 +15,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.effect.BoxBlur;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
@@ -49,6 +50,9 @@ public class MainController {
 
     @FXML
     private SidebarControl sidebar;
+
+    @FXML
+    private TextArea output;
 
     @FXML
     private SplittablePane camerasViewRoot;
@@ -132,6 +136,10 @@ public class MainController {
         for (CameraViewControl view : cameraViews){
             view.focusOnObject(obj);
         }
+    }
+
+    public void addLineToOutput(String line){
+        output.appendText(line+"\n");
     }
 
     /////////////////
