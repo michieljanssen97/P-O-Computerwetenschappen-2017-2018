@@ -19,6 +19,7 @@ public class routeCalculator {
 //    			fromGate.getWorldPosition().subtract(fromAirport.getWorldPosition()));
     	if (orientation.getNorm() != 0)
     		orientation = orientation.mapMultiply(1/orientation.getNorm());
+    	orientation = new ArrayRealVector(new double[] {0, 0, -1}, false);
     			
     	RealVector solution = orientation.mapMultiply(
     			(fromAirport.getSize().getX()/2) + (hight/Math.tan(Math.toRadians(5)))
@@ -38,11 +39,11 @@ public class routeCalculator {
     	
     	RealVector[] solution;
     	if (hight < hightInterval)
-    		solution = new RealVector[5];
+    		solution = new RealVector[5+1];
     	else if (hight < 3*hightInterval)
-    		solution = new RealVector[6];
+    		solution = new RealVector[6+1];
     	else
-    		solution = new RealVector[7];	
+    		solution = new RealVector[7+1];	
     	
     	solution[solution.length-1] = orientation.mapMultiply(
     			(toAirport.getSize().getX()/2) - (drone.getTailSize()/2)
@@ -80,8 +81,18 @@ public class routeCalculator {
     		solution[solution.length-4].setEntry(1, hight);
     	}
     	
+//    	for (int i = 7;i>=3;i--) {
+//    		solution[i] = orientation.mapMultiply(
+//    				750
+//    				).add(solution[i+1]);
+//    		solution[i].setEntry(1, hight);
+//    	}
+    	solution[3] = orientation.mapMultiply(
+    			1000
+    			).add(solution[4]);
+    	solution[3].setEntry(1, hight);
     	solution[2] = orientation.mapMultiply(
-    			750
+    			1000
     			).add(solution[3]);
     	solution[2].setEntry(1, hight);
     	solution[1] = orientation.mapMultiply(

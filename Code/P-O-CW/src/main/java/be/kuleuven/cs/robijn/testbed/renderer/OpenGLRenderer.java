@@ -150,7 +150,7 @@ public class OpenGLRenderer implements Renderer {
 
         //Load gate model
         Mesh gateMesh = OBJLoader.loadFromResources("/models/plane/plane.obj");
-        gateMesh.setRenderOffset(new Vector3D(0, .1, 0));
+        gateMesh.setRenderOffset(new Vector3D(0, .006, 0));
         Texture gateTexture = Texture.load(Resources.loadImageResource("/models/gate/texture.png"));
         Texture withPackageGateTexture = Texture.load(Resources.loadImageResource("/models/gate/with_package_texture.png"));
         gateModel = new Model(gateMesh, gateTexture, texturedProgram);
