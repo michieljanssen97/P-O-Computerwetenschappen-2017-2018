@@ -42,7 +42,6 @@ public class SimulationBuilder {
             newAirport.setRelativePosition(new ArrayRealVector(new double[]{airportDef.getCenterX(), 0, airportDef.getCenterZ()}));
             root.addChild(newAirport);
             airports.put(airportDef, newAirport);
-            groundPlane.addAirport(newAirport);
         }
 
         //Setup drones
@@ -84,6 +83,7 @@ public class SimulationBuilder {
 //            rotation.applyTo(new Vector3D(0, 0, -1));
             
             newDrone.setRelativeRotation(rotation); //TODO: make sure this isn't broken by Drone
+            newDrone.setToAirport();
             
         }
         

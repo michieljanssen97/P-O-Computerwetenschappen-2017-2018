@@ -1,6 +1,8 @@
 package be.kuleuven.cs.robijn.common;
 
 import org.apache.commons.math3.linear.*;
+
+import be.kuleuven.cs.robijn.autopilot.AutopilotModule;
 import be.kuleuven.cs.robijn.common.math.*;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 
@@ -112,7 +114,6 @@ public class DroneTest {
         public int getNbColumns() { return nbColumns; }
         public int getNbRows() { return nbRows; }
     };
-	private static Drone drone = new Drone(config, velocity);
 
 	@Test
 	public final void testExtendedConstructor_LegalCase() throws Exception {
@@ -216,6 +217,10 @@ public class DroneTest {
 
 	@Test
 	public final void testSetHeading_LegalCase_IllegalCase() {
+		WorldObject world = new WorldObject();
+		Drone drone = new Drone(config, velocity);
+		world.addChild(drone);
+		AutopilotModule module = new AutopilotModule(world);
 		float heading = (float) Math.PI; //Valid value
 		drone.setHeading(heading);
 		assertEquals(heading, drone.getHeading(), EPSILON);
@@ -228,6 +233,10 @@ public class DroneTest {
 
 	@Test
 	public final void testSetPitch_LegalCase_IllegalCase() {
+		WorldObject world = new WorldObject();
+		Drone drone = new Drone(config, velocity);
+		world.addChild(drone);
+		AutopilotModule module = new AutopilotModule(world);
 		float pitch = (float) Math.PI; //Valid value
 		drone.setPitch(pitch);
 		assertEquals(pitch, drone.getPitch(), EPSILON);
@@ -240,6 +249,10 @@ public class DroneTest {
 
 	@Test
 	public final void testSetRoll_LegalCase_IllegalCase() {
+		WorldObject world = new WorldObject();
+		Drone drone = new Drone(config, velocity);
+		world.addChild(drone);
+		AutopilotModule module = new AutopilotModule(world);
 		float roll = (float) Math.PI; //Valid value
 		drone.setRoll(roll);
 		assertEquals(roll, drone.getRoll(), 0.00001);
@@ -252,6 +265,10 @@ public class DroneTest {
 
 	@Test
 	public final void testSetPosition_LegalCase_IllegalCase() {
+		WorldObject world = new WorldObject();
+		Drone drone = new Drone(config, velocity);
+		world.addChild(drone);
+		AutopilotModule module = new AutopilotModule(world);
 		RealVector pos = new ArrayRealVector(new double[] {4,7,5},false); //Valid value
 		drone.setRelativePosition(pos);
 		assertTrue(VectorMath.fuzzyEquals(pos, drone.getWorldPosition()));
@@ -264,6 +281,10 @@ public class DroneTest {
 
 	@Test
 	public final void testSetVelocity_LegalCase_IllegalCase() {
+		WorldObject world = new WorldObject();
+		Drone drone = new Drone(config, velocity);
+		world.addChild(drone);
+		AutopilotModule module = new AutopilotModule(world);
 		RealVector velocity =  new ArrayRealVector(new double[] {5,8,6}, false); //Valid value
 		drone.setVelocity(velocity);
 		assertTrue(VectorMath.fuzzyEquals(velocity, drone.getVelocity()));
@@ -276,6 +297,10 @@ public class DroneTest {
 
 	@Test
 	public final void testTransformationToWorldCoordinates_SingleCase() {
+		WorldObject world = new WorldObject();
+		Drone drone = new Drone(config, velocity);
+		world.addChild(drone);
+		AutopilotModule module = new AutopilotModule(world);
 		drone.setRoll(0);
 		drone.setHeading(0);
 		drone.setPitch(0);
@@ -286,6 +311,10 @@ public class DroneTest {
 
 	@Test
     public final void testTransformationToDroneCoordinates_SingleCase() {
+		WorldObject world = new WorldObject();
+		Drone drone = new Drone(config, velocity);
+		world.addChild(drone);
+		AutopilotModule module = new AutopilotModule(world);
 		drone.setRoll((float) Math.PI/3);
 		drone.setHeading((float) Math.PI/4);
 		drone.setPitch((float) Math.PI/5);

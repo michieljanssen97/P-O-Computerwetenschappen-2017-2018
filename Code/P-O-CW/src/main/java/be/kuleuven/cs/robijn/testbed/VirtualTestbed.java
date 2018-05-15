@@ -1,6 +1,7 @@
 package be.kuleuven.cs.robijn.testbed;
 
 import be.kuleuven.cs.robijn.common.*;
+import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import be.kuleuven.cs.robijn.testbed.renderer.AsyncOpenGLRenderer;
 import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
 import be.kuleuven.cs.robijn.worldObjects.Label3D;
@@ -77,6 +78,13 @@ public class VirtualTestbed implements TestBed {
 		try {
 			worldStateLock.acquire();
 
+			try {
+				AirportPackage airpPack = world.getFirstChildOfType(AirportPackage.class);
+				airpPack.assignPackages();
+			}
+			catch(IllegalArgumentException e) {
+				//There are no packages to assign
+			}
 			//Update drones
 			for(int i = 0; i < drones.size(); i++){
 				Drone drone = drones.get(i);

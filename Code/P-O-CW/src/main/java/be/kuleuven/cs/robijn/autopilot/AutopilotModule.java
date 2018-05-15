@@ -9,6 +9,7 @@ import java.util.concurrent.Future;
 
 import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Airport;
+import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 import interfaces.AutopilotInputs;
@@ -40,7 +41,8 @@ public class AutopilotModule {
     }
 
     public void deliverPackage(Airport fromAirport, Gate fromGate, Airport toAirport, Gate toGate) {
-        //TODO
+    	AirportPackage p = new AirportPackage(fromGate, toGate);
+    	this.world.addChild(p);
     }
 
     public void startTimeHasPassed(Drone drone, AutopilotInputs inputs) {
@@ -63,5 +65,9 @@ public class AutopilotModule {
 
     public void simulationEnded() throws IllegalArgumentException {
         threadPool.shutdown();
+    }
+    
+    public static void flyRoute(Drone drone, Gate fromGate, Gate toGate, float hight) {
+    	//TODO vervang door andere implementatie
     }
 }

@@ -1,12 +1,14 @@
 package be.kuleuven.cs.robijn.common.airports;
 
+import be.kuleuven.cs.robijn.autopilot.AutopilotModule;
+import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class AirportPackage {
+public class AirportPackage extends WorldObject{
     private final Gate origin, destination;
 
     private ArrayList<Consumer<AirportPackage>> stateUpdateEventHandlers = new ArrayList<>();
@@ -81,10 +83,24 @@ public class AirportPackage {
         currentGate = null;
         currentTransporter = transporter;
         currentTransporter.setPackage(this);
+        
+        Airport fromAirport = this.getOrigin().getAirport();
+        Airport toAirport = this.getDestination().getAirport();
+		Runway takeOffRunway = fromAirport.getRunwayToTakeOff();
+		Runway landRunway = toAirport.getRunwayToLand();
+		
+		
+        takeOffRunway.setHasDrones(true);
+        
+    	landRunway.setHasDrones(true);
+        currentTransporter.setDestinationRunway(landRunway);
 
         for(Consumer<AirportPackage> handler : stateUpdateEventHandlers){
             handler.accept(this);
         }
+        
+        //TODO drone moet eerst nog naar fromGate taxiën
+        AutopilotModule.flyRoute(transporter, this.getOrigin(), this.getDestination(), transporter.getHeight());
     }
 
     /**
@@ -155,5 +171,48 @@ public class AirportPackage {
         }
         builder.append('}');
         return builder.toString();
+    } 
+    
+    public ArrayList<AirportPackage> getAllPackagesToAssign(){
+    	ArrayList<AirportPackage> packageList = new ArrayList<AirportPackage>();
+    	for (Gate gate : Gate.getAllGates(this.getParent())) {
+    		if(gate.hasPackage()) {
+    			packageList.add(gate.getPackage());
+    		}
+    	}
+        return packageList;
+    }
+    
+    public boolean droneCanStart(Airport currentAirport) {
+    	if(currentAirport == null) {
+    		return false;
+    	}
+    	
+		Runway toTakeOff = this.getOrigin().getAirport().getRunwayToTakeOff();
+		Runway toLand = this.getDestination().getAirport().getRunwayToLand();
+    	return (currentAirport.equals(this.getOrigin().getAirport()) && Runway.areRunwaysAvailable(toTakeOff, toLand));
+    }
+
+    public void assignPackages() {    
+    	for(AirportPackage p : this.getAllPackagesToAssign()){
+            Airport fromAirport = p.getOrigin().getAirport();  
+            Gate toGate = p.getDestination();
+            Drone drone = fromAirport.getAvailableDrone();
+            if(drone != null) {
+            	if(drone.getCurrentAirport() != fromAirport) {
+            		if(drone.getAirportOfDrone() == null) {
+            			throw new IllegalStateException();
+            		}
+	            	AutopilotModule.flyRoute(drone, drone.getAirportOfDrone().getGates()[0], toGate, drone.getHeight());
+            	}
+	            else {
+	            	if (p.droneCanStart(fromAirport)){
+		            	p.markAsInTransit(drone);;
+	            	}
+	            }
+            }
+            
+            
+        }
     }
 }

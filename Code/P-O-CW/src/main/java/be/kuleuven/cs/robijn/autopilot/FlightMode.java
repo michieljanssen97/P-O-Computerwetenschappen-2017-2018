@@ -1,6 +1,6 @@
 package be.kuleuven.cs.robijn.autopilot;
 
-public enum FlightMode {//TODO use enums, instead of modes that are integers in Autopilot.java
+public enum FlightMode {
 	FULL_FLIGHT,
 	READY,
 	ASCEND,
