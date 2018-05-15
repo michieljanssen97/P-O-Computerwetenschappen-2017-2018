@@ -93,9 +93,15 @@ public class OpenGLRenderer implements Renderer {
 
     private long windowHandle;
 
+    private ShaderProgram texturedProgram;
+
     private Model droneModel = null;
     private Model boxModel = null;
+
     private Model groundModel = null;
+    private Texture grassTexture = null;
+    private Texture groundTexture = null; // Produced by GroundBaker
+    private Mesh groundMesh = null;
 
     private Model lineModel = null;
 
@@ -111,13 +117,14 @@ public class OpenGLRenderer implements Renderer {
 
     private final LabelRenderer labelRenderer = new LabelRenderer(this);
 
+    private GroundBaker groundBaker = new GroundBaker(this);
+
     private OpenGLRenderer(long windowHandle){
         this.windowHandle = windowHandle;
     }
 
     private void initializeModels(){
         //Load shader for textured models (the shaders will be closed after linking, but the reference in the program will keep them from being deleted)
-        ShaderProgram texturedProgram;
         try(Shader vertexShader = Shader.compileVertexShader(Resources.loadTextResource("/shaders/textured/vertex.glsl"))){
             try(Shader fragmentShader = Shader.compileFragmentShader(Resources.loadTextResource("/shaders/textured/fragment.glsl"))){
                 texturedProgram = ShaderProgram.link(vertexShader, fragmentShader);
@@ -144,10 +151,9 @@ public class OpenGLRenderer implements Renderer {
         boxModel = new Model(boxMesh, null, boxProgram);
 
         //Load ground model
-        Mesh groundMesh = OBJLoader.loadFromResources("/models/plane/plane.obj");
-        Texture groundTexture = Texture.load(Resources.loadImageResource("/models/ground/texture.png"));
-        groundTexture.setTextureScale(new Vector2D(0.0001, 0.0001));
-        groundModel = new Model(groundMesh, groundTexture, texturedProgram);
+        groundMesh = OBJLoader.loadFromResources("/models/plane/plane.obj");
+        grassTexture = Texture.load(Resources.loadImageResource("/models/ground/texture.png"));
+        grassTexture.setTextureScale(new Vector2D(0.0001, 0.0001));
 
         //Load gate model
         Mesh gateMesh = OBJLoader.loadFromResources("/models/plane/plane.obj");
@@ -208,6 +214,16 @@ public class OpenGLRenderer implements Renderer {
         }
 
         try {
+            int groundWidth = 20000;
+            int groundHeight = 20000;
+
+            if(groundModel == null){
+                groundModel = new Model(groundMesh, grassTexture, texturedProgram);
+                groundTexture = groundBaker.bake(groundWidth, groundHeight, 8000, 8000, worldRoot, worldStateLock);
+                groundTexture.setTextureScale(new Vector2D(1, 1));
+                groundModel = new Model(groundMesh, groundTexture, texturedProgram);
+            }
+
             worldStateLock.acquire();
 
             labelRenderer.updateLabelCache(worldRoot);
@@ -241,7 +257,8 @@ public class OpenGLRenderer implements Renderer {
 
             //Render ground if needed
             WorldObject groundObj = new WorldObject();
-            groundObj.setScale(new ArrayRealVector(new double[]{60000, 1, 60000}, false));
+            groundObj.setName("GROUND");
+            groundObj.setScale(new ArrayRealVector(new double[]{groundWidth, 1, groundHeight}, false));
             RealMatrix transform = groundObj.getObjectToWorldTransform();
             renderModel(groundModel, viewProjectionMatrix, transform);
 
@@ -295,10 +312,10 @@ public class OpenGLRenderer implements Renderer {
             model.getShader().setUniformFloat("color", rgbValues);
         }else if(obj instanceof Drone){
             model = droneModel;
-        }else if(obj instanceof Gate){
+        }else if(obj instanceof Gate && (obj.getWorldPosition().getDistance(camera.getWorldPosition()) < 1000 || camera instanceof OrthographicCamera)){
             Gate gate = (Gate)obj;
             model = gate.hasPackage() ? withPackageGateModel : gateModel;
-        }else if(obj instanceof Runway){
+        }else if(obj instanceof Runway && (obj.getWorldPosition().getDistance(camera.getWorldPosition()) < 1000 || camera instanceof OrthographicCamera)){
             model = runwayModel;
         }else if(obj instanceof Label3D){
             labelRenderer.renderLabel((Label3D)obj, viewProjectionMatrix, camera);
