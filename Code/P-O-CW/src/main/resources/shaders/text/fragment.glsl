@@ -31,4 +31,7 @@ void main() {
     float colorIndex = texColor.g;
     vec4 color = texture(colorMap, colorIndex);
     outColor = vec4(color.rgb, opacity);
+    if(true){
+        outColor = vec4(1.0, 0.0, 0.0, opacity);
+    }
 }
