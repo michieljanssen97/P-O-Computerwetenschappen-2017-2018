@@ -6,8 +6,8 @@ public enum FlightMode {
 	ASCEND,
 	TAXI,
 	LAND,
-	STOPPED,
-	TURN,
 	WAIT,
-	BRAKE;
+	BRAKE,
+	TURN,
+	STOP;
 }

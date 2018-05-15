@@ -165,7 +165,7 @@ public class OpenGLRenderer implements Renderer {
 
         //Load runway model
         Mesh runwayMesh = OBJLoader.loadFromResources("/models/plane/plane.obj");
-        runwayMesh.setRenderOffset(new Vector3D(0, .006, 0));
+        runwayMesh.setRenderOffset(new Vector3D(0, .1, 0));
         Texture runwayTexture = Texture.load(Resources.loadImageResource("/models/runway/texture.png"));
         runwayModel = new Model(runwayMesh, runwayTexture, texturedProgram);
     }

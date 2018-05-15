@@ -37,7 +37,7 @@ public class SimulationDriver {
     private Queue<AirportPackage> newPackages = new LinkedList<>();
     
     public SimulationDriver(SimulationSettings settings){
-        this(settings, new ConstantIntervalStopwatch(0.1d));
+        this(settings, new ConstantIntervalStopwatch(0.03d));
     }
     
     public SimulationDriver(SimulationSettings settings, Stopwatch stopwatch){
