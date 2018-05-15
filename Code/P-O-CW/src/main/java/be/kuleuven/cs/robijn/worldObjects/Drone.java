@@ -1144,7 +1144,7 @@ public class Drone extends WorldObject {
 		
 		for (Tyre tyres: this.getChildrenOfType(Tyre.class)) {
 			float wheelBrakeForce;
-			if(tyres instanceof RightRearWheel) { //TODO get rid of instanceof
+			if(tyres instanceof RightRearWheel) {
 				wheelBrakeForce = rightRearBrakeForce;
 			}
 			else if(tyres instanceof LeftRearWheel) {
@@ -1240,7 +1240,7 @@ public class Drone extends WorldObject {
 		
 		for (Tyre tyres: this.getChildrenOfType(Tyre.class)) {
 			float wheelBrakeForce;
-			if(tyres instanceof RightRearWheel) { //TODO get rid of instanceof
+			if(tyres instanceof RightRearWheel) {
 				wheelBrakeForce = rightRearBrakeForce;
 			}
 			else if(tyres instanceof LeftRearWheel) {

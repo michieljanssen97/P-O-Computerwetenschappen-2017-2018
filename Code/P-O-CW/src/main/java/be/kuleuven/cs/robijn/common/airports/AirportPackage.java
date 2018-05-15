@@ -99,7 +99,7 @@ public class AirportPackage extends WorldObject{
             handler.accept(this);
         }
         
-        //TODO moet drone eerst nog naar fromGate taxiën of niet??
+        //TODO drone moet eerst nog naar fromGate taxiën
         AutopilotModule.flyRoute(transporter, this.getOrigin(), this.getDestination(), transporter.getHeight());
     }
 
@@ -193,9 +193,7 @@ public class AirportPackage extends WorldObject{
     	return (currentAirport.equals(this.getOrigin().getAirport()) && Runway.areRunwaysAvailable(toTakeOff, toLand));
     }
 
-    public void assignPackages() {
-    	//TODO kan dat toekenning van pakje aan ene drone beter is dan aan andere -> moeten eerst allemaal een temp toekenning hebben en dan controleren of er 2 dezelfde hebben -> Indien ja: De 'slechtste" opniew toekennen...
-       
+    public void assignPackages() {    
     	for(AirportPackage p : this.getAllPackagesToAssign()){
             Airport fromAirport = p.getOrigin().getAirport();  
             Gate toGate = p.getDestination();

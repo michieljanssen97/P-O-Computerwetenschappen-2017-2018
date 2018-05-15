@@ -13,7 +13,6 @@ public class Gate extends WorldObject{
     private final int id;
     private AirportPackage queuedPackage;
 
-    //TODO mss een vertrek gate voor pakjes en een aankomstgate -> Anders kan bij afleveren landen meteen een nieuw pakje worden opgenomen zonder dat assignPackages() daar iets van weet
     public Gate(Airport parent, int id){
         this.parent = parent;
         this.id = id;
