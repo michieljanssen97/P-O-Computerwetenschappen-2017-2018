@@ -697,8 +697,8 @@ public class Autopilot {
         }
         if (this.getFlightMode() == FlightMode.STOP){
         	thrust = 0;
-        	leftBrakeForce = 2000;
-        	rightBrakeForce = 2000;
+        	leftBrakeForce = 4300;
+        	rightBrakeForce = 4300;
         }
 
         final float thrustOutput = thrust;
