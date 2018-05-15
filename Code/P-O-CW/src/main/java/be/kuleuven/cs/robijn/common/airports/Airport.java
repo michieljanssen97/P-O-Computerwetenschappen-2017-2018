@@ -1,9 +1,7 @@
 package be.kuleuven.cs.robijn.common.airports;
 
+import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
-import be.kuleuven.cs.robijn.worldObjects.WorldObject;
-
-import java.util.ArrayList;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -12,17 +10,18 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 
 import java.awt.Polygon;
+import java.util.ArrayList;
 
 public class Airport extends WorldObject {
-//	private static ArrayList<Airport> allAirportsList = new ArrayList<Airport>();
 
     private final int id;
     private Vector2D size;
     private Gate[] gates;
     private Runway[] runways;
-
-    private ArrayList<Drone> currentDrones = new ArrayList<Drone>();
     private double angle;
+    
+    private ArrayList<Drone> currentDrones = new ArrayList<Drone>();
+
     public Airport(int id, float length, float width, Vector2D centerToRunway0){
         this.id = id;
         size = new Vector2D((2f*length) + width, 2f*width);
@@ -52,17 +51,11 @@ public class Airport extends WorldObject {
             new Rotation(Vector3D.PLUS_J, angle)
         );
         this.angle = angle;
-        
-//        Airport.allAirportsList.add(this);
     }
     
-    public static ArrayList<Airport>getAllAirports() {
-    	return WorldObject.getChildrenOfType(Airport.class);
+    public ArrayList<Airport>getAllAirports() {
+    	return this.getChildrenOfType(Airport.class);
     }
-    
-//    public static void removeAllAirports() {
-//    	Airport.allAirportsList = new ArrayList<Airport>();
-//    }
     
     public int getXPositionMiddle() {
     	return (int) this.getWorldPosition().getEntry(0);
@@ -71,7 +64,7 @@ public class Airport extends WorldObject {
     public int getZPositionMiddle() {
     	return (int) this.getWorldPosition().getEntry(2);
     }
-    
+
 
     public int getId() {
         return id;
@@ -88,7 +81,6 @@ public class Airport extends WorldObject {
     public Runway[] getRunways() {
         return runways;
     }
-    
     public ArrayList<Drone> getCurrentDrones() {
         return new ArrayList<Drone>(this.currentDrones);
     }
@@ -104,9 +96,9 @@ public class Airport extends WorldObject {
     /**
      * Check all Airports for an available Drone
      */
-    public static boolean isDroneAvailableInWorld(){
+    public boolean isDroneAvailableInWorld(){
     	boolean result = false;
-    	for(Airport airport : Airport.getAllAirports()) {
+    	for(Airport airport : this.getAllAirports()) {
     		if(airport.isDroneAvailableOnThisAirport()) {
     			result = true;
     			break;
@@ -130,7 +122,7 @@ public class Airport extends WorldObject {
     	}
     	
     	double minDistance = Double.MAX_VALUE;
-    	for(Airport airp : Airport.getAllAirports()) {
+    	for(Airport airp : this.getAllAirports()) {
     		Drone tempDrone = airp.getFirstAvailableDrone();
     		if(tempDrone != null && tempDrone.calculateDistanceToAirport(this) < minDistance && airp.hasSufficientAvailableDrones()) {
     			minDistance = tempDrone.calculateDistanceToAirport(this);
@@ -176,8 +168,8 @@ public class Airport extends WorldObject {
     /*
      * Get the airport at the given position
      */
-	public static Airport getAirportAt(RealVector position) {
-		for(Airport airport : getAllAirports()) {
+	public Airport getAirportAt(RealVector position) {
+		for(Airport airport : this.getAllAirports()) {
 			if(airport.isOnAirport(position)) {
 				return airport;
 			}
@@ -238,4 +230,5 @@ public class Airport extends WorldObject {
     public double getAngle() {
     	return angle;
     }
+    
 }

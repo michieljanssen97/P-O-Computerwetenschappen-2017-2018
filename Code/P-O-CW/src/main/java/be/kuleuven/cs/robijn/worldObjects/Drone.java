@@ -3,8 +3,11 @@ package be.kuleuven.cs.robijn.worldObjects;
 import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import org.apache.commons.math3.geometry.euclidean.threed.*;
 import org.apache.commons.math3.linear.*;
+
+import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.Runway;
+
 import be.kuleuven.cs.robijn.common.exceptions.CrashException;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
 import be.kuleuven.cs.robijn.tyres.*;
@@ -81,10 +84,11 @@ public class Drone extends WorldObject {
 		this.addChild(rightRearWheel);
 		this.addChild(leftRearWheel);
 		
-		int amountOfDrones = WorldObject.getChildrenOfType(Drone.class).size() + 1;
+		int amountOfDrones = this.getChildrenOfType(Drone.class).size() + 1;
 		int minHeight = 30;
 		int extraHeight = 10;
 		this.height = minHeight + (amountOfDrones * extraHeight);
+
 	}
 	
     //     -----------------     //
@@ -122,7 +126,7 @@ public class Drone extends WorldObject {
     
     private Runway destinationRunway = null;
 
- 	public AutopilotConfig getConfig() {
+	public AutopilotConfig getConfig() {
 		return config;
 	}
 
@@ -254,14 +258,16 @@ public class Drone extends WorldObject {
     }
     
 	public void setToAirport() {
-		Airport currentAirport = Airport.getAirportAt(this.getWorldPosition());
+		Airport air = this.getFirstChildOfType(Airport.class);
+		Airport currentAirport = air.getAirportAt(this.getWorldPosition());
 		if(currentAirport != null) {
 			currentAirport.addDroneToCurrentDrones(this);
 		}
 	}
 	
 	public void removeFromAirport() {
-		Airport currentAirport = Airport.getAirportAt(this.getWorldPosition());
+		Airport air = this.getFirstChildOfType(Airport.class);
+		Airport currentAirport = air.getAirportAt(this.getWorldPosition());
 		if(currentAirport != null) {
 			currentAirport.removeDroneFromCurrentDrones(this);
 			currentAirport.getRunwayToTakeOff().setHasDrones(false);
@@ -269,7 +275,8 @@ public class Drone extends WorldObject {
 	}
 	
 	public Airport getAirportOfDrone() {
-		return Airport.getAirportAt(this.getWorldPosition());
+		Airport air = this.getFirstChildOfType(Airport.class);
+		return air.getAirportAt(this.getWorldPosition());
 
 	}
 	
@@ -288,7 +295,6 @@ public class Drone extends WorldObject {
 	public void setTookOff() {
 		this.removeFromAirport();
 	}
-	
     //  -----------------   //
     //                      //
     //       HEADING        //
@@ -342,6 +348,7 @@ public class Drone extends WorldObject {
 			throw new IllegalArgumentException();
 		this.heading = heading;
 	}
+
 	
     //  -----------------   //
     //                      //
@@ -1135,9 +1142,9 @@ public class Drone extends WorldObject {
 								.add(liftForce)
 								.add(this.transformationToWorldCoordinates(new ArrayRealVector(new double[] {0, 0, -thrust}, false)));
 		
-		for (Tyre tyres: WorldObject.getChildrenOfType(Tyre.class)) {
+		for (Tyre tyres: this.getChildrenOfType(Tyre.class)) {
 			float wheelBrakeForce;
-			if(tyres instanceof RightRearWheel) {
+			if(tyres instanceof RightRearWheel) { //TODO get rid of instanceof
 				wheelBrakeForce = rightRearBrakeForce;
 			}
 			else if(tyres instanceof LeftRearWheel) {
@@ -1231,9 +1238,9 @@ public class Drone extends WorldObject {
 									)
 								));
 		
-		for (Tyre tyres: WorldObject.getChildrenOfType(Tyre.class)) {
+		for (Tyre tyres: this.getChildrenOfType(Tyre.class)) {
 			float wheelBrakeForce;
-			if(tyres instanceof RightRearWheel) {
+			if(tyres instanceof RightRearWheel) { //TODO get rid of instanceof
 				wheelBrakeForce = rightRearBrakeForce;
 			}
 			else if(tyres instanceof LeftRearWheel) {
@@ -1249,9 +1256,9 @@ public class Drone extends WorldObject {
 		
 		return new float[] {(float)solution.getEntry(0), (float)solution.getEntry(1), (float)solution.getEntry(2)};
 	}
-
 	public Airport getCurrentAirport() {
-		for(Airport airport : Airport.getAllAirports()) {
+		Airport air = this.getFirstChildOfType(Airport.class);
+		for(Airport airport : air.getAllAirports()) {
 			for(Drone d : airport.getCurrentDrones()) {
 				if (d.getDroneID() == this.getDroneID()) {
 					return airport;
@@ -1260,7 +1267,7 @@ public class Drone extends WorldObject {
 		}
 		return null;
 	}
-
+	
 	/**
 	 * Returns the package that the drone is currently carrying
 	 */

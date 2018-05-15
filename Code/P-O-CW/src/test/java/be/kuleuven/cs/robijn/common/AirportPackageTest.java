@@ -15,7 +15,6 @@ import be.kuleuven.cs.robijn.common.airports.AirportPackage.State;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.airports.Runway;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
-import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 import interfaces.AutopilotConfig;
 
 public class AirportPackageTest {
@@ -145,20 +144,25 @@ public class AirportPackageTest {
         drone.setRelativePosition(dronePos);
         drone.setToAirport();
         
-        assertEquals(Airport.getAllAirports().size(), 2);
-		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
+        Airport firstAirport = world.getFirstChildOfType(Airport.class);
+        
+        assertEquals(firstAirport.getAllAirports().size(), 2);
+//		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
 		AutopilotModule module = new AutopilotModule(world);		
 		module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
-		AirportPackage.assignPackages();
-		for(Airport air : Airport.getAllAirports()) {
+        AirportPackage airPackage = world.getFirstChildOfType(AirportPackage.class);
+		airPackage.assignPackages();
+		
+		
+		for(Airport air : firstAirport.getAllAirports()) {
 			assertEquals(0, air.getCurrentDrones().size());
 		}
-		assertEquals(AirportPackage.getAllPackagesToAssign().size(),1);
-		AirportPackage airportPackage = AirportPackage.getAllPackagesToAssign().get(0);
-		assertEquals(airportPackage.getState(), State.AT_GATE);
+		assertEquals(airPackage.getAllPackagesToAssign().size(),1);
+		AirportPackage p = airPackage.getAllPackagesToAssign().get(0);
+		assertEquals(p.getState(), State.AT_GATE);
 		
 		
-		removeAllChildren();
+		removeAllChildren(world);
 	}
 	
 	@Test
@@ -189,13 +193,16 @@ public class AirportPackageTest {
         );
         drone.setRelativePosition(dronePos);
         drone.setToAirport();
+        
+        Airport firstAirport = world.getFirstChildOfType(Airport.class);
 		
-        assertEquals(Airport.getAllAirports().size(), 2);
-		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
+        assertEquals(firstAirport.getAllAirports().size(), 2);
+//		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
 		AutopilotModule module = new AutopilotModule(world);
 		module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
-		AirportPackage.assignPackages();
-		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
+        AirportPackage airPackage = world.getFirstChildOfType(AirportPackage.class);
+        airPackage.assignPackages();
+		assertEquals(airPackage.getAllPackagesToAssign().size(),0);
 		assertTrue(drone.hasPackage());
 		AirportPackage airportPackage = drone.getPackage();
 		assertEquals(airportPackage.getState(), State.IN_TRANSIT);
@@ -204,7 +211,7 @@ public class AirportPackageTest {
 		assertEquals(airportPackage.getCurrentTransporter(), drone);
 		assertEquals(airportPackage.getDestination(), toGate);	
 		
-		removeAllChildren();
+		removeAllChildren(world);
 	}
 	
 	@Test
@@ -236,18 +243,22 @@ public class AirportPackageTest {
         drone.setRelativePosition(dronePos);
         drone.setToAirport();
 		
-        assertEquals(Airport.getAllAirports().size(), 2);
-		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
+        
+        Airport firstAirport = world.getFirstChildOfType(Airport.class);
+        
+        assertEquals(firstAirport.getAllAirports().size(), 2);
+//		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
 		AutopilotModule module = new AutopilotModule(world);
 		module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
-		AirportPackage.assignPackages();
-		assertEquals(AirportPackage.getAllPackagesToAssign().size(),1);
+        AirportPackage airPackage = world.getFirstChildOfType(AirportPackage.class);
+		airPackage.assignPackages();
+		assertEquals(airPackage.getAllPackagesToAssign().size(),1);
 		assertTrue(!drone.hasPackage());
 		
 		assertEquals(1, airport1.getCurrentDrones().size());
 		assertEquals(0, airport2.getCurrentDrones().size());
 		
-		removeAllChildren();
+		removeAllChildren(world);
 	}	
 	
 	@Test
@@ -279,15 +290,18 @@ public class AirportPackageTest {
         drone.setRelativePosition(dronePos);
         drone.setToAirport();
         
-        assertEquals(Airport.getAllAirports().size(), 2);
-		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
+        Airport firstAirport = world.getFirstChildOfType(Airport.class);
+        
+        assertEquals(firstAirport.getAllAirports().size(), 2);
+//		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
 		AutopilotModule module = new AutopilotModule(world);
 		module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
-		assertEquals(AirportPackage.getAllPackagesToAssign().size(),1);
+        AirportPackage airPackage = world.getFirstChildOfType(AirportPackage.class);
+		assertEquals(airPackage.getAllPackagesToAssign().size(),1);
 		module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
-		assertEquals(AirportPackage.getAllPackagesToAssign().size(),1);
+		assertEquals(airPackage.getAllPackagesToAssign().size(),1);
 		
-		removeAllChildren();
+		removeAllChildren(world);
 	}
 	
 	/**
@@ -328,33 +342,36 @@ public class AirportPackageTest {
         drone.setRelativePosition(dronePos1);
         drone.setToAirport();
         
-        assertEquals(Airport.getAllAirports().size(), 2);
-		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
-		assertEquals(WorldObject.getChildrenOfType(Drone.class).size(), 1);
+        Airport firstAirport = world.getFirstChildOfType(Airport.class);
+        
+        assertEquals(firstAirport.getAllAirports().size(), 2);
+//		assertEquals(AirportPackage.getAllPackagesToAssign().size(),0);
+		assertEquals(firstAirport.getChildrenOfType(Drone.class).size(), 1);
 		
 		//Packet1
 		AutopilotModule module = new AutopilotModule(world);
 		module.deliverPackage(fromAirport2, fromGate2, toAirport2, toGate2);
-		assertEquals(AirportPackage.getAllPackagesToAssign().size(),1);
+        AirportPackage airPackage = world.getFirstChildOfType(AirportPackage.class);
+		assertEquals(airPackage.getAllPackagesToAssign().size(),1);
 		
 		//Packet2
 		module.deliverPackage(fromAirport1, fromGate1, toAirport1, toGate1);
-		AirportPackage.assignPackages();
-		assertEquals(AirportPackage.getAllPackagesToAssign().size(),1);
+		airPackage.assignPackages();
+		assertEquals(airPackage.getAllPackagesToAssign().size(),1);
 		
 		assertEquals(drone.getPackage().getOrigin(), fromGate1);	
 		assertTrue(fromGate2.hasPackage());
 		
-		removeAllChildren();
+		removeAllChildren(world);
         
 	}
 	
-	public static void removeAllChildren() {
-		WorldObject.removeAllChildrenOfType(Drone.class);
-		WorldObject.removeAllChildrenOfType(Gate.class);
-		WorldObject.removeAllChildrenOfType(Airport.class);
-		WorldObject.removeAllChildrenOfType(Runway.class);
-		WorldObject.removeAllChildrenOfType(WorldObject.class);
+	public static void removeAllChildren(WorldObject world) {
+		world.removeAllChildrenOfType(Drone.class);
+		world.removeAllChildrenOfType(Gate.class);
+		world.removeAllChildrenOfType(Airport.class);
+		world.removeAllChildrenOfType(Runway.class);
+		world.removeAllChildrenOfType(WorldObject.class);
 	}
 
 }

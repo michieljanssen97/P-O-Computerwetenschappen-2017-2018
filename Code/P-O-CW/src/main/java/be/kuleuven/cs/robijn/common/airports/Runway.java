@@ -2,7 +2,8 @@ package be.kuleuven.cs.robijn.common.airports;
 
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
-import be.kuleuven.cs.robijn.worldObjects.WorldObject;
+import be.kuleuven.cs.robijn.common.WorldObject;
+
 
 public class Runway extends WorldObject{
 	private boolean hasDrone = false;

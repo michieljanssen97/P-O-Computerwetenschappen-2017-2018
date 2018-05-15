@@ -1,14 +1,14 @@
 package be.kuleuven.cs.robijn.common.airports;
 
 import be.kuleuven.cs.robijn.autopilot.AutopilotModule;
+import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
-import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class AirportPackage {
+public class AirportPackage extends WorldObject{
     private final Gate origin, destination;
 
     private ArrayList<Consumer<AirportPackage>> stateUpdateEventHandlers = new ArrayList<>();
@@ -68,7 +68,7 @@ public class AirportPackage {
     }
 
     /**
-     * Sets the state of the package to IN_TRANSIT, and sets the transporter.
+     * Sets the state of the package to IN_TRANSIT, adn sets the transporter.
      * @param transporter the drone that is carrying the package
      */
     public void markAsInTransit(Drone transporter){
@@ -173,9 +173,9 @@ public class AirportPackage {
         return builder.toString();
     } 
     
-    public static ArrayList<AirportPackage> getAllPackagesToAssign(){
+    public ArrayList<AirportPackage> getAllPackagesToAssign(){
     	ArrayList<AirportPackage> packageList = new ArrayList<AirportPackage>();
-    	for (Gate gate : WorldObject.getChildrenOfType(Gate.class)) {
+    	for (Gate gate : this.getChildrenOfType(Gate.class)) {
     		if(gate.hasPackage()) {
     			packageList.add(gate.getPackage());
     		}
@@ -193,10 +193,10 @@ public class AirportPackage {
     	return (currentAirport.equals(this.getOrigin().getAirport()) && Runway.areRunwaysAvailable(toTakeOff, toLand));
     }
 
-    public static void assignPackages() {
+    public void assignPackages() {
     	//TODO kan dat toekenning van pakje aan ene drone beter is dan aan andere -> moeten eerst allemaal een temp toekenning hebben en dan controleren of er 2 dezelfde hebben -> Indien ja: De 'slechtste" opniew toekennen...
        
-    	for(AirportPackage p : getAllPackagesToAssign()){
+    	for(AirportPackage p : this.getAllPackagesToAssign()){
             Airport fromAirport = p.getOrigin().getAirport();  
             Gate toGate = p.getDestination();
             Drone drone = fromAirport.getAvailableDrone();
@@ -217,5 +217,4 @@ public class AirportPackage {
             
         }
     }
-    
 }

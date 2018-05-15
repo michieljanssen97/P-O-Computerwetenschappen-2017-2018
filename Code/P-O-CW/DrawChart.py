@@ -212,7 +212,8 @@ def main():
     input = open("invoer.txt", "r")
     data = input.readlines()  # format input file to list
     input.close()
-    type = str(data[0]).strip('\n')
+
+    type = str(data[0])
     if type == "heading" or type == "pitch":
         getInfoHP(data)
         displayPointsHP(type)

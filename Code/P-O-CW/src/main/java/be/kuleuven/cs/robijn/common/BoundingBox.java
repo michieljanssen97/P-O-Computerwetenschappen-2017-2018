@@ -1,8 +1,6 @@
 package be.kuleuven.cs.robijn.common;
 
 import be.kuleuven.cs.robijn.common.math.VectorMath;
-import be.kuleuven.cs.robijn.worldObjects.WorldObject;
-
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;

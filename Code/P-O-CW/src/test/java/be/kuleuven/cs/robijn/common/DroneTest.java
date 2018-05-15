@@ -5,7 +5,6 @@ import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.autopilot.AutopilotModule;
 import be.kuleuven.cs.robijn.common.math.*;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
-import be.kuleuven.cs.robijn.worldObjects.WorldObject;
 
 import org.junit.jupiter.api.Test;
 import interfaces.*;
