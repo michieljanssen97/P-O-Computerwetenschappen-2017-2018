@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import be.kuleuven.cs.robijn.common.math.VectorMath;
-import be.kuleuven.cs.robijn.tyres.Tyre;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -88,6 +87,7 @@ public class WorldObject {
     	if(clazz == null) {
     		throw new IllegalArgumentException("clazz cannot be null");
     	}
+    	
     	
     	for(WorldObject child : getChildren()) {
     		if(clazz.isAssignableFrom(child.getClass())) {

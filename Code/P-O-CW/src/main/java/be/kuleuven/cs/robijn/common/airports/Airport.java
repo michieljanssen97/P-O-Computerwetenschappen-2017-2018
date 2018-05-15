@@ -54,7 +54,7 @@ public class Airport extends WorldObject {
     }
     
     public ArrayList<Airport>getAllAirports() {
-    	return this.getChildrenOfType(Airport.class);
+    	return this.getParent().getChildrenOfType(Airport.class);
     }
     
     public int getXPositionMiddle() {

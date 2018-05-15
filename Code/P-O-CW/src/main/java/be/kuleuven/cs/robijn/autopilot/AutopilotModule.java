@@ -41,10 +41,8 @@ public class AutopilotModule {
     }
 
     public void deliverPackage(Airport fromAirport, Gate fromGate, Airport toAirport, Gate toGate) {
-        if(! fromGate.hasPackage()){ //Er mag maar 1 pakket beschikbaar zijn per Gate
-        	AirportPackage p = new AirportPackage(fromGate, toGate);
-        	this.world.addChild(p);
-        }
+    	AirportPackage p = new AirportPackage(fromGate, toGate);
+    	this.world.addChild(p);
     }
 
     public void startTimeHasPassed(Drone drone, AutopilotInputs inputs) {

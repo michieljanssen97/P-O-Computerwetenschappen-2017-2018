@@ -10,7 +10,7 @@ public class GroundPlane extends WorldObject{
 	public GroundPlane() {}
 	
 	public boolean isGrass(RealVector location) {
-		Airport airport = this.getFirstChildOfType(Airport.class);
+		Airport airport = this.getParent().getFirstChildOfType(Airport.class);
 		for (Airport air : airport.getAllAirports()) {
 			if(air.isOnAirport(location)) {
 				return false;

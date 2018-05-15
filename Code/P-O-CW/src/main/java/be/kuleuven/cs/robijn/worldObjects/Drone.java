@@ -258,7 +258,7 @@ public class Drone extends WorldObject {
     }
     
 	public void setToAirport() {
-		Airport air = this.getFirstChildOfType(Airport.class);
+		Airport air = this.getParent().getFirstChildOfType(Airport.class);
 		Airport currentAirport = air.getAirportAt(this.getWorldPosition());
 		if(currentAirport != null) {
 			currentAirport.addDroneToCurrentDrones(this);
@@ -266,7 +266,7 @@ public class Drone extends WorldObject {
 	}
 	
 	public void removeFromAirport() {
-		Airport air = this.getFirstChildOfType(Airport.class);
+		Airport air = this.getParent().getFirstChildOfType(Airport.class);
 		Airport currentAirport = air.getAirportAt(this.getWorldPosition());
 		if(currentAirport != null) {
 			currentAirport.removeDroneFromCurrentDrones(this);
@@ -275,7 +275,7 @@ public class Drone extends WorldObject {
 	}
 	
 	public Airport getAirportOfDrone() {
-		Airport air = this.getFirstChildOfType(Airport.class);
+		Airport air = this.getParent().getFirstChildOfType(Airport.class);
 		return air.getAirportAt(this.getWorldPosition());
 
 	}
@@ -1257,7 +1257,7 @@ public class Drone extends WorldObject {
 		return new float[] {(float)solution.getEntry(0), (float)solution.getEntry(1), (float)solution.getEntry(2)};
 	}
 	public Airport getCurrentAirport() {
-		Airport air = this.getFirstChildOfType(Airport.class);
+		Airport air = this.getParent().getFirstChildOfType(Airport.class);
 		for(Airport airport : air.getAllAirports()) {
 			for(Drone d : airport.getCurrentDrones()) {
 				if (d.getDroneID() == this.getDroneID()) {
