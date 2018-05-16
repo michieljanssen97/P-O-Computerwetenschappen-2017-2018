@@ -4,6 +4,7 @@ import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import org.apache.commons.math3.geometry.euclidean.threed.*;
 import org.apache.commons.math3.linear.*;
 
+import be.kuleuven.cs.robijn.autopilot.routeCalculator;
 import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.Runway;
@@ -265,12 +266,12 @@ public class Drone extends WorldObject {
 		}
 	}
 	
-	public void removeFromAirport() {
+	public void removeFromAirport(Runway fromRunway) {
 		Airport air = this.getParent().getFirstChildOfType(Airport.class);
 		Airport currentAirport = air.getAirportAt(this.getWorldPosition());
 		if(currentAirport != null) {
 			currentAirport.removeDroneFromCurrentDrones(this);
-			currentAirport.getRunwayToTakeOff().setHasDrones(false);
+			fromRunway.setHasDrones(false);
 		}
 	}
 	
@@ -293,7 +294,13 @@ public class Drone extends WorldObject {
 	}
 	
 	public void setTookOff() {
-		this.removeFromAirport();
+		AirportPackage p = this.getPackage();
+		if(p == null) {
+			throw new IllegalStateException();
+		}
+		
+		Runway fromRunway = routeCalculator.getFromRunway(this, p.getCurrentGate());
+		this.removeFromAirport(fromRunway);
 	}
     //  -----------------   //
     //                      //
