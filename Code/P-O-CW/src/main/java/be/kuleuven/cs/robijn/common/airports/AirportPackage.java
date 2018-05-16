@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import org.apache.commons.math3.linear.RealVector;
+
 public class AirportPackage extends WorldObject{
     private final Gate origin, destination;
 
@@ -190,6 +192,25 @@ public class AirportPackage extends WorldObject{
 		Runway toLand = routeCalculator.getToRunway(drone, fromGate, toGate, toTakeOff, drone.getHeight());
     	return (currentAirport.equals(this.getOrigin().getAirport()) && Runway.areRunwaysAvailable(toTakeOff, toLand));
     }
+    
+    private static Gate findClosestGate(Drone drone, Airport airport) {
+    	RealVector dronePos = drone.getWorldPosition();
+    	double minDistance = Double.MAX_VALUE;
+    	Gate closestGate = null;
+    	for(Gate g : airport.getGates()) {
+    		double distance = g.getWorldPosition().getDistance(dronePos);
+    		if( distance < minDistance) {
+    			closestGate = g;
+    			minDistance = distance;
+    		}
+    	}
+    	
+    	if(closestGate != null) {
+    		return closestGate;
+    	}
+    	
+    	throw new IllegalStateException();
+    }
 
     public void assignPackages() {    
     	for(AirportPackage p : this.getAllPackagesToAssign()){
@@ -202,12 +223,12 @@ public class AirportPackage extends WorldObject{
             		if(drone.getAirportOfDrone() == null) {
             			throw new IllegalStateException();
             		}
-	            	module.pickupPackageAndFly(drone, drone.getAirportOfDrone().getGates()[0], toGate);
+	            	module.taxiToGateAndFly(drone, findClosestGate(drone, drone.getAirportOfDrone()), fromGate);
             	}
 	            else {
 	            	if (p.droneCanStart(drone, fromGate, toGate, fromAirport)){
 		            	p.markAsInTransit(drone);
-		                module.pickupPackageAndFly(drone, this.getOrigin(), this.getDestination());
+		                module.taxiToGateAndFly(drone, fromGate, toGate);
 	            	}
 	            }
             }
