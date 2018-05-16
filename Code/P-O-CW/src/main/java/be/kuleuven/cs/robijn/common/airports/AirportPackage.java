@@ -99,9 +99,6 @@ public class AirportPackage extends WorldObject{
         for(Consumer<AirportPackage> handler : stateUpdateEventHandlers){
             handler.accept(this);
         }
-        
-        //TODO drone moet eerst nog naar fromGate taxiën
-        module.flyRoute(transporter, this.getOrigin(), this.getDestination(), transporter.getHeight());
     }
 
     /**
@@ -210,6 +207,8 @@ public class AirportPackage extends WorldObject{
 	            else {
 	            	if (p.droneCanStart(drone, fromGate, toGate, fromAirport)){
 		            	p.markAsInTransit(drone);
+		                //TODO drone moet eerst nog naar fromGate taxiën
+		                module.flyRoute(drone, this.getOrigin(), this.getDestination(), drone.getHeight());
 	            	}
 	            }
             }

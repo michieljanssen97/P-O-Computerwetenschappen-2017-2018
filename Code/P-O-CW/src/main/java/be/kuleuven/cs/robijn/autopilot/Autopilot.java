@@ -76,7 +76,7 @@ public class Autopilot {
 
 
 	public Drone[] calculateFirstDroneCollision(){
-		world = new WorldObject();
+		world = drone.getParent();
 		drones = world.getChildrenOfType(Drone.class);
 		Map<Drone[], Double> collisionDroneMap = new HashMap<>();
 		Double collisionTime;

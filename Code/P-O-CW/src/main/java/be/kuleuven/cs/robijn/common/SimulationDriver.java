@@ -101,7 +101,7 @@ public class SimulationDriver {
                         newPack.getDestination().getAirport().getId(), newPack.getDestination().getId()
                     );
                 }
-            	
+    			
                 for(int i = 0; i < settings.getDrones().length; i++){
                     autoPilotModule.startTimeHasPassed(i, latestAutopilotInputs[i]);
                 }

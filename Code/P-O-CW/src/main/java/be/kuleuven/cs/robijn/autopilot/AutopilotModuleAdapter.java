@@ -91,6 +91,11 @@ public class AutopilotModuleAdapter implements interfaces.AutopilotModule {
     @Override
     public void startTimeHasPassed(int droneIndex, AutopilotInputs inputs) {
         buildWorldIfNull();
+        
+		AirportPackage airpPack = this.getWorld().getFirstChildOfType(AirportPackage.class);
+		if(airpPack != null) {
+			airpPack.assignPackages();
+		}
 
         Drone drone = drones.get(droneIndex);
         module.startTimeHasPassed(drone, inputs);
@@ -110,4 +115,8 @@ public class AutopilotModuleAdapter implements interfaces.AutopilotModule {
     public AutopilotModule getAutopilotModule() {
     	return this.module;
     }
+
+	public WorldObject getWorld() {
+		return this.world;
+	}
 }
