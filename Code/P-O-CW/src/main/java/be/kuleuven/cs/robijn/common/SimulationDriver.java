@@ -152,7 +152,7 @@ public class SimulationDriver {
             throw new IllegalStateException("The source gate already has a package");
         }
 
-        AirportPackage pack = new AirportPackage(sourceGate, targetGate);
+        AirportPackage pack = new AirportPackage(sourceGate, targetGate, this.autoPilotModule.getAutopilotModule());
         newPackages.add(pack);
         return pack;
     }

@@ -219,14 +219,7 @@ public class Airport extends WorldObject {
 		return airportPolygon.contains(positionToCheck.getX(), positionToCheck.getY());
 
 	}
-
-	public Runway getRunwayToLand() { //TODO gebruik in routeCalculator
-		return this.getRunways()[0];
-	}
-
-	public Runway getRunwayToTakeOff() { //TODO gebruik in routeCalculator
-		return this.getRunways()[1];
-	}
+	
     public double getAngle() {
     	return angle;
     }

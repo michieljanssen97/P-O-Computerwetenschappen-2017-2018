@@ -1,6 +1,7 @@
 package be.kuleuven.cs.robijn.common.airports;
 
 import be.kuleuven.cs.robijn.autopilot.AutopilotModule;
+import be.kuleuven.cs.robijn.autopilot.routeCalculator;
 import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 
@@ -15,14 +16,16 @@ public class AirportPackage extends WorldObject{
     private State packageState;
     private Gate currentGate;
     private Drone currentTransporter;
+    private AutopilotModule module;
 
-    public AirportPackage(Gate origin, Gate destination){
+    public AirportPackage(Gate origin, Gate destination, AutopilotModule module){
         if(origin == null || destination == null){
             throw new IllegalArgumentException();
         }
 
         this.origin = origin;
         this.destination = destination;
+        this.module = module;
 
         markAsAtGate(origin);
     }
@@ -83,11 +86,9 @@ public class AirportPackage extends WorldObject{
         currentGate = null;
         currentTransporter = transporter;
         currentTransporter.setPackage(this);
-        
-        Airport fromAirport = this.getOrigin().getAirport();
-        Airport toAirport = this.getDestination().getAirport();
-		Runway takeOffRunway = fromAirport.getRunwayToTakeOff();
-		Runway landRunway = toAirport.getRunwayToLand();
+
+        Runway takeOffRunway = routeCalculator.getFromRunway(transporter, this.getOrigin());
+		Runway landRunway = routeCalculator.getToRunway(transporter, this.getOrigin(), this.getDestination(), takeOffRunway, transporter.getHeight());
 		
 		
         takeOffRunway.setHasDrones(true);
@@ -100,7 +101,6 @@ public class AirportPackage extends WorldObject{
         }
         
         //TODO drone moet eerst nog naar fromGate taxiën
-        AutopilotModule module = new AutopilotModule(this.getParent());
         module.flyRoute(transporter, this.getOrigin(), this.getDestination(), transporter.getHeight());
     }
 
@@ -184,19 +184,20 @@ public class AirportPackage extends WorldObject{
         return packageList;
     }
     
-    public boolean droneCanStart(Airport currentAirport) {
+    public boolean droneCanStart(Drone drone, Gate fromGate, Gate toGate, Airport currentAirport) {
     	if(currentAirport == null) {
     		return false;
     	}
     	
-		Runway toTakeOff = this.getOrigin().getAirport().getRunwayToTakeOff();
-		Runway toLand = this.getDestination().getAirport().getRunwayToLand();
+		Runway toTakeOff = routeCalculator.getFromRunway(drone, fromGate);
+		Runway toLand = routeCalculator.getToRunway(drone, fromGate, toGate, toTakeOff, drone.getHeight());
     	return (currentAirport.equals(this.getOrigin().getAirport()) && Runway.areRunwaysAvailable(toTakeOff, toLand));
     }
 
     public void assignPackages() {    
     	for(AirportPackage p : this.getAllPackagesToAssign()){
-            Airport fromAirport = p.getOrigin().getAirport();  
+            Airport fromAirport = p.getOrigin().getAirport(); 
+            Gate fromGate = p.getOrigin();
             Gate toGate = p.getDestination();
             Drone drone = fromAirport.getAvailableDrone();
             if(drone != null) {
@@ -204,12 +205,11 @@ public class AirportPackage extends WorldObject{
             		if(drone.getAirportOfDrone() == null) {
             			throw new IllegalStateException();
             		}
-            		AutopilotModule module = new AutopilotModule(this.getParent());
 	            	module.flyRoute(drone, drone.getAirportOfDrone().getGates()[0], toGate, drone.getHeight());
             	}
 	            else {
-	            	if (p.droneCanStart(fromAirport)){
-		            	p.markAsInTransit(drone);;
+	            	if (p.droneCanStart(drone, fromGate, toGate, fromAirport)){
+		            	p.markAsInTransit(drone);
 	            	}
 	            }
             }

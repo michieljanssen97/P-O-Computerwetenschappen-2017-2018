@@ -81,7 +81,7 @@ public class AutopilotModuleAdapter implements interfaces.AutopilotModule {
         Gate toGate = toAirport.getGates()[toGateIndex];
         
         if(! fromGate.hasPackage()){ //Er mag maar 1 pakket beschikbaar zijn per Gate
-	        AirportPackage newPackage = new AirportPackage(fromGate, toGate);
+	        AirportPackage newPackage = new AirportPackage(fromGate, toGate, module);
 	        fromGate.setPackage(newPackage);
 	
 	        module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
@@ -105,5 +105,9 @@ public class AutopilotModuleAdapter implements interfaces.AutopilotModule {
     @Override
     public void simulationEnded() {
         module.simulationEnded();
+    }
+    
+    public AutopilotModule getAutopilotModule() {
+    	return this.module;
     }
 }

@@ -45,7 +45,7 @@ public class AutopilotModule {
     }
 
     public void deliverPackage(Airport fromAirport, Gate fromGate, Airport toAirport, Gate toGate) {
-    	AirportPackage p = new AirportPackage(fromGate, toGate);
+    	AirportPackage p = new AirportPackage(fromGate, toGate, this);
     	this.world.addChild(p);
     }
 
