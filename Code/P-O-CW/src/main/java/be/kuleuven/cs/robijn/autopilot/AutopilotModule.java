@@ -69,12 +69,16 @@ public class AutopilotModule {
         threadPool.shutdown();
     }
     
-    public void flyRoute(Drone drone, Gate fromGate, Gate toGate, float hight) {
+    public void pickupPackageAndFly(Drone drone, Gate fromGate, Gate toGate) {
+    	if(drone.getAirportOfDrone().getId() != fromGate.getAirport().getId()) {
+    		throw new IllegalStateException();
+    	}
     	Autopilot autopilot = autopilots.get(drone);
-    	RealVector[] route = routeCalculator.calculateRoute(drone, fromGate, toGate, hight);
-    	autopilot.setTargets(route);
-    	autopilot.setTargetPosition(toGate.getWorldPosition());
-    	autopilot.setFlightMode(FlightMode.ASCEND);
+    	autopilot.setTargetPosition(fromGate.getWorldPosition());
+    	autopilot.setFlightMode(FlightMode.TAXI);
+    	
+    	autopilot.setFlyAfterPackagePicked(drone, fromGate, toGate);
+    	//TODO bij aankomst roep flyRoute op
     }
 
 	public WorldObject getWorld() {

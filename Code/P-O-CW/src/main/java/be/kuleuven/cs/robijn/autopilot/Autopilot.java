@@ -2,7 +2,9 @@ package be.kuleuven.cs.robijn.autopilot;
 
 import org.apache.commons.math3.linear.*;
 
+import be.kuleuven.cs.robijn.autopilot.Autopilot;
 import be.kuleuven.cs.robijn.common.WorldObject;
+import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.exceptions.FinishedException;
 import be.kuleuven.cs.robijn.common.math.Angle;
 import be.kuleuven.cs.robijn.common.math.Angle.Type;
@@ -744,6 +746,11 @@ public class Autopilot {
         	thrust = 0;
         	leftBrakeForce = 2000;
         	rightBrakeForce = 2000;
+        	
+        	if(droneOfPackage != null && fromGate != null && toGate != null ) {
+	        	this.flyRoute(droneOfPackage, fromGate, toGate);
+        	}
+        	
         }
 
         final float thrustOutput = thrust;
@@ -786,6 +793,30 @@ public class Autopilot {
 		};
         return output;
 	}
+	
+	private Drone droneOfPackage = null;
+	private Gate fromGate = null;
+	private Gate toGate = null;
+	
+	public void setFlyAfterPackagePicked(Drone drone, Gate fromGate, Gate toGate) {
+		this.droneOfPackage = drone;
+		this.fromGate = fromGate;
+		this.toGate = toGate;
+	}
+	
+	private void resetFlyAfterPackagePicked() {
+		this.droneOfPackage = null;
+		this.fromGate = null;
+		this.toGate = null;
+	}
+	
+    private void flyRoute(Drone drone, Gate fromGate, Gate toGate) {
+    	RealVector[] route = routeCalculator.calculateRoute(drone, fromGate, toGate, drone.getHeight());
+    	this.setTargets(route);
+    	this.setTargetPosition(toGate.getWorldPosition());
+    	this.setFlightMode(FlightMode.ASCEND);
+    	this.resetFlyAfterPackagePicked();
+    }
 	
 	public RealMatrix calculateTransformationMatrix(float roll, Drone drone) {
 		RealMatrix inverseRollTransformation = new Array2DRowRealMatrix(new double[][] {

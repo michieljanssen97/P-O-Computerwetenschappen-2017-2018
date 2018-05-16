@@ -202,13 +202,12 @@ public class AirportPackage extends WorldObject{
             		if(drone.getAirportOfDrone() == null) {
             			throw new IllegalStateException();
             		}
-	            	module.flyRoute(drone, drone.getAirportOfDrone().getGates()[0], toGate, drone.getHeight());
+	            	module.pickupPackageAndFly(drone, drone.getAirportOfDrone().getGates()[0], toGate);
             	}
 	            else {
 	            	if (p.droneCanStart(drone, fromGate, toGate, fromAirport)){
 		            	p.markAsInTransit(drone);
-		                //TODO drone moet eerst nog naar fromGate taxiën
-		                module.flyRoute(drone, this.getOrigin(), this.getDestination(), drone.getHeight());
+		                module.pickupPackageAndFly(drone, this.getOrigin(), this.getDestination());
 	            	}
 	            }
             }
