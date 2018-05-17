@@ -267,8 +267,7 @@ public class Drone extends WorldObject {
 	}
 	
 	public void removeFromAirport(Runway fromRunway) {
-		Airport air = this.getParent().getFirstChildOfType(Airport.class);
-		Airport currentAirport = air.getAirportAt(this.getWorldPosition());
+		 Airport currentAirport = fromRunway.getAirport();
 		if(currentAirport != null) {
 			currentAirport.removeDroneFromCurrentDrones(this);
 			fromRunway.setHasDrones(false);
