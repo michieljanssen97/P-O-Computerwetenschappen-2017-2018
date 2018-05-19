@@ -1339,4 +1339,9 @@ public class Drone extends WorldObject {
 	public float getHeight() {
 		return this.height;
 	}
+
+	public boolean isOnGate(Gate fromGate) {
+		Gate g = this.getClosestGate(fromGate.getAirport());
+		return g.getWorldPosition().getDistance(this.getWorldPosition()) < (g.getAirport().width + 5);
+	}
 }

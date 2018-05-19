@@ -20,6 +20,8 @@ public class Airport extends WorldObject {
     private Runway[] runways;
     private double angle;
     
+    public float width;
+    
 //    private ArrayList<Drone> currentDrones = new ArrayList<Drone>();
 
     public Airport(int id, float length, float width, Vector2D centerToRunway0){
@@ -51,6 +53,7 @@ public class Airport extends WorldObject {
             new Rotation(Vector3D.PLUS_J, angle)
         );
         this.angle = angle;
+        this.width = width;
     }
     
     public ArrayList<Airport>getAllAirports() {

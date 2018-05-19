@@ -81,10 +81,15 @@ public class AutopilotModule {
     
     public void taxiToGateAndFly(Drone drone, Gate fromGate, Gate toGate) {
     	Autopilot autopilot = autopilots.get(drone);
-    	autopilot.setTargetPosition(fromGate.getWorldPosition());
-    	autopilot.setFlightMode(FlightMode.TAXI);
-    	
-    	autopilot.setFlyAfterPackagePicked(drone, fromGate, toGate);
+    	if(!drone.isOnGate(fromGate)) {//first taxi to the correct Gate
+	    	autopilot.setTargetPosition(fromGate.getWorldPosition());
+	    	autopilot.setFlightMode(FlightMode.TAXI);
+	    	
+	    	autopilot.setFlyAfterPackagePicked(drone, fromGate, toGate);
+    	}
+    	else {
+    		autopilot.flyRoute(drone, fromGate, toGate);
+    	}
     }
 
 	public WorldObject getWorld() {
