@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import org.apache.commons.math3.linear.RealVector;
-
 public class AirportPackage extends WorldObject{
     private final Gate origin, destination;
 
@@ -192,17 +190,8 @@ public class AirportPackage extends WorldObject{
     	return (currentAirport.equals(this.getOrigin().getAirport()) && Runway.areRunwaysAvailable(toTakeOff, toLand) && fromGate.hasDrone() && !toGate.hasDrone());
     }
     
-    private static Gate findClosestGate(Drone drone, Airport airport) {
-    	RealVector dronePos = drone.getWorldPosition();
-    	double minDistance = Double.MAX_VALUE;
-    	Gate closestGate = null;
-    	for(Gate g : airport.getGates()) {
-    		double distance = g.getWorldPosition().getDistance(dronePos);
-    		if( distance < minDistance) {
-    			closestGate = g;
-    			minDistance = distance;
-    		}
-    	}
+    private static Gate findClosestGate(Drone drone) {
+    	Gate closestGate = drone.getClosestGate(drone.getAirportOfDrone());
     	
     	if(closestGate != null) {
     		return closestGate;
@@ -216,22 +205,20 @@ public class AirportPackage extends WorldObject{
             Airport fromAirport = p.getOrigin().getAirport(); 
             Gate fromGate = p.getOrigin();
             Gate toGate = p.getDestination();
-            
             Drone drone = fromAirport.getAvailableDrone();
-            if(drone != null) {
+            if(drone != null && drone.canBeAssigned()) {
             	if(drone.getCurrentAirport() != fromAirport) {
             		if(drone.getAirportOfDrone() == null) {
             			throw new IllegalStateException();
             		}
-	            	module.taxiToGateAndFly(drone, findClosestGate(drone, drone.getAirportOfDrone()), fromGate);
+            		drone.setCanBeAssigned(false);
+	            	module.taxiToGateAndFly(drone, findClosestGate(drone), fromGate);
             	}
-	            else {
-	            	if (p.droneCanStart(drone, fromGate, toGate, fromAirport)){
-	            		fromGate.setCurrentDrone(drone);
-	            		toGate.setCurrentDrone(drone);
-		            	p.markAsInTransit(drone);
-		                module.taxiToGateAndFly(drone, fromGate, toGate);
-	            	}
+	            else if (p.droneCanStart(drone, fromGate, toGate, fromAirport)){
+            		fromGate.setCurrentDrone(drone);
+            		toGate.setCurrentDrone(drone);
+	            	p.markAsInTransit(drone);
+	                module.taxiToGateAndFly(drone, fromGate, toGate);
 	            }
             }
         }

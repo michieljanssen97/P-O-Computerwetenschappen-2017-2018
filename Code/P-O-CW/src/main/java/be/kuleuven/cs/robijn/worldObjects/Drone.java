@@ -1344,4 +1344,13 @@ public class Drone extends WorldObject {
 		Gate g = this.getClosestGate(fromGate.getAirport());
 		return g.getWorldPosition().getDistance(this.getWorldPosition()) < (g.getAirport().width + 5);
 	}
+	
+	private boolean canBeAssigned = true;
+
+	public boolean canBeAssigned() {
+		return this.canBeAssigned;
+	}
+	public void setCanBeAssigned(boolean status) {
+		this.canBeAssigned = status;
+	}
 }

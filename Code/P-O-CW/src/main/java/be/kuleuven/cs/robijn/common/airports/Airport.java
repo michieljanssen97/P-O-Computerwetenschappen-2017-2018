@@ -130,10 +130,14 @@ public class Airport extends WorldObject {
     }
     
     public Drone getFirstAvailableDrone(){
+    	Drone drone = null;
     	if(! this.getAllAvailableDrones().isEmpty()) {
-    		return this.getAllAvailableDrones().get(0);
+    		drone =  this.getAllAvailableDrones().get(0);
     	}
-        return null;
+    	if(drone != null && ! drone.canBeAssigned()) {
+    		return null;
+    	}
+        return drone;
     }
     
     public Drone getAvailableDrone() {
@@ -149,7 +153,7 @@ public class Airport extends WorldObject {
     			minDistance = tempDrone.calculateDistanceToAirport(this);
     			drone = tempDrone;
     		}
-    	}    	
+    	}
     	return drone; //Is null if no drones are Available
     }
     

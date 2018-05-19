@@ -750,6 +750,9 @@ public class Autopilot {
         	if(droneOfPackage != null && fromGate != null && toGate != null ) {
 	        	this.flyRoute(droneOfPackage, fromGate, toGate);
         	}
+        	else {
+        		drone.setCanBeAssigned(true);
+        	}
         	
         }
 
