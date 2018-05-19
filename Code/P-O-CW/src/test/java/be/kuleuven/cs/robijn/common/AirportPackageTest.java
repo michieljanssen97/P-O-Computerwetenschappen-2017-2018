@@ -9,6 +9,7 @@ import org.apache.commons.math3.linear.RealVector;
 import org.junit.jupiter.api.Test;
 
 import be.kuleuven.cs.robijn.autopilot.AutopilotModule;
+import be.kuleuven.cs.robijn.autopilot.routeCalculator;
 import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import be.kuleuven.cs.robijn.common.airports.AirportPackage.State;
@@ -194,6 +195,17 @@ public class AirportPackageTest {
         drone.setRelativePosition(dronePos);
         drone.setToAirport();
         
+        assertTrue(drone.getClosestGate(airport1).equals(fromGate));
+        assertTrue(fromGate.hasDrone());
+        assertEquals(fromGate.getCurrentDrone(), drone);
+        assertTrue(! toGate.hasDrone());
+        
+        Runway toTakeOff = routeCalculator.getFromRunway(drone, fromGate);
+		Runway toLand = routeCalculator.getToRunway(drone, fromGate, toGate, toTakeOff, drone.getHeight());
+		
+		assertTrue(! toTakeOff.hasDrone());
+		assertTrue(! toLand.hasDrone());
+        
         Airport firstAirport = world.getFirstChildOfType(Airport.class);
 		
         assertEquals(firstAirport.getAllAirports().size(), 2);
@@ -202,6 +214,8 @@ public class AirportPackageTest {
 		module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
         AirportPackage airPackage = world.getFirstChildOfType(AirportPackage.class);
         airPackage.assignPackages();
+     
+        
 		assertEquals(airPackage.getAllPackagesToAssign().size(),0);
 		assertTrue(drone.hasPackage());
 		AirportPackage airportPackage = drone.getPackage();
@@ -308,7 +322,7 @@ public class AirportPackageTest {
 	 * Het 2de pakket mag worden toegekend, het eerste niet.
 	 */
 	@Test
-	public void testMoreThanOneDroneAvailableAtOtherAirport() {
+	public void testcorrectPackageAssigned() {
 		WorldObject world = new WorldObject();
 		Airport airport1 = new Airport(0, 1000, 500, new Vector2D(0,0));
 		airport1.setRelativePosition(new ArrayRealVector(new double[] {0,0,0}, false));

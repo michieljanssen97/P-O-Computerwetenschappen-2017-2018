@@ -93,9 +93,8 @@ public class AirportPackage extends WorldObject{
 		Runway landRunway = routeCalculator.getToRunway(transporter, this.getOrigin(), this.getDestination(), takeOffRunway, transporter.getHeight());
 		
 		
-        takeOffRunway.setHasDrones(true);
-        
-    	landRunway.setHasDrones(true);
+        takeOffRunway.setCurrentDrone(transporter);
+    	landRunway.setCurrentDrone(transporter);
         currentTransporter.setDestinationRunway(landRunway);
 
         for(Consumer<AirportPackage> handler : stateUpdateEventHandlers){
@@ -190,7 +189,7 @@ public class AirportPackage extends WorldObject{
     	
 		Runway toTakeOff = routeCalculator.getFromRunway(drone, fromGate);
 		Runway toLand = routeCalculator.getToRunway(drone, fromGate, toGate, toTakeOff, drone.getHeight());
-    	return (currentAirport.equals(this.getOrigin().getAirport()) && Runway.areRunwaysAvailable(toTakeOff, toLand));
+    	return (currentAirport.equals(this.getOrigin().getAirport()) && Runway.areRunwaysAvailable(toTakeOff, toLand) && fromGate.hasDrone() && !toGate.hasDrone());
     }
     
     private static Gate findClosestGate(Drone drone, Airport airport) {
@@ -217,6 +216,7 @@ public class AirportPackage extends WorldObject{
             Airport fromAirport = p.getOrigin().getAirport(); 
             Gate fromGate = p.getOrigin();
             Gate toGate = p.getDestination();
+            
             Drone drone = fromAirport.getAvailableDrone();
             if(drone != null) {
             	if(drone.getCurrentAirport() != fromAirport) {
@@ -227,13 +227,13 @@ public class AirportPackage extends WorldObject{
             	}
 	            else {
 	            	if (p.droneCanStart(drone, fromGate, toGate, fromAirport)){
+	            		fromGate.setCurrentDrone(drone);
+	            		toGate.setCurrentDrone(drone);
 		            	p.markAsInTransit(drone);
 		                module.taxiToGateAndFly(drone, fromGate, toGate);
 	            	}
 	            }
             }
-            
-            
         }
     }
 }

@@ -7,8 +7,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.apache.commons.math3.linear.RealVector;
-
 import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.AirportPackage;
@@ -45,6 +43,18 @@ public class AutopilotModule {
     public void deliverPackage(Airport fromAirport, Gate fromGate, Airport toAirport, Gate toGate) {
     	AirportPackage p = new AirportPackage(fromGate, toGate, this);
     	this.world.addChild(p);
+    	
+//    	float closestDistance = Float.POSITIVE_INFINITY;
+//    	Drone bestDrone = null;
+//    	ArrayList<Drone> drones = world.getChildrenOfType(Drone.class);
+//		for (Drone drone : drones) {
+//			float distance = (float) fromGate.getWorldPosition().getDistance(drone.getWorldPosition());
+//			if (distance < closestDistance) {
+//				closestDistance = distance;
+//				bestDrone = drone;
+//			}
+//	    }
+//		autopilots.get(bestDrone).flyRoute(bestDrone, fromGate, toGate);
     }
 
     public void startTimeHasPassed(Drone drone, AutopilotInputs inputs) {

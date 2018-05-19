@@ -810,7 +810,7 @@ public class Autopilot {
 		this.toGate = null;
 	}
 	
-    private void flyRoute(Drone drone, Gate fromGate, Gate toGate) {
+    public void flyRoute(Drone drone, Gate fromGate, Gate toGate) {
     	RealVector[] route = routeCalculator.calculateRoute(drone, fromGate, toGate, drone.getHeight());
     	this.setTargets(route);
     	this.setTargetPosition(toGate.getWorldPosition());
