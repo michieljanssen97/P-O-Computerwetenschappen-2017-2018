@@ -1,5 +1,6 @@
 package be.kuleuven.cs.robijn.common.airports;
 
+import be.kuleuven.cs.robijn.autopilot.routeCalculator;
 import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 
@@ -11,6 +12,7 @@ import org.apache.commons.math3.linear.RealVector;
 
 import java.awt.Polygon;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Airport extends WorldObject {
 
@@ -140,18 +142,29 @@ public class Airport extends WorldObject {
         return drone;
     }
     
-    public Drone getAvailableDrone() {
-    	Drone drone = this.getFirstAvailableDrone();
+    public Drone getFirstAvailableDroneOnAirportOfGate(Gate fromGate) {
+    	if(this.equals(fromGate.getAirport()) && fromGate.hasDrone()) {
+			return fromGate.getCurrentDrone();
+		}
+    	else {
+    		return this.getFirstAvailableDrone();
+    	}
+    }
+    
+    public Drone getAvailableDrone(Gate fromGate) { //TODO dmv geordende lisjt van Pieter
+    	Drone drone = this.getFirstAvailableDroneOnAirportOfGate(fromGate);
     	if(drone != null) {
     		return drone;
     	}
-    	
     	double minDistance = Double.MAX_VALUE;
     	for(Airport airp : this.getAllAirports()) {
     		Drone tempDrone = airp.getFirstAvailableDrone();
-    		if(tempDrone != null && tempDrone.calculateDistanceToAirport(this) < minDistance && airp.hasSufficientAvailableDrones()) {
-    			minDistance = tempDrone.calculateDistanceToAirport(this);
-    			drone = tempDrone;
+    		if(tempDrone != null) {
+	    		double distance = (double) routeCalculator.getBestRunway(tempDrone, airp, this, tempDrone.getClosestGate(airp), fromGate, tempDrone.getHeight())[1];
+	    		if(distance < minDistance && airp.hasSufficientAvailableDrones()) {
+	    			minDistance = distance;
+	    			drone = tempDrone;
+	    		}
     		}
     	}
     	return drone; //Is null if no drones are Available
