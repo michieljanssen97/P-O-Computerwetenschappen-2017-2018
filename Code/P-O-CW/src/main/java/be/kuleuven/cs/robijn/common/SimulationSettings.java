@@ -1,6 +1,7 @@
 package be.kuleuven.cs.robijn.common;
 
 import be.kuleuven.cs.robijn.gui.ObservableAutoPilotConfig;
+import interfaces.AutopilotConfig;
 import interfaces.AutopilotConfigReader;
 import interfaces.AutopilotConfigWriter;
 

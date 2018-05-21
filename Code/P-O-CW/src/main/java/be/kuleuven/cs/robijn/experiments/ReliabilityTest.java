@@ -8,6 +8,7 @@ import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.airports.generator.AirportGenerator;
 import be.kuleuven.cs.robijn.common.stopwatch.ConstantIntervalStopwatch;
+import be.kuleuven.cs.robijn.common.stopwatch.Stopwatch;
 import interfaces.AutopilotConfig;
 import interfaces.AutopilotConfigReader;
 
@@ -28,17 +29,11 @@ public class ReliabilityTest {
                 .setCenterToRunway0X(0)
                 .setCenterToRunway0Z(-1);
 
-        AirportDefinition airport1 = new AirportDefinition()
-                .setCenterX(0)
-                .setCenterZ(0)
-                .setCenterToRunway0X(0)
-                .setCenterToRunway0Z(-1);
-
         SimulationSettings settings = new SimulationSettings()
                 .setGateLength(30)
                 .setRunwayLength(100)
                 .setAirports(new AirportDefinition[]{
-                    airport0, airport1
+                    airport0
                 })
                 .setDrones(new DroneDefinition[]{
                     new DroneDefinition(getDefaultConfig())
@@ -49,16 +44,17 @@ public class ReliabilityTest {
 
         return new TestSetup()
                 .setName("Simple test")
-                .setUpdatesPerSecond(50)
-                .setMaxSimulationRuntimeInSeconds(300)
+                .setUpdatesPerSecond(60)
+                .setMaxSimulationRuntimeInSeconds(1000)
                 .setSettings(settings)
                 .setPacketAddingFunction(new Consumer<SimulationState>() {
                     boolean hasAddedPackage = false;
                     @Override
                     public void accept(SimulationState state) {
                         if(!hasAddedPackage){
-                            Gate source = state.driver.getTestBed().getWorldRepresentation().getChildrenOfType(Airport.class).get(0).getGates()[0];
-                            Gate dest = state.driver.getTestBed().getWorldRepresentation().getChildrenOfType(Airport.class).get(1).getGates()[0];
+                            Airport airport = state.driver.getTestBed().getWorldRepresentation().getChildrenOfType(Airport.class).get(0);
+                            Gate source = airport.getGates()[0];
+                            Gate dest = airport.getGates()[1];
                             state.driver.addPackage(source, dest);
                             hasAddedPackage = true;
                         }
@@ -114,16 +110,16 @@ public class ReliabilityTest {
         double interval = 1d/((double)testSetup.updatesPerSecond);
         List<AirportPackage> packages = new ArrayList<>();
         HashMap<AirportPackage, Delivery> pendingDeliveries = new HashMap<>();
-        final double[] currentTime = new double[1];
 
-        SimulationDriver driver = new SimulationDriver(testSetup.settings, new ConstantIntervalStopwatch(interval), true){
+        Stopwatch stopwatch = new ConstantIntervalStopwatch(interval);
+        SimulationDriver driver = new SimulationDriver(testSetup.settings, stopwatch, true){
             @Override
             public AirportPackage addPackage(Gate sourceGate, Gate targetGate) {
                 AirportPackage p = super.addPackage(sourceGate, targetGate);
                 packages.add(p);
                 Delivery d = new Delivery();
                 d.airportPackage = p;
-                d.additionTime = currentTime[0];
+                d.additionTime = stopwatch.getSecondsSinceStart();
                 pendingDeliveries.put(p, d);
                 return p;
             }
@@ -133,25 +129,24 @@ public class ReliabilityTest {
         int maxUpdates = testSetup.maxSimulationRuntimeInSeconds * testSetup.updatesPerSecond;
         int updateI = 0;
         for(; updateI < maxUpdates; updateI++){
-            currentTime[0] = updateI * interval;
-            testSetup.packetAddingFunction.accept(new SimulationState(currentTime[0], driver, packages));
+            testSetup.packetAddingFunction.accept(new SimulationState(stopwatch.getSecondsSinceStart(), driver, packages));
             driver.runUpdate();
 
-            result.runtimeInSeconds = currentTime[0];
+            result.runtimeInSeconds = stopwatch.getSecondsSinceStart();
 
             for(AirportPackage p : packages){
                 Delivery d = pendingDeliveries.get(p);
                 if(p.getState() == AirportPackage.State.IN_TRANSIT && d.pickupTime < 0){
-                    d.deliveryTime = currentTime[0];
+                    d.deliveryTime = stopwatch.getSecondsSinceStart();
                 }else if(p.hasBeenDelivered() && d.deliveryTime < 0){
-                    d.deliveryTime = currentTime[0];
+                    d.deliveryTime = stopwatch.getSecondsSinceStart();
                     packages.remove(p);
                     pendingDeliveries.remove(d);
                     result.packetDeliveries.add(d);
                 }
             }
 
-            if(driver.hasSimulationFinished() || testSetup.testFinishedPredicate.test(new SimulationState(currentTime[0], driver, packages))){
+            if(driver.hasSimulationFinished() || testSetup.testFinishedPredicate.test(new SimulationState(stopwatch.getSecondsSinceStart(), driver, packages))){
                 break;
             }
 

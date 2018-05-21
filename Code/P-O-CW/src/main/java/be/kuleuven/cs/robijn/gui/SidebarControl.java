@@ -52,6 +52,9 @@ public class SidebarControl extends VBox {
     /// TESTBED INFO
 
     @FXML
+    private Label upsLabel;
+
+    @FXML
     private Label positionLabel;
 
     @FXML
@@ -206,6 +209,8 @@ public class SidebarControl extends VBox {
         AutopilotOutputs out = outputs[index];
 
         positionLabel.setText(String.format("X:%6.2f  Y:%6.2f  Z:%6.2f", in.getX(), in.getY(), in.getZ()));
+
+        upsLabel.setText(getSimulation().getUpdatesPerSecond()+"");
 
         //Heading
         setIndicatorValue(headingIndicator, remap360to180(in.getHeading()), Math.PI*2d);

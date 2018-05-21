@@ -30,6 +30,8 @@ public class SimulationDriver {
     private AutopilotInputs[] latestAutopilotInputs;
     private AutopilotOutputs[] latestAutopilotOutputs;
 
+    private List<Long> lastUpdateTimestamps = new ArrayList<>();
+
     //List of eventhandlers that are invoked when the simulation has updated.
     private final TreeSet<UpdateEventHandler> updateEventHandlers = new TreeSet<>();
 
@@ -141,6 +143,9 @@ public class SimulationDriver {
                 System.err.println("Testbed threw an unexpected exception!");
                 ex.printStackTrace();
             }
+
+            lastUpdateTimestamps.removeIf(timestamp -> System.currentTimeMillis() - timestamp > 1000);
+            lastUpdateTimestamps.add(System.currentTimeMillis());
         }
 
         //Invoke the event handlers
@@ -182,6 +187,10 @@ public class SimulationDriver {
     public boolean hasSimulationThrownException(){return simulationThrewException;}
     
     public boolean isOutOfControl(){return outOfControl;}
+
+    public int getUpdatesPerSecond(){
+        return lastUpdateTimestamps.size();
+    }
 
     public TestBed getTestBed(){
         return testBed;
