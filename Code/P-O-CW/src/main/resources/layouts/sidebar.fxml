@@ -89,9 +89,19 @@
         </Label>
         <VBox prefHeight="61.0" prefWidth="192.0">
             <children>
-                <Label text="Drone position" style="-fx-font-weight: bold;">
+                <Label text="Updates per second" style="-fx-font-weight: bold;">
                     <VBox.margin>
                         <Insets />
+                    </VBox.margin>
+                </Label>
+                <Label fx:id="upsLabel" text="">
+                    <VBox.margin>
+                        <Insets top="3"/>
+                    </VBox.margin>
+                </Label>
+                <Label text="Drone position" style="-fx-font-weight: bold;">
+                    <VBox.margin>
+                        <Insets top="7"/>
                     </VBox.margin>
                 </Label>
                 <Label fx:id="positionLabel" text="">

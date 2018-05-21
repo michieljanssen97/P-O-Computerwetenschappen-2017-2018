@@ -3,7 +3,6 @@ package be.kuleuven.cs.robijn.autopilot;
 import org.apache.commons.math3.linear.*;
 
 import be.kuleuven.cs.robijn.autopilot.Autopilot;
-import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.exceptions.FinishedException;
 import be.kuleuven.cs.robijn.common.math.Angle;
@@ -13,7 +12,6 @@ import be.kuleuven.cs.robijn.experiments.ExpPosition;
 import be.kuleuven.cs.robijn.tyres.FrontWheel;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 import interfaces.*;
-import java.util.*;
 
 /**
  * A class of autopilots.
@@ -83,54 +81,17 @@ public class Autopilot {
 		this.targetHeading = targetHeading;
 	}
 	
-	private WorldObject world;
-	private List<Drone> drones = new ArrayList<>();
-
-
-	public Drone[] calculateFirstDroneCollision(){
-		world = drone.getParent();
-		drones = world.getChildrenOfType(Drone.class);
-		Map<Drone[], Double> collisionDroneMap = new HashMap<>();
-		Double collisionTime;
-
-		for(int i = 0; i < drones.size(); i++){
-			for(int j = i+1; j < drones.size(); j++){
-
-				double deltaPosX = drones.get(i).getWorldPosition().getEntry(0)-drones.get(j).getWorldPosition().getEntry(0);
-				double deltaPosY = drones.get(i).getWorldPosition().getEntry(1)-drones.get(j).getWorldPosition().getEntry(1);
-				double deltaPosZ = drones.get(i).getWorldPosition().getEntry(2)-drones.get(j).getWorldPosition().getEntry(2);
-
-
-				double deltaVelX = drones.get(i).getVelocity().getEntry(0)-drones.get(j).getVelocity().getEntry(0);
-				double deltaVelY = drones.get(i).getVelocity().getEntry(1)-drones.get(j).getVelocity().getEntry(1);
-				double deltaVelZ = drones.get(i).getVelocity().getEntry(2)-drones.get(j).getVelocity().getEntry(2);
-
-				double deltaRR = Math.pow(deltaPosX, 2) + Math.pow(deltaPosY, 2) + Math.pow(deltaPosZ, 2);
-				double deltaVV = Math.pow(deltaVelX, 2) + Math.pow(deltaVelY, 2) + Math.pow(deltaVelZ, 2);
-				double deltaVR = (deltaVelX*deltaPosX)  + (deltaVelY*deltaPosY) +  (deltaVelZ*deltaPosZ);
-				double d = Math.pow(deltaVR, 2) - (deltaVV)*(deltaRR - Math.pow(5, 2));
-
-
-				if (deltaVR >= 0){
-					collisionTime =  Double.POSITIVE_INFINITY;
-				} else if (d < 0){
-					collisionTime = Double.POSITIVE_INFINITY;
-				} else {
-					collisionTime =  - ((deltaVR + Math.sqrt(d))/(deltaVV));
-				}
-				if (collisionTime != Double.POSITIVE_INFINITY) {
-					Drone[] collisionArray = {drones.get(i), drones.get(j)};
-					collisionDroneMap.put(collisionArray, collisionTime);
-				}
-			}
-		}
-		if (collisionDroneMap.isEmpty()) {
-			return null;
-		} else {
-			Drone[] firstCollisionDroneArray = Collections.min(collisionDroneMap.entrySet(), Map.Entry.comparingByValue()).getKey();
-			return firstCollisionDroneArray;
-		}
+	private Angle targetYRotation = null;
+	
+	public Angle getTargetYRotation() {
+		return targetYRotation;
 	}
+	
+	public void setTargetYRotation(Angle targetYRotation) {
+		this.targetYRotation = targetYRotation;
+	}
+	
+	private boolean flag;
 	
 	/**
 	 * Wel roll ten gevolge van verschillende snelheid van vleugels (door de rotaties). 
@@ -268,7 +229,11 @@ public class Autopilot {
 					}
 					
 					Angle XRotation = Angle.getXRotation(target, drone.getWorldPosition());
-					Angle YRotation = Angle.getYRotation(target, drone.getWorldPosition());
+					Angle YRotation;
+					if (this.flag == true)
+						YRotation = this.getTargetYRotation();
+					else
+						YRotation = Angle.getYRotation(target, drone.getWorldPosition());
 					
 					XRotation = Angle.add(XRotation, - drone.getPitch());
 					YRotation = Angle.add(YRotation, - drone.getHeading());
@@ -818,6 +783,7 @@ public class Autopilot {
 	}
 	
     public void flyRoute(Drone drone, Gate fromGate, Gate toGate) {     
+    	System.out.println("FLY ROUTE");
     	RealVector[] route = routeCalculator.calculateRoute(drone, fromGate, toGate, drone.getHeight());
     	this.setTargets(route);
     	this.setTargetPosition(toGate.getWorldPosition());
@@ -827,6 +793,23 @@ public class Autopilot {
     	this.setTargetHeading(angle.getAngle());
     	this.setFlightMode(FlightMode.ASCEND);
     	this.resetFlyAfterPackagePicked();
+    }
+    
+    public void preventCollisionFirst() {
+    	Angle yrotation = new Angle(40, Type.DEGREES);
+    	this.setTargetYRotation(yrotation);
+    	this.flag = true;
+    }
+    
+    public void preventCollisionSecond() {     
+    	Angle yrotation = new Angle(-40, Type.DEGREES);
+    	this.setTargetYRotation(yrotation);
+    	this.flag = true;
+    }
+    
+    public void stopPrevention() {     
+    	this.setTargetYRotation(null);
+    	this.flag = false;
     }
 	
 	public RealMatrix calculateTransformationMatrix(float roll, Drone drone) {

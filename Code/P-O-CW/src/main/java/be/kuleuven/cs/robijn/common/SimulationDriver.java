@@ -20,6 +20,7 @@ public class SimulationDriver {
     private final TestBed testBed;
     private final AutopilotModuleAdapter autoPilotModule;
     private final Stopwatch stopwatch;
+    private final boolean isHeadless;
 
     private boolean simulationFinished;
     private boolean simulationCrashed;
@@ -29,18 +30,21 @@ public class SimulationDriver {
     private AutopilotInputs[] latestAutopilotInputs;
     private AutopilotOutputs[] latestAutopilotOutputs;
 
+    private List<Long> lastUpdateTimestamps = new ArrayList<>();
+
     //List of eventhandlers that are invoked when the simulation has updated.
     private final TreeSet<UpdateEventHandler> updateEventHandlers = new TreeSet<>();
 
     private Queue<AirportPackage> newPackages = new LinkedList<>();
     
     public SimulationDriver(SimulationSettings settings){
-        this(settings, new ConstantIntervalStopwatch(0.03d));
+        this(settings, new ConstantIntervalStopwatch(0.03d), false);
     }
     
-    public SimulationDriver(SimulationSettings settings, Stopwatch stopwatch){
+    public SimulationDriver(SimulationSettings settings, Stopwatch stopwatch, boolean headless){
         this.settings = settings;
         this.stopwatch = stopwatch;
+        this.isHeadless = headless;
 
         latestAutopilotInputs = new AutopilotInputs[settings.getDrones().length];
         latestAutopilotOutputs = new AutopilotOutputs[settings.getDrones().length];
@@ -87,8 +91,10 @@ public class SimulationDriver {
         stopwatch.tick();
 
         if(!isSimulationPaused() && !simulationFinished && !simulationCrashed && !simulationThrewException){
-            //Reset renderer
-            testBed.getRenderer().clearDebugObjects();
+            if(!isHeadless){
+                //Reset renderer
+                testBed.getRenderer().clearDebugObjects();
+            }
 
             //Run the autopilotmodule update
             try {
@@ -137,6 +143,9 @@ public class SimulationDriver {
                 System.err.println("Testbed threw an unexpected exception!");
                 ex.printStackTrace();
             }
+
+            lastUpdateTimestamps.removeIf(timestamp -> System.currentTimeMillis() - timestamp > 1000);
+            lastUpdateTimestamps.add(System.currentTimeMillis());
         }
 
         //Invoke the event handlers
@@ -178,6 +187,10 @@ public class SimulationDriver {
     public boolean hasSimulationThrownException(){return simulationThrewException;}
     
     public boolean isOutOfControl(){return outOfControl;}
+
+    public int getUpdatesPerSecond(){
+        return lastUpdateTimestamps.size();
+    }
 
     public TestBed getTestBed(){
         return testBed;

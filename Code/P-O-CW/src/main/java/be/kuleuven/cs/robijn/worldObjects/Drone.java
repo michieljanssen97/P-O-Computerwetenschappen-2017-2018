@@ -90,7 +90,6 @@ public class Drone extends WorldObject {
 		int minHeight = 30;
 		int extraHeight = 10;
 		this.height = minHeight + (amountOfDrones * extraHeight);
-
 	}
 	
     //     -----------------     //
@@ -122,7 +121,11 @@ public class Drone extends WorldObject {
 	
 	private final String droneID;
 	
-	private final float height;
+	private float height;
+	
+	public void setHeight(float height) {
+		this.height = height;
+	}
 	
     private AirportPackage assignedPackage = null;
     
@@ -293,10 +296,8 @@ public class Drone extends WorldObject {
 	public void setArrived() {
 		this.setToAirport();
 		this.setPackageDelivered();
-		if(this.getDestinationRunway() != null) {
-			this.getDestinationRunway().removeCurrentDrone();
-			this.setDestinationRunway(null);
-		}
+		this.getDestinationRunway().removeCurrentDrone();
+		this.setDestinationRunway(null);
 	}
 	
 	public void setPackageDelivered() {

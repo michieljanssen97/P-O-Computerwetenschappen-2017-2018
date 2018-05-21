@@ -184,7 +184,7 @@ public class MainController {
 
     //Starts running the simulation.
     private void startSimulation(){
-        int targetFPS = 30;
+        int targetFPS = 60;
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(1000/targetFPS), e -> {
             getSimulation().runUpdate();
         }));
