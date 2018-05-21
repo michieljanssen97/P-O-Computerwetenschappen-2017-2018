@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
-import org.apache.commons.math3.util.Pair;
 
 import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Airport;

@@ -41,6 +41,7 @@ public class Targets {
 				}
 				this.setTargets(newTars);
 			}
+			System.out.println(this.getTargets()[index]);
 		}
 		return this.getTargets()[index];
 	}
