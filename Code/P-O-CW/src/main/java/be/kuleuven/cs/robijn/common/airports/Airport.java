@@ -219,20 +219,35 @@ public class Airport extends WorldObject {
 	 * Check if the given location is on (or above) the given airport
 	 */
 	public boolean isOnAirport(RealVector place) {
-		Vector2D airport2DPos = new Vector2D(this.getXPositionMiddle(), this.getZPositionMiddle());
-		Vector2D airportSize = this.getSize();
-		double angle = this.getAngle() + Math.PI;
+//		Vector2D airport2DPos = new Vector2D(this.getXPositionMiddle(), this.getZPositionMiddle());
+//		Vector2D airportSize = this.getSize();
+//		double angle = this.getAngle() + Math.PI;
 		Vector2D positionToCheck = new Vector2D(place.getEntry(0), place.getEntry(2));
 		
-		Vector2D up = new Vector2D(airportSize.getX()/2, new Vector2D(-Math.cos(angle), -Math.sin(angle)));		
-		Vector2D down = new Vector2D(airportSize.getX()/2, new Vector2D(Math.cos(angle), Math.sin(angle)));		
-		Vector2D right = new Vector2D(airportSize.getY()/2, new Vector2D(-Math.sin(angle), Math.cos(angle)));		
-		Vector2D left = new Vector2D(airportSize.getY()/2, new Vector2D(Math.sin(angle), -Math.cos(angle)));
-		
-		Vector2D rightUpCorner = airport2DPos.add(up).add(right);
-		Vector2D rightDownCorner = airport2DPos.add(up).add(left);
-		Vector2D leftDownCorner = airport2DPos.add(down).add(left);
-		Vector2D leftUpCorner = airport2DPos.add(down).add(right);
+//		Vector2D up = new Vector2D(airportSize.getX()/2, new Vector2D(-Math.cos(angle), -Math.sin(angle)));		
+//		Vector2D down = new Vector2D(airportSize.getX()/2, new Vector2D(Math.cos(angle), Math.sin(angle)));		
+//		Vector2D right = new Vector2D(airportSize.getY()/2, new Vector2D(-Math.sin(angle), Math.cos(angle)));		
+//		Vector2D left = new Vector2D(airportSize.getY()/2, new Vector2D(Math.sin(angle), -Math.cos(angle)));
+		RealVector orientation11 = this.getRunways()[0].getWorldPosition().subtract(this.getWorldPosition());
+		if (orientation11.getNorm() != 0)
+			orientation11 = orientation11.mapMultiply((this.getSize().getX()/2)/orientation11.getNorm());
+		RealVector orientation111 = this.getGates()[0].getWorldPosition().subtract(this.getWorldPosition());
+		if (orientation111.getNorm() != 0)
+			orientation111 = orientation111.mapMultiply((this.getSize().getY()/2)/orientation111.getNorm());
+		RealVector orientation222 = this.getGates()[1].getWorldPosition().subtract(this.getWorldPosition());
+		if (orientation222.getNorm() != 0)
+			orientation222 = orientation222.mapMultiply((this.getSize().getY()/2)/orientation222.getNorm());
+		RealVector orientation12 = this.getRunways()[1].getWorldPosition().subtract(this.getWorldPosition());
+		if (orientation12.getNorm() != 0)
+			orientation12 = orientation12.mapMultiply((this.getSize().getX()/2)/orientation12.getNorm());
+		RealVector upRight = orientation111.add(orientation11).add(this.getWorldPosition());
+		RealVector upLeft = orientation222.add(orientation11).add(this.getWorldPosition());
+		RealVector downRight = orientation111.add(orientation12).add(this.getWorldPosition());
+		RealVector downLeft = orientation222.add(orientation12).add(this.getWorldPosition());
+//		Vector2D rightUpCorner = airport2DPos.add(up).add(right);
+//		Vector2D rightDownCorner = airport2DPos.add(up).add(left);
+//		Vector2D leftDownCorner = airport2DPos.add(down).add(left);
+//		Vector2D leftUpCorner = airport2DPos.add(down).add(right);
 		
 //		Vector2D leftUpCorner = airport2DPos.add(up).add(right);
 //		Vector2D leftDownCorner = airport2DPos.add(up).add(left);
@@ -248,8 +263,8 @@ public class Airport extends WorldObject {
 //		}
 //		return false;
 		
-		int[] xPos = {(int) rightUpCorner.getX(), (int) rightDownCorner.getX(), (int) leftDownCorner.getX(), (int) leftUpCorner.getX()};
-		int[] yPos = {(int) rightUpCorner.getY(), (int) rightDownCorner.getY(), (int) leftDownCorner.getY(), (int) leftUpCorner.getY()};
+		int[] xPos = {(int) upRight.getEntry(0), (int) upLeft.getEntry(0), (int) downLeft.getEntry(0), (int) downRight.getEntry(0)};
+		int[] yPos = {(int) upRight.getEntry(2), (int) upLeft.getEntry(2), (int) downLeft.getEntry(2), (int) downRight.getEntry(2)};
 		
 		
 		Polygon airportPolygon = new Polygon(xPos, yPos, 4);
