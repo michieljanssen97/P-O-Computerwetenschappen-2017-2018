@@ -273,10 +273,10 @@ public class Drone extends WorldObject {
 			fromRunway.removeCurrentDrone();
 			Gate g0 = currentAirport.getGates()[0];
 			Gate g1 = currentAirport.getGates()[1];
-			if(g0.getCurrentDrone().equals(this)) {
+			if(g0.getCurrentDrone() != null && g0.getCurrentDrone().equals(this)) {
 				g0.removeCurrentDrone();
 			}
-			if(g1.getCurrentDrone().equals(this)) {
+			if(g1.getCurrentDrone() != null && g1.getCurrentDrone().equals(this)) {
 				g1.removeCurrentDrone();
 			}
 			
@@ -292,7 +292,10 @@ public class Drone extends WorldObject {
 	public void setArrived() {
 		this.setToAirport();
 		this.setPackageDelivered();
-		this.getDestinationRunway().removeCurrentDrone();
+		if(this.getDestinationRunway() != null) {
+			this.getDestinationRunway().removeCurrentDrone();
+			this.setDestinationRunway(null);
+		}
 	}
 	
 	public void setPackageDelivered() {

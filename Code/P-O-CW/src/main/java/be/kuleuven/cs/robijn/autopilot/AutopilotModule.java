@@ -11,6 +11,7 @@ import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import be.kuleuven.cs.robijn.common.airports.Gate;
+import be.kuleuven.cs.robijn.common.airports.Runway;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
@@ -42,6 +43,7 @@ public class AutopilotModule {
 
     public void deliverPackage(Airport fromAirport, Gate fromGate, Airport toAirport, Gate toGate) {
     	AirportPackage p = new AirportPackage(fromGate, toGate, this);
+    	fromGate.setPackage(p);
     	this.world.addChild(p);
     	
 //    	float closestDistance = Float.POSITIVE_INFINITY;
@@ -80,8 +82,9 @@ public class AutopilotModule {
     }
     
     public void taxiToGateAndFly(Drone drone, Gate fromGate, Gate toGate) {
+        
     	Autopilot autopilot = autopilots.get(drone);
-    	if(!drone.isOnGate(fromGate) && drone.canBeAssigned()) {//first taxi to the correct Gate
+    	if(!drone.isOnGate(fromGate) && drone.canBeAssigned() && drone.getAirportOfDrone().equals(fromGate.getAirport())) {//first taxi to the correct Gate
     		
     		System.out.println("-------------------- TAXI");
     		

@@ -86,10 +86,10 @@ public class AirportPackage extends WorldObject{
         currentGate = null;
         currentTransporter = transporter;
         currentTransporter.setPackage(this);
-
+        
+    	//Lock the runways
         Runway takeOffRunway = routeCalculator.getFromRunway(transporter, this.getOrigin());
 		Runway landRunway = routeCalculator.getToRunway(transporter, this.getOrigin(), this.getDestination(), takeOffRunway, transporter.getHeight());
-		
 		
         takeOffRunway.setCurrentDrone(transporter);
     	landRunway.setCurrentDrone(transporter);
@@ -184,10 +184,14 @@ public class AirportPackage extends WorldObject{
     	if(currentAirport == null) {
     		return false;
     	}
-    	
 		Runway toTakeOff = routeCalculator.getFromRunway(drone, fromGate);
 		Runway toLand = routeCalculator.getToRunway(drone, fromGate, toGate, toTakeOff, drone.getHeight());
-    	return (currentAirport.equals(this.getOrigin().getAirport()) && Runway.areRunwaysAvailable(toTakeOff, toLand) && fromGate.hasDrone() && !toGate.hasDrone());
+		
+		System.out.println("----------------------------------------------------------");
+		System.out.println(currentAirport.equals(this.getOrigin().getAirport()));
+		System.out.println(Runway.areRunwaysAvailable(toTakeOff, toLand));
+		System.out.println(!toGate.hasDrone());
+    	return (Runway.areRunwaysAvailable(toTakeOff, toLand) && !toGate.hasDrone());
     }
     
     private static Gate findClosestGate(Drone drone) {
@@ -200,7 +204,8 @@ public class AirportPackage extends WorldObject{
     	throw new IllegalStateException();
     }
 
-    public void assignPackages() {    
+    public void assignPackages() {
+    	int oldAmountOfPackages = this.getAllPackagesToAssign().size();
     	for(AirportPackage p : this.getAllPackagesToAssign()){
             Airport fromAirport = p.getOrigin().getAirport(); 
             Gate fromGate = p.getOrigin();
@@ -211,8 +216,21 @@ public class AirportPackage extends WorldObject{
             		if(drone.getAirportOfDrone() == null) {
             			throw new IllegalStateException();
             		}
-            		drone.setCanBeAssigned(false);
-	            	module.taxiToGateAndFly(drone, findClosestGate(drone), fromGate);
+            		Gate newFromGate = findClosestGate(drone);
+            		if(p.droneCanStart(drone, newFromGate, fromGate, drone.getAirportOfDrone())) {
+            			//Lock the runways
+            	        Runway takeOffRunway = routeCalculator.getFromRunway(drone, this.getOrigin());
+            			Runway landRunway = routeCalculator.getToRunway(drone, this.getOrigin(), this.getDestination(), takeOffRunway, drone.getHeight());
+            			
+            	        takeOffRunway.setCurrentDrone(drone);
+            	    	landRunway.setCurrentDrone(drone);
+            	        drone.setDestinationRunway(landRunway);
+	            		drone.setCanBeAssigned(false);
+	            		
+	            		
+		            	System.out.println("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
+		            	module.taxiToGateAndFly(drone, newFromGate, fromGate);
+            		}
             	}
 	            else if (p.droneCanStart(drone, fromGate, toGate, fromAirport)){
             		fromGate.setCurrentDrone(drone);
@@ -222,5 +240,20 @@ public class AirportPackage extends WorldObject{
 	            }
             }
         }
+    	
+    	if(oldAmountOfPackages != 0 && this.getAllPackagesToAssign().size() == oldAmountOfPackages) {//No package was assigned to a drone
+    		boolean isDeadlock = true;
+    		for(Drone d : this.getParent().getChildrenOfType(Drone.class)) {
+    			if(!d.canBeAssigned() || d.hasPackage()) {
+    				isDeadlock = false;
+    				break;
+    			}
+    		}
+    		
+    		if(isDeadlock) {
+	    		//TODO laat een vliegtuig (op een airp zonder pakje) naar een vrije gate vliegen zodat 'deadlock' wordt opgelost
+	    		System.out.println("--------------------------------- DEADLOCK: " + oldAmountOfPackages);
+    		}
+    	}
     }
 }

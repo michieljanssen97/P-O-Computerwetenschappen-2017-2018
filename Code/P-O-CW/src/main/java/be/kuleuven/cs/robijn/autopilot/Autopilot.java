@@ -5,6 +5,7 @@ import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.autopilot.Autopilot;
 import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Gate;
+import be.kuleuven.cs.robijn.common.airports.Runway;
 import be.kuleuven.cs.robijn.common.exceptions.FinishedException;
 import be.kuleuven.cs.robijn.common.math.Angle;
 import be.kuleuven.cs.robijn.common.math.Angle.Type;
@@ -646,6 +647,7 @@ public class Autopilot {
 			thrust = Math.max(0, thrust);
         }
         if (this.getFlightMode() == FlightMode.BRAKE) {
+        	this.drone.setArrived();
 			if (drone.getVelocity().getNorm() > 0.001) {
 				float targetVelocity;
 				RealVector targetPosition = this.getTargetPosition();
@@ -813,7 +815,7 @@ public class Autopilot {
 		this.toGate = null;
 	}
 	
-    public void flyRoute(Drone drone, Gate fromGate, Gate toGate) {
+    public void flyRoute(Drone drone, Gate fromGate, Gate toGate) {     
     	RealVector[] route = routeCalculator.calculateRoute(drone, fromGate, toGate, drone.getHeight());
     	this.setTargets(route);
     	this.setTargetPosition(toGate.getWorldPosition());

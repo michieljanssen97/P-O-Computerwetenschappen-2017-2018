@@ -257,7 +257,9 @@ public class AirportPackageTest {
         drone.setRelativePosition(dronePos);
         drone.setToAirport();
 		
-        
+		assertEquals(1, airport1.getCurrentDrones().size());
+		assertEquals(0, airport2.getCurrentDrones().size());
+		
         Airport firstAirport = world.getFirstChildOfType(Airport.class);
         
         assertEquals(firstAirport.getAllAirports().size(), 2);
@@ -268,9 +270,6 @@ public class AirportPackageTest {
 		airPackage.assignPackages();
 		assertEquals(1, airPackage.getAllPackagesToAssign().size());
 		assertTrue(!drone.hasPackage());
-		
-		assertEquals(1, airport1.getCurrentDrones().size());
-		assertEquals(0, airport2.getCurrentDrones().size());
 		
 		removeAllChildren(world);
 	}	
