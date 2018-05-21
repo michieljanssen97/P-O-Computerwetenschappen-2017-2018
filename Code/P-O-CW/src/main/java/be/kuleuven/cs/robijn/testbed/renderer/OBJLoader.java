@@ -1,7 +1,6 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.Resources;
-import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import java.io.*;
@@ -140,7 +139,7 @@ public class OBJLoader {
         return Mesh.loadMesh(vertexArray, textureArray, normalArray, indexArray);
     }
 
-    private Mesh buildCheapModel(){
+    public Mesh buildCheapModel(){
         //This method uses the cheap and easy way to fix the 'multiple indices to one index' problem.
         //Easy to implement and relatively cheap, but breaks if a vertex is associated with multiple texture/normal coordinates
 

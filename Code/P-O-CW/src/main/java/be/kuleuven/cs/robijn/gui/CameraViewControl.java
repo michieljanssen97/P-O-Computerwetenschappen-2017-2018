@@ -5,7 +5,6 @@ import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.worldObjects.Label3D;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
-import be.kuleuven.cs.robijn.testbed.renderer.RenderDebug;
 import be.kuleuven.cs.robijn.worldObjects.*;
 import javafx.beans.binding.Bindings;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
@@ -33,21 +32,18 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 
 import java.awt.*;
-import java.awt.Menu;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.Vector;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.Semaphore;
 
 /**
  * GUI component that displays a 3D render of the world, along with several buttons for changing the view
  */
+@SuppressWarnings("restriction")
 public class CameraViewControl extends AnchorPane {
     //The object names for the cameras that provide the different perspectives.
     public static final String SIDE_CAMERA_ID = "gui_side_camera";
@@ -80,7 +76,7 @@ public class CameraViewControl extends AnchorPane {
     private Camera activeCamera;
 
     private DragHelper dragHelper;
-    private double dragSensitivity = 200;
+    //private double dragSensitivity = 200;
     private final MainController mainController;
 
     public CameraViewControl(MainController parent){
@@ -562,9 +558,8 @@ public class CameraViewControl extends AnchorPane {
         //If the camera is orthographic, update the icon rendering properties
         if(activeCamera instanceof OrthographicCamera){
             OrthographicCamera orthoCam = (OrthographicCamera) activeCamera;
-            orthoCam.setRenderIconsThresholdRatio(0.025);
             orthoCam.setIconOffset(new Vector2D(0, 7));
-            orthoCam.setIconSize(8f);
+            orthoCam.setIconSize(10f);
         }
 
         //The view always lags behind 1 frame so that the GPU work can be done while the Java code continues and so
@@ -642,5 +637,12 @@ public class CameraViewControl extends AnchorPane {
 
     public ObjectProperty<Drone> getActiveDronePropertyProperty() {
         return activeDroneProperty;
+    }
+
+    public void focusOnObject(WorldObject obj) {
+        if(activeCamera instanceof OrthographicCamera){
+            OrthographicCamera orthoCam = (OrthographicCamera)activeCamera;
+            orthoCam.centerObject(obj);
+        }
     }
 }

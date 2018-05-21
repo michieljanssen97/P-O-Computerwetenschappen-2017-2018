@@ -2,12 +2,11 @@ package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.common.Font;
-import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.airports.Runway;
+import be.kuleuven.cs.robijn.gui.OrthoCameraZoomHandler;
 import be.kuleuven.cs.robijn.testbed.renderer.bmfont.BMFont;
 import be.kuleuven.cs.robijn.worldObjects.Label3D;
-import be.kuleuven.cs.robijn.common.math.VectorMath;
 import be.kuleuven.cs.robijn.worldObjects.Box;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
@@ -92,9 +91,15 @@ public class OpenGLRenderer implements Renderer {
 
     private long windowHandle;
 
+    private ShaderProgram texturedProgram;
+
     private Model droneModel = null;
     private Model boxModel = null;
+
     private Model groundModel = null;
+    private Texture grassTexture = null;
+    private Texture groundTexture = null; // Produced by GroundBaker
+    private Mesh groundMesh = null;
 
     private Model lineModel = null;
 
@@ -110,13 +115,14 @@ public class OpenGLRenderer implements Renderer {
 
     private final LabelRenderer labelRenderer = new LabelRenderer(this);
 
+    private GroundBaker groundBaker = new GroundBaker(this);
+
     private OpenGLRenderer(long windowHandle){
         this.windowHandle = windowHandle;
     }
 
     private void initializeModels(){
         //Load shader for textured models (the shaders will be closed after linking, but the reference in the program will keep them from being deleted)
-        ShaderProgram texturedProgram;
         try(Shader vertexShader = Shader.compileVertexShader(Resources.loadTextResource("/shaders/textured/vertex.glsl"))){
             try(Shader fragmentShader = Shader.compileFragmentShader(Resources.loadTextResource("/shaders/textured/fragment.glsl"))){
                 texturedProgram = ShaderProgram.link(vertexShader, fragmentShader);
@@ -143,14 +149,13 @@ public class OpenGLRenderer implements Renderer {
         boxModel = new Model(boxMesh, null, boxProgram);
 
         //Load ground model
-        Mesh groundMesh = OBJLoader.loadFromResources("/models/plane/plane.obj");
-        Texture groundTexture = Texture.load(Resources.loadImageResource("/models/ground/texture.png"));
-        groundTexture.setTextureScale(new Vector2D(0.0001, 0.0001));
-        groundModel = new Model(groundMesh, groundTexture, texturedProgram);
+        groundMesh = OBJLoader.loadFromResources("/models/plane/plane.obj");
+        grassTexture = Texture.load(Resources.loadImageResource("/models/ground/texture.png"));
+        grassTexture.setTextureScale(new Vector2D(0.0001, 0.0001));
 
         //Load gate model
         Mesh gateMesh = OBJLoader.loadFromResources("/models/plane/plane.obj");
-        gateMesh.setRenderOffset(new Vector3D(0, .1, 0));
+        gateMesh.setRenderOffset(new Vector3D(0, .006, 0));
         Texture gateTexture = Texture.load(Resources.loadImageResource("/models/gate/texture.png"));
         Texture withPackageGateTexture = Texture.load(Resources.loadImageResource("/models/gate/with_package_texture.png"));
         gateModel = new Model(gateMesh, gateTexture, texturedProgram);
@@ -207,6 +212,16 @@ public class OpenGLRenderer implements Renderer {
         }
 
         try {
+            int groundWidth = 20000;
+            int groundHeight = 20000;
+
+            if(groundModel == null){
+                groundModel = new Model(groundMesh, grassTexture, texturedProgram);
+                groundTexture = groundBaker.bake(groundWidth, groundHeight, 8000, 8000, worldRoot, worldStateLock);
+                groundTexture.setTextureScale(new Vector2D(1, 1));
+                groundModel = new Model(groundMesh, groundTexture, texturedProgram);
+            }
+
             worldStateLock.acquire();
 
             labelRenderer.updateLabelCache(worldRoot);
@@ -240,7 +255,8 @@ public class OpenGLRenderer implements Renderer {
 
             //Render ground if needed
             WorldObject groundObj = new WorldObject();
-            groundObj.setScale(new ArrayRealVector(new double[]{60000, 1, 60000}, false));
+            groundObj.setName("GROUND");
+            groundObj.setScale(new ArrayRealVector(new double[]{groundWidth, 1, groundHeight}, false));
             RealMatrix transform = groundObj.getObjectToWorldTransform();
             renderModel(groundModel, viewProjectionMatrix, transform);
 
@@ -264,6 +280,9 @@ public class OpenGLRenderer implements Renderer {
                 throw new RuntimeException("glFenceSync failed");
             }
 
+            //Some OpenGL driver implementations require flushing to make sure all commands are run.
+            glFlush();
+
             OpenGLRenderTask task = new OpenGLRenderTask(sync);
             ((OpenGLFrameBuffer) buffer).setCurrentRenderTask(task);
             return task;
@@ -275,7 +294,8 @@ public class OpenGLRenderer implements Renderer {
         }
     }
 
-    private void renderChildren(WorldObject obj, Matrix4f viewProjectionMatrix, Camera camera){
+    @SuppressWarnings("static-access")
+	private void renderChildren(WorldObject obj, Matrix4f viewProjectionMatrix, Camera camera){
         //Recursively render children
         for (WorldObject child : obj.getChildren()){
             renderChildren(child, viewProjectionMatrix, camera);
@@ -294,10 +314,10 @@ public class OpenGLRenderer implements Renderer {
             model.getShader().setUniformFloat("color", rgbValues);
         }else if(obj instanceof Drone){
             model = droneModel;
-        }else if(obj instanceof Gate){
+        }else if(obj instanceof Gate && (obj.getWorldPosition().getDistance(camera.getWorldPosition()) < 1000 || camera instanceof OrthographicCamera)){
             Gate gate = (Gate)obj;
             model = gate.hasPackage() ? withPackageGateModel : gateModel;
-        }else if(obj instanceof Runway){
+        }else if(obj instanceof Runway && (obj.getWorldPosition().getDistance(camera.getWorldPosition()) < 1000 || camera instanceof OrthographicCamera)){
             model = runwayModel;
         }else if(obj instanceof Label3D){
             labelRenderer.renderLabel((Label3D)obj, viewProjectionMatrix, camera);
@@ -312,28 +332,24 @@ public class OpenGLRenderer implements Renderer {
         if(camera instanceof OpenGLOrthographicCamera){
             OpenGLOrthographicCamera orthoCam = (OpenGLOrthographicCamera) camera;
 
-            Vector3D size = model.getMesh().getBoundingBox().getBoxDimensions();
-            double avgAxis = (size.getX() + size.getY() + size.getZ()) / 3d;
-            double minRatio = Math.min(avgAxis/orthoCam.getWidth(), avgAxis/orthoCam.getHeight());
-            if(minRatio < orthoCam.getRenderIconsThresholdRatio()){
-                //Render icon
-
-                Billboard icon = null;
-                if(obj instanceof Box){
-                    icon = boxIcon;
-                }else if(obj instanceof Drone){
-                    icon = droneIcon;
-                }else{
-                    return;
-                }
-
-                Vector3D billboardRelPos = camera.getWorldRotation().applyTo(
-                        new Vector3D(orthoCam.getIconOffset().getX(), orthoCam.getIconOffset().getY(), 0)
-                );
-                RealVector billboardPosition = obj.getWorldPosition().add(
-                        new ArrayRealVector(new double[]{billboardRelPos.getX(), billboardRelPos.getY(), billboardRelPos.getZ()}, false));
-                renderModel(icon, viewProjectionMatrix, icon.generateModelMatrix(camera, billboardPosition, orthoCam.getIconSize()));
+            //Render icon
+            Billboard icon = null;
+            if(obj instanceof Box){
+                icon = boxIcon;
+            }else if(obj instanceof Drone){
+                icon = droneIcon;
+            }else{
+                return;
             }
+
+            Vector3D billboardRelPos = camera.getWorldRotation().applyTo(
+                    new Vector3D(orthoCam.getIconOffset().getX(), orthoCam.getIconOffset().getY(), 0)
+            );
+            RealVector billboardPosition = obj.getWorldPosition().add(
+                    new ArrayRealVector(new double[]{billboardRelPos.getX(), billboardRelPos.getY(), billboardRelPos.getZ()}, false));
+
+            float scale = orthoCam.getWidth() / OrthoCameraZoomHandler.DEFAULT_ORTHO_CAM_WIDTH;
+            renderModel(icon, viewProjectionMatrix, icon.generateModelMatrix(camera, billboardPosition, scale * orthoCam.getIconSize()));
         }
     }
 

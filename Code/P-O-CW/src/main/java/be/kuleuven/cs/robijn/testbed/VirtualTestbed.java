@@ -1,8 +1,8 @@
 package be.kuleuven.cs.robijn.testbed;
 
 import be.kuleuven.cs.robijn.common.*;
+import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import be.kuleuven.cs.robijn.testbed.renderer.AsyncOpenGLRenderer;
-import be.kuleuven.cs.robijn.testbed.renderer.OpenGLRenderer;
 import be.kuleuven.cs.robijn.worldObjects.Label3D;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
@@ -10,10 +10,8 @@ import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
 import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Semaphore;
+import java.util.*;
+import java.util.concurrent.*;
 
 public class VirtualTestbed implements TestBed {
 	//Simulation
@@ -22,6 +20,7 @@ public class VirtualTestbed implements TestBed {
 	private final WorldObject world;
 	private final List<Drone> drones;
 	private final Semaphore worldStateLock = new Semaphore(1);
+
 
 	//Renderer
 	private AsyncOpenGLRenderer renderer;
@@ -51,11 +50,33 @@ public class VirtualTestbed implements TestBed {
 		simulation = new TestbedSimulation(world);
 	}
 
+
 	@Override
 	public boolean update(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs[] outputs) {
+
+		for(int i = 0; i < drones.size()-1; i++){
+			for(int j = i+1; j < drones.size(); j++){
+
+				double deltaPosX = drones.get(i).getWorldPosition().getEntry(0)-drones.get(j).getWorldPosition().getEntry(0);
+				double deltaPosY = drones.get(i).getWorldPosition().getEntry(1)-drones.get(j).getWorldPosition().getEntry(1);
+				double deltaPosZ = drones.get(i).getWorldPosition().getEntry(2)-drones.get(j).getWorldPosition().getEntry(2);
+				double deltaRR = Math.sqrt(Math.pow(deltaPosX, 2) + Math.pow(deltaPosY, 2) + Math.pow(deltaPosZ, 2));
+
+
+				if (deltaRR < 5){
+					drones.remove(i);
+					drones.remove(j-1);
+				}
+			}
+		}
+
+		if (drones.size() == 0){
+			throw new IllegalArgumentException("No more drone's in the world");
+		}
+
 		try {
 			worldStateLock.acquire();
-
+			
 			//Update drones
 			for(int i = 0; i < drones.size(); i++){
 				Drone drone = drones.get(i);
@@ -73,7 +94,10 @@ public class VirtualTestbed implements TestBed {
 		} finally {
 			worldStateLock.release();
 		}
+
+		
 	}
+
 
 	@Override
 	public AutopilotInputs getInputs(int i) {

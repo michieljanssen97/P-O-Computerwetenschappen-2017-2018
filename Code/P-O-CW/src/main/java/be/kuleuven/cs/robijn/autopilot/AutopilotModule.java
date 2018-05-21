@@ -6,14 +6,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
-import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.RealVector;
-
 import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Airport;
+import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import be.kuleuven.cs.robijn.common.airports.Gate;
-import be.kuleuven.cs.robijn.common.airports.Runway;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
@@ -44,18 +40,21 @@ public class AutopilotModule {
     }
 
     public void deliverPackage(Airport fromAirport, Gate fromGate, Airport toAirport, Gate toGate) {
-    	float closestDistance = Float.POSITIVE_INFINITY;
-    	Drone bestDrone = null;
-    	ArrayList<Drone> drones = world.getChildrenOfType(Drone.class);
-		for (Drone drone : drones) {
-			float distance = (float) fromGate.getWorldPosition().getDistance(drone.getWorldPosition());
-			if (distance < closestDistance) {
-				closestDistance = distance;
-				bestDrone = drone;
-			}
-	    }
-		this.flyRoute(bestDrone, fromGate, toGate, 100);
-		
+    	AirportPackage p = new AirportPackage(fromGate, toGate, this);
+    	fromGate.setPackage(p);
+    	this.world.addChild(p);
+    	
+//    	float closestDistance = Float.POSITIVE_INFINITY;
+//    	Drone bestDrone = null;
+//    	ArrayList<Drone> drones = world.getChildrenOfType(Drone.class);
+//		for (Drone drone : drones) {
+//			float distance = (float) fromGate.getWorldPosition().getDistance(drone.getWorldPosition());
+//			if (distance < closestDistance) {
+//				closestDistance = distance;
+//				bestDrone = drone;
+//			}
+//	    }
+//		autopilots.get(bestDrone).flyRoute(bestDrone, fromGate, toGate);
     }
 
     public void startTimeHasPassed(Drone drone, AutopilotInputs inputs) {
@@ -80,11 +79,30 @@ public class AutopilotModule {
         threadPool.shutdown();
     }
     
-    public void flyRoute(Drone drone, Gate fromGate, Gate toGate, float hight) {
+    public void taxiToGateAndFly(Drone drone, Gate fromGate, Gate toGate) {
+    	
+    	System.out.println(drone.getWorldPosition());
+    	System.out.println(fromGate.getWorldPosition());
+    	System.out.println(toGate.getWorldPosition());
+        
     	Autopilot autopilot = autopilots.get(drone);
-    	RealVector[] route = routeCalculator.calculateRoute(drone, fromGate, toGate, hight);
-    	autopilot.setTargets(route);
-    	autopilot.setTargetPosition(toGate.getWorldPosition());
-    	autopilot.setFlightMode(FlightMode.ASCEND);
+    	if(!drone.isOnGate(fromGate) && drone.canBeAssigned() && drone.getAirportOfDrone().equals(fromGate.getAirport())) {//first taxi to the correct Gate
+    		
+    		System.out.println("-------------------- TAXI");
+    		
+	    	autopilot.setTargetPosition(fromGate.getWorldPosition());
+	    	autopilot.setFlightMode(FlightMode.TAXI);
+	    	
+	    	autopilot.setFlyAfterPackagePicked(drone, fromGate, toGate);
+    	}
+    	else {
+    		System.out.println("-------------------- FLY");
+    		
+    		autopilot.flyRoute(drone, fromGate, toGate);
+    	}
     }
+
+	public WorldObject getWorld() {
+		return this.world;
+	}
 }

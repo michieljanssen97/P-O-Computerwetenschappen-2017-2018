@@ -3,7 +3,6 @@ package be.kuleuven.cs.robijn.common.math;
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.ode.*;
 
-import be.kuleuven.cs.robijn.tyres.Tyre;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 import interfaces.*;
 

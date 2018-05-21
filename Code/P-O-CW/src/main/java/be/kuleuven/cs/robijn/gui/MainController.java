@@ -1,32 +1,27 @@
 package be.kuleuven.cs.robijn.gui;
 
 import be.kuleuven.cs.robijn.common.*;
-import be.kuleuven.cs.robijn.common.stopwatch.RealTimeStopwatch;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
-import be.kuleuven.cs.robijn.worldObjects.OrthographicCamera;
-import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.*;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.effect.BoxBlur;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.linear.ArrayRealVector;
-
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Controller for the main window layout
  */
+@SuppressWarnings("restriction")
 public class MainController {
     @FXML
     private SplitPane contentRoot;
@@ -48,7 +43,11 @@ public class MainController {
     private SidebarControl sidebar;
 
     @FXML
+    private TextArea output;
+
+    @FXML
     private SplittablePane camerasViewRoot;
+    private ArrayList<CameraViewControl> cameraViews = new ArrayList<>();
 
     private ObjectProperty<SimulationDriver> simulationProperty = new SimpleObjectProperty<>(this, "simulation");
 
@@ -67,6 +66,7 @@ public class MainController {
         //Setup CameraViewControls
         camerasViewRoot.setViewSupplier(() -> {
             CameraViewControl cameraView = new CameraViewControl(this);
+            cameraViews.add(cameraView);
             cameraView.getSimulationProperty().bind(simulationProperty);
             cameraView.getSelectedDronePropertyProperty().bind(selectedDroneProperty);
             return cameraView;
@@ -95,14 +95,22 @@ public class MainController {
             droneList.getSelectionModel().select(0);
         });
 
-        droneList.setCellFactory(view -> new ListCell<Drone>(){
-            @Override
-            protected void updateItem(Drone item, boolean empty) {
-                super.updateItem(item, empty);
-                if(!empty && item != null){
-                    setText(item.getDroneID());
+        droneList.setCellFactory(view -> {
+            ListCell<Drone> cell = new ListCell<Drone>(){
+                @Override
+                protected void updateItem(Drone item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if(!empty && item != null){
+                        setText(item.getDroneID());
+                    }
                 }
-            }
+            };
+            cell.setOnMouseClicked(e -> {
+                if(e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 2){
+                    focusCameraOnObject(cell.getItem());
+                }
+            });
+            return cell;
         });
     }
 
@@ -111,7 +119,18 @@ public class MainController {
     }
 
     private void setupPackageList(){
+        packageListControl.setMainController(this);
         packageListControl.simulationProperty().bind(getSimulationProperty());
+    }
+
+    public void focusCameraOnObject(WorldObject obj) {
+        for (CameraViewControl view : cameraViews){
+            view.focusOnObject(obj);
+        }
+    }
+
+    public void addLineToOutput(String line){
+        output.appendText(line+"\n");
     }
 
     /////////////////

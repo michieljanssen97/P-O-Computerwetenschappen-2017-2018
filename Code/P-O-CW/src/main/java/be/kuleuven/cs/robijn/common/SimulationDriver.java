@@ -5,14 +5,12 @@ import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.exceptions.CrashException;
 import be.kuleuven.cs.robijn.common.stopwatch.ConstantIntervalStopwatch;
-import be.kuleuven.cs.robijn.common.stopwatch.RealTimeStopwatch;
 import be.kuleuven.cs.robijn.common.stopwatch.Stopwatch;
 import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
 import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  * This class combines the testbed and autopilot into one runnable simulation.
@@ -101,7 +99,7 @@ public class SimulationDriver {
                         newPack.getDestination().getAirport().getId(), newPack.getDestination().getId()
                     );
                 }
-            	
+    			
                 for(int i = 0; i < settings.getDrones().length; i++){
                     autoPilotModule.startTimeHasPassed(i, latestAutopilotInputs[i]);
                 }
@@ -152,7 +150,7 @@ public class SimulationDriver {
             throw new IllegalStateException("The source gate already has a package");
         }
 
-        AirportPackage pack = new AirportPackage(sourceGate, targetGate);
+        AirportPackage pack = new AirportPackage(sourceGate, targetGate, this.autoPilotModule.getAutopilotModule());
         newPackages.add(pack);
         return pack;
     }
@@ -193,7 +191,7 @@ public class SimulationDriver {
         updateEventHandlers.add(handler);
     }
 
-    private void removeOnUpdateEventHandler(UpdateEventHandler handler){
+    public void removeOnUpdateEventHandler(UpdateEventHandler handler){
         updateEventHandlers.remove(handler);
     }
 }

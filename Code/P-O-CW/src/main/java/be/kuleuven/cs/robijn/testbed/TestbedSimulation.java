@@ -6,7 +6,6 @@ import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
 import org.apache.commons.math3.ode.FirstOrderIntegrator;
 import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
-
 import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.math.SystemDifferentialEquations;
 import be.kuleuven.cs.robijn.tyres.Tyre;
@@ -88,6 +87,7 @@ public class TestbedSimulation {
 		if (useDiffEquations){
 //			FirstOrderIntegrator dp853 = new DormandPrince853Integrator(1.0e-8, 100.0, 1.0e-5, 1.0e-5);
 			FirstOrderIntegrator rk4 = new ClassicalRungeKuttaIntegrator(secondsSinceLastUpdate);
+			//FirstOrderIntegrator euler = new EulerIntegrator(secondsSinceLastUpdate);
 			FirstOrderDifferentialEquations ode = new SystemDifferentialEquations(drone, output);
 			double[] y = new double[] { drone.getWorldPosition().getEntry(0), drone.getVelocity().getEntry(0), 
 					drone.getWorldPosition().getEntry(1), drone.getVelocity().getEntry(1),

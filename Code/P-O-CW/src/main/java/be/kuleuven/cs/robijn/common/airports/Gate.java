@@ -2,6 +2,9 @@ package be.kuleuven.cs.robijn.common.airports;
 
 import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
+
+import java.util.ArrayList;
+
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.linear.RealVector;
 
@@ -9,6 +12,8 @@ public class Gate extends WorldObject{
     private final Airport parent;
     private final int id;
     private AirportPackage queuedPackage;
+    
+    private Drone currentDrone = null;
 
     public Gate(Airport parent, int id){
         this.parent = parent;
@@ -18,7 +23,7 @@ public class Gate extends WorldObject{
     public Vector2D getSize(){
         return new Vector2D(this.getScale().getEntry(0), this.getScale().getEntry(2));
     }
-
+    
     public Airport getAirport() {
         return parent;
     }
@@ -36,7 +41,7 @@ public class Gate extends WorldObject{
     }
 
     public boolean hasPackage() {
-        return queuedPackage != null;
+        return this.getPackage() != null;
     }
 
     public void setPackage(AirportPackage pack){
@@ -52,4 +57,37 @@ public class Gate extends WorldObject{
         return Math.abs(droneToGateVect.getEntry(0)) < gateSize.getX() &&
                 Math.abs(droneToGateVect.getEntry(2)) < gateSize.getY();
     }
+    
+    public static ArrayList<Gate> getAllGates(WorldObject world){
+    	ArrayList<Gate> allGates = new ArrayList<Gate>();
+    	for(Airport airp : world.getChildrenOfType(Airport.class)) {
+    		for(Gate g : airp.getChildrenOfType(Gate.class)) {
+    			allGates.add(g);
+    		}
+    	}
+    	
+    	return allGates;
+    }
+
+	public boolean hasDrone() {
+		return(this.getCurrentDrone() != null);
+	}
+
+	public void setCurrentDrone(Drone drone) {
+		if(this.hasDrone() && !this.getCurrentDrone().equals(drone)) {
+			throw new IllegalStateException();
+		}
+		else {
+			this.currentDrone = drone;
+		}
+		
+	}
+
+	public Drone getCurrentDrone() {
+		return this.currentDrone;
+	}
+
+	public void removeCurrentDrone() {
+		this.currentDrone = null;
+	}
 }

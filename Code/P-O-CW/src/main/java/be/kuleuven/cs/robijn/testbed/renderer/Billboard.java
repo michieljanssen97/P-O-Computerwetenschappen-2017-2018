@@ -4,7 +4,6 @@ import be.kuleuven.cs.robijn.common.Resources;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.RealVector;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;

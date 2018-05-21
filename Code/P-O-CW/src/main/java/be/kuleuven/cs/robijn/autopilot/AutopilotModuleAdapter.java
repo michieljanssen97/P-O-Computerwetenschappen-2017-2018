@@ -79,16 +79,23 @@ public class AutopilotModuleAdapter implements interfaces.AutopilotModule {
         Gate fromGate = fromAirport.getGates()[fromGateIndex];
         Airport toAirport = airports.get(toAirportIndex);
         Gate toGate = toAirport.getGates()[toGateIndex];
-
-        AirportPackage newPackage = new AirportPackage(fromGate, toGate);
-        fromGate.setPackage(newPackage);
-
-        module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
+        
+        if(! fromGate.hasPackage()){ //Er mag maar 1 pakket beschikbaar zijn per Gate
+//	        AirportPackage newPackage = new AirportPackage(fromGate, toGate, module);
+//	        fromGate.setPackage(newPackage);
+	
+	        module.deliverPackage(fromAirport, fromGate, toAirport, toGate);
+        }
     }
 
     @Override
     public void startTimeHasPassed(int droneIndex, AutopilotInputs inputs) {
         buildWorldIfNull();
+        
+		AirportPackage airpPack = this.getWorld().getFirstChildOfType(AirportPackage.class);
+		if(airpPack != null) {
+			airpPack.assignPackages();
+		}
 
         Drone drone = drones.get(droneIndex);
         module.startTimeHasPassed(drone, inputs);
@@ -104,4 +111,12 @@ public class AutopilotModuleAdapter implements interfaces.AutopilotModule {
     public void simulationEnded() {
         module.simulationEnded();
     }
+    
+    public AutopilotModule getAutopilotModule() {
+    	return this.module;
+    }
+
+	public WorldObject getWorld() {
+		return this.world;
+	}
 }
