@@ -209,6 +209,7 @@ public class AirportPackage extends WorldObject{
             Gate fromGate = p.getOrigin();
             Gate toGate = p.getDestination();
             Drone drone = fromAirport.getAvailableDrone(fromGate);
+           
             if(drone != null && drone.canBeAssigned()) {
             	if(drone.getCurrentAirport() != fromAirport) {
             		if(drone.getAirportOfDrone() == null) {
@@ -228,9 +229,9 @@ public class AirportPackage extends WorldObject{
 		            	module.taxiToGateAndFly(drone, newFromGate, fromGate);
             		}
             	}
-	            else if (p.droneCanStart(drone, fromGate, toGate, fromAirport)){
-            		toGate.setCurrentDrone(drone);
+	            else if (p.droneCanStart(drone, fromGate, toGate, fromAirport)) {
 	            	p.markAsInTransit(drone);
+	            	toGate.setCurrentDrone(drone);
 	                module.taxiToGateAndFly(drone, fromGate, toGate);
 	            }
             }

@@ -743,7 +743,7 @@ public class Autopilot {
         	if(droneOfPackage != null && fromGate != null && toGate != null && Math.abs(drone.getHeadingAngularVelocity()) < 0.00001) {
 	        	this.flyRoute(droneOfPackage, fromGate, toGate);
         	}
-        	else {
+        	else if(Math.abs(drone.getHeadingAngularVelocity()) < 0.00001){
         		drone.setCanBeAssigned(true);
         	}
         }
