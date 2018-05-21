@@ -661,16 +661,16 @@ public class Autopilot {
 				else
 					targetVelocity = 1;
 				if (drone.getVelocity().getNorm() > targetVelocity) {
-					leftBrakeForce = 4300;
-					rightBrakeForce = 4300;
+					float distance = (float) targetPositionDroneCoordinates.getNorm();
+					float velocity = (float) drone.getVelocity().getNorm();
+					float force = drone.getTotalMass()* (float) Math.pow(velocity, 2) / (2*distance);
+					leftBrakeForce = Math.max(0, Math.min(4300, force/2));
+					rightBrakeForce = Math.max(0, Math.min(4300, force/2));
 				}
-				
-				if (targetPositionDroneCoordinates.getNorm() < 3) {
-					
+				if (targetPositionDroneCoordinates.getNorm() < 10) {
 					this.setFlightMode(FlightMode.TURN);
 				}
-			}
-					
+			}	
 		}
         if (this.getFlightMode() == FlightMode.TURN) {
         	float targetHeading = (float) (Math.PI);
@@ -690,7 +690,7 @@ public class Autopilot {
         			thrust = 0;
         		}
         		else {
-        			leftBrakeForce = 9000*Math.abs(drone.getHeading()-targetHeading);
+        			leftBrakeForce = 9000*Math.abs(targetHeading-drone.getHeading());
         			rightBrakeForce = 0;
         		}
         		
