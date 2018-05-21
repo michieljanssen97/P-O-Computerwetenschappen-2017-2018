@@ -159,10 +159,12 @@ public class Airport extends WorldObject {
     	double minDistance = Double.MAX_VALUE;
     	for(Airport airp : this.getAllAirports()) {
     		Drone tempDrone = airp.getFirstAvailableDrone();
-    		int distance = (int) routeCalculator.getBestRunway(tempDrone, airp, this, tempDrone.getClosestGate(airp), fromGate, tempDrone.getHeight())[1];
-    		if(tempDrone != null &&  distance < minDistance && airp.hasSufficientAvailableDrones()) {
-    			minDistance = distance;
-    			drone = tempDrone;
+    		if(tempDrone != null) {
+	    		double distance = (double) routeCalculator.getBestRunway(tempDrone, airp, this, tempDrone.getClosestGate(airp), fromGate, tempDrone.getHeight())[1];
+	    		if(distance < minDistance && airp.hasSufficientAvailableDrones()) {
+	    			minDistance = distance;
+	    			drone = tempDrone;
+	    		}
     		}
     	}
     	return drone; //Is null if no drones are Available

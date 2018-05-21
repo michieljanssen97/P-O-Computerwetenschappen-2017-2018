@@ -745,10 +745,10 @@ public class Autopilot {
                 	rightBrakeForce = 100+180*Math.abs(drone.getHeadingAngularVelocity());
             	}
         	}
-        	if(droneOfPackage != null && fromGate != null && toGate != null && Math.abs(drone.getHeadingAngularVelocity()) < 0.00001) {
+        	if(droneOfPackage != null && fromGate != null && toGate != null) {
 	        	this.flyRoute(droneOfPackage, fromGate, toGate);
         	}
-        	else if(Math.abs(drone.getHeadingAngularVelocity()) < 0.00001){
+        	else {
         		drone.setCanBeAssigned(true);
         	}
         }
