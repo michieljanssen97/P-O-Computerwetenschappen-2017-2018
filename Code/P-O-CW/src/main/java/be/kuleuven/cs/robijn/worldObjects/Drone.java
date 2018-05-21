@@ -262,7 +262,7 @@ public class Drone extends WorldObject {
 		Airport air = this.getParent().getFirstChildOfType(Airport.class);
 		Airport currentAirport = air.getAirportAt(this.getWorldPosition());
 		if(currentAirport != null) {
-			Gate g = this.getClosestGate(air);
+			Gate g = this.getClosestGate(currentAirport);
 			g.setCurrentDrone(this);
 		}
 	}

@@ -82,26 +82,22 @@ public class AutopilotModule {
     }
     
     public void taxiToGateAndFly(Drone drone, Gate fromGate, Gate toGate) {
-    	
-    	System.out.println(drone.getWorldPosition());
-    	System.out.println(fromGate.getWorldPosition());
-    	System.out.println(toGate.getWorldPosition());
         
     	Autopilot autopilot = autopilots.get(drone);
-    	if(!drone.isOnGate(fromGate) && drone.canBeAssigned() && drone.getAirportOfDrone().equals(fromGate.getAirport())) {//first taxi to the correct Gate
-    		
-    		System.out.println("-------------------- TAXI");
-    		
-	    	autopilot.setTargetPosition(fromGate.getWorldPosition());
-	    	autopilot.setFlightMode(FlightMode.TAXI);
-	    	
-	    	autopilot.setFlyAfterPackagePicked(drone, fromGate, toGate);
-    	}
-    	else {
+//    	if(!drone.isOnGate(fromGate) && drone.canBeAssigned() && drone.getAirportOfDrone().equals(fromGate.getAirport())) {//first taxi to the correct Gate
+//    		
+//    		System.out.println("-------------------- TAXI");
+//    		
+//	    	autopilot.setTargetPosition(fromGate.getWorldPosition());
+//	    	autopilot.setFlightMode(FlightMode.TAXI);
+//	    	
+//	    	autopilot.setFlyAfterPackagePicked(drone, fromGate, toGate);
+//    	}
+//    	else {
     		System.out.println("-------------------- FLY");
     		
     		autopilot.flyRoute(drone, fromGate, toGate);
-    	}
+//    	}
     }
 
 	public WorldObject getWorld() {

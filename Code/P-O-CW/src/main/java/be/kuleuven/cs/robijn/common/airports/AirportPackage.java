@@ -186,11 +186,6 @@ public class AirportPackage extends WorldObject{
     	}
 		Runway toTakeOff = routeCalculator.getFromRunway(drone, fromGate);
 		Runway toLand = routeCalculator.getToRunway(drone, fromGate, toGate, toTakeOff, drone.getHeight());
-		
-		System.out.println("----------------------------------------------------------");
-		System.out.println(currentAirport.equals(this.getOrigin().getAirport()));
-		System.out.println(Runway.areRunwaysAvailable(toTakeOff, toLand));
-		System.out.println(!toGate.hasDrone());
     	return (Runway.areRunwaysAvailable(toTakeOff, toLand) && !toGate.hasDrone());
     }
     
@@ -227,8 +222,6 @@ public class AirportPackage extends WorldObject{
             	        drone.setDestinationRunway(landRunway);
 	            		drone.setCanBeAssigned(false);
 	            		
-	            		
-		            	System.out.println("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
 		            	module.taxiToGateAndFly(drone, newFromGate, fromGate);
             		}
             	}
