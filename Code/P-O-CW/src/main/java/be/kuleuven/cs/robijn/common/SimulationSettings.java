@@ -19,32 +19,36 @@ public class SimulationSettings {
         return runwayLength;
     }
 
-    public void setRunwayLength(float runwayLength) {
+    public SimulationSettings setRunwayLength(float runwayLength) {
         this.runwayLength = runwayLength;
+        return this;
     }
 
     public float getGateLength() {
         return gateLength;
     }
 
-    public void setGateLength(float gateLength) {
+    public SimulationSettings setGateLength(float gateLength) {
         this.gateLength = gateLength;
+        return this;
     }
 
     public AirportDefinition[] getAirports() {
         return airports;
     }
 
-    public void setAirports(AirportDefinition[] airports) {
+    public SimulationSettings setAirports(AirportDefinition[] airports) {
         this.airports = airports;
+        return this;
     }
 
     public DroneDefinition[] getDrones() {
         return drones;
     }
 
-    public void setDrones(DroneDefinition[] drones) {
+    public SimulationSettings setDrones(DroneDefinition[] drones) {
         this.drones = drones;
+        return this;
     }
 
     public void write(DataOutputStream out) throws IOException {
@@ -99,32 +103,36 @@ public class SimulationSettings {
             return centerX;
         }
 
-        public void setCenterX(float centerX) {
+        public AirportDefinition setCenterX(float centerX) {
             this.centerX = centerX;
+            return this;
         }
 
         public float getCenterZ() {
             return centerZ;
         }
 
-        public void setCenterZ(float centerZ) {
+        public AirportDefinition setCenterZ(float centerZ) {
             this.centerZ = centerZ;
+            return this;
         }
 
         public float getCenterToRunway0X() {
             return centerToRunway0X;
         }
 
-        public void setCenterToRunway0X(float centerToRunway0X) {
+        public AirportDefinition setCenterToRunway0X(float centerToRunway0X) {
             this.centerToRunway0X = centerToRunway0X;
+            return this;
         }
 
         public float getCenterToRunway0Z() {
             return centerToRunway0Z;
         }
 
-        public void setCenterToRunway0Z(float centerToRunway0Z) {
+        public AirportDefinition setCenterToRunway0Z(float centerToRunway0Z) {
             this.centerToRunway0Z = centerToRunway0Z;
+            return this;
         }
     }
 
@@ -169,6 +177,10 @@ public class SimulationSettings {
 
         DroneDefinition (){ }
 
+        public DroneDefinition(AutopilotConfig config) {
+            this(new ObservableAutoPilotConfig(config));
+        }
+
         public DroneDefinition(ObservableAutoPilotConfig config) {
             this.config = config;
         }
@@ -203,32 +215,36 @@ public class SimulationSettings {
             return config;
         }
 
-        public void setConfig(ObservableAutoPilotConfig config) {
+        public DroneDefinition setConfig(ObservableAutoPilotConfig config) {
             this.config = config;
+            return this;
         }
 
         public AirportDefinition getAirport() {
             return airport;
         }
 
-        public void setAirport(AirportDefinition airport) {
+        public DroneDefinition setAirport(AirportDefinition airport) {
             this.airport = airport;
+            return this;
         }
 
         public int getGate() {
             return gate;
         }
 
-        public void setGate(int gate) {
+        public DroneDefinition setGate(int gate) {
             this.gate = gate;
+            return this;
         }
 
         public int getRunwayToFace() {
             return runwayToFace;
         }
 
-        public void setRunwayToFace(int runwayToFace) {
+        public DroneDefinition setRunwayToFace(int runwayToFace) {
             this.runwayToFace = runwayToFace;
+            return this;
         }
     }
 }

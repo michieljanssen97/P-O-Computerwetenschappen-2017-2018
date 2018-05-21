@@ -20,6 +20,7 @@ public class SimulationDriver {
     private final TestBed testBed;
     private final AutopilotModuleAdapter autoPilotModule;
     private final Stopwatch stopwatch;
+    private final boolean isHeadless;
 
     private boolean simulationFinished;
     private boolean simulationCrashed;
@@ -35,12 +36,13 @@ public class SimulationDriver {
     private Queue<AirportPackage> newPackages = new LinkedList<>();
     
     public SimulationDriver(SimulationSettings settings){
-        this(settings, new ConstantIntervalStopwatch(0.03d));
+        this(settings, new ConstantIntervalStopwatch(0.03d), false);
     }
     
-    public SimulationDriver(SimulationSettings settings, Stopwatch stopwatch){
+    public SimulationDriver(SimulationSettings settings, Stopwatch stopwatch, boolean headless){
         this.settings = settings;
         this.stopwatch = stopwatch;
+        this.isHeadless = headless;
 
         latestAutopilotInputs = new AutopilotInputs[settings.getDrones().length];
         latestAutopilotOutputs = new AutopilotOutputs[settings.getDrones().length];
@@ -87,8 +89,10 @@ public class SimulationDriver {
         stopwatch.tick();
 
         if(!isSimulationPaused() && !simulationFinished && !simulationCrashed && !simulationThrewException){
-            //Reset renderer
-            testBed.getRenderer().clearDebugObjects();
+            if(!isHeadless){
+                //Reset renderer
+                testBed.getRenderer().clearDebugObjects();
+            }
 
             //Run the autopilotmodule update
             try {
