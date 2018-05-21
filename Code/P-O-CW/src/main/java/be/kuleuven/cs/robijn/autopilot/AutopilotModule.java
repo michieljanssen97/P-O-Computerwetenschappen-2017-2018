@@ -64,15 +64,9 @@ public class AutopilotModule {
 //	    }
 //		autopilots.get(bestDrone).flyRoute(bestDrone, fromGate, toGate);
     }
-
-    public void startTimeHasPassed(Drone drone, AutopilotInputs inputs) {
-        // Get the autopilot that controls this drone
-    	Autopilot autopilot = autopilots.get(drone);
-    	// Run the autopilot update on a separate thread in the threadpool
-    	Future<AutopilotOutputs> task = threadPool.submit(() -> autopilot.timePassed(inputs));
-    	// Store the task.
-        autopilotTasks.put(drone, task);
-        Object[] collision = this.calculateFirstDroneCollision();
+    
+    public void beforeUpdate() {
+    	Object[] collision = this.calculateFirstDroneCollision();
         if (((collision != null) && (this.collision != null) && (collision[0] != this.collision[0])) || 
         		((collision != null) && (this.collision != null) && (((Double)collision[1]) >= 5))) {
         	Drone[] collisionDrones = (Drone[]) this.collision[0];
@@ -94,6 +88,15 @@ public class AutopilotModule {
         	autopilot1.preventCollisionFirst();
         	autopilot2.preventCollisionSecond();
         }
+    }
+
+    public void startTimeHasPassed(Drone drone, AutopilotInputs inputs) {
+        // Get the autopilot that controls this drone
+    	Autopilot autopilot = autopilots.get(drone);
+    	// Run the autopilot update on a separate thread in the threadpool
+    	Future<AutopilotOutputs> task = threadPool.submit(() -> autopilot.timePassed(inputs));
+    	// Store the task.
+        autopilotTasks.put(drone, task);
     }
     
     private Object[] collision = null;
@@ -138,7 +141,6 @@ public class AutopilotModule {
 
 		for(int i = 0; i < drones.size(); i++){
 			for(int j = i+1; j < drones.size(); j++){
-
 				double deltaPosX = drones.get(i).getWorldPosition().getEntry(0)-drones.get(j).getWorldPosition().getEntry(0);
 				double deltaPosY = drones.get(i).getWorldPosition().getEntry(1)-drones.get(j).getWorldPosition().getEntry(1);
 				double deltaPosZ = drones.get(i).getWorldPosition().getEntry(2)-drones.get(j).getWorldPosition().getEntry(2);
