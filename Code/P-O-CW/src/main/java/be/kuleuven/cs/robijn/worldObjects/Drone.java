@@ -271,21 +271,24 @@ public class Drone extends WorldObject {
 		}
 	}
 	
-	public void removeFromAirport(Runway fromRunway) {
-		 Airport currentAirport = fromRunway.getAirport();
-		if(currentAirport != null) {
+	public void removeFromAirport(Runway fromRunway, Gate fromGate) {
+//		 Airport currentAirport = fromRunway.getAirport();
+//		if(currentAirport != null) {
 			fromRunway.removeCurrentDrone();
-			Gate g0 = currentAirport.getGates()[0];
-			Gate g1 = currentAirport.getGates()[1];
-			if(g0.getCurrentDrone() != null && g0.getCurrentDrone().equals(this)) {
-				g0.removeCurrentDrone();
-			}
-			if(g1.getCurrentDrone() != null && g1.getCurrentDrone().equals(this)) {
-				g1.removeCurrentDrone();
-			}
+			fromGate.removeCurrentDrone();
+//			Gate g0 = currentAirport.getGates()[0];
+//			Gate g1 = currentAirport.getGates()[1];
+//			
+//			System.out.println("----------------");
+//			if(g0.getCurrentDrone() != null && g0.getCurrentDrone().equals(this)) {
+//				g0.removeCurrentDrone();
+//			}
+//			if(g1.getCurrentDrone() != null && g1.getCurrentDrone().equals(this)) {
+//				g1.removeCurrentDrone();
+//			}
 			
 		}
-	}
+//	}
 	
 	public Airport getAirportOfDrone() {
 		Airport air = this.getParent().getFirstChildOfType(Airport.class);
@@ -296,8 +299,11 @@ public class Drone extends WorldObject {
 	public void setArrived() {
 		this.setToAirport();
 		this.setPackageDelivered();
-		this.getDestinationRunway().removeCurrentDrone();
-		this.setDestinationRunway(null);
+		if(getDestinationRunway() != null) {
+			System.out.println("HOE ZELFS...");
+			this.getDestinationRunway().removeCurrentDrone();
+			this.setDestinationRunway(null);
+		}
 	}
 	
 	public void setPackageDelivered() {
@@ -307,7 +313,22 @@ public class Drone extends WorldObject {
 	}
 	
 	public void setTookOff() {
-		this.removeFromAirport(this.getClosestRunway());
+		Airport airp = this.getAirportOfDrone();
+		Gate fromGate = null;
+		
+		Gate g1 = airp.getGates()[0];
+		Gate g2 = airp.getGates()[1];
+		if(g1.getCurrentDrone() != null && g1.getCurrentDrone().equals(this)) {
+			fromGate = g1;
+		}
+		else if(g2.getCurrentDrone() != null && g2.getCurrentDrone().equals(this)) {
+			fromGate = g2;
+		}
+		
+		if(fromGate == null) {
+			throw new IllegalArgumentException();
+		}
+		this.removeFromAirport(this.getClosestRunway(), fromGate);
 	}
     //  -----------------   //
     //                      //

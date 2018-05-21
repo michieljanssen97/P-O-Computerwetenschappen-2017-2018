@@ -116,7 +116,7 @@ public class routeCalculator {
 		
 		if (landRoute1[1].getDistance(ascendRoute) < landRoute2[1].getDistance(ascendRoute))
 			return new Object[] {toRunway1, landRoute1[1].getDistance(ascendRoute)};
-		return new Object[] {toRunway1, landRoute2[1].getDistance(ascendRoute)};
+		return new Object[] {toRunway2, landRoute2[1].getDistance(ascendRoute)};
 	}
 	
 	public static Object[] getBestRunway(Drone drone, Airport fromAirport, Airport toAirport, Gate fromGate, Gate toGate, float height) {
