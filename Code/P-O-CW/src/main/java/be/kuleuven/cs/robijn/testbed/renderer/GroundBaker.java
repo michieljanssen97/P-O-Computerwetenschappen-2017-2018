@@ -1,6 +1,5 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
-import be.kuleuven.cs.robijn.common.FrameBuffer;
 import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.Gate;

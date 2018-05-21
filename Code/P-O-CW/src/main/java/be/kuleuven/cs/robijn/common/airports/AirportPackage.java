@@ -233,7 +233,6 @@ public class AirportPackage extends WorldObject{
             		}
             	}
 	            else if (p.droneCanStart(drone, fromGate, toGate, fromAirport)){
-            		fromGate.setCurrentDrone(drone);
             		toGate.setCurrentDrone(drone);
 	            	p.markAsInTransit(drone);
 	                module.taxiToGateAndFly(drone, fromGate, toGate);

@@ -9,6 +9,7 @@ import interfaces.AutopilotConfig;
  * An implementation of AutopilotConfig that is driven by an ObservableMap.
  * This allows easy use and modification of the config in GUI controls.
  */
+@SuppressWarnings("restriction")
 public class ObservableAutoPilotConfig implements AutopilotConfig {
     //Keys of the various settings in the ObservableMap
     public static final String DRONE_ID_KEY = "DRONE_ID";

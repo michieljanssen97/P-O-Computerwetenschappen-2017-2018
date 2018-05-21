@@ -1,6 +1,5 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
-import org.apache.commons.math3.geometry.Vector;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 

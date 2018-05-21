@@ -1,32 +1,19 @@
 package be.kuleuven.cs.robijn.gui;
 
 import be.kuleuven.cs.robijn.common.Resources;
-import be.kuleuven.cs.robijn.common.SimulationSettings;
 import be.kuleuven.cs.robijn.common.SimulationSettings.AirportDefinition;
 import be.kuleuven.cs.robijn.common.airports.generator.AirportGenerator;
-import be.kuleuven.cs.robijn.worldObjects.Drone;
-import interfaces.AutopilotConfig;
-import interfaces.AutopilotConfigReader;
-import interfaces.AutopilotConfigWriter;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import javafx.util.converter.NumberStringConverter;
-
 import java.io.*;
-import java.util.Arrays;
 
+@SuppressWarnings("restriction")
 public class GenerateAirportsDialog {
     public static AirportDefinition[] showDialog(Stage parentStage){
         Stage dialog = new Stage();
