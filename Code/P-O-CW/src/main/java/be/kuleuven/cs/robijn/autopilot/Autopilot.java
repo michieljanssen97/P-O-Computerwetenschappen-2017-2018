@@ -616,7 +616,6 @@ public class Autopilot {
 			thrust = Math.max(0, thrust);
         }
         if (this.getFlightMode() == FlightMode.BRAKE) {
-        	System.out.println("brake");
         	this.drone.setArrived();
 			if (drone.getVelocity().getNorm() > 0.001) {
 				float targetVelocity;
@@ -653,7 +652,6 @@ public class Autopilot {
 			}
 		}
         if (this.getFlightMode() == FlightMode.TURN) {
-        	System.out.println("turn");
         	float targetHeading = this.getTargetHeading();
         	if (drone.getVelocity().getNorm() < 1) {
         		thrust = 20;
@@ -691,7 +689,6 @@ public class Autopilot {
         	}
         }
         if (this.getFlightMode() == FlightMode.STOP){
-        	System.out.println("stop");
         	float targetHeading = (float) (Math.PI);
         	if (Math.abs(drone.getHeading()-targetHeading) > Math.PI/180) {
         		if (drone.getHeading() < targetHeading) {

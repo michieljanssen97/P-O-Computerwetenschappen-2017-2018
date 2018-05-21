@@ -223,7 +223,7 @@ public class WorldObject {
         }
 
         this.position = vector;
-        this.objectToWorldTransform = null;
+        invalidateObjectToWorldTransform();
     }
 
     /**
@@ -244,7 +244,7 @@ public class WorldObject {
         }
 
         this.rotation = rotation;
-        this.objectToWorldTransform = null;
+        invalidateObjectToWorldTransform();
     }
 
     /**
@@ -272,13 +272,16 @@ public class WorldObject {
         }
 
         this.scale = scale;
-        this.objectToWorldTransform = null;
+        invalidateObjectToWorldTransform();
     }
 
     /// WORLD TRANSFORM ///
 
-    private boolean isObjectToWorldTransformDirty(){
-        return objectToWorldTransform == null || (getParent() != null && getParent().isObjectToWorldTransformDirty());
+    private void invalidateObjectToWorldTransform(){
+        this.objectToWorldTransform = null;
+        for(WorldObject child : this.getChildren()){
+            child.invalidateObjectToWorldTransform();
+        }
     }
 
     /**
@@ -286,7 +289,7 @@ public class WorldObject {
      * @return a non-null 4x4 homogeneous transformation matrix
      */
     public RealMatrix getObjectToWorldTransform(){
-        if(isObjectToWorldTransformDirty()){
+        if(objectToWorldTransform == null){
             if(getParent() == null) {
                 objectToWorldTransform = getObjectToParentTransform();
             }else{
