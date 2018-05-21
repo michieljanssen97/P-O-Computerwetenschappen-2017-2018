@@ -2,6 +2,7 @@ package be.kuleuven.cs.robijn.testbed;
 
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.common.airports.AirportPackage;
+import be.kuleuven.cs.robijn.common.exceptions.DroneCollisionException;
 import be.kuleuven.cs.robijn.testbed.renderer.AsyncOpenGLRenderer;
 import be.kuleuven.cs.robijn.worldObjects.Label3D;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
@@ -21,6 +22,7 @@ public class VirtualTestbed implements TestBed {
 	private final List<Drone> drones;
 	private final Semaphore worldStateLock = new Semaphore(1);
 
+	private final ExecutorService executor = Executors.newFixedThreadPool(4);
 
 	//Renderer
 	private AsyncOpenGLRenderer renderer;
@@ -53,49 +55,66 @@ public class VirtualTestbed implements TestBed {
 
 	@Override
 	public boolean update(float secondsSinceStart, float secondsSinceLastUpdate, AutopilotOutputs[] outputs) {
+		try {
+			worldStateLock.acquire();
+
+			checkForCollisions();
+
+			if (drones.size() == 0){
+				throw new IllegalArgumentException("No more drone's in the world");
+			}
+			
+			// Start drone update tasks
+			ArrayList<Future<AutopilotInputs>> updateTasks = new ArrayList<>();
+			for(int i = 0; i < drones.size(); i++){
+				final Drone drone = drones.get(i);
+				final AutopilotOutputs curOutputs = outputs[i];
+				updateTasks.add(executor.submit(() -> {
+					simulation.updateDrone(drone, secondsSinceStart, secondsSinceLastUpdate, curOutputs);
+					byte[] image = null;
+					/*if(AUTOPILOT_CAMERA_ENABLED){
+						image = renderCameraView(drone);
+					}*/
+					return new VirtualTestbed.TestbedAutopilotInputs(drone, image, secondsSinceStart);
+				}));
+			}
+
+			// Wait for tasks to complete and gather AutopilotInputs
+			for(int i = 0; i < drones.size(); i++){
+				inputs[i] = updateTasks.get(i).get();
+			}
+
+			return simulation.isSimulationFinished();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new RuntimeException(e);
+		} finally {
+			worldStateLock.release();
+		}
+	}
+
+	private void checkForCollisions(){
+		ArrayList<Drone> collidingDrones = new ArrayList<>();
 
 		for(int i = 0; i < drones.size()-1; i++){
 			for(int j = i+1; j < drones.size(); j++){
-
 				double deltaPosX = drones.get(i).getWorldPosition().getEntry(0)-drones.get(j).getWorldPosition().getEntry(0);
 				double deltaPosY = drones.get(i).getWorldPosition().getEntry(1)-drones.get(j).getWorldPosition().getEntry(1);
 				double deltaPosZ = drones.get(i).getWorldPosition().getEntry(2)-drones.get(j).getWorldPosition().getEntry(2);
 				double deltaRR = Math.sqrt(Math.pow(deltaPosX, 2) + Math.pow(deltaPosY, 2) + Math.pow(deltaPosZ, 2));
 
-
 				if (deltaRR < 5){
-					drones.remove(i);
-					drones.remove(j-1);
+					collidingDrones.add(drones.get(i));
+					collidingDrones.add(drones.get(j-1));
 				}
 			}
 		}
 
-		if (drones.size() == 0){
-			throw new IllegalArgumentException("No more drone's in the world");
-		}
-
-		try {
-			worldStateLock.acquire();
-			
-			//Update drones
-			for(int i = 0; i < drones.size(); i++){
-				Drone drone = drones.get(i);
-				simulation.updateDrone(drone, secondsSinceStart, secondsSinceLastUpdate, outputs[i]);
-				byte[] image = null;
-				if(AUTOPILOT_CAMERA_ENABLED){
-					image = renderCameraView(drone);
-				}
-				inputs[i] = new VirtualTestbed.TestbedAutopilotInputs(drone, image, secondsSinceStart);
+		if(collidingDrones.size() > 0){
+			for (Drone d : collidingDrones) {
+				drones.remove(d);
 			}
-
-			return simulation.isSimulationFinished();
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		} finally {
-			worldStateLock.release();
+			throw new DroneCollisionException(collidingDrones);
 		}
-
-		
 	}
 
 
