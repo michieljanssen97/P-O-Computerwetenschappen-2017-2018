@@ -300,9 +300,11 @@ public class Drone extends WorldObject {
 		this.setToAirport();
 		this.setPackageDelivered();
 		if(getDestinationRunway() != null) {
-			System.out.println("HOE ZELFS...");
 			this.getDestinationRunway().removeCurrentDrone();
 			this.setDestinationRunway(null);
+		}
+		else {
+			System.out.println("HOE ZELFS...");
 		}
 	}
 	
