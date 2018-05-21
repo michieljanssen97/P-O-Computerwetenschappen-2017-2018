@@ -23,7 +23,7 @@ public class AutopilotSettings {
 		this.xMovementTime = xMovementTime;
 	}
 	
-	private float xMovementTime = 3f;
+	private float xMovementTime = 2f;
 	
 	public float getMaxRoll() {
 		return this.maxRoll;
