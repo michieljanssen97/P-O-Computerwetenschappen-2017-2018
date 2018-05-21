@@ -42,4 +42,9 @@ public class GUI extends Application {
     	if (controller != null)
     		controller.addLineToOutput(line);
     }
+
+    public static void setText(String line){
+        if (controller != null)
+            controller.setOutput(line);
+    }
 }

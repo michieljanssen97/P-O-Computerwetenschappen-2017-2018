@@ -133,6 +133,10 @@ public class MainController {
         output.appendText(line+"\n");
     }
 
+    public void setOutput(String line){
+        output.setText(line+"\n");
+    }
+
     /////////////////
     //// OVERLAY ////
     /////////////////
