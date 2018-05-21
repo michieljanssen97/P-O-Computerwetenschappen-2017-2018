@@ -1202,7 +1202,7 @@ public class Drone extends WorldObject {
 	}
 
 	public void setRelativeRotation(Rotation rotation, float extra) {
-//		super.setRelativeRotation(rotation);
+		super.setRelativeRotation(rotation);
 //		double w = rotation.getQ0();
 //		double x = rotation.getQ1();
 //		double y = rotation.getQ2();
