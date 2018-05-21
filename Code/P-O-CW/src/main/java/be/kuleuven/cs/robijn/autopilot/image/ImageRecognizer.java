@@ -418,12 +418,13 @@ public class ImageRecognizer {
 	 * "exact" mode, meaning it will use image recognition to determine the exact coordinate of the cube.
 	 */
 	public RealVector getCurrentPathTarget() {
+		System.out.println("PATH");
 		RealVector path = this.currentPathTarget;
 		double[] drone = getDronePositionCoordinates();
 		float distanceToPath = (float) Math.sqrt(Math.pow(path.getEntry(0) - drone[0], 2) + Math.pow(path.getEntry(1) - drone[1], 2) + Math.pow(path.getEntry(2) - drone[2], 2));
-		if (distanceToPath <= 3)
-			//followExactCoordinates();
-			this.followNewPathCoordinates();
+		if (distanceToPath <= 150)
+			followExactCoordinates();
+//			this.followNewPathCoordinates();
 		
 		return path;
 	}
@@ -477,7 +478,7 @@ public class ImageRecognizer {
 	 * 		The current image.
 	 */
 	public RealVector searchForCubeInPathArea(Image im) {
-		
+		System.out.println("EXACT");
 		ImageRecognizerCube toFollow;
 		float toFollowDistance;
 		
@@ -495,7 +496,7 @@ public class ImageRecognizer {
 				closest = c;
 			}
 		}
-		if (minimum <= 50) {
+		if (minimum <= 30) {
 			setCurrentCubeHue(closest.getHue());
 			setCurrentCubeSat(closest.getSaturation());
 			this.currentCubeColorCalculated = true;
