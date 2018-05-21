@@ -71,13 +71,13 @@ public class Autopilot {
 		this.targetPosition = targetPosition;
 	}
 	
-	private float targetHeading = 0;
+	private Float targetHeading = null;
 	
-	public float getTargetHeading() {
+	public Float getTargetHeading() {
 		return targetHeading;
 	}
 	
-	public void setTargetHeading(float targetHeading) {
+	public void setTargetHeading(Float targetHeading) {
 		this.targetHeading = targetHeading;
 	}
 	
@@ -156,6 +156,13 @@ public class Autopilot {
 						drone.getAngularAccelerations(leftWingInclination, rightWingInclination, horStabInclination, verStabInclination,
 								frontBrakeForce, leftBrakeForce, rightBrakeForce)[1]
 						-pitchAngularAcceleration);
+			}
+			
+			if (this.getTargetHeading() != null) {
+				if (drone.getHeading() < this.getTargetHeading())
+					verStabInclination = this.getConfig().getMaxAOA()/2;
+				if (drone.getHeading() > this.getTargetHeading())
+					verStabInclination = -this.getConfig().getMaxAOA()/2;
 			}
 			
 			if (drone.getWorldPosition().getEntry(1) > this.getConfig().getTailSize()) {
@@ -796,6 +803,7 @@ public class Autopilot {
     	System.out.println("FLY ROUTE");
     	RealVector[] route = routeCalculator.calculateRoute(drone, fromGate, toGate, drone.getHeight());
     	this.setTargets(route);
+    	this.targets.setIndex(0);
     	this.setTargetPosition(toGate.getWorldPosition());
     	RealVector vector = route[route.length-1].subtract(route[route.length-2]);
     	vector.setEntry(1, 0);
