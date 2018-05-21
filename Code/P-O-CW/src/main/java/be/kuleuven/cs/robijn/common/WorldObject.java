@@ -58,8 +58,7 @@ public class WorldObject {
      * If no such object is found, null is returned.
      * @param clazz the class of the child to return. Must not be null.
      */
-    @SuppressWarnings("unchecked")
-	public <T extends WorldObject> T getFirstChildOfType(Class<T> clazz){
+    public <T extends WorldObject> T getFirstChildOfType(Class<T> clazz){
         try {
         	ArrayList<T> childrenOfType = getChildrenOfType(clazz);
         	

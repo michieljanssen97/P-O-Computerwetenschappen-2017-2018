@@ -5,14 +5,12 @@ import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.exceptions.CrashException;
 import be.kuleuven.cs.robijn.common.stopwatch.ConstantIntervalStopwatch;
-import be.kuleuven.cs.robijn.common.stopwatch.RealTimeStopwatch;
 import be.kuleuven.cs.robijn.common.stopwatch.Stopwatch;
 import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
 import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  * This class combines the testbed and autopilot into one runnable simulation.
@@ -193,7 +191,7 @@ public class SimulationDriver {
         updateEventHandlers.add(handler);
     }
 
-    private void removeOnUpdateEventHandler(UpdateEventHandler handler){
+    public void removeOnUpdateEventHandler(UpdateEventHandler handler){
         updateEventHandlers.remove(handler);
     }
 }

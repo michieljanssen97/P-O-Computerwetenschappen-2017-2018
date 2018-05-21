@@ -2,13 +2,11 @@ package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.*;
 import be.kuleuven.cs.robijn.common.Font;
-import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.airports.Runway;
 import be.kuleuven.cs.robijn.gui.OrthoCameraZoomHandler;
 import be.kuleuven.cs.robijn.testbed.renderer.bmfont.BMFont;
 import be.kuleuven.cs.robijn.worldObjects.Label3D;
-import be.kuleuven.cs.robijn.common.math.VectorMath;
 import be.kuleuven.cs.robijn.worldObjects.Box;
 import be.kuleuven.cs.robijn.worldObjects.Camera;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
@@ -296,7 +294,8 @@ public class OpenGLRenderer implements Renderer {
         }
     }
 
-    private void renderChildren(WorldObject obj, Matrix4f viewProjectionMatrix, Camera camera){
+    @SuppressWarnings("static-access")
+	private void renderChildren(WorldObject obj, Matrix4f viewProjectionMatrix, Camera camera){
         //Recursively render children
         for (WorldObject child : obj.getChildren()){
             renderChildren(child, viewProjectionMatrix, camera);

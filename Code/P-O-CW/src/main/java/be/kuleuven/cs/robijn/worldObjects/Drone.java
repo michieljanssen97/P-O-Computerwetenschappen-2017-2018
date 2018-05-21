@@ -10,6 +10,7 @@ import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.Runway;
 
 import be.kuleuven.cs.robijn.common.exceptions.CrashException;
+import be.kuleuven.cs.robijn.common.math.Angle;
 import be.kuleuven.cs.robijn.common.math.VectorMath;
 import be.kuleuven.cs.robijn.tyres.*;
 import interfaces.*;
@@ -1176,6 +1177,19 @@ public class Drone extends WorldObject {
 	@Override
 	public Rotation getRelativeRotation() {
 		return new Rotation(this.getRotationMatrix().getData(), 0.0001);
+	}
+
+	public void setRelativeRotation(Rotation rotation, float extra) {
+//		super.setRelativeRotation(rotation);
+//		double w = rotation.getQ0();
+//		double x = rotation.getQ1();
+//		double y = rotation.getQ2();
+//		double z = rotation.getQ3();
+//		Angle roll = new Angle((float) Math.atan2(2*y*w + 2*x*z, 1 - 2*y*y - 2*z*z));
+//		Angle pitch = new Angle((float) Math.atan2(2*x*w + 2*y*z, 1 - 2*x*x - 2*z*z));
+//		Angle heading = new Angle((float) Math.asin(2*x*y + 2*z*w));
+		Angle heading = new Angle((float) rotation.getAngles(RotationOrder.YXZ)[0] + extra);
+		this.setHeading(heading.getAngle());
 	}
 	
 	/**

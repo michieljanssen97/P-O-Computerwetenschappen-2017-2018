@@ -13,6 +13,7 @@ import java.io.UncheckedIOException;
 /**
  * Main GUI class. Use this to start the GUI.
  */
+@SuppressWarnings("restriction")
 public class GUI extends Application {
     private static MainController controller;
 

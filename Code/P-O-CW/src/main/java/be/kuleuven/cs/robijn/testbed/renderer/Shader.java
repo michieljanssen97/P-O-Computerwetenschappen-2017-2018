@@ -30,11 +30,11 @@ public class Shader implements AutoCloseable{
         return new Shader(shaderType, shader);
     }
 
-    private final int shaderType;
+    //private final int shaderType;
     private final int shaderId;
 
     private Shader(int shaderType, int shaderId) {
-        this.shaderType = shaderType;
+        //this.shaderType = shaderType;
         this.shaderId = shaderId;
     }
 

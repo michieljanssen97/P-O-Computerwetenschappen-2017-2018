@@ -4,6 +4,7 @@ import javafx.util.StringConverter;
 
 import java.awt.*;
 
+@SuppressWarnings("restriction")
 public class ColorStringConverter extends StringConverter<Color>{
     @Override
     public String toString(Color c) {

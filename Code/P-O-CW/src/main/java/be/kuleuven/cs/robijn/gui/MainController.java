@@ -1,16 +1,10 @@
 package be.kuleuven.cs.robijn.gui;
 
 import be.kuleuven.cs.robijn.common.*;
-import be.kuleuven.cs.robijn.common.airports.AirportPackage;
-import be.kuleuven.cs.robijn.common.stopwatch.RealTimeStopwatch;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
-import be.kuleuven.cs.robijn.worldObjects.OrthographicCamera;
-import be.kuleuven.cs.robijn.worldObjects.PerspectiveCamera;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.*;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -21,16 +15,13 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.linear.ArrayRealVector;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Controller for the main window layout
  */
+@SuppressWarnings("restriction")
 public class MainController {
     @FXML
     private SplitPane contentRoot;

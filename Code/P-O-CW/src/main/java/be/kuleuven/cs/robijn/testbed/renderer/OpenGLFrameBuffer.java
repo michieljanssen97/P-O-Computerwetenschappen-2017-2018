@@ -1,7 +1,6 @@
 package be.kuleuven.cs.robijn.testbed.renderer;
 
 import be.kuleuven.cs.robijn.common.FrameBuffer;
-import be.kuleuven.cs.robijn.common.RenderTask;
 import org.lwjgl.BufferUtils;
 
 import java.nio.ByteBuffer;
