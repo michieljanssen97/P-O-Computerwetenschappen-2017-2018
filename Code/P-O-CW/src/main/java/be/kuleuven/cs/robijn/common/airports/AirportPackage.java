@@ -89,14 +89,6 @@ public class AirportPackage extends WorldObject{
         currentGate = null;
         currentTransporter = transporter;
         currentTransporter.setPackage(this);
-        
-    	//Lock the runways
-        Runway takeOffRunway = routeCalculator.getFromRunway(transporter, this.getOrigin());
-		Runway landRunway = routeCalculator.getToRunway(transporter, this.getOrigin(), this.getDestination(), takeOffRunway, transporter.getHeight());
-		
-        takeOffRunway.setCurrentDrone(transporter);
-    	landRunway.setCurrentDrone(transporter);
-        currentTransporter.setDestinationRunway(landRunway);
 
         for(Consumer<AirportPackage> handler : stateUpdateEventHandlers){
             handler.accept(this);
@@ -223,6 +215,8 @@ public class AirportPackage extends WorldObject{
             			Runway landRunway = routeCalculator.getToRunway(drone, this.getOrigin(), this.getDestination(), takeOffRunway, drone.getHeight());
             			
             	        takeOffRunway.setCurrentDrone(drone);
+            	        
+    	            	System.out.println(landRunway.getCurrentDrone() + " " + drone);
             	    	landRunway.setCurrentDrone(drone);
             	        drone.setDestinationRunway(landRunway);
 	            		drone.setCanBeAssigned(false);
@@ -231,8 +225,19 @@ public class AirportPackage extends WorldObject{
             	}
 	            else if (p.droneCanStart(drone, fromGate, toGate, fromAirport)) {
 	            	p.markAsInTransit(drone);
-	            	toGate.setCurrentDrone(drone);
+	            	//Lock the runways
+	                Runway takeOffRunway = routeCalculator.getFromRunway(drone, this.getOrigin());
+	        		Runway landRunway = routeCalculator.getToRunway(drone, this.getOrigin(), this.getDestination(), takeOffRunway, drone.getHeight());
+	        		
+	                takeOffRunway.setCurrentDrone(drone);
+	            	landRunway.setCurrentDrone(drone);
+	                drone.setDestinationRunway(landRunway);
+		            toGate.setCurrentDrone(drone);
+		            
 	                module.taxiToGateAndFly(drone, fromGate, toGate);
+	            }
+	            else {
+	            	System.out.println("HIERO " + this.getAllPackagesToAssign().size());
 	            }
             }
         }
@@ -248,7 +253,7 @@ public class AirportPackage extends WorldObject{
     		
     		if(isDeadlock) {
 	    		//TODO laat een vliegtuig (op een airp zonder pakje) naar een vrije gate vliegen zodat 'deadlock' wordt opgelost
-	    		//System.out.println("--------------------------------- DEADLOCK: " + oldAmountOfPackages);
+	    		System.out.println("--------------------------------- DEADLOCK: " + oldAmountOfPackages);
     		}
     	}
     }
