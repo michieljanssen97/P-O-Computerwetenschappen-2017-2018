@@ -1,5 +1,9 @@
 package be.kuleuven.cs.robijn.autopilot;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 
@@ -115,10 +119,10 @@ public class routeCalculator {
 		return new Object[] {toRunway1, landRoute2[1].getDistance(ascendRoute)};
 	}
 	
-	public static Airport getBestAirport(Drone drone, Airport fromAirport, Gate fromGate, float height) {
+	public static List<Airport> orderAirports(Drone drone, Airport fromAirport, Gate fromGate, float height) {
 		WorldObject world = fromAirport.getParent();
-		Airport bestAirport = null;
-		float distance = Float.POSITIVE_INFINITY;
+		List<Airport> bestAirports = new ArrayList<>();
+		HashMap<Airport, Float> pairs = new HashMap<>();
 		for (Airport airport: world.getChildrenOfType(Airport.class)) {
 			Runway fromRunway = routeCalculator.getFromRunway(drone, fromGate);
 			Object[] first = routeCalculator.getBestRunway(drone, fromAirport, airport, fromGate, airport.getGates()[0], fromRunway, 
@@ -132,12 +136,21 @@ public class routeCalculator {
 				bestDistance = distance1;
 			else
 				bestDistance = distance2;
-			if (bestDistance < distance) {
-				distance = bestDistance;
-				bestAirport = airport;
+			pairs.put(airport, bestDistance);
+			Airport port = null;
+			boolean flag = false;
+			for (int i = 0; i< bestAirports.size(); i++) {
+				port = bestAirports.get(i);
+				if (pairs.get(port) > bestDistance) {
+					bestAirports.add(i, airport);
+					flag = true;
+					break;
+				}
 			}
+			if (!flag)
+				bestAirports.add(airport);
 		}
-		return bestAirport;
+		return bestAirports;
 			
 	}
 	

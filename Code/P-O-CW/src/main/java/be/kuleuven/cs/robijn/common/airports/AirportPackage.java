@@ -189,6 +189,7 @@ public class AirportPackage extends WorldObject{
     	}
 		Runway toTakeOff = routeCalculator.getFromRunway(drone, fromGate);
 		Runway toLand = routeCalculator.getToRunway(drone, fromGate, toGate, toTakeOff, drone.getHeight());
+		
     	return (Runway.areRunwaysAvailable(toTakeOff, toLand) && !toGate.hasDrone());
     }
     
@@ -225,7 +226,6 @@ public class AirportPackage extends WorldObject{
             	    	landRunway.setCurrentDrone(drone);
             	        drone.setDestinationRunway(landRunway);
 	            		drone.setCanBeAssigned(false);
-	            		
 		            	module.taxiToGateAndFly(drone, newFromGate, fromGate);
             		}
             	}
@@ -248,7 +248,7 @@ public class AirportPackage extends WorldObject{
     		
     		if(isDeadlock) {
 	    		//TODO laat een vliegtuig (op een airp zonder pakje) naar een vrije gate vliegen zodat 'deadlock' wordt opgelost
-	    		System.out.println("--------------------------------- DEADLOCK: " + oldAmountOfPackages);
+	    		//System.out.println("--------------------------------- DEADLOCK: " + oldAmountOfPackages);
     		}
     	}
     }

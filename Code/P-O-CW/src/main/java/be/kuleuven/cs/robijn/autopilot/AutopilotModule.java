@@ -79,8 +79,7 @@ public class AutopilotModule {
         threadPool.shutdown();
     }
     
-    public void taxiToGateAndFly(Drone drone, Gate fromGate, Gate toGate) {
-        
+    public void taxiToGateAndFly(Drone drone, Gate fromGate, Gate toGate) {        
     	Autopilot autopilot = autopilots.get(drone);
 //    	if(!drone.isOnGate(fromGate) && drone.canBeAssigned() && drone.getAirportOfDrone().equals(fromGate.getAirport())) {//first taxi to the correct Gate
 //    		
@@ -92,7 +91,8 @@ public class AutopilotModule {
 //	    	autopilot.setFlyAfterPackagePicked(drone, fromGate, toGate);
 //    	}
 //    	else {
-    		System.out.println("-------------------- FLY");
+//    		System.out.println("-------------------- FLY");
+
     		
     		autopilot.flyRoute(drone, fromGate, toGate);
 //    	}
