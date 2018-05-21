@@ -14,7 +14,7 @@ public class RandomAirportGenerator implements AirportGenerator {
             //Set position
             float x, z;
             boolean isTaken;
-            NormalDistribution normal = new NormalDistribution(0, 500);
+            NormalDistribution normal = new NormalDistribution(0, 2000);
             do {
                 //Generate random coordinate
                 //x = (float)(Math.random() * 60000d);
