@@ -17,6 +17,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
@@ -62,6 +63,9 @@ public class CameraViewControl extends AnchorPane {
 
     @FXML
     private ComboBox<Drone> droneComboBox;
+
+    @FXML
+    private Label fpsLabel;
 
     private ObjectProperty<SimulationDriver> simulationProperty = new SimpleObjectProperty<>(this, "simulation");
     //Drone that is selected in sidebar
@@ -364,36 +368,6 @@ public class CameraViewControl extends AnchorPane {
 
                 airportMenu.show(imageView, e.getScreenX(), e.getScreenY());
             }
-
-            /*world.getDescendantsStream().filter(c -> c instanceof Airport).forEach(c -> {
-                Color color = ColorGenerator.random();
-
-                BoundingBox box = renderer.getBoundingBoxFor(c);
-                Vector3D boxPos = VectorMath.realTo3D(box.getWorldPosition());
-                double dX = (box.getBoxDimensions().getX() / 2d) + 0.01f;
-                double dY = (box.getBoxDimensions().getY() / 2d) + 0.01f;
-                double dZ = (box.getBoxDimensions().getZ() / 2d) + 0.01f;
-                RenderDebug.drawLine(
-                        new Vector3D(boxPos.getX() - dX, boxPos.getY() + dY, boxPos.getZ() - dZ),
-                        new Vector3D(boxPos.getX() + dX, boxPos.getY() + dY, boxPos.getZ() - dZ),
-                        color
-                    );
-                RenderDebug.drawLine(
-                        new Vector3D(boxPos.getX() - dX, boxPos.getY() + dY, boxPos.getZ() + dZ),
-                        new Vector3D(boxPos.getX() + dX, boxPos.getY() + dY, boxPos.getZ() + dZ),
-                        color
-                );
-                RenderDebug.drawLine(
-                        new Vector3D(boxPos.getX() - dX, boxPos.getY() + dY, boxPos.getZ() - dZ),
-                        new Vector3D(boxPos.getX() - dX, boxPos.getY() + dY, boxPos.getZ() + dZ),
-                        color
-                );
-                RenderDebug.drawLine(
-                        new Vector3D(boxPos.getX() + dX, boxPos.getY() + dY, boxPos.getZ() - dZ),
-                        new Vector3D(boxPos.getX() + dX, boxPos.getY() + dY, boxPos.getZ() + dZ),
-                        color
-                );
-            });*/
         });
 
         imageView.setOnMouseClicked(e -> {
@@ -532,6 +506,7 @@ public class CameraViewControl extends AnchorPane {
 
     private RenderTask renderTask;
     private Future<byte[]> imageCopyTask;
+    private ArrayList<Long> lastRenderTimestamps = new ArrayList<>();
 
     private void update(){
         //If no camera is active, don't render.
@@ -574,6 +549,7 @@ public class CameraViewControl extends AnchorPane {
             image = SwingFXUtils.toFXImage(awtImage, image);
             imageView.setImage(image);
             imageCopyTask = null;
+            lastRenderTimestamps.add(System.currentTimeMillis());
         }
 
         if(renderTask != null && renderTask.isDone()){
@@ -584,6 +560,11 @@ public class CameraViewControl extends AnchorPane {
         if(renderTask == null || renderTask.isDone()){
             renderTask = renderer.startRender(world, frameBuffer, activeCamera, testBed.getWorldStateLock());
         }
+
+        //Update FPS counter
+        lastRenderTimestamps.removeIf(timestamp -> System.currentTimeMillis() - timestamp > 1000);
+        int fps = lastRenderTimestamps.size();
+        fpsLabel.setText(fps+"");
     }
 
     private void setCameraAspectRatio(Camera camera, double aspectRatio){
