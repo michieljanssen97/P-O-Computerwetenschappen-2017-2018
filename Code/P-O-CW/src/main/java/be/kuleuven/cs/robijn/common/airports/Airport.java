@@ -20,7 +20,9 @@ public class Airport extends WorldObject {
     private Runway[] runways;
     private double angle;
     
-    private ArrayList<Drone> currentDrones = new ArrayList<Drone>();
+    public float width;
+    
+//    private ArrayList<Drone> currentDrones = new ArrayList<Drone>();
 
     public Airport(int id, float length, float width, Vector2D centerToRunway0){
         this.id = id;
@@ -51,6 +53,7 @@ public class Airport extends WorldObject {
             new Rotation(Vector3D.PLUS_J, angle)
         );
         this.angle = angle;
+        this.width = width;
     }
     
     public ArrayList<Airport>getAllAirports() {
@@ -82,16 +85,34 @@ public class Airport extends WorldObject {
         return runways;
     }
     public ArrayList<Drone> getCurrentDrones() {
-        return new ArrayList<Drone>(this.currentDrones);
+    	ArrayList<Drone> currentDrones = new ArrayList<Drone>();
+    	Gate g0 = this.getGates()[0];
+    	Gate g1 = this.getGates()[1];
+    	Runway r0 = this.getRunways()[0];
+    	Runway r1 = this.getRunways()[1];
+    	if(g0.hasDrone()) {currentDrones.add(g0.getCurrentDrone());}
+    	if(g1.hasDrone()) {currentDrones.add(g1.getCurrentDrone());}
+    	if(r0.hasDrone()) {currentDrones.add(r0.getCurrentDrone());}
+    	if(r1.hasDrone()) {currentDrones.add(r1.getCurrentDrone());}
+    	
+    	return currentDrones;
     }
     
-    public void addDroneToCurrentDrones(Drone d){
-        currentDrones.add(d);
-    }
-    
-    public void removeDroneFromCurrentDrones(Drone d){
-        currentDrones.remove(d);
-    }
+//    public void addDroneToCurrentDrones(Drone d, Gate g, Runway r){
+//    	if(g.hasDrone() || r.hasDrone()) {
+//    		throw new IllegalArgumentException();
+//    	}
+//        g.setCurrentDrone(d);
+//        r.setCurrentDrone(d);
+//    }
+//    
+//    public void removeDroneFromCurrentDrones(Drone d, Gate g, Runway r){
+//    	if(!g.getCurrentDrone().equals(d) || !r.getCurrentDrone().equals(d)) {
+//    		throw new IllegalArgumentException();
+//    	}
+//        g.removeDrone();
+//        r.removeDrone();
+//    }
     
     /**
      * Check all Airports for an available Drone
@@ -109,10 +130,14 @@ public class Airport extends WorldObject {
     }
     
     public Drone getFirstAvailableDrone(){
+    	Drone drone = null;
     	if(! this.getAllAvailableDrones().isEmpty()) {
-    		return this.getAllAvailableDrones().get(0);
+    		drone =  this.getAllAvailableDrones().get(0);
     	}
-        return null;
+    	if(drone != null && ! drone.canBeAssigned()) {
+    		return null;
+    	}
+        return drone;
     }
     
     public Drone getAvailableDrone() {
@@ -128,7 +153,7 @@ public class Airport extends WorldObject {
     			minDistance = tempDrone.calculateDistanceToAirport(this);
     			drone = tempDrone;
     		}
-    	}    	
+    	}
     	return drone; //Is null if no drones are Available
     }
     
@@ -219,14 +244,7 @@ public class Airport extends WorldObject {
 		return airportPolygon.contains(positionToCheck.getX(), positionToCheck.getY());
 
 	}
-
-	public Runway getRunwayToLand() { //TODO gebruik in routeCalculator
-		return this.getRunways()[0];
-	}
-
-	public Runway getRunwayToTakeOff() { //TODO gebruik in routeCalculator
-		return this.getRunways()[1];
-	}
+	
     public double getAngle() {
     	return angle;
     }

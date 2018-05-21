@@ -280,6 +280,9 @@ public class OpenGLRenderer implements Renderer {
                 throw new RuntimeException("glFenceSync failed");
             }
 
+            //Some OpenGL driver implementations require flushing to make sure all commands are run.
+            glFlush();
+
             OpenGLRenderTask task = new OpenGLRenderTask(sync);
             ((OpenGLFrameBuffer) buffer).setCurrentRenderTask(task);
             return task;

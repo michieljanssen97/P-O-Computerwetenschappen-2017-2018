@@ -1,9 +1,10 @@
 package be.kuleuven.cs.robijn.worldObjects;
 
 import be.kuleuven.cs.robijn.common.airports.AirportPackage;
+import be.kuleuven.cs.robijn.common.airports.Gate;
+
 import org.apache.commons.math3.geometry.euclidean.threed.*;
 import org.apache.commons.math3.linear.*;
-
 import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.Runway;
@@ -262,16 +263,24 @@ public class Drone extends WorldObject {
 		Airport air = this.getParent().getFirstChildOfType(Airport.class);
 		Airport currentAirport = air.getAirportAt(this.getWorldPosition());
 		if(currentAirport != null) {
-			currentAirport.addDroneToCurrentDrones(this);
+			Gate g = this.getClosestGate(air);
+			g.setCurrentDrone(this);
 		}
 	}
 	
-	public void removeFromAirport() {
-		Airport air = this.getParent().getFirstChildOfType(Airport.class);
-		Airport currentAirport = air.getAirportAt(this.getWorldPosition());
+	public void removeFromAirport(Runway fromRunway) {
+		 Airport currentAirport = fromRunway.getAirport();
 		if(currentAirport != null) {
-			currentAirport.removeDroneFromCurrentDrones(this);
-			currentAirport.getRunwayToTakeOff().setHasDrones(false);
+			fromRunway.removeCurrentDrone();
+			Gate g0 = currentAirport.getGates()[0];
+			Gate g1 = currentAirport.getGates()[1];
+			if(g0.getCurrentDrone() != null && g0.getCurrentDrone().equals(this)) {
+				g0.removeCurrentDrone();
+			}
+			if(g1.getCurrentDrone() != null && g1.getCurrentDrone().equals(this)) {
+				g1.removeCurrentDrone();
+			}
+			
 		}
 	}
 	
@@ -284,7 +293,10 @@ public class Drone extends WorldObject {
 	public void setArrived() {
 		this.setToAirport();
 		this.setPackageDelivered();
-		this.getDestinationRunway().setHasDrones(false);
+		if(this.getDestinationRunway() != null) {
+			this.getDestinationRunway().removeCurrentDrone();
+			this.setDestinationRunway(null);
+		}
 	}
 	
 	public void setPackageDelivered() {
@@ -294,7 +306,7 @@ public class Drone extends WorldObject {
 	}
 	
 	public void setTookOff() {
-		this.removeFromAirport();
+		this.removeFromAirport(this.getClosestRunway());
 	}
     //  -----------------   //
     //                      //
@@ -1282,6 +1294,47 @@ public class Drone extends WorldObject {
 		return null;
 	}
 	
+	public Runway getClosestRunway() {
+		Airport air = this.getCurrentAirport();
+		if(air == null) {
+			return null;
+		}
+		Runway r0 = air.getRunways()[0];
+		Runway r1 = air.getRunways()[1];
+		RealVector dronePos = this.getWorldPosition();
+		
+		double runWay0Distance = r0.getWorldPosition().getDistance(dronePos);
+		double runway1Distance = r1.getWorldPosition().getDistance(dronePos);
+		
+		Runway closestRunway = r0;
+		if(runway1Distance < runWay0Distance) {
+			closestRunway = r1;
+		}
+		
+		return closestRunway;
+		
+	}
+	
+	public Gate getClosestGate(Airport air) {
+		if(air == null) {
+			throw new IllegalArgumentException();
+		}
+		Gate g0 = air.getGates()[0];
+		Gate g1 = air.getGates()[1];
+		
+		RealVector dronePos = this.getWorldPosition();
+		
+		double gate0Distance = g0.getWorldPosition().getDistance(dronePos);
+		double gate1Distance = g1.getWorldPosition().getDistance(dronePos);
+		
+		Gate closestGate = g0;
+		if(gate1Distance < gate0Distance) {
+			closestGate = g1;
+		}
+		
+		return closestGate;
+	}
+	
 	/**
 	 * Returns the package that the drone is currently carrying
 	 */
@@ -1302,5 +1355,19 @@ public class Drone extends WorldObject {
 
 	public float getHeight() {
 		return this.height;
+	}
+
+	public boolean isOnGate(Gate fromGate) {
+		Gate g = this.getClosestGate(fromGate.getAirport());
+		return g.getWorldPosition().getDistance(this.getWorldPosition()) < (g.getAirport().width + 5);
+	}
+	
+	private boolean canBeAssigned = true;
+
+	public boolean canBeAssigned() {
+		return this.canBeAssigned;
+	}
+	public void setCanBeAssigned(boolean status) {
+		this.canBeAssigned = status;
 	}
 }
