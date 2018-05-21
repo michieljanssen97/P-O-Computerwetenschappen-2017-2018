@@ -623,26 +623,26 @@ public class Autopilot {
 				RealVector targetPosition = this.getTargetPosition();
 				RealVector targetPositionDroneCoordinates = drone.transformationToDroneCoordinates(targetPosition.subtract(drone.getWorldPosition()));
 				if (targetPositionDroneCoordinates.getNorm() > 200)
-					targetVelocity = 30;
-				if (targetPositionDroneCoordinates.getNorm() > 50)
-					targetVelocity = 20;
-				if (targetPositionDroneCoordinates.getNorm() > 20)
 					targetVelocity = 10;
+				if (targetPositionDroneCoordinates.getNorm() > 50)
+					targetVelocity = 5;
+				if (targetPositionDroneCoordinates.getNorm() > 20)
+					targetVelocity = 2;
 				if (targetPositionDroneCoordinates.getNorm() > 5)
-					targetVelocity = 4;
+					targetVelocity = 1;
 				else
 					targetVelocity = 1;
 				if (drone.getVelocity().getNorm() > targetVelocity) {
-					leftBrakeForce = 4300;
-					rightBrakeForce = 4300;
+					float distance = (float) targetPositionDroneCoordinates.getNorm();
+					float velocity = (float) drone.getVelocity().getNorm();
+					float force = 10f * drone.getTotalMass()* (float) Math.pow(velocity, 2) / (2*distance);
+					leftBrakeForce = Math.max(0, Math.min(4300, force/2));
+					rightBrakeForce = Math.max(0, Math.min(4300, force/2));
 				}
-				
-				if (targetPositionDroneCoordinates.getNorm() < 10) {
-					
-					this.setFlightMode(FlightMode.TURN);
+				if (targetPositionDroneCoordinates.getNorm() < 5) {
+					this.setFlightMode(FlightMode.STOP);
 				}
-			}
-					
+			}	
 		}
         if (this.getFlightMode() == FlightMode.TURN) {
         	System.out.println("turn");
@@ -663,10 +663,9 @@ public class Autopilot {
         			thrust = 0;
         		}
         		else {
-        			leftBrakeForce = 9000*Math.abs(drone.getHeading()-targetHeading);
+        			leftBrakeForce = 9000*drone.getHeadingAngularVelocity()*(float)drone.getVelocity().getNorm();
         			rightBrakeForce = 0;
         		}
-        		
         	}
         	else if (drone.getHeading() > targetHeading) {
         		if (targetHeading - drone.getHeading() > - Math.PI/90) {
@@ -679,7 +678,7 @@ public class Autopilot {
         		}
         		else {
         			leftBrakeForce = 0;
-        			rightBrakeForce = 9000*Math.abs(drone.getHeading()-targetHeading);
+        			rightBrakeForce = 9000*drone.getHeadingAngularVelocity()*(float)drone.getVelocity().getNorm();
         		}
         	}
         }
@@ -701,13 +700,13 @@ public class Autopilot {
         	else {
             	if (drone.getHeading() < targetHeading) {
             		thrust = 0;
-                	leftBrakeForce = 100+180*Math.abs(drone.getHeadingAngularVelocity());
-                	rightBrakeForce = 100; //3600*Math.abs(drone.getHeadingAngularVelocity());
+                	leftBrakeForce = 100;
+                	rightBrakeForce = 100+18000*Math.abs(drone.getHeadingAngularVelocity()); //3600*Math.abs(drone.getHeadingAngularVelocity());
             	}
             	else {
             		thrust = 0;
-                	leftBrakeForce = 100;
-                	rightBrakeForce = 100+180*Math.abs(drone.getHeadingAngularVelocity());
+                	leftBrakeForce = 100+18000*Math.abs(drone.getHeadingAngularVelocity());
+                	rightBrakeForce = 100;
             	}
         	}
         	if(droneOfPackage != null && fromGate != null && toGate != null) {
