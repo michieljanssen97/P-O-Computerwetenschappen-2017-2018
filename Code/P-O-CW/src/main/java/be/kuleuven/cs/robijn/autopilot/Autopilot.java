@@ -5,7 +5,6 @@ import org.apache.commons.math3.linear.*;
 import be.kuleuven.cs.robijn.autopilot.Autopilot;
 import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Gate;
-import be.kuleuven.cs.robijn.common.airports.Runway;
 import be.kuleuven.cs.robijn.common.exceptions.FinishedException;
 import be.kuleuven.cs.robijn.common.math.Angle;
 import be.kuleuven.cs.robijn.common.math.Angle.Type;
@@ -64,7 +63,7 @@ public class Autopilot {
 		this.targets.setTargets(targets);
 	}
 	
-	private RealVector targetPosition = new ArrayRealVector(new double[]{0,1.40,100});
+	private RealVector targetPosition = null;
 	
 	public RealVector getTargetPosition() {
 		return targetPosition;
@@ -72,6 +71,16 @@ public class Autopilot {
 	
 	public void setTargetPosition(RealVector targetPosition) {
 		this.targetPosition = targetPosition;
+	}
+	
+	private float targetHeading = 0;
+	
+	public float getTargetHeading() {
+		return targetHeading;
+	}
+	
+	public void setTargetHeading(float targetHeading) {
+		this.targetHeading = targetHeading;
 	}
 	
 	private WorldObject world;
@@ -465,7 +474,7 @@ public class Autopilot {
 							solution = (float) (minNewWingInclination + Math.toRadians(settings.getCorrectionFactor()));
 						}
 						else {
-							solution = (float) (maxNewWingInclination + Math.toRadians(settings.getCorrectionFactor()));
+							solution = (float) (maxNewWingInclination - Math.toRadians(settings.getCorrectionFactor()));
 						}
 					}
 					leftWingInclination = solution - rollInclination.getOrientation();
@@ -601,9 +610,6 @@ public class Autopilot {
 					thrust = 0;
 				}
 			}
-			System.out.println(drone.getVelocity().getNorm());
-			System.out.println(targetPositionDroneCoordinates.getNorm());
-			System.out.println();
 			int factor;
 			if (droneVelocity < 10)
 				factor = 2;
@@ -645,6 +651,7 @@ public class Autopilot {
 			thrust = Math.max(0, thrust);
         }
         if (this.getFlightMode() == FlightMode.BRAKE) {
+        	System.out.println("brake");
         	this.drone.setArrived();
 			if (drone.getVelocity().getNorm() > 0.001) {
 				float targetVelocity;
@@ -673,7 +680,8 @@ public class Autopilot {
 			}	
 		}
         if (this.getFlightMode() == FlightMode.TURN) {
-        	float targetHeading = (float) (Math.PI);
+        	System.out.println("turn");
+        	float targetHeading = this.getTargetHeading();
         	if (drone.getVelocity().getNorm() < 1) {
         		thrust = 20;
         	}
@@ -709,9 +717,9 @@ public class Autopilot {
         			rightBrakeForce = 9000*Math.abs(drone.getHeading()-targetHeading);
         		}
         	}
-        	System.out.println(drone.getVelocity().getNorm());
         }
         if (this.getFlightMode() == FlightMode.STOP){
+        	System.out.println("stop");
         	float targetHeading = (float) (Math.PI);
         	if (Math.abs(drone.getHeading()-targetHeading) > Math.PI/180) {
         		if (drone.getHeading() < targetHeading) {
@@ -736,9 +744,6 @@ public class Autopilot {
                 	leftBrakeForce = 100;
                 	rightBrakeForce = 100+180*Math.abs(drone.getHeadingAngularVelocity());
             	}
-            	if (Math.abs(drone.getHeadingAngularVelocity()) < 0.00001)
-            		this.setFlightMode(FlightMode.READY);
-            	System.out.println(drone.getHeadingAngularVelocity());
         	}
         	if(droneOfPackage != null && fromGate != null && toGate != null ) {
 	        	this.flyRoute(droneOfPackage, fromGate, toGate);
@@ -809,6 +814,10 @@ public class Autopilot {
     	RealVector[] route = routeCalculator.calculateRoute(drone, fromGate, toGate, drone.getHeight());
     	this.setTargets(route);
     	this.setTargetPosition(toGate.getWorldPosition());
+    	RealVector vector = route[route.length-1].subtract(route[route.length-2]);
+    	vector.setEntry(1, 0);
+    	Angle angle = Angle.getYRotation(vector, new ArrayRealVector(new double[] {0,0,0}, false));
+    	this.setTargetHeading(angle.getAngle());
     	this.setFlightMode(FlightMode.ASCEND);
     	this.resetFlyAfterPackagePicked();
     }

@@ -1,8 +1,13 @@
 package be.kuleuven.cs.robijn.autopilot;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 
+import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.common.airports.Airport;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.airports.Runway;
@@ -19,7 +24,7 @@ public class routeCalculator {
     	//		fromGate.getWorldPosition().subtract(fromAirport.getWorldPosition()));
     	if (orientation.getNorm() != 0)
     		orientation = orientation.mapMultiply(1/orientation.getNorm());
-    	orientation = new ArrayRealVector(new double[] {0, 0, -1}, false);
+    	//orientation = new ArrayRealVector(new double[] {0, 0, -1}, false);
     			
     	RealVector solution = orientation.mapMultiply(
     			(fromAirport.getSize().getX()/2) + (hight/Math.tan(Math.toRadians(5)))
@@ -103,15 +108,50 @@ public class routeCalculator {
     	return solution;
 	}
 	
-	public static Runway getBestRunway(Drone drone, Airport fromAirport, Airport toAirport, Gate fromGate, Gate toGate,
-			Runway fromRunway, Runway toRunway1, Runway toRunway2, float hight) {
-		RealVector ascendRoute = routeCalculator.getAscendRoute(drone, fromAirport, fromGate, fromRunway, hight);
-		RealVector[] landRoute1 = routeCalculator.getLandRoute(drone, toAirport, toGate, toRunway1, hight);
-		RealVector[] landRoute2 = routeCalculator.getLandRoute(drone, toAirport, toGate, toRunway2, hight);
+	public static Object[] getBestRunway(Drone drone, Airport fromAirport, Airport toAirport, Gate fromGate, Gate toGate,
+			Runway fromRunway, Runway toRunway1, Runway toRunway2, float height) {
+		RealVector ascendRoute = routeCalculator.getAscendRoute(drone, fromAirport, fromGate, fromRunway, height);
+		RealVector[] landRoute1 = routeCalculator.getLandRoute(drone, toAirport, toGate, toRunway1, height);
+		RealVector[] landRoute2 = routeCalculator.getLandRoute(drone, toAirport, toGate, toRunway2, height);
 		
 		if (landRoute1[1].getDistance(ascendRoute) < landRoute2[1].getDistance(ascendRoute))
-			return toRunway1;
-		return toRunway2;		
+			return new Object[] {toRunway1, landRoute1[1].getDistance(ascendRoute)};
+		return new Object[] {toRunway1, landRoute2[1].getDistance(ascendRoute)};
+	}
+	
+	public static List<Airport> orderAirports(Drone drone, Airport fromAirport, Gate fromGate, float height) {
+		WorldObject world = fromAirport.getParent();
+		List<Airport> bestAirports = new ArrayList<>();
+		HashMap<Airport, Float> pairs = new HashMap<>();
+		for (Airport airport: world.getChildrenOfType(Airport.class)) {
+			Runway fromRunway = routeCalculator.getFromRunway(drone, fromGate);
+			Object[] first = routeCalculator.getBestRunway(drone, fromAirport, airport, fromGate, airport.getGates()[0], fromRunway, 
+					airport.getRunways()[0], airport.getRunways()[1], height);
+			Object[] second = routeCalculator.getBestRunway(drone, fromAirport, airport, fromGate, airport.getGates()[1], fromRunway, 
+					airport.getRunways()[0], airport.getRunways()[1], height);
+			float distance1 = (float) first[1];
+			float distance2 = (float) second[1];
+			float bestDistance;
+			if (distance1 <= distance2)
+				bestDistance = distance1;
+			else
+				bestDistance = distance2;
+			pairs.put(airport, bestDistance);
+			Airport port = null;
+			boolean flag = false;
+			for (int i = 0; i< bestAirports.size(); i++) {
+				port = bestAirports.get(i);
+				if (pairs.get(port) > bestDistance) {
+					bestAirports.add(i, airport);
+					flag = true;
+					break;
+				}
+			}
+			if (!flag)
+				bestAirports.add(airport);
+		}
+		return bestAirports;
+			
 	}
 	
 	public static RealVector[] calculateRoute(Drone drone, Gate fromGate, Gate toGate, float height) {    
@@ -153,6 +193,6 @@ public class routeCalculator {
     	Runway toRunway1 = toAirport.getRunways()[0];
     	Runway toRunway2 = toAirport.getRunways()[1];
     	
-    	return routeCalculator.getBestRunway(drone, fromAirport, toAirport, fromGate, toGate, fromRunway, toRunway1, toRunway2, height);
+    	return (Runway) routeCalculator.getBestRunway(drone, fromAirport, toAirport, fromGate, toGate, fromRunway, toRunway1, toRunway2, height)[0];
 	}
 }

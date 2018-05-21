@@ -187,10 +187,10 @@ public class AirportPackage extends WorldObject{
 		Runway toTakeOff = routeCalculator.getFromRunway(drone, fromGate);
 		Runway toLand = routeCalculator.getToRunway(drone, fromGate, toGate, toTakeOff, drone.getHeight());
 		
-		System.out.println("----------------------------------------------------------");
-		System.out.println(currentAirport.equals(this.getOrigin().getAirport()));
-		System.out.println(Runway.areRunwaysAvailable(toTakeOff, toLand));
-		System.out.println(!toGate.hasDrone());
+//		System.out.println("----------------------------------------------------------");
+//		System.out.println(currentAirport.equals(this.getOrigin().getAirport()));
+//		System.out.println(Runway.areRunwaysAvailable(toTakeOff, toLand));
+//		System.out.println(!toGate.hasDrone());
     	return (Runway.areRunwaysAvailable(toTakeOff, toLand) && !toGate.hasDrone());
     }
     
@@ -228,12 +228,11 @@ public class AirportPackage extends WorldObject{
 	            		drone.setCanBeAssigned(false);
 	            		
 	            		
-		            	System.out.println("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
+		            	//System.out.println("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
 		            	module.taxiToGateAndFly(drone, newFromGate, fromGate);
             		}
             	}
 	            else if (p.droneCanStart(drone, fromGate, toGate, fromAirport)){
-            		fromGate.setCurrentDrone(drone);
             		toGate.setCurrentDrone(drone);
 	            	p.markAsInTransit(drone);
 	                module.taxiToGateAndFly(drone, fromGate, toGate);
@@ -252,7 +251,7 @@ public class AirportPackage extends WorldObject{
     		
     		if(isDeadlock) {
 	    		//TODO laat een vliegtuig (op een airp zonder pakje) naar een vrije gate vliegen zodat 'deadlock' wordt opgelost
-	    		System.out.println("--------------------------------- DEADLOCK: " + oldAmountOfPackages);
+	    		//System.out.println("--------------------------------- DEADLOCK: " + oldAmountOfPackages);
     		}
     	}
     }
