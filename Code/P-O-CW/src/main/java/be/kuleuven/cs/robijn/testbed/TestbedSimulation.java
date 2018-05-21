@@ -1,5 +1,6 @@
 package be.kuleuven.cs.robijn.testbed;
 
+import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
@@ -176,9 +177,10 @@ public class TestbedSimulation {
 				.findFirst();
 
 		if(gate.isPresent()){
+			AirportPackage p = gate.get().getPackage();
 			if(drone.getPackage() != null && drone.getPackage().getDestination().getWorldPosition().getDistance(gate.get().getWorldPosition()) < (gate.get().getAirport().width + 10)){
 				drone.getPackage().markAsDelivered();
-			}else if(drone.getPackage() == null && gate.get().hasPackage()){
+			}else if(drone.getPackage() == null && gate.get().hasPackage() && p != null && p.droneCanStart(drone, p.getOrigin(), p.getDestination(), p.getOrigin().getAirport())){
 				gate.get().getPackage().markAsInTransit(drone);
 			}
 		}
