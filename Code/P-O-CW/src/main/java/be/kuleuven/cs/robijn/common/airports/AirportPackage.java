@@ -71,10 +71,13 @@ public class AirportPackage extends WorldObject{
     }
 
     /**
-     * Sets the state of the package to IN_TRANSIT, adn sets the transporter.
+     * Sets the state of the package to IN_TRANSIT, and sets the transporter.
      * @param transporter the drone that is carrying the package
      */
     public void markAsInTransit(Drone transporter){
+    	if(! this.droneCanStart(transporter, this.getOrigin(), this.getDestination(), this.getOrigin().getAirport())) {
+    		return;
+    	}
         if(packageState == State.DELIVERED){
             throw new IllegalStateException("Packages that have been delivered cannot be marked as in transit.");
         }else if(packageState == State.IN_TRANSIT){
@@ -205,7 +208,7 @@ public class AirportPackage extends WorldObject{
             Airport fromAirport = p.getOrigin().getAirport(); 
             Gate fromGate = p.getOrigin();
             Gate toGate = p.getDestination();
-            Drone drone = fromAirport.getAvailableDrone();
+            Drone drone = fromAirport.getAvailableDrone(fromGate);
             if(drone != null && drone.canBeAssigned()) {
             	if(drone.getCurrentAirport() != fromAirport) {
             		if(drone.getAirportOfDrone() == null) {

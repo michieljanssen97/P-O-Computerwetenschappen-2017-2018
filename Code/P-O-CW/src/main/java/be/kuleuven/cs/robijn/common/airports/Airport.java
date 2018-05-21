@@ -140,8 +140,17 @@ public class Airport extends WorldObject {
         return drone;
     }
     
-    public Drone getAvailableDrone() {
-    	Drone drone = this.getFirstAvailableDrone();
+    public Drone getFirstAvailableDroneOnAirportOfGate(Gate fromGate) {
+    	if(this.equals(fromGate.getAirport()) && fromGate.hasDrone()) {
+			return fromGate.getCurrentDrone();
+		}
+    	else {
+    		return this.getFirstAvailableDrone();
+    	}
+    }
+    
+    public Drone getAvailableDrone(Gate fromGate) { //TODO dmv geordende lisjt van Pieter
+    	Drone drone = this.getFirstAvailableDroneOnAirportOfGate(fromGate);
     	if(drone != null) {
     		return drone;
     	}

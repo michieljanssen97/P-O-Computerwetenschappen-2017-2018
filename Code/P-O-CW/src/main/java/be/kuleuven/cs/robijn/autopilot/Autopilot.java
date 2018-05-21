@@ -740,7 +740,7 @@ public class Autopilot {
             		this.setFlightMode(FlightMode.READY);
             	System.out.println(drone.getHeadingAngularVelocity());
         	}
-        	if(droneOfPackage != null && fromGate != null && toGate != null ) {
+        	if(droneOfPackage != null && fromGate != null && toGate != null && Math.abs(drone.getHeadingAngularVelocity()) < 0.00001) {
 	        	this.flyRoute(droneOfPackage, fromGate, toGate);
         	}
         	else {
