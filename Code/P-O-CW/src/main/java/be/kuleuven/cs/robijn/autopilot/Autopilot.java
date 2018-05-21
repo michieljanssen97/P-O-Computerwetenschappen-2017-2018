@@ -474,7 +474,7 @@ public class Autopilot {
 							solution = (float) (minNewWingInclination + Math.toRadians(settings.getCorrectionFactor()));
 						}
 						else {
-							solution = (float) (maxNewWingInclination + Math.toRadians(settings.getCorrectionFactor()));
+							solution = (float) (maxNewWingInclination - Math.toRadians(settings.getCorrectionFactor()));
 						}
 					}
 					leftWingInclination = solution - rollInclination.getOrientation();
@@ -610,9 +610,6 @@ public class Autopilot {
 					thrust = 0;
 				}
 			}
-			System.out.println(drone.getVelocity().getNorm());
-			System.out.println(targetPositionDroneCoordinates.getNorm());
-			System.out.println();
 			int factor;
 			if (droneVelocity < 10)
 				factor = 2;
@@ -654,7 +651,7 @@ public class Autopilot {
 			thrust = Math.max(0, thrust);
         }
         if (this.getFlightMode() == FlightMode.BRAKE) {
-        	System.out.println("test1");
+        	System.out.println("brake");
         	this.drone.setArrived();
 			if (drone.getVelocity().getNorm() > 0.001) {
 				float targetVelocity;
@@ -683,7 +680,7 @@ public class Autopilot {
 					
 		}
         if (this.getFlightMode() == FlightMode.TURN) {
-        	System.out.println("test2");
+        	System.out.println("turn");
         	float targetHeading = this.getTargetHeading();
         	if (drone.getVelocity().getNorm() < 1) {
         		thrust = 20;
@@ -722,7 +719,7 @@ public class Autopilot {
         	}
         }
         if (this.getFlightMode() == FlightMode.STOP){
-        	System.out.println("test3");
+        	System.out.println("stop");
         	float targetHeading = (float) (Math.PI);
         	if (Math.abs(drone.getHeading()-targetHeading) > Math.PI/180) {
         		if (drone.getHeading() < targetHeading) {
