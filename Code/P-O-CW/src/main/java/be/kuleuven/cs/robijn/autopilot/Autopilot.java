@@ -658,13 +658,13 @@ public class Autopilot {
 				RealVector targetPosition = this.getTargetPosition();
 				RealVector targetPositionDroneCoordinates = drone.transformationToDroneCoordinates(targetPosition.subtract(drone.getWorldPosition()));
 				if (targetPositionDroneCoordinates.getNorm() > 200)
-					targetVelocity = 10;
+					targetVelocity = 30;
 				if (targetPositionDroneCoordinates.getNorm() > 50)
-					targetVelocity = 5;
+					targetVelocity = 20;
 				if (targetPositionDroneCoordinates.getNorm() > 20)
-					targetVelocity = 2;
+					targetVelocity = 10;
 				if (targetPositionDroneCoordinates.getNorm() > 5)
-					targetVelocity = 1;
+					targetVelocity = 3;
 				else
 					targetVelocity = 1;
 				if (drone.getVelocity().getNorm() > targetVelocity) {
@@ -674,10 +674,18 @@ public class Autopilot {
 					leftBrakeForce = Math.max(0, Math.min(4300, force/2));
 					rightBrakeForce = Math.max(0, Math.min(4300, force/2));
 				}
+				if (targetPositionDroneCoordinates.getNorm() < 20) {
+					if (targetPositionDroneCoordinates.getEntry(0) > 0) {
+						leftBrakeForce = 0;
+					}
+					else if (targetPositionDroneCoordinates.getEntry(0) < 0) {
+						rightBrakeForce = 0;
+					}
+				}
 				if (targetPositionDroneCoordinates.getNorm() < 5) {
 					this.setFlightMode(FlightMode.STOP);
 				}
-			}	
+			}
 		}
         if (this.getFlightMode() == FlightMode.TURN) {
         	System.out.println("turn");
