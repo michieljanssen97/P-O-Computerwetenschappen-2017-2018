@@ -75,9 +75,6 @@ public class AirportPackage extends WorldObject{
      * @param transporter the drone that is carrying the package
      */
     public void markAsInTransit(Drone transporter){
-    	if(! this.droneCanStart(transporter, this.getOrigin(), this.getDestination(), this.getOrigin().getAirport())) {
-    		return;
-    	}
         if(packageState == State.DELIVERED){
             throw new IllegalStateException("Packages that have been delivered cannot be marked as in transit.");
         }else if(packageState == State.IN_TRANSIT){
@@ -182,6 +179,7 @@ public class AirportPackage extends WorldObject{
 		Runway toTakeOff = routeCalculator.getFromRunway(drone, fromGate);
 		Runway toLand = routeCalculator.getToRunway(drone, fromGate, toGate, toTakeOff, drone.getHeight());
 		
+		System.out.println(Runway.areRunwaysAvailable(toTakeOff, toLand) + " " + !toGate.hasDrone());
     	return (Runway.areRunwaysAvailable(toTakeOff, toLand) && !toGate.hasDrone());
     }
     
@@ -193,6 +191,18 @@ public class AirportPackage extends WorldObject{
     	}
     	
     	throw new IllegalStateException();
+    }
+    
+    private void lockEverything(Drone drone, Gate fromGate, Gate toGate) {
+        Runway takeOffRunway = routeCalculator.getFromRunway(drone, fromGate);
+		Runway landRunway = routeCalculator.getToRunway(drone, fromGate, toGate, takeOffRunway, drone.getHeight());
+		
+		System.out.println(landRunway.getCurrentDrone() + " " + drone);
+		
+        takeOffRunway.setCurrentDrone(drone);
+    	landRunway.setCurrentDrone(drone);
+        drone.setDestinationRunway(landRunway);
+        toGate.setCurrentDrone(drone);
     }
 
     public void assignPackages() {
@@ -210,34 +220,21 @@ public class AirportPackage extends WorldObject{
             		}
             		Gate newFromGate = findClosestGate(drone);
             		if(p.droneCanStart(drone, newFromGate, fromGate, drone.getAirportOfDrone())) {
-            			//Lock the runways
-            	        Runway takeOffRunway = routeCalculator.getFromRunway(drone, this.getOrigin());
-            			Runway landRunway = routeCalculator.getToRunway(drone, this.getOrigin(), this.getDestination(), takeOffRunway, drone.getHeight());
-            			
-            	        takeOffRunway.setCurrentDrone(drone);
-            	        
-    	            	System.out.println(landRunway.getCurrentDrone() + " " + drone);
-            	    	landRunway.setCurrentDrone(drone);
-            	        drone.setDestinationRunway(landRunway);
+	            		p.lockEverything(drone, newFromGate, fromGate);
 	            		drone.setCanBeAssigned(false);
 		            	module.taxiToGateAndFly(drone, newFromGate, fromGate);
+            		}
+            		else {
+            			System.out.println("HIERO1 " + this.getAllPackagesToAssign().size());
             		}
             	}
 	            else if (p.droneCanStart(drone, fromGate, toGate, fromAirport)) {
 	            	p.markAsInTransit(drone);
-	            	//Lock the runways
-	                Runway takeOffRunway = routeCalculator.getFromRunway(drone, this.getOrigin());
-	        		Runway landRunway = routeCalculator.getToRunway(drone, this.getOrigin(), this.getDestination(), takeOffRunway, drone.getHeight());
-	        		
-	                takeOffRunway.setCurrentDrone(drone);
-	            	landRunway.setCurrentDrone(drone);
-	                drone.setDestinationRunway(landRunway);
-		            toGate.setCurrentDrone(drone);
-		            
+		            p.lockEverything(drone, fromGate, toGate);
 	                module.taxiToGateAndFly(drone, fromGate, toGate);
 	            }
 	            else {
-	            	System.out.println("HIERO " + this.getAllPackagesToAssign().size());
+	            	System.out.println("HIERO2 " + this.getAllPackagesToAssign().size());
 	            }
             }
         }
