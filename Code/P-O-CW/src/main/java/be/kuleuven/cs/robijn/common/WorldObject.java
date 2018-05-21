@@ -278,7 +278,7 @@ public class WorldObject {
     /// WORLD TRANSFORM ///
 
     private boolean isObjectToWorldTransformDirty(){
-        return objectToWorldTransform == null || (getParent() != null && getParent().isObjectToWorldTransformDirty());
+        return true || objectToWorldTransform == null || (getParent() != null && getParent().isObjectToWorldTransformDirty());
     }
 
     /**
@@ -287,11 +287,10 @@ public class WorldObject {
      */
     public RealMatrix getObjectToWorldTransform(){
         if(isObjectToWorldTransformDirty()){
-            RealMatrix objectToParentTransform = getObjectToParentTransform();
             if(getParent() == null) {
-                objectToWorldTransform = objectToParentTransform;
+                objectToWorldTransform = getObjectToParentTransform();
             }else{
-                objectToWorldTransform = getParent().getObjectToWorldTransform().multiply(objectToParentTransform);
+                objectToWorldTransform = getParent().getObjectToWorldTransform().multiply(getObjectToParentTransform());
             }
         }
         return objectToWorldTransform;
