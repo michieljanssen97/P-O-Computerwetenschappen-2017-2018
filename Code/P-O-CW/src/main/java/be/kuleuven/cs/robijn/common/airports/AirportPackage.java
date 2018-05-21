@@ -71,10 +71,13 @@ public class AirportPackage extends WorldObject{
     }
 
     /**
-     * Sets the state of the package to IN_TRANSIT, adn sets the transporter.
+     * Sets the state of the package to IN_TRANSIT, and sets the transporter.
      * @param transporter the drone that is carrying the package
      */
     public void markAsInTransit(Drone transporter){
+    	if(! this.droneCanStart(transporter, this.getOrigin(), this.getDestination(), this.getOrigin().getAirport())) {
+    		return;
+    	}
         if(packageState == State.DELIVERED){
             throw new IllegalStateException("Packages that have been delivered cannot be marked as in transit.");
         }else if(packageState == State.IN_TRANSIT){
@@ -187,10 +190,6 @@ public class AirportPackage extends WorldObject{
 		Runway toTakeOff = routeCalculator.getFromRunway(drone, fromGate);
 		Runway toLand = routeCalculator.getToRunway(drone, fromGate, toGate, toTakeOff, drone.getHeight());
 		
-//		System.out.println("----------------------------------------------------------");
-//		System.out.println(currentAirport.equals(this.getOrigin().getAirport()));
-//		System.out.println(Runway.areRunwaysAvailable(toTakeOff, toLand));
-//		System.out.println(!toGate.hasDrone());
     	return (Runway.areRunwaysAvailable(toTakeOff, toLand) && !toGate.hasDrone());
     }
     
@@ -210,7 +209,8 @@ public class AirportPackage extends WorldObject{
             Airport fromAirport = p.getOrigin().getAirport(); 
             Gate fromGate = p.getOrigin();
             Gate toGate = p.getDestination();
-            Drone drone = fromAirport.getAvailableDrone();
+            Drone drone = fromAirport.getAvailableDrone(fromGate);
+           
             if(drone != null && drone.canBeAssigned()) {
             	if(drone.getCurrentAirport() != fromAirport) {
             		if(drone.getAirportOfDrone() == null) {
@@ -226,15 +226,12 @@ public class AirportPackage extends WorldObject{
             	    	landRunway.setCurrentDrone(drone);
             	        drone.setDestinationRunway(landRunway);
 	            		drone.setCanBeAssigned(false);
-	            		
-	            		
-		            	//System.out.println("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
 		            	module.taxiToGateAndFly(drone, newFromGate, fromGate);
             		}
             	}
-	            else if (p.droneCanStart(drone, fromGate, toGate, fromAirport)){
-            		toGate.setCurrentDrone(drone);
+	            else if (p.droneCanStart(drone, fromGate, toGate, fromAirport)) {
 	            	p.markAsInTransit(drone);
+	            	toGate.setCurrentDrone(drone);
 	                module.taxiToGateAndFly(drone, fromGate, toGate);
 	            }
             }
