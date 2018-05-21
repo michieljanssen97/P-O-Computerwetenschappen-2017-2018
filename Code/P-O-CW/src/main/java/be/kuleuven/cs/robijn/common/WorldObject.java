@@ -278,7 +278,7 @@ public class WorldObject {
     /// WORLD TRANSFORM ///
 
     private boolean isObjectToWorldTransformDirty(){
-        return true || objectToWorldTransform == null || (getParent() != null && getParent().isObjectToWorldTransformDirty());
+        return objectToWorldTransform == null || (getParent() != null && getParent().isObjectToWorldTransformDirty());
     }
 
     /**
