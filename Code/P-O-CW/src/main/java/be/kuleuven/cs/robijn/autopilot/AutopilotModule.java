@@ -82,6 +82,10 @@ public class AutopilotModule {
     }
     
     public void taxiToGateAndFly(Drone drone, Gate fromGate, Gate toGate) {
+    	
+    	System.out.println(drone.getWorldPosition());
+    	System.out.println(fromGate.getWorldPosition());
+    	System.out.println(toGate.getWorldPosition());
         
     	Autopilot autopilot = autopilots.get(drone);
     	if(!drone.isOnGate(fromGate) && drone.canBeAssigned() && drone.getAirportOfDrone().equals(fromGate.getAirport())) {//first taxi to the correct Gate
