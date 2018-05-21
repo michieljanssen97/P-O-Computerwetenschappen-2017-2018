@@ -1,5 +1,6 @@
 package be.kuleuven.cs.robijn.common.airports;
 
+import be.kuleuven.cs.robijn.autopilot.routeCalculator;
 import be.kuleuven.cs.robijn.common.WorldObject;
 import be.kuleuven.cs.robijn.worldObjects.Drone;
 
@@ -11,6 +12,7 @@ import org.apache.commons.math3.linear.RealVector;
 
 import java.awt.Polygon;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Airport extends WorldObject {
 
@@ -154,12 +156,12 @@ public class Airport extends WorldObject {
     	if(drone != null) {
     		return drone;
     	}
-    	
     	double minDistance = Double.MAX_VALUE;
     	for(Airport airp : this.getAllAirports()) {
     		Drone tempDrone = airp.getFirstAvailableDrone();
-    		if(tempDrone != null && tempDrone.calculateDistanceToAirport(this) < minDistance && airp.hasSufficientAvailableDrones()) {
-    			minDistance = tempDrone.calculateDistanceToAirport(this);
+    		int distance = (int) routeCalculator.getBestRunway(tempDrone, airp, this, tempDrone.getClosestGate(airp), fromGate, tempDrone.getHeight())[1];
+    		if(tempDrone != null &&  distance < minDistance && airp.hasSufficientAvailableDrones()) {
+    			minDistance = distance;
     			drone = tempDrone;
     		}
     	}
