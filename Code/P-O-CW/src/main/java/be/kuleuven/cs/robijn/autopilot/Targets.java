@@ -48,6 +48,14 @@ public class Targets {
 		
 	private int index = 0;
 	
+	public int getIndex() {
+		return this.index;
+	}
+	
+	public void setIndex(int index) {
+		this.index = index;
+	}
+	
 	public int getNbTargets() {
 		return this.getTargets().length;
 	}
