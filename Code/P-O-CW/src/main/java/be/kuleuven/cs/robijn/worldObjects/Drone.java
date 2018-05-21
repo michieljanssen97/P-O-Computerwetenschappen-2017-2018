@@ -296,10 +296,8 @@ public class Drone extends WorldObject {
 	public void setArrived() {
 		this.setToAirport();
 		this.setPackageDelivered();
-		if(this.getDestinationRunway() != null) {
-			this.getDestinationRunway().removeCurrentDrone();
-			this.setDestinationRunway(null);
-		}
+		this.getDestinationRunway().removeCurrentDrone();
+		this.setDestinationRunway(null);
 	}
 	
 	public void setPackageDelivered() {

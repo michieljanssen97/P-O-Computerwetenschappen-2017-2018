@@ -39,7 +39,7 @@ public class Runway extends WorldObject{
 		return this.currentDrone;
 	}
 	public void setCurrentDrone(Drone drone) {
-		if(this.hasDrone() && !this.getCurrentDrone().equals(drone)) {
+		if(this.hasDrone() && !this.getCurrentDrone().equals(drone) && drone != null) {
 			throw new IllegalStateException();
 		}
 		else {
