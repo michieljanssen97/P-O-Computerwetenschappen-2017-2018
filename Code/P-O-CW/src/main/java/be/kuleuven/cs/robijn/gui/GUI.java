@@ -39,6 +39,7 @@ public class GUI extends Application {
     }
 
     public static void println(String line){
-        controller.addLineToOutput(line);
+    	if (controller != null)
+    		controller.addLineToOutput(line);
     }
 }
