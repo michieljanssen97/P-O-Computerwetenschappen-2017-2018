@@ -15,8 +15,8 @@ public class routeCalculator {
 	
 	public static RealVector getAscendRoute(Drone drone, Airport fromAirport, Gate fromGate, Runway fromRunway, float hight) {
 		RealVector orientation = fromRunway.getWorldPosition().subtract(fromAirport.getWorldPosition());
-//    	orientation = orientation.add(
-//    			fromGate.getWorldPosition().subtract(fromAirport.getWorldPosition()));
+    	//orientation = orientation.add(
+    	//		fromGate.getWorldPosition().subtract(fromAirport.getWorldPosition()));
     	if (orientation.getNorm() != 0)
     		orientation = orientation.mapMultiply(1/orientation.getNorm());
     	orientation = new ArrayRealVector(new double[] {0, 0, -1}, false);
