@@ -744,7 +744,7 @@ public class Autopilot {
                 	rightBrakeForce = 100;
             	}
         	}
-        	if(droneOfPackage != null && fromGate != null && toGate != null ) {
+        	if(droneOfPackage != null && fromGate != null && toGate != null) {
 	        	this.flyRoute(droneOfPackage, fromGate, toGate);
         	}
         	else {

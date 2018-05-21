@@ -119,6 +119,19 @@ public class routeCalculator {
 		return new Object[] {toRunway1, landRoute2[1].getDistance(ascendRoute)};
 	}
 	
+	public static Object[] getBestRunway(Drone drone, Airport fromAirport, Airport toAirport, Gate fromGate, Gate toGate, float height) {
+		Runway fromRunway = routeCalculator.getFromRunway(drone, fromGate);
+		Runway toRunway1 = toAirport.getRunways()[0];
+		Runway toRunway2 = toAirport.getRunways()[1];
+		RealVector ascendRoute = routeCalculator.getAscendRoute(drone, fromAirport, fromGate, fromRunway, height);
+		RealVector[] landRoute1 = routeCalculator.getLandRoute(drone, toAirport, toGate, toRunway1, height);
+		RealVector[] landRoute2 = routeCalculator.getLandRoute(drone, toAirport, toGate, toRunway2, height);
+		
+		if (landRoute1[1].getDistance(ascendRoute) < landRoute2[1].getDistance(ascendRoute))
+			return new Object[] {toRunway1, landRoute1[1].getDistance(ascendRoute)};
+		return new Object[] {toRunway1, landRoute2[1].getDistance(ascendRoute)};
+	}
+	
 	public static List<Airport> orderAirports(Drone drone, Airport fromAirport, Gate fromGate, float height) {
 		WorldObject world = fromAirport.getParent();
 		List<Airport> bestAirports = new ArrayList<>();
