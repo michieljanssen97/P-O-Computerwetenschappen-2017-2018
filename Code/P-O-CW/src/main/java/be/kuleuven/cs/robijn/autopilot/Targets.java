@@ -25,7 +25,7 @@ public class Targets {
 				return null;
 			Angle YRotation = Angle.getYRotation(this.getTargets()[index], drone.getWorldPosition());
 			YRotation = Angle.add(YRotation, - drone.getHeading());
-			if ((Math.abs(YRotation.getOrientation(Type.DEGREES)) > 30) && (drone.getWorldPosition().getDistance(this.getTargets()[index]) < 500)) {
+			if ((Math.abs(YRotation.getOrientation(Type.DEGREES)) > 30) && (drone.getWorldPosition().getDistance(this.getTargets()[index]) < 400)) {
 				System.out.println("test2");
 				RealVector newTarget = drone.getVelocity().add(drone.getWorldPosition());
 				if (newTarget.getNorm() != 0)
