@@ -169,9 +169,9 @@ public class Autopilot {
 			}
 			
 			if (drone.getHeading() < this.getTargetHeadingA())
-				verStabInclination = this.getConfig().getMaxAOA()/2;
-			if (drone.getHeading() > this.getTargetHeadingA())
 				verStabInclination = -this.getConfig().getMaxAOA()/2;
+			if (drone.getHeading() > this.getTargetHeadingA())
+				verStabInclination = this.getConfig().getMaxAOA()/2;
 			
 			if (drone.getWorldPosition().getEntry(1) > this.getConfig().getTailSize()) {
 				drone.setTookOff();
@@ -632,7 +632,6 @@ public class Autopilot {
 			thrust = Math.max(0, thrust);
         }
         if (this.getFlightMode() == FlightMode.BRAKE) {
-        	System.out.println("brake");
 			if (drone.getVelocity().getNorm() > 0.001) {
 				float targetVelocity;
 				RealVector targetPosition = this.getTargetPosition();
@@ -705,7 +704,6 @@ public class Autopilot {
         	}
         }
         if (this.getFlightMode() == FlightMode.STOP){
-        	System.out.println("stop");
         	float targetHeading = this.getTargetHeading();
         	if (Math.abs(drone.getHeading()-targetHeading) > Math.PI/180) {
         		if (drone.getHeading() < targetHeading) {
@@ -732,14 +730,14 @@ public class Autopilot {
             	}
         	}
 //        	System.out.println(droneOfPackage + " " + fromGate.getAirport() + " " + toGate.getAirport());
-        	if(drone.getVelocity().getNorm() <= 1) {
-        		if(droneOfPackage != null && fromGate != null && toGate != null ) {
-    	        	this.flyRoute(droneOfPackage, fromGate, toGate);
-    	        	this.resetFlyAfterPackagePicked();
-            	}
-            	else {
+        	if(drone.getVelocity().getNorm() <= 0.1) {
+//        		if(droneOfPackage != null && fromGate != null && toGate != null ) {
+//    	        	this.flyRoute(droneOfPackage, fromGate, toGate);
+//    	        	this.resetFlyAfterPackagePicked();
+//            	}
+//            	else {
             		drone.setCanBeAssigned(true);
-            	}
+//            	}
         	}
         	
         }
@@ -785,22 +783,21 @@ public class Autopilot {
         return output;
 	}
 	
-	private Drone droneOfPackage = null;
-	private Gate fromGate = null;
-	private Gate toGate = null;
-	
-	public void setFlyAfterPackagePicked(Drone drone, Gate fromGate, Gate toGate) {
-		System.out.println("Gezet");
-		this.droneOfPackage = drone;
-		this.fromGate = fromGate;
-		this.toGate = toGate;
-	}
-	
-	private void resetFlyAfterPackagePicked() {
-		this.droneOfPackage = null;
-		this.fromGate = null;
-		this.toGate = null;
-	}
+//	private Drone droneOfPackage = null;
+//	private Gate fromGate = null;
+//	private Gate toGate = null;
+//	
+//	public void setFlyAfterPackagePicked(Drone drone, Gate fromGate, Gate toGate) {
+//		this.droneOfPackage = drone;
+//		this.fromGate = fromGate;
+//		this.toGate = toGate;
+//	}
+//	
+//	private void resetFlyAfterPackagePicked() {
+//		this.droneOfPackage = null;
+//		this.fromGate = null;
+//		this.toGate = null;
+//	}
 	
     public void flyRoute(Drone drone, Gate fromGate, Gate toGate) {     
     	System.out.println("FLY ROUTE");

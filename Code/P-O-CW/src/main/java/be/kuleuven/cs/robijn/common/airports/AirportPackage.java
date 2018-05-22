@@ -226,7 +226,7 @@ public class AirportPackage extends WorldObject{
 	            		
 	            		Autopilot autopilot = module.autopilots.get(drone);
 	            		autopilot.setTargetPosition(fromGate.getWorldPosition());
-	            		autopilot.setFlyAfterPackagePicked(drone, fromGate, toGate);
+//	            		autopilot.setFlyAfterPackagePicked(drone, fromGate, toGate);
 	            		
 		            	module.taxiToGateAndFly(drone, newFromGate, fromGate);
             		}
