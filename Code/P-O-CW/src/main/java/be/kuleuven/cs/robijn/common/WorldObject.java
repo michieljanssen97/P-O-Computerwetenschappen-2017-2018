@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import be.kuleuven.cs.robijn.common.math.VectorMath;
-import be.kuleuven.cs.robijn.tyres.Tyre;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -12,11 +11,22 @@ import org.apache.commons.math3.linear.*;
 
 public class WorldObject {
     private WorldObject parent;
+
     private ArrayList<WorldObject> children = new ArrayList<>();
     private RealVector position = new ArrayRealVector(new double[]{0, 0, 0}, false);
     private Rotation rotation = new Rotation(new Vector3D(1, 0, 0), 0);
     private RealVector scale = new ArrayRealVector(new double[]{1, 1, 1}, false);
+    private RealMatrix objectToWorldTransform = null;
     private String name = "";
+
+    public WorldObject(){}
+
+    public WorldObject(WorldObject toCopy){
+        setRelativePosition(toCopy.getRelativePosition());
+        setRelativeRotation(toCopy.getRelativeRotation());
+        setScale(toCopy.getScale());
+        setName(toCopy.getName());
+    }
 
     ////////////////////////
     /// OBJECT HIERARCHY ///
@@ -48,8 +58,7 @@ public class WorldObject {
      * If no such object is found, null is returned.
      * @param clazz the class of the child to return. Must not be null.
      */
-    @SuppressWarnings("unchecked")
-	public <T extends WorldObject> T getFirstChildOfType(Class<T> clazz){
+    public <T extends WorldObject> T getFirstChildOfType(Class<T> clazz){
         try {
         	ArrayList<T> childrenOfType = getChildrenOfType(clazz);
         	
@@ -77,6 +86,7 @@ public class WorldObject {
     	if(clazz == null) {
     		throw new IllegalArgumentException("clazz cannot be null");
     	}
+    	
     	
     	for(WorldObject child : getChildren()) {
     		if(clazz.isAssignableFrom(child.getClass())) {
@@ -163,6 +173,12 @@ public class WorldObject {
         }
         return false;
     }
+    
+    public <T extends WorldObject> void removeAllChildrenOfType(Class<T> clazz) {
+    	for (WorldObject child : getChildrenOfType(clazz)) {
+    		removeChild(child);
+    	}
+    }
 
     /**
      * Returns the WorldObject of which this object is the child.
@@ -207,6 +223,7 @@ public class WorldObject {
         }
 
         this.position = vector;
+        invalidateObjectToWorldTransform();
     }
 
     /**
@@ -227,6 +244,7 @@ public class WorldObject {
         }
 
         this.rotation = rotation;
+        invalidateObjectToWorldTransform();
     }
 
     /**
@@ -254,21 +272,40 @@ public class WorldObject {
         }
 
         this.scale = scale;
+        invalidateObjectToWorldTransform();
     }
 
     /// WORLD TRANSFORM ///
+
+    private void invalidateObjectToWorldTransform(){
+        this.objectToWorldTransform = null;
+        for(WorldObject child : this.getChildren()){
+            child.invalidateObjectToWorldTransform();
+        }
+    }
 
     /**
      * Returns an affine transformation matrix that transforms local coordinates to world coordinates.
      * @return a non-null 4x4 homogeneous transformation matrix
      */
     public RealMatrix getObjectToWorldTransform(){
+        if(objectToWorldTransform == null){
+            if(getParent() == null) {
+                objectToWorldTransform = getObjectToParentTransform();
+            }else{
+                objectToWorldTransform = getParent().getObjectToWorldTransform().multiply(getObjectToParentTransform());
+            }
+        }
+        return objectToWorldTransform;
+    }
+
+    public RealMatrix getObjectToParentTransform(){
         //Create local affine scale matrix
         RealMatrix scaleMatrix = new Array2DRowRealMatrix(new double[][]{
-            {getScale().getEntry(0), 0, 0, 0},
-            {0, getScale().getEntry(1), 0, 0},
-            {0, 0, getScale().getEntry(2), 0},
-            {0, 0, 0, 1}
+                {getScale().getEntry(0), 0, 0, 0},
+                {0, getScale().getEntry(1), 0, 0},
+                {0, 0, getScale().getEntry(2), 0},
+                {0, 0, 0, 1}
         }, false);
 
         //Create local affine transformation matrix
@@ -279,17 +316,13 @@ public class WorldObject {
         //Create local affine translation matrix
         RealVector localTranslation = getRelativePosition();
         RealMatrix translationMatrix = new Array2DRowRealMatrix(new double[][]{
-            {1, 0, 0, localTranslation.getEntry(0)},
-            {0, 1, 0, localTranslation.getEntry(1)},
-            {0, 0, 1, localTranslation.getEntry(2)},
-            {0, 0, 0, 1}
+                {1, 0, 0, localTranslation.getEntry(0)},
+                {0, 1, 0, localTranslation.getEntry(1)},
+                {0, 0, 1, localTranslation.getEntry(2)},
+                {0, 0, 0, 1}
         }, false);
 
-        RealMatrix objectToParentTransform = translationMatrix.multiply(rotationMatrix.multiply(scaleMatrix));
-        if(getParent() != null) {
-            return getParent().getObjectToWorldTransform().multiply(objectToParentTransform);
-        }
-        return objectToParentTransform;
+        return translationMatrix.multiply(rotationMatrix.multiply(scaleMatrix));
     }
 
     /**
@@ -360,6 +393,14 @@ public class WorldObject {
 
     private RealVector vector3DToRealVector(Vector3D vector){
         return new ArrayRealVector(new double[]{vector.getX(), vector.getY(), vector.getZ(), 1});
+    }
+
+    @Override
+    public String toString() {
+        if(this.getName() != null && !this.getName().equals("")){
+            return this.getClass().getName() + ": " + getName();
+        }
+        return super.toString();
     }
 }
 

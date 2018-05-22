@@ -19,7 +19,7 @@ public class OBJLoader {
     public static Mesh load(Reader reader) throws IOException{
         OBJLoader loader = new OBJLoader();
         loader.load(new BufferedReader(reader));
-        return loader.buildModel();
+        return loader.buildFlatModel();
     }
 
     private ArrayList<Vector3f> vertices = new ArrayList<Vector3f>();
@@ -98,7 +98,48 @@ public class OBJLoader {
         }
     }
 
-    private Mesh buildModel(){
+    /**
+     * Builds a mesh.
+     * This function will create a separate vertex for each index.
+     * This increases memory usage, but is easier to calculate and allows for flat shading.
+     */
+    private Mesh buildFlatModel(){
+        float[] vertexArray = new float[vertexIndices.size() * 3];
+        float[] textureArray = new float[vertexIndices.size() * 2];
+        float[] normalArray = new float[vertexIndices.size() * 3];
+        int[] indexArray = new int[vertexIndices.size()];
+
+        //Loop over indices
+        for(int i = 0; i < vertexIndices.size(); i++) {
+            indexArray[i] = i;
+
+            int vertexIndex = vertexIndices.get(i)-1;
+            int textureIndex = textureIndices.get(i)-1;
+            int normalIndex = normalIndices.get(i)-1;
+
+            Vector3f vector = vertices.get(vertexIndex);
+            vertexArray[(i*3)] = vector.x;
+            vertexArray[(i*3)+1] = vector.y;
+            vertexArray[(i*3)+2] = vector.z;
+
+            if(textureIndex != -1) {
+                Vector2f texCoord = textureCoordinates.get(textureIndex);
+                textureArray[(i * 2)] = texCoord.x;
+                textureArray[(i * 2) + 1] = texCoord.y;
+            }
+
+            if(normalIndex != -1) {
+                Vector3f normalCoord = normals.get(normalIndex);
+                normalArray[(i * 3)] = normalCoord.x;
+                normalArray[(i * 3) + 1] = normalCoord.y;
+                normalArray[(i * 3) + 2] = normalCoord.z;
+            }
+        }
+
+        return Mesh.loadMesh(vertexArray, textureArray, normalArray, indexArray);
+    }
+
+    public Mesh buildCheapModel(){
         //This method uses the cheap and easy way to fix the 'multiple indices to one index' problem.
         //Easy to implement and relatively cheap, but breaks if a vertex is associated with multiple texture/normal coordinates
 

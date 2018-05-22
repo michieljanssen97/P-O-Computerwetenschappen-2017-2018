@@ -1,24 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
 <?import be.kuleuven.cs.robijn.gui.SimulationSettingsControl?>
+<?import be.kuleuven.cs.robijn.gui.PackageListControl?>
 
 <?import be.kuleuven.cs.robijn.gui.SidebarControl?>
 <?import be.kuleuven.cs.robijn.gui.SplittablePane?>
-<AnchorPane fx:id="root" fx:controller="be.kuleuven.cs.robijn.gui.MainController" prefHeight="700" prefWidth="1400" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8">
+<AnchorPane fx:id="root" fx:controller="be.kuleuven.cs.robijn.gui.MainController" prefHeight="900" prefWidth="1600" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8">
    <children>
-      <SplitPane fx:id="contentRoot" dividerPositions="0.95" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
-         <items>
-            <SplittablePane fx:id="camerasViewRoot" minHeight="0.0" minWidth="0.0" prefHeight="400.0" prefWidth="500.0" />
-            <SidebarControl fx:id="sidebar" SplitPane.resizableWithParent="false" minHeight="0.0" minWidth="320.0" prefHeight="160.0" prefWidth="100.0"></SidebarControl>
-         </items>
+      <SplitPane fx:id="contentRoot" dividerPositions="0.05, 0.95" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
+         <SplitPane dividerPositions="0.50" orientation="VERTICAL" SplitPane.resizableWithParent="false" minHeight="0.0" minWidth="320.0" prefHeight="160.0" prefWidth="320.0">
+            <ListView fx:id="droneList"/>
+            <PackageListControl fx:id="packageListControl"/>
+         </SplitPane>
+         <SplitPane dividerPositions="0.90" orientation="VERTICAL" SplitPane.resizableWithParent="false" minHeight="0.0" minWidth="320.0" prefHeight="160.0" prefWidth="320.0">
+            <SplittablePane fx:id="camerasViewRoot" minHeight="0.0" minWidth="0.0" prefHeight="400.0" prefWidth="500.0"/>
+            <TextArea fx:id="output" editable="false"/>
+         </SplitPane>
+         <SidebarControl fx:id="sidebar" SplitPane.resizableWithParent="false" minHeight="0.0" minWidth="220.0" prefHeight="160.0" prefWidth="220.0"/>
       </SplitPane>
       <AnchorPane fx:id="overlayRoot" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0">
-         <SimulationSettingsControl fx:id="simulationSettingsControl" AnchorPane.leftAnchor="100" AnchorPane.topAnchor="100" AnchorPane.rightAnchor="100" AnchorPane.bottomAnchor="100"></SimulationSettingsControl>
+         <SimulationSettingsControl fx:id="simulationSettingsControl" AnchorPane.leftAnchor="100"
+                                    AnchorPane.topAnchor="100" AnchorPane.rightAnchor="100"
+                                    AnchorPane.bottomAnchor="100"/>
       </AnchorPane>
    </children>
 </AnchorPane>

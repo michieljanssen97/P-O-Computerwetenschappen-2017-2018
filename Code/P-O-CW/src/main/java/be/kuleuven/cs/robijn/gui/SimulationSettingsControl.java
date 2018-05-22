@@ -1,28 +1,32 @@
 package be.kuleuven.cs.robijn.gui;
 
 import be.kuleuven.cs.robijn.common.*;
-
+import be.kuleuven.cs.robijn.common.SimulationSettings.AirportDefinition;
+import be.kuleuven.cs.robijn.common.SimulationSettings.DroneDefinition;
+import be.kuleuven.cs.robijn.common.SimulationSettings.GateDefinition;
+import be.kuleuven.cs.robijn.common.airports.Airport;
+import be.kuleuven.cs.robijn.common.airports.Gate;
+import be.kuleuven.cs.robijn.worldObjects.Box;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.*;
-import javafx.collections.FXCollections;
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.converter.NumberStringConverter;
-
 import interfaces.AutopilotConfig;
 import interfaces.AutopilotConfigReader;
 import interfaces.AutopilotConfigWriter;
 import org.apache.commons.math3.linear.ArrayRealVector;
 
-import java.awt.*;
 import java.io.*;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,52 +35,62 @@ import java.util.stream.Stream;
  */
 public class SimulationSettingsControl extends AnchorPane {
 
-    /// CONFIG
+    /// AIRPORT WIDTH & HEIGHT
 
     @FXML
-    private Button loadConfigFileButton;
+    private Spinner<Double> runwayLengthSpinner;
 
     @FXML
-    private Button saveConfigFileButton;
+    private Spinner<Double> gateLengthSpinner;
+
+    /// AIRPORTS SETUP
 
     @FXML
-    private Button loadConfigDefaultsButton;
+    private Button addAirportButton;
 
     @FXML
-    private TableView stringPropertiesTable;
+    private Button removeAirportButton;
 
     @FXML
-    private TableView numberPropertiesTable;
-
-    /// BOXES
+    private Button loadAirportsConfigFileButton;
 
     @FXML
-    private Button loadBoxFileButton;
+    private Button saveAirportsConfigFileButton;
 
     @FXML
-    private Button saveBoxFileButton;
+    private Button generateAirportsButton;
 
     @FXML
-    private Button loadBoxDefaultsButton;
+    private TableView<AirportDefinition> airportsTable;
+
+    /// DRONES SETUP
 
     @FXML
-    private Button addBoxButton;
+    private Button addDroneButton;
 
     @FXML
-    private Button removeBoxButton;
+    private Button removeDroneButton;
 
     @FXML
-    private Button randomBoxesButton;
+    private Button autoAssignDronesButton;
 
     @FXML
-    private TableView boxTable;
+    private Button loadDroneSetupFileButton;
+
+    @FXML
+    private Button saveDroneSetupFileButton;
+
+    @FXML
+    private Button loadDroneSetupDefaultsButton;
+
+    @FXML
+    private TableView<DroneDefinition> dronesTable;
 
     /// MISC
 
     @FXML
     private Button okButton;
 
-    private ObjectProperty<ObservableAutoPilotConfig> configProperty = new SimpleObjectProperty<>(this, "config");
 
     public SimulationSettingsControl(){
         //Load the layout associated with this control.
@@ -93,324 +107,412 @@ public class SimulationSettingsControl extends AnchorPane {
 
     @FXML
     private void initialize(){
-        setupConfigControls();
-        setupBoxControls();
+        setupSpinners();
+        setupAirportsTab();
+        setupDronesTab();
 
-        //User can only click OK if an AutoPilotConfig is loaded.
-        okButton.disableProperty().bind(configProperty.isNull());
+        //User can only click OK if number of airports > 0 and number of drones > 0
+        okButton.disableProperty().bind(Bindings.createBooleanBinding(
+                () -> airportsTable.getItems().size() == 0 ||
+                        dronesTable.getItems().size() == 0,
+                Bindings.size(airportsTable.getItems()),
+                Bindings.size(dronesTable.getItems())
+        ));
+
         //Fire a SimulationSettingsConfirmEvent when the user clicks the OK button
         //This event is observed in the MainController, where the overlay is hidden and the simulation is started.
         okButton.setOnAction(e -> {
+            boolean allDronesValid = dronesTable.getItems().stream().allMatch(DroneDefinition::isValid);
+            if(!allDronesValid){
+                Alert alert = new Alert(
+                        Alert.AlertType.ERROR,
+                        "Some drone(s) have invalid settings. \nPlease check the drone airport and config settings.",
+                        ButtonType.OK
+                );
+                alert.showAndWait();
+                return;
+            }
             SimulationSettingsConfirmEvent confirmEvent = new SimulationSettingsConfirmEvent();
-            confirmEvent.setSettings(configProperty.get());
-            confirmEvent.setBoxes(getBoxes());
+            confirmEvent.setSimulationSettings(buildSettings());
             fireEvent(confirmEvent);
         });
-
-        //Setup the simulation properties table
-        setupConfigTable();
-        setupBoxTable();
     }
 
-    private void setupConfigControls(){
-        //Load the initial, default values for the AutoPilotConfig
-        loadDefaultConfig();
+    /****************/
+    /*** AIRPORTS ***/
+    /****************/
 
-        //When the "load file" button is clicked, show a dialog and load the config file.
-        loadConfigFileButton.setOnAction(e -> {
-            FileChooser chooser = new FileChooser();
-            chooser.setTitle("Select the simulation settings file");
-            chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("AutopilotConfig file", "bin"));
-            File chosenFile = chooser.showOpenDialog(this.getScene().getWindow());
-            if(chosenFile == null){
-                return;
-            }
-
-            try(DataInputStream in = new DataInputStream(new FileInputStream(chosenFile))){
-                loadConfig(AutopilotConfigReader.read(in));
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Failed to load file");
-                alert.setHeaderText("Could not load config file");
-                alert.setContentText("An error occured while loading the file! ("+ex.getMessage()+")");
-                alert.showAndWait();
-            }
-        });
-
-        //When the "save file" button is clicked, show a dialog and save the config file.
-        saveConfigFileButton.setOnAction(e -> {
-            FileChooser chooser = new FileChooser();
-            chooser.setTitle("Select where to save the simulation settings file");
-            chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("AutopilotConfig file", "bin"));
-            File targetFile = chooser.showSaveDialog(this.getScene().getWindow());
-            if(targetFile == null){
-                return;
-            }
-
-            try(DataOutputStream out = new DataOutputStream(new FileOutputStream(targetFile))){
-                AutopilotConfigWriter.write(out, configProperty.get());
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Failed to save file");
-                alert.setHeaderText("Could not save config file");
-                alert.setContentText("An error occured while saving the file! ("+ex.getMessage()+")");
-                alert.showAndWait();
-            }
-        });
-
-        //When the "load default settings" button is clicked, load the default settings.
-        loadConfigDefaultsButton.setOnAction(e -> {
-            loadDefaultConfig();
-        });
+    private void setupSpinners(){
+        JavaFXUtilities.enableApplySpinnerValueOnFocusLost(gateLengthSpinner);
+        JavaFXUtilities.enableApplySpinnerValueOnFocusLost(runwayLengthSpinner);
     }
 
-    private void setupBoxControls(){
-        //Load the initial, default box setup
-        loadDefaultBoxSetup();
-
-        //When the "load file" button is clicked, show a dialog and load the config file.
-        loadBoxFileButton.setOnAction(e -> {
-            FileChooser chooser = new FileChooser();
-            chooser.setTitle("Select the box setup file");
-            chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Box setup text file", "txt"));
-            File chosenFile = chooser.showOpenDialog(this.getScene().getWindow());
-            if(chosenFile == null){
-                return;
-            }
-
-            try(DataInputStream in = new DataInputStream(new FileInputStream(chosenFile))){
-                loadBoxSetup(BoxFileLoader.load(in));
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Failed to load file");
-                alert.setHeaderText("Could not load box setup file");
-                alert.setContentText("An error occured while loading the file! ("+ex.getMessage()+")");
-                alert.showAndWait();
-            }
-        });
-
-        //When the "save file" button is clicked, show a dialog and save the config file.
-        saveBoxFileButton.setOnAction(e -> {
-            FileChooser chooser = new FileChooser();
-            chooser.setTitle("Select where to save the box setup file");
-            chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Box setup text file", "txt"));
-            File targetFile = chooser.showSaveDialog(this.getScene().getWindow());
-            if(targetFile == null){
-                return;
-            }
-
-            try(DataOutputStream out = new DataOutputStream(new FileOutputStream(targetFile))){
-                BoxFileLoader.write(getBoxes(), out);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Failed to save file");
-                alert.setHeaderText("Could not save box file");
-                alert.setContentText("An error occured while saving the file! ("+ex.getMessage()+")");
-                alert.showAndWait();
-            }
-        });
-
-        addBoxButton.setOnAction(e -> {
-            boxTable.getItems().add(generateNextBox());
-        });
-
-        removeBoxButton.setOnAction(e -> {
-            boxTable.getItems().remove(boxTable.getSelectionModel().getSelectedIndex());
-        });
-        removeBoxButton.disableProperty().bind(boxTable.getSelectionModel().selectedItemProperty().isNull());
-
-        //When the "load default settings" button is clicked, load the default settings.
-        loadBoxDefaultsButton.setOnAction(e -> {
-            loadDefaultBoxSetup();
-        });
-
-        randomBoxesButton.setOnAction(e -> {
-            WorldGenerator.WorldGeneratorSettings settings = WorldGeneratorSettingsController.showDialog((Stage)this.addBoxButton.getScene().getWindow());
-            if(settings != null){
-                boxTable.getItems().addAll(WorldGenerator.generateBoxes(settings));
-            }
-        });
+    private void setupAirportsTab(){
+        setupAirportsButtons();
+        setupAirportsTable();
     }
 
-    private Box generateNextBox(){
-        Box newBox = new Box();
-        newBox.setColor(ColorGenerator.sequentialEvenDistribution(boxTable.getItems().size()));
-        return newBox;
-    }
+    private void setupAirportsButtons(){
+        addAirportButton.setOnAction(e -> airportsTable.getItems().add(new AirportDefinition()));
 
-    /**
-     * Creates an ObservableAutoPilotConfig version of the specified config and assigns it to configProperty.
-     * The propertiesTable is refreshed to make sure the values displayed are correct and up-to-date.
-     */
-    private void loadConfig(AutopilotConfig config){
-        configProperty.set(new ObservableAutoPilotConfig(config));
-        stringPropertiesTable.refresh();
-        numberPropertiesTable.refresh();
-    }
+        removeAirportButton.setOnAction(e -> airportsTable.getItems().removeAll(airportsTable.getSelectionModel().getSelectedItems()));
+        removeAirportButton.disableProperty().bind(airportsTable.getSelectionModel().selectedIndexProperty().isEqualTo(-1));
 
-    /**
-     * Loads the default_autopilot_config.bin config file from the application resources
-     */
-    private void loadDefaultConfig(){
-        try(DataInputStream in = new DataInputStream(Resources.getResourceStream("/default_autopilot_config.bin"))){
-            loadConfig(AutopilotConfigReader.read(in));
-        } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
-        }
-    }
+        loadAirportsConfigFileButton.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Load airport config");
+            fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Airport definitions file (*.airport)", "*.airport"));
+            Stage parentStage = (Stage)loadAirportsConfigFileButton.getScene().getWindow();
+            File chosenFile = fileChooser.showOpenDialog(parentStage);
 
-    private void setupConfigTable(){
-        //Make table editable
-        stringPropertiesTable.setEditable(true);
-        numberPropertiesTable.setEditable(true);
+            if(chosenFile != null){
+                try {
+                    DataInputStream in = new DataInputStream(new FileInputStream(chosenFile));
 
-        //Load property names (hashmap keys) in table
-        stringPropertiesTable.setItems(FXCollections.observableArrayList(configProperty.get().getStringProperties().keySet()));
-        numberPropertiesTable.setItems(FXCollections.observableArrayList(configProperty.get().getNumberProperties().keySet()));
+                    int airportCount = in.readInt();
+                    AirportDefinition[] airports = new AirportDefinition[airportCount];
 
-        //Column 1 is keys and is readonly
-        TableColumn<String, String> keyColumn = new TableColumn<>();
-        keyColumn.setText("Property");
-        keyColumn.setEditable(false);
-        keyColumn.setCellValueFactory(cd -> Bindings.createStringBinding(() -> cd.getValue()));
-        stringPropertiesTable.getColumns().add(keyColumn);
+                    for (int i = 0; i < airportCount; i++) {
+                        airports[i] = new AirportDefinition();
+                        airports[i].read(in);
+                    }
 
-        //Column 1 is keys and is readonly
-        TableColumn<String, String> keyColumn2 = new TableColumn<>();
-        keyColumn2.setText("Property");
-        keyColumn2.setEditable(false);
-        keyColumn2.setCellValueFactory(cd -> Bindings.createStringBinding(() -> cd.getValue()));
-        numberPropertiesTable.getColumns().add(keyColumn2);
-
-        //Column 2 is values and is editable
-        TableColumn<String, String> valueColumn = new TableColumn<>();
-        valueColumn.setText("Value");
-        valueColumn.setEditable(true);
-        valueColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        valueColumn.setCellValueFactory(cd -> Bindings.valueAt(configProperty.get().getStringProperties(), cd.getValue()));
-        valueColumn.setOnEditCommit( (e) ->
-                configProperty.get().setProperty((String)stringPropertiesTable.getItems().get(e.getTablePosition().getRow()), e.getNewValue())
-        );
-        stringPropertiesTable.getColumns().add(valueColumn);
-
-        //Column 2 is values and is editable
-        TableColumn<String, Number> valueColumn2 = new TableColumn<>();
-        valueColumn2.setText("Value");
-        valueColumn2.setEditable(true);
-        valueColumn2.setCellFactory(TextFieldTableCell.forTableColumn(new NumberStringConverter()));
-        valueColumn2.setCellValueFactory(cd -> Bindings.valueAt(configProperty.get().getNumberProperties(), cd.getValue()));
-        valueColumn2.setOnEditCommit( (e) ->
-                configProperty.get().setProperty((String)numberPropertiesTable.getItems().get(e.getTablePosition().getRow()), e.getNewValue())
-        );
-        numberPropertiesTable.getColumns().add(valueColumn2);
-    }
-
-    private void setupBoxTable(){
-        //Make table editable
-        boxTable.setEditable(true);
-
-        //Column 1 is box colors and is readonly
-        TableColumn<Box, Color> colorColumn = new TableColumn<>();
-        colorColumn.setText("Box color");
-        colorColumn.setCellValueFactory(cd -> Bindings.createObjectBinding(() -> cd.getValue().getColor()));
-        colorColumn.setCellFactory(x -> new TextFieldTableCell(new ColorStringConverter()){
-            @Override
-            public void updateItem(Object item, boolean empty) {
-                super.updateItem(item, empty);
-
-                if (item == null || empty) {
-                    setStyle("");
-                } else {
-                    // Format date.
-                    Color color = (Color)item;
-                    String colorHex = String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
-                    setStyle("-fx-background-color: "+colorHex);
+                    airportsTable.getItems().clear();
+                    airportsTable.getItems().addAll(airports);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Failed to load file");
+                    alert.setHeaderText("Could not load airports file");
+                    alert.setContentText("An error occured while loading the file! ("+ex.getMessage()+")");
+                    alert.showAndWait();
                 }
             }
         });
-        colorColumn.setOnEditCommit((e) -> {
-            Box curBox = (Box)boxTable.getItems().get(e.getTablePosition().getRow());
-            Color color = e.getNewValue();
-            float[] hsv = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
-            hsv[1] = hsv[2] = 1.0f;
-            color = Color.getHSBColor(hsv[0], hsv[1], hsv[2]);
-            curBox.setColor(color);
-            boxTable.refresh();
-        });
-        boxTable.getColumns().add(colorColumn);
 
-        //Column 2 is X-coordinates and is editable
-        TableColumn<Box, Number> xColumn = new TableColumn<>();
+        saveAirportsConfigFileButton.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save airport config");
+            fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Airport definitions file (*.airport)", "*.airport"));
+            Stage parentStage = (Stage)saveAirportsConfigFileButton.getScene().getWindow();
+            File chosenFile = fileChooser.showSaveDialog(parentStage);
+            if(!chosenFile.getName().endsWith(".airport")){
+                chosenFile = new File(chosenFile.getParentFile(), chosenFile.getName()+".airport");
+            }
+
+            if(chosenFile != null){
+                try {
+                    DataOutputStream out = new DataOutputStream(new FileOutputStream(chosenFile));
+
+                    int airportCount = airportsTable.getItems().size();
+                    out.writeInt(airportCount);
+
+                    for (int i = 0; i < airportCount; i++) {
+                        AirportDefinition airport = airportsTable.getItems().get(i);
+                        airport.write(out);
+                    }
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+
+        generateAirportsButton.setOnAction(e -> {
+            Stage parentStage = (Stage)generateAirportsButton.getScene().getWindow();
+            AirportDefinition[] airports = GenerateAirportsDialog.showDialog(parentStage);
+            airportsTable.getItems().clear();
+            airportsTable.getItems().addAll(airports);
+            airportsTable.refresh();
+        });
+    }
+
+    private void setupAirportsTable(){
+        //Make table editable
+        airportsTable.setEditable(true);
+
+        //Column 1 is X-coordinates and is editable
+        TableColumn<AirportDefinition, Number> xColumn = new TableColumn<>();
         xColumn.setText("X");
         xColumn.setEditable(true);
         xColumn.setCellFactory(TextFieldTableCell.forTableColumn(new NumberStringConverter()));
-        xColumn.setCellValueFactory(cd -> Bindings.createDoubleBinding(() -> cd.getValue().getRelativePosition().getEntry(0)));
+        xColumn.setCellValueFactory(cd -> Bindings.createFloatBinding(() -> cd.getValue().getCenterX()));
         xColumn.setOnEditCommit((e) -> {
-            Box curBox = (Box)boxTable.getItems().get(e.getTablePosition().getRow());
-            double newX = e.getNewValue().doubleValue();
-            double newY = curBox.getRelativePosition().getEntry(1);
-            double newZ = curBox.getRelativePosition().getEntry(2);
-            curBox.setRelativePosition(new ArrayRealVector(new double[]{newX, newY, newZ}, false));
+            AirportDefinition curAirport = airportsTable.getItems().get(e.getTablePosition().getRow());
+            curAirport.setCenterX(e.getNewValue().floatValue());
         });
-        boxTable.getColumns().add(xColumn);
-
-        //Column 2 is Y-coordinates and is editable
-        TableColumn<Box, Number> yColumn = new TableColumn<>();
-        yColumn.setText("Y");
-        yColumn.setEditable(true);
-        yColumn.setCellFactory(TextFieldTableCell.forTableColumn(new NumberStringConverter()));
-        yColumn.setCellValueFactory(cd -> Bindings.createDoubleBinding(() -> cd.getValue().getRelativePosition().getEntry(1)));
-        yColumn.setOnEditCommit((e) -> {
-            Box curBox = (Box)boxTable.getItems().get(e.getTablePosition().getRow());
-            double newX = curBox.getRelativePosition().getEntry(0);
-            double newY = e.getNewValue().doubleValue();
-            double newZ = curBox.getRelativePosition().getEntry(2);
-            curBox.setRelativePosition(new ArrayRealVector(new double[]{newX, newY, newZ}, false));
-        });
-        boxTable.getColumns().add(yColumn);
+        airportsTable.getColumns().add(xColumn);
 
         //Column 2 is Z-coordinates and is editable
-        TableColumn<Box, Number> zColumn = new TableColumn<>();
+        TableColumn<AirportDefinition, Number> zColumn = new TableColumn<>();
         zColumn.setText("Z");
         zColumn.setEditable(true);
         zColumn.setCellFactory(TextFieldTableCell.forTableColumn(new NumberStringConverter()));
-        zColumn.setCellValueFactory(cd -> Bindings.createDoubleBinding(() -> cd.getValue().getRelativePosition().getEntry(2)));
+        zColumn.setCellValueFactory(cd -> Bindings.createFloatBinding(() -> cd.getValue().getCenterZ()));
         zColumn.setOnEditCommit((e) -> {
-            Box curBox = (Box)boxTable.getItems().get(e.getTablePosition().getRow());
-            double newX = curBox.getRelativePosition().getEntry(0);
-            double newY = curBox.getRelativePosition().getEntry(1);
-            double newZ = e.getNewValue().doubleValue();
-            curBox.setRelativePosition(new ArrayRealVector(new double[]{newX, newY, newZ}, false));
+            AirportDefinition curAirport = airportsTable.getItems().get(e.getTablePosition().getRow());
+            curAirport.setCenterZ(e.getNewValue().floatValue());
         });
-        boxTable.getColumns().add(zColumn);
+        airportsTable.getColumns().add(zColumn);
+
+        //Column 3 is centerToRunway0X and is editable
+        TableColumn<AirportDefinition, Number> rotVectXColumn = new TableColumn<>();
+        rotVectXColumn.setText("Center to runway 0 X");
+        rotVectXColumn.setEditable(true);
+        rotVectXColumn.setCellFactory(TextFieldTableCell.forTableColumn(new NumberStringConverter()));
+        rotVectXColumn.setCellValueFactory(cd -> Bindings.createFloatBinding(() -> cd.getValue().getCenterToRunway0X()));
+        rotVectXColumn.setOnEditCommit((e) -> {
+            AirportDefinition curAirport = airportsTable.getItems().get(e.getTablePosition().getRow());
+            curAirport.setCenterToRunway0X(e.getNewValue().floatValue());
+        });
+        airportsTable.getColumns().add(rotVectXColumn);
+
+        //Column 4 is centerToRunway0Z and is editable
+        TableColumn<AirportDefinition, Number> rotVectZColumn = new TableColumn<>();
+        rotVectZColumn.setText("Center to runway 0 Z");
+        rotVectZColumn.setEditable(true);
+        rotVectZColumn.setCellFactory(TextFieldTableCell.forTableColumn(new NumberStringConverter()));
+        rotVectZColumn.setCellValueFactory(cd -> Bindings.createFloatBinding(() -> cd.getValue().getCenterToRunway0Z()));
+        rotVectZColumn.setOnEditCommit((e) -> {
+            AirportDefinition curAirport = airportsTable.getItems().get(e.getTablePosition().getRow());
+            curAirport.setCenterToRunway0Z(e.getNewValue().floatValue());
+        });
+        airportsTable.getColumns().add(rotVectZColumn);
+
+        //Autosize columns
+        autosizeTableColumns(airportsTable);
     }
 
-    private List<Box> getBoxes(){
-        Stream<Box> boxStream = boxTable.getItems().stream().map(o -> (Box)o);
-        return boxStream.collect(Collectors.toList());
+    /**************/
+    /*** DRONES ***/
+    /**************/
+
+    private void setupDronesTab(){
+        setupDronesButtons();
+        setupDronesTable();
     }
 
-    /**
-     * Loads the default_autopilot_config.bin config file from the application resources
-     */
-    private void loadDefaultBoxSetup(){
-        try(DataInputStream in = new DataInputStream(Resources.getResourceStream("/default_boxes.txt"))){
-            loadBoxSetup(BoxFileLoader.load(in));
+    private void setupDronesButtons(){
+        addDroneButton.setOnAction(e -> {
+            ObservableAutoPilotConfig config = new ObservableAutoPilotConfig(getDefaultAutopilotConfig());
+            config.setProperty(ObservableAutoPilotConfig.DRONE_ID_KEY, "Drone " + dronesTable.getItems().size());
+            dronesTable.getItems().add(new DroneDefinition(config));
+        });
+
+        removeDroneButton.setOnAction(e -> dronesTable.getItems().removeAll(dronesTable.getSelectionModel().getSelectedItems()));
+        removeDroneButton.disableProperty().bind(dronesTable.getSelectionModel().selectedIndexProperty().isEqualTo(-1));
+
+        autoAssignDronesButton.setOnAction(e -> {
+            HashSet<GateDefinition> freeGates = new HashSet<>();
+
+            //Add all gates
+            freeGates.addAll(airportsTable.getItems().stream().flatMap(a -> {
+                return Stream.of(new GateDefinition(a, 0), new GateDefinition(a, 1));
+            }).collect(Collectors.toList()));
+
+            //Remove non-free gates
+            for (DroneDefinition d : dronesTable.getItems()) {
+                if(d.getAirport() != null){
+                    freeGates.remove(new GateDefinition(d.getAirport(), d.getGate()));
+                }
+            }
+
+            //Assign every non-assigned drone to a free gate
+            for (DroneDefinition d : dronesTable.getItems()) {
+                if(d.getAirport() == null){
+                    Optional<GateDefinition> gate = freeGates.stream().findFirst();
+                    if(gate.isPresent()){
+                        d.setAirport(gate.get().getAirport());
+                        d.setGate(gate.get().getId());
+                        freeGates.remove(gate.get());
+                    }else{
+                        break;
+                    }
+                }
+            }
+            
+            dronesTable.refresh();
+        });
+
+        loadDroneSetupFileButton.setVisible(false); //Not implemented yet
+        loadDroneSetupFileButton.setOnAction(e -> {
+
+        });
+
+        saveDroneSetupFileButton.setVisible(false); //Not implemented yet
+        saveDroneSetupFileButton.setOnAction(e -> {
+
+        });
+
+        loadDroneSetupDefaultsButton.setVisible(false); //Not implemented yet
+        loadDroneSetupDefaultsButton.setOnAction(e -> {
+
+        });
+    }
+
+    private AutopilotConfig getDefaultAutopilotConfig() {
+        try(DataInputStream in = new DataInputStream(Resources.getResourceStream("/default_autopilot_config.bin"))){
+            return AutopilotConfigReader.read(in);
         } catch (IOException ex) {
             throw new UncheckedIOException(ex);
         }
     }
 
-    private void loadBoxSetup(List<Box> boxes){
-        for(int i = 0; i < boxes.size(); i++){
-            boxes.get(i).setColor(ColorGenerator.sequentialEvenDistribution(i));
-        }
+    private void setupDronesTable(){
+        //Make table editable
+        dronesTable.setEditable(true);
 
-        boxTable.getItems().clear();
-        boxTable.getItems().addAll(boxes);
+        //Column 1 is drone ID and is editable
+        TableColumn<DroneDefinition, String> idColumn = new TableColumn<>();
+        idColumn.setText("ID");
+        idColumn.setEditable(true);
+        idColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        idColumn.setCellValueFactory(cd -> Bindings.createStringBinding(() -> cd.getValue().getConfig().getDroneID()));
+        idColumn.setOnEditCommit((e) -> {
+            DroneDefinition curDrone = (DroneDefinition)dronesTable.getItems().get(e.getTablePosition().getRow());
+            curDrone.getConfig().setProperty(ObservableAutoPilotConfig.DRONE_ID_KEY, e.getNewValue());
+        });
+        dronesTable.getColumns().add(idColumn);
+
+        //Column 2 is airport and is editable
+        TableColumn<DroneDefinition, Number> airportColumn = new TableColumn<>();
+        airportColumn.setText("Airport index");
+        airportColumn.setEditable(true);
+        airportColumn.setCellFactory(TextFieldTableCell.forTableColumn(new NumberStringConverter(){
+            @Override
+            public String toString(Number value) {
+                if(value.intValue() == -1){
+                    return "<No airport>";
+                }
+                return super.toString(value);
+            }
+        }));
+        airportColumn.setCellValueFactory(cd -> Bindings.createIntegerBinding(
+                () -> airportsTable.getItems().indexOf(cd.getValue().getAirport())
+        ));
+        airportColumn.setOnEditCommit((e) -> {
+            DroneDefinition curDrone = (DroneDefinition)dronesTable.getItems().get(e.getTablePosition().getRow());
+
+            int index = e.getNewValue().intValue();
+            if(index < 0 || index >= airportsTable.getItems().size()){
+                dronesTable.getItems().set(
+                    e.getTablePosition().getRow(),
+                    new DroneDefinition(curDrone.getConfig(), null, curDrone.getGate(), curDrone.getRunwayToFace())
+                );
+            }else{
+                curDrone.setAirport((AirportDefinition) airportsTable.getItems().get(index));
+            }
+        });
+        dronesTable.getColumns().add(airportColumn);
+
+        //Column 3 is gate and is editable
+        TableColumn<DroneDefinition, Number> gateColumn = new TableColumn<>();
+        gateColumn.setText("Gate");
+        gateColumn.setEditable(true);
+        gateColumn.setCellFactory(TextFieldTableCell.forTableColumn(new NumberStringConverter()));
+        gateColumn.setCellValueFactory(cd -> Bindings.createIntegerBinding(() -> cd.getValue().getGate()));
+        gateColumn.setOnEditCommit((e) -> {
+            DroneDefinition curDrone = (DroneDefinition)dronesTable.getItems().get(e.getTablePosition().getRow());
+            int gate = Integer.max(0, Integer.min(1, e.getNewValue().intValue()));
+            dronesTable.getItems().set(
+                e.getTablePosition().getRow(),
+                new DroneDefinition(curDrone.getConfig(), curDrone.getAirport(), gate, curDrone.getRunwayToFace())
+            );
+        });
+        dronesTable.getColumns().add(gateColumn);
+
+        //Column 4 is runwayToFace and is editable
+        TableColumn<DroneDefinition, Number> runwayColumn = new TableColumn<>();
+        runwayColumn.setText("Runway to face");
+        runwayColumn.setEditable(true);
+        runwayColumn.setCellFactory(TextFieldTableCell.forTableColumn(new NumberStringConverter()));
+        runwayColumn.setCellValueFactory(cd -> Bindings.createIntegerBinding(() -> cd.getValue().getRunwayToFace()));
+        runwayColumn.setOnEditCommit((e) -> {
+            DroneDefinition curDrone = (DroneDefinition)dronesTable.getItems().get(e.getTablePosition().getRow());
+            int runway = Integer.max(0, Integer.min(1, e.getNewValue().intValue()));
+            dronesTable.getItems().set(
+                e.getTablePosition().getRow(),
+                new DroneDefinition(curDrone.getConfig(), curDrone.getAirport(), curDrone.getGate(), runway)
+            );
+        });
+        dronesTable.getColumns().add(runwayColumn);
+
+        //Column 5 is autopilotconfig and is editable
+        TableColumn<DroneDefinition, ObservableAutoPilotConfig> configColumn = new TableColumn<>();
+        configColumn.setText("Autopilot config");
+        configColumn.setEditable(true);
+        configColumn.setCellFactory(cb -> {
+            final TableCell<DroneDefinition, ObservableAutoPilotConfig> cell = new TableCell<DroneDefinition, ObservableAutoPilotConfig>() {
+                final Button btn = new Button("Edit");
+
+                @Override
+                public void updateItem(ObservableAutoPilotConfig item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty) {
+                        setGraphic(null);
+                        setText(null);
+                    } else {
+                        btn.setOnAction(event -> {
+                            Stage parentStage = (Stage)addDroneButton.getScene().getWindow();
+                            ObservableAutoPilotConfig newConfig = ConfigEditorDialog.showDialog(parentStage, item);
+                            if(newConfig != null){
+                                int rowIndex = getTableRow().getIndex();
+                                DroneDefinition oldDef = (DroneDefinition)dronesTable.getItems().get(rowIndex);
+                                DroneDefinition newDef = new DroneDefinition(newConfig, oldDef.getAirport(), oldDef.getGate(), oldDef.getRunwayToFace());
+                                dronesTable.getItems().set(rowIndex, newDef);
+                            }
+                        });
+                        setGraphic(btn);
+                        setText(null);
+                    }
+                }
+            };
+
+            return cell;
+        });
+        configColumn.setCellValueFactory(cd -> Bindings.createObjectBinding(() -> cd.getValue().getConfig()));
+        configColumn.setOnEditCommit((e) -> {
+            DroneDefinition curDrone = (DroneDefinition)dronesTable.getItems().get(e.getTablePosition().getRow());
+            curDrone.setConfig(e.getNewValue());
+        });
+        dronesTable.getColumns().add(configColumn);
+
+        //Autosize columns
+        autosizeTableColumns(dronesTable);
+    }
+
+    private void autosizeTableColumns(TableView table){
+        DoubleBinding widthPerColumn = table.widthProperty().divide(table.getColumns().size());
+        for (Object col : table.getColumns()){
+            TableColumn column = (TableColumn) col;
+            column.prefWidthProperty().bind(widthPerColumn);
+        }
+    }
+
+    /***************************/
+    /*** SIMULATION SETTINGS ***/
+    /***************************/
+
+    private SimulationSettings buildSettings() {
+        SimulationSettings settings = new SimulationSettings();
+
+        //Airport size
+        settings.setRunwayLength(runwayLengthSpinner.getValue().floatValue());
+        settings.setGateLength(gateLengthSpinner.getValue().floatValue());
+
+        //Airports
+        AirportDefinition[] airports = new AirportDefinition[airportsTable.getItems().size()];
+        for (int i = 0; i < airports.length; i++) {
+            airports[i] = (AirportDefinition) airportsTable.getItems().get(i);
+        }
+        settings.setAirports(airports);
+
+        //Drones
+        DroneDefinition[] drones = new DroneDefinition[dronesTable.getItems().size()];
+        for (int i = 0; i < drones.length; i++) {
+            drones[i] = (DroneDefinition) dronesTable.getItems().get(i);
+        }
+        settings.setDrones(drones);
+
+        return settings;
     }
 }

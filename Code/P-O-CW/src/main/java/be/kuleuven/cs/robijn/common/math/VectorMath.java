@@ -1,5 +1,6 @@
 package be.kuleuven.cs.robijn.common.math;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.*;
 
 /**
@@ -86,5 +87,17 @@ public class VectorMath {
 				input.getEntry(1) / scale,
 				input.getEntry(2) / scale
 		}, false);
+	}
+
+	public static Vector3D realTo3D(RealVector input){
+		if(input.getDimension() != 3){
+			throw new IllegalArgumentException("input must be 3-dimensional");
+		}
+
+		return new Vector3D(input.getEntry(0), input.getEntry(1), input.getEntry(2));
+	}
+
+	public static RealVector vector3DToReal(Vector3D input){
+		return new ArrayRealVector(new double[]{input.getX(), input.getY(), input.getZ()}, false);
 	}
 }

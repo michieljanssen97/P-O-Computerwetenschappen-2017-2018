@@ -17,47 +17,67 @@
             </VBox.margin>
         </Label>
         <VBox prefHeight="25.0" prefWidth="100.0">
-            <children>
-                <HBox prefHeight="25.0" prefWidth="200.0">
-                    <children>
-                        <fx:define>
-                            <ToggleGroup fx:id="simulationRunningToggleGroup"/>
-                        </fx:define>
-                        <ToggleButton fx:id="playButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false" text="Play" />
-                        <ToggleButton fx:id="pauseButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false" text="Pause">
-                            <HBox.margin>
-                                <Insets left="5.0" />
-                            </HBox.margin>
-                        </ToggleButton>
-                    </children>
-                    <VBox.margin>
-                        <Insets />
-                    </VBox.margin>
-                </HBox>
-                <Label fx:id="simulationFinishedLabel" text="Simulation has finished." style="-fx-font-weight: bold;">
-                    <VBox.margin>
-                        <Insets top="5.0" />
-                    </VBox.margin>
-                </Label>
-                <Label fx:id="simulationCrashedLabel" text="The drone crashed!" style="-fx-font-weight: bold; -fx-text-fill: red;">
-                    <VBox.margin>
-                        <Insets top="5.0" />
-                    </VBox.margin>
-                </Label>
-                <Label fx:id="outOfControlLabel" text="The autopilot is out of control!" style="-fx-font-weight: bold; -fx-text-fill: red;">
-                    <VBox.margin>
-                        <Insets top="5.0" />
-                    </VBox.margin>
-                </Label>
-                <Label fx:id="simulationThrewExceptionLabel" text="An exception occurred!" style="-fx-font-weight: bold; -fx-text-fill: red;">
-                    <VBox.margin>
-                        <Insets top="5.0" />
-                    </VBox.margin>
-                </Label>
-            </children>
             <VBox.margin>
-                <Insets left="15.0" right="15.0" top="5.0" />
+                <Insets left="15.0" right="15.0" top="5.0"/>
             </VBox.margin>
+            <GridPane prefHeight="50.0" prefWidth="200.0" maxWidth="205">
+                <fx:define>
+                    <ToggleGroup fx:id="simulationRunningToggleGroup"/>
+                </fx:define>
+                <columnConstraints>
+                    <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0"/>
+                    <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0"/>
+                </columnConstraints>
+                <ToggleButton fx:id="pauseButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false"
+                              text="Pause" maxWidth="100" alignment="CENTER"
+                              GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.fillWidth="true">
+                    <GridPane.margin>
+                        <Insets right="2.5"/>
+                    </GridPane.margin>
+                </ToggleButton>
+                <ToggleButton fx:id="playButton" toggleGroup="$simulationRunningToggleGroup" mnemonicParsing="false"
+                              text="Play" maxWidth="100" alignment="CENTER"
+                              GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.fillWidth="true">
+                    <GridPane.margin>
+                        <Insets left="2.5"/>
+                    </GridPane.margin>
+                </ToggleButton>
+                <Slider fx:id="simulationSpeedSlider" blockIncrement="0.5" majorTickUnit="1.0" min="0.0" max="4.0"
+                        value="1.0"
+                        minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true"
+                        GridPane.columnSpan="2" GridPane.rowIndex="1">
+                    <GridPane.margin>
+                        <Insets top="5.0"/>
+                    </GridPane.margin>
+                </Slider>
+
+                <VBox.margin>
+                    <Insets top="5.0"/>
+                </VBox.margin>
+            </GridPane>
+            <Label fx:id="simulationFinishedLabel" text="Simulation has finished." style="-fx-font-weight: bold;">
+                <VBox.margin>
+                    <Insets top="5.0"/>
+                </VBox.margin>
+            </Label>
+            <Label fx:id="simulationCrashedLabel" text="The drone crashed!"
+                   style="-fx-font-weight: bold; -fx-text-fill: red;">
+                <VBox.margin>
+                    <Insets top="5.0"/>
+                </VBox.margin>
+            </Label>
+            <Label fx:id="outOfControlLabel" text="The autopilot is out of control!"
+                   style="-fx-font-weight: bold; -fx-text-fill: red;">
+                <VBox.margin>
+                    <Insets top="5.0"/>
+                </VBox.margin>
+            </Label>
+            <Label fx:id="simulationThrewExceptionLabel" text="An exception occurred!"
+                   style="-fx-font-weight: bold; -fx-text-fill: red;">
+                <VBox.margin>
+                    <Insets top="5.0"/>
+                </VBox.margin>
+            </Label>
         </VBox>
         <Label text="Testbed">
             <font>
@@ -69,9 +89,19 @@
         </Label>
         <VBox prefHeight="61.0" prefWidth="192.0">
             <children>
-                <Label text="Drone position" style="-fx-font-weight: bold;">
+                <Label text="Updates per second" style="-fx-font-weight: bold;">
                     <VBox.margin>
                         <Insets />
+                    </VBox.margin>
+                </Label>
+                <Label fx:id="upsLabel" text="">
+                    <VBox.margin>
+                        <Insets top="3"/>
+                    </VBox.margin>
+                </Label>
+                <Label text="Drone position" style="-fx-font-weight: bold;">
+                    <VBox.margin>
+                        <Insets top="7"/>
                     </VBox.margin>
                 </Label>
                 <Label fx:id="positionLabel" text="">
@@ -142,23 +172,6 @@
         </Label>
         <VBox prefHeight="61.0" prefWidth="192.0">
             <children>
-                <!--<Label text="Progress">
-                    <VBox.margin>
-                        <Insets />
-                    </VBox.margin>
-                </Label>
-                <ProgressBar prefWidth="200.0" progress="0.0">
-                    <VBox.margin>
-                        <Insets top="3.0" />
-                    </VBox.margin>
-                </ProgressBar>-->
-                <Label text="Path" style="-fx-font-weight: bold;">
-                    <VBox.margin>
-                        <Insets />
-                    </VBox.margin>
-                </Label>
-                <Button fx:id="editPathButton" text="Set path"/>
-
                 <Label text="Thrust" style="-fx-font-weight: bold;">
                     <VBox.margin>
                         <Insets top="7"/>

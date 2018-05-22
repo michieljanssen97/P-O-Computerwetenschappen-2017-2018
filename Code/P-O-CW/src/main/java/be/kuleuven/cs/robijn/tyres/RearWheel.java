@@ -3,7 +3,7 @@ package be.kuleuven.cs.robijn.tyres;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 
-import be.kuleuven.cs.robijn.common.Drone;
+import be.kuleuven.cs.robijn.worldObjects.Drone;
 import interfaces.AutopilotConfig;
 
 public abstract class RearWheel extends Tyre{

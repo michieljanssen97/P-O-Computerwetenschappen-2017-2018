@@ -191,7 +191,7 @@ public class PathEditorControl {
         for(int i = 0; i < rows.length; i++){
             rows[i] = FXCollections.observableFloatArray(path.getX()[i], path.getY()[i], path.getZ()[i]);
         }
-        pathTable.getItems().addAll(rows);
+        pathTable.getItems().addAll((Object[])rows);
     }
 
     private void setupDialogButtons() {

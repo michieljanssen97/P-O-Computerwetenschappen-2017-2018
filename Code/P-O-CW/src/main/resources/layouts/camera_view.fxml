@@ -11,49 +11,66 @@
       <ScrollPane fx:id="imageViewHost" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <ImageView fx:id="imageView" pickOnBounds="true" preserveRatio="false"/>
       </ScrollPane>
-      <HBox prefHeight="25.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
-         <children>
-            <fx:define>
-               <ToggleGroup fx:id="perspectiveToggleGroup"/>
-            </fx:define>
-            <ToggleButton toggleGroup="$perspectiveToggleGroup" selected="true" mnemonicParsing="false" text="Drone camera">
-               <userData>
-                  <CameraViewControl fx:constant="DRONE_CAMERA_ID"/>
-               </userData>
-            </ToggleButton>
-            <ToggleButton toggleGroup="$perspectiveToggleGroup" mnemonicParsing="false" text="Third person">
-               <userData>
-                  <CameraViewControl fx:constant="THIRDPERSON_CAMERA_ID"/>
-               </userData>
-               <HBox.margin>
-                  <Insets left="5.0" />
-               </HBox.margin>
-            </ToggleButton>
-            <ToggleButton toggleGroup="$perspectiveToggleGroup" mnemonicParsing="false" text="Side camera">
-               <userData>
-                  <CameraViewControl fx:constant="SIDE_CAMERA_ID"/>
-               </userData>
-               <HBox.margin>
-                  <Insets left="5.0" />
-               </HBox.margin>
-            </ToggleButton>
-            <ToggleButton toggleGroup="$perspectiveToggleGroup" mnemonicParsing="false" text="Topdown camera">
-               <userData>
-                  <CameraViewControl fx:constant="TOPDOWN_CAMERA_ID"/>
-               </userData>
-               <HBox.margin>
-                  <Insets left="5.0" />
-               </HBox.margin>
-            </ToggleButton>
-            <!--<ToggleButton toggleGroup="$perspectiveToggleGroup" mnemonicParsing="false" text="Free camera">
-               <userData>
-                  <CameraViewControl fx:constant="FREE_CAMERA_ID"/>
-               </userData>
-               <HBox.margin>
-                  <Insets left="5.0" />
-               </HBox.margin>
-            </ToggleButton>-->
-         </children>
-      </HBox>
+      <VBox prefHeight="50.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+         <HBox prefHeight="25.0">
+            <children>
+               <fx:define>
+                  <ToggleGroup fx:id="perspectiveToggleGroup"/>
+               </fx:define>
+               <ToggleButton toggleGroup="$perspectiveToggleGroup" selected="true" mnemonicParsing="false" text="Side camera">
+                  <userData>
+                     <CameraViewControl fx:constant="SIDE_CAMERA_ID"/>
+                  </userData>
+                  <HBox.margin>
+                     <Insets left="5.0" />
+                  </HBox.margin>
+               </ToggleButton>
+               <ToggleButton toggleGroup="$perspectiveToggleGroup" mnemonicParsing="false" text="Topdown camera">
+                  <userData>
+                     <CameraViewControl fx:constant="TOPDOWN_CAMERA_ID"/>
+                  </userData>
+                  <HBox.margin>
+                     <Insets left="5.0" />
+                  </HBox.margin>
+               </ToggleButton>
+               <!--<ToggleButton toggleGroup="$perspectiveToggleGroup" mnemonicParsing="false" text="Free camera">
+                  <userData>
+                     <CameraViewControl fx:constant="FREE_CAMERA_ID"/>
+                  </userData>
+                  <HBox.margin>
+                     <Insets left="5.0" />
+                  </HBox.margin>
+               </ToggleButton>-->
+               <ToggleButton toggleGroup="$perspectiveToggleGroup" mnemonicParsing="false" text="Drone camera">
+                  <userData>
+                     <CameraViewControl fx:constant="DRONE_CAMERA_ID"/>
+                  </userData>
+                  <HBox.margin>
+                     <Insets left="5.0" />
+                  </HBox.margin>
+               </ToggleButton>
+               <ToggleButton toggleGroup="$perspectiveToggleGroup" mnemonicParsing="false" text="Third person">
+                  <userData>
+                     <CameraViewControl fx:constant="THIRDPERSON_CAMERA_ID"/>
+                  </userData>
+                  <HBox.margin>
+                     <Insets left="5.0" />
+                  </HBox.margin>
+               </ToggleButton>
+               <ComboBox fx:id="droneComboBox">
+                  <HBox.margin>
+                     <Insets left="5.0" />
+                  </HBox.margin>
+               </ComboBox>
+            </children>
+         </HBox>
+         <HBox>
+            <Label>FPS:</Label>
+            <Label fx:id="fpsLabel"/>
+            <VBox.margin>
+               <Insets left="5.0" top="3.0"/>
+            </VBox.margin>
+         </HBox>
+      </VBox>
    </children>
 </fx:root>

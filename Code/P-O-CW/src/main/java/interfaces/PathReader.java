@@ -1,7 +1,7 @@
 package interfaces;
 
 public class PathReader {
-    private static byte[] readByteArray(java.io.DataInputStream stream) throws java.io.IOException {
+    public static byte[] readByteArray(java.io.DataInputStream stream) throws java.io.IOException {
         int length = stream.readInt();
         byte[] array = new byte[length];
         stream.readFully(array);

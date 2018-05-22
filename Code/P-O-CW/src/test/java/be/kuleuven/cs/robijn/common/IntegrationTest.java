@@ -1,8 +1,10 @@
 package be.kuleuven.cs.robijn.common;
 
 import be.kuleuven.cs.robijn.common.stopwatch.ConstantIntervalStopwatch;
+import be.kuleuven.cs.robijn.worldObjects.Box;
 import interfaces.AutopilotConfig;
 import interfaces.AutopilotConfigReader;
+
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +17,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class IntegrationTest {
-    @Test
+    /*@Test
     public void testSingleRedBoxForward(){
         //Config
         int maxSimulationRuntimeInSeconds = 30;
@@ -53,5 +55,5 @@ public class IntegrationTest {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-    }
+    }*/
 }

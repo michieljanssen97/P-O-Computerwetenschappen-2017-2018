@@ -1,11 +1,11 @@
 package be.kuleuven.cs.robijn.gui;
 
 import javafx.scene.Node;
-import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
 
 import java.util.function.Consumer;
 
+@SuppressWarnings("restriction")
 public class DragHelper {
     private final Node node;
     private double lastX, lastY;
@@ -26,10 +26,12 @@ public class DragHelper {
             double deltaX = e.getX() - lastX;
             double deltaY = e.getY() - lastY;
 
-            handler.accept(new ExtendedDragEvent(e, deltaX, deltaY));
+            if(Math.abs(deltaX) > 1E-7 || Math.abs(deltaY) > 1E-7){
+                handler.accept(new ExtendedDragEvent(e, deltaX, deltaY));
 
-            lastX = e.getX();
-            lastY = e.getY();
+                lastX = e.getX();
+                lastY = e.getY();
+            }
         });
     }
 

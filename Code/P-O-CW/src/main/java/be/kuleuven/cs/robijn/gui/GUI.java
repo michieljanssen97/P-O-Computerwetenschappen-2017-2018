@@ -13,7 +13,10 @@ import java.io.UncheckedIOException;
 /**
  * Main GUI class. Use this to start the GUI.
  */
+@SuppressWarnings("restriction")
 public class GUI extends Application {
+    private static MainController controller;
+
     @Override
     public void start(Stage stage) {
         //Load layout
@@ -21,6 +24,7 @@ public class GUI extends Application {
         try {
             FXMLLoader loader = new FXMLLoader(Resources.getResourceURL("/layouts/main_view.fxml"));
             root = loader.load();
+            controller = loader.getController();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -29,8 +33,18 @@ public class GUI extends Application {
         Scene scene = new Scene(root);
         stage.setTitle("P&O Robijn Testbed");
         stage.setScene(scene);
-        stage.setWidth(1400);
-        stage.setHeight(700);
+        stage.setWidth(1600);
+        stage.setHeight(900);
         stage.show();
+    }
+
+    public static void println(String line){
+    	if (controller != null)
+    		controller.addLineToOutput(line);
+    }
+
+    public static void setText(String line){
+        if (controller != null)
+            controller.setOutput(line);
     }
 }
