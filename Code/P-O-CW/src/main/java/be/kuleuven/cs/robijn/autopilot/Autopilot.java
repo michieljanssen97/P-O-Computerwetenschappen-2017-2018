@@ -81,13 +81,13 @@ public class Autopilot {
 		this.targetHeading = targetHeading;
 	}
 	
-	private RealVector targetHeadingA = null;
+	private Float targetHeadingA= null;
 	
-	public RealVector getTargetHeadingA() {
+	public Float getTargetHeadingA() {
 		return targetHeadingA;
 	}
 	
-	public void setTargetHeadingA(RealVector targetHeadingA) {
+	public void setTargetHeadingA(Float targetHeadingA) {
 		this.targetHeadingA = targetHeadingA;
 	}
 	
@@ -167,15 +167,11 @@ public class Autopilot {
 								frontBrakeForce, leftBrakeForce, rightBrakeForce)[1]
 						-pitchAngularAcceleration);
 			}
-
-			RealVector AAvector = this.getTargetHeadingA().subtract(drone.getWorldPosition());
-			AAvector.setEntry(1, 0);
-			Angle angle = Angle.getYRotation(AAvector, new ArrayRealVector(new double[] {0,0,0}, false));
-			float AA = angle.getAngle();
-			if (drone.getHeading() < AA)
-				verStabInclination = this.getConfig().getMaxAOA()/2;
-			if (drone.getHeading() > AA)
+			
+			if (drone.getHeading() < this.getTargetHeadingA())
 				verStabInclination = -this.getConfig().getMaxAOA()/2;
+			if (drone.getHeading() > this.getTargetHeadingA())
+				verStabInclination = this.getConfig().getMaxAOA()/2;
 			
 			if (drone.getWorldPosition().getEntry(1) > this.getConfig().getTailSize()) {
 				drone.setTookOff();
@@ -734,7 +730,7 @@ public class Autopilot {
             	}
         	}
 //        	System.out.println(droneOfPackage + " " + fromGate.getAirport() + " " + toGate.getAirport());
-        	if(drone.getVelocity().getNorm() <= 0.1) {
+        	if(drone.getVelocity().getNorm() <= 0.5) {
 //        		if(droneOfPackage != null && fromGate != null && toGate != null ) {
 //    	        	this.flyRoute(droneOfPackage, fromGate, toGate);
 //    	        	this.resetFlyAfterPackagePicked();
@@ -813,7 +809,10 @@ public class Autopilot {
     	vector.setEntry(1, 0);
     	Angle angle = Angle.getYRotation(vector, new ArrayRealVector(new double[] {0,0,0}, false));
     	this.setTargetHeading(angle.getAngle());
-    	this.setTargetHeadingA(route[0]);
+    	RealVector vector2 = route[0].subtract(fromGate.getWorldPosition());
+    	vector2.setEntry(1, 0);
+    	Angle angle2 = Angle.getYRotation(vector2, new ArrayRealVector(new double[] {0,0,0}, false));
+    	this.setTargetHeadingA(angle2.getAngle());
     	this.setFlightMode(FlightMode.ASCEND);
     }
     
