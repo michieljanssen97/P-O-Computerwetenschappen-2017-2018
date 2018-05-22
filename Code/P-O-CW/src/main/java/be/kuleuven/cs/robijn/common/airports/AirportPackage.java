@@ -1,5 +1,6 @@
 package be.kuleuven.cs.robijn.common.airports;
 
+import be.kuleuven.cs.robijn.autopilot.Autopilot;
 import be.kuleuven.cs.robijn.autopilot.AutopilotModule;
 import be.kuleuven.cs.robijn.autopilot.routeCalculator;
 import be.kuleuven.cs.robijn.common.WorldObject;
@@ -222,6 +223,11 @@ public class AirportPackage extends WorldObject{
             		if(p.droneCanStart(drone, newFromGate, fromGate, drone.getAirportOfDrone())) {
 	            		p.lockEverything(drone, newFromGate, fromGate);
 	            		drone.setCanBeAssigned(false);
+	            		
+	            		Autopilot autopilot = module.autopilots.get(drone);
+	            		autopilot.setTargetPosition(fromGate.getWorldPosition());
+	            		autopilot.setFlyAfterPackagePicked(drone, fromGate, toGate);
+	            		
 		            	module.taxiToGateAndFly(drone, newFromGate, fromGate);
             		}
             		else {

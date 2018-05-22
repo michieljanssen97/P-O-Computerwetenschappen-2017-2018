@@ -4,9 +4,11 @@ import be.kuleuven.cs.robijn.autopilot.AutopilotModuleAdapter;
 import be.kuleuven.cs.robijn.common.airports.AirportPackage;
 import be.kuleuven.cs.robijn.common.airports.Gate;
 import be.kuleuven.cs.robijn.common.exceptions.CrashException;
+import be.kuleuven.cs.robijn.common.exceptions.DroneCollisionException;
 import be.kuleuven.cs.robijn.common.stopwatch.ConstantIntervalStopwatch;
 import be.kuleuven.cs.robijn.common.stopwatch.Stopwatch;
 import be.kuleuven.cs.robijn.testbed.VirtualTestbed;
+import be.kuleuven.cs.robijn.worldObjects.Drone;
 import interfaces.AutopilotInputs;
 import interfaces.AutopilotOutputs;
 
@@ -31,6 +33,7 @@ public class SimulationDriver {
     private AutopilotOutputs[] latestAutopilotOutputs;
 
     private List<Long> lastUpdateTimestamps = new ArrayList<>();
+    private List<Drone> crashedDrones = new ArrayList<>();
 
     //List of eventhandlers that are invoked when the simulation has updated.
     private final TreeSet<UpdateEventHandler> updateEventHandlers = new TreeSet<>();
@@ -134,6 +137,9 @@ public class SimulationDriver {
                 for(int i = 0; i < settings.getDrones().length; i++){
                     latestAutopilotInputs[i] = testBed.getInputs(i);
                 }
+            } catch (DroneCollisionException ex){
+                System.err.println("Drones collided!");
+                crashedDrones.addAll(ex.getCollidingDrones());
             } catch (CrashException ex){
                 simulationCrashed = true;
                 System.err.println("Plane crashed!");

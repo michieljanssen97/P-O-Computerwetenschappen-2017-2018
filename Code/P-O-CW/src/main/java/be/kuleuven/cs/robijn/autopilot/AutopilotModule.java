@@ -20,7 +20,7 @@ import interfaces.AutopilotOutputs;
 
 public class AutopilotModule {
     private final WorldObject world; //Must not be modified by Autopilot or race conditions might occur!
-    private final HashMap<Drone, Autopilot> autopilots = new HashMap<>();
+    public final HashMap<Drone, Autopilot> autopilots = new HashMap<>();
     private final HashMap<Drone, Future<AutopilotOutputs>> autopilotTasks = new HashMap<>();
     private final ExecutorService threadPool;
 
@@ -130,7 +130,7 @@ public class AutopilotModule {
 
     		
     		autopilot.flyRoute(drone, fromGate, toGate);
-//    	}
+//   	}
     }
     
     public Object[] calculateFirstDroneCollision(){
