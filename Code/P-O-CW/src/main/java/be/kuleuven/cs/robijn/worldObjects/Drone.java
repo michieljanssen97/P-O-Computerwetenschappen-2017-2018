@@ -303,13 +303,11 @@ public class Drone extends WorldObject {
 			this.getDestinationRunway().removeCurrentDrone();
 			this.setDestinationRunway(null);
 		}
-		else {
-			System.out.println("HOE ZELFS...");
-		}
 	}
 	
 	public void setPackageDelivered() {
 		if(this.assignedPackage != null) {
+			this.setCanBeAssigned(true);
 			this.assignedPackage.markAsDelivered();
 		}
 	}

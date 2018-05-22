@@ -736,6 +736,7 @@ public class Autopilot {
 //    	        	this.resetFlyAfterPackagePicked();
 //            	}
 //            	else {
+        		System.out.println("Kan worden assigned");
             		drone.setCanBeAssigned(true);
 //            	}
         	}
