@@ -180,7 +180,7 @@ public class TestbedSimulation {
 			AirportPackage p = gate.get().getPackage();
 			if(drone.getPackage() != null && drone.getPackage().getDestination().getWorldPosition().getDistance(gate.get().getWorldPosition()) < (gate.get().getAirport().width + 10)){
 				drone.getPackage().markAsDelivered();
-			}else if(drone.getPackage() == null && gate.get().hasPackage() && p != null && p.droneCanStart(drone, p.getOrigin(), p.getDestination(), p.getOrigin().getAirport())){
+			}else if(drone.getPackage() == null && gate.get().hasPackage()){
 				gate.get().getPackage().markAsInTransit(drone);
 			}
 		}

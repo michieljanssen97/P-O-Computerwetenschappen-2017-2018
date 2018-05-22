@@ -43,7 +43,7 @@
                                             <Insets left="20.0"/>
                                         </HBox.margin>
                                     </Label>
-                                    <Spinner fx:id="gateLengthSpinner" min="1.0" max="1000.0" initialValue="17" prefWidth="80.0">
+                                    <Spinner fx:id="gateLengthSpinner" min="1.0" max="1000.0" initialValue="60" prefWidth="80.0">
                                         <editable>true</editable>
                                         <HBox.margin>
                                             <Insets left="5.0"/>
