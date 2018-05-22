@@ -725,11 +725,6 @@ public class Autopilot {
         	}
 //        	System.out.println(droneOfPackage + " " + fromGate.getAirport() + " " + toGate.getAirport());
         	if(drone.getVelocity().getNorm() <= 1) {
-        		drone.setVelocity(new ArrayRealVector(new double[] {0,0,0}));
-        		drone.setHeadingAngularVelocity(0);
-        		drone.setHeading(targetHeading);
-        		System.out.println(drone.getHeading() - this.getTargetHeading());
-
         		if(droneOfPackage != null && fromGate != null && toGate != null ) {
     	        	this.flyRoute(droneOfPackage, fromGate, toGate);
     	        	this.resetFlyAfterPackagePicked();
